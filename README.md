@@ -63,7 +63,7 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 	 Net::HTTP.get('www.google.com', '/')
 
-### Real requests to network can be allowed or disables
+### Real requests to network can be allowed or disabled
 
 	WebMock.allow_net_connect!
 
