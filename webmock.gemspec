@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "0.7.0"
+  s.version = "0.7.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
@@ -74,7 +74,8 @@ Gem::Specification.new do |s|
      "spec/vendor/samuel-0.2.1/test/thread_test.rb",
      "spec/webmock_spec.rb",
      "test/test_helper.rb",
-     "test/test_webmock.rb"
+     "test/test_webmock.rb",
+     "webmock.gemspec"
   ]
   s.homepage = %q{http://github.com/bblimke/webmock}
   s.rdoc_options = ["--charset=UTF-8"]
