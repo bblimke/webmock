@@ -32,7 +32,7 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 	 stub_request(:any, "www.google.com")
 
-	 Net::HTTP.get('www.google.com', '/')
+	 Net::HTTP.get('www.google.com', '/')    # ===> Success
 	
 ### Stubbing requests based on method, url, body and headers
 
@@ -43,25 +43,36 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 	req['Content-Length'] = 3
     res = Net::HTTP.start(url.host, url.port) {|http|
       http.request(req, 'abc')
-    }
+    }    # ===> Success
+
+### Matching custom request headers
+
+    stub_request(:any, "www.google.com").with(:headers=>{'Header-Name'=>"Header-Value"}).to_return(:body => "abc", :status => 200)
+
+	url = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(url.path)
+	req['Header-Name'] = "Header-Value"
+    res = Net::HTTP.start(url.host, url.port) {|http|
+      http.request(req, 'abc')
+    }    # ===> Success
 
 ### Custom response
 
 	stub_request(:any, "www.google.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 })
 	
-	Net::HTTP.get('www.google.com', '/').body ===> "abc"
+	Net::HTTP.get('www.google.com', '/').body ===> "abc"    # ===> Success
 	
 ### Request with basic authentication
 
 	stub_request(:any, "john:smith@www.google.com")
 	
-	Net::HTTP.get(URI.parse('http://john:smith@www.google.com'))
+	Net::HTTP.get(URI.parse('http://john:smith@www.google.com'))    # ===> Success
 	
 ### Matching urls using regular expressions
 
 	 stub_request(:any, /.*google.*/)
 
-	 Net::HTTP.get('www.google.com', '/')
+	 Net::HTTP.get('www.google.com', '/') # ===> Success
 
 ### Real requests to network can be allowed or disabled
 
@@ -69,23 +80,23 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 	stub_request(:any, "www.google.com").to_return(:body => "abc")
 
-	Net::HTTP.get('www.google.com', '/').should == "abc"
+	Net::HTTP.get('www.google.com', '/').should == "abc"    # ===> Success
 	
-	Net::HTTP.get('www.something.com', '/').should =~ "Something."	
+	Net::HTTP.get('www.something.com', '/').should =~ "Something."    # ===> Success
 	
 	WebMock.disable_net_connect!
 	
-	Net::HTTP.get('www.something.com', '/') ===> Failure
+	Net::HTTP.get('www.something.com', '/')    # ===> Failure
 
 ### Clearing stubs
 
 	stub_request(:any, "www.google.com")
 
-	Net::HTTP.get('www.google.com', '/') ===> Success
+	Net::HTTP.get('www.google.com', '/')    # ===> Success
 	
 	reset_webmock
 	
-	Net::HTTP.get('www.google.com', '/') ===> Failure
+	Net::HTTP.get('www.google.com', '/')    # ===> Failure
 
 
 ### Test/Unit style assertions (they actually work everywhere, in RSpec too)
@@ -99,9 +110,9 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
       http.request(req, 'abc')
     }
 
-	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc", :times => 1
+	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
 	
-	assert_not_requested :get, "http://www.something.com"
+	assert_not_requested :get, "http://www.something.com"    # ===> Success
 
 ### RSpec matchers 1
 
@@ -137,7 +148,7 @@ i.e
 	stub_request(:get, "www.google.com").to_return(:body => "abc")
 	stub_request(:get, "www.google.com").to_return(:body => "def")
 
-	Net::HTTP.get('www.google.com', '/').body ====> "def"
+	Net::HTTP.get('www.google.com', '/').body    # ====> "def"
 
 Bugs and Issues
 ---------------
@@ -147,7 +158,7 @@ Please submit them here [http://github.com/bblimke/webmock/issues](http://github
 Suggestions
 ------------
 
-If you have any suggestions on how to improve WebMock please send an email to the mailing list [groups.google.com/group/fakeweb-users](http://groups.google.com/group/fakeweb-users)
+If you have any suggestions on how to improve WebMock please send an email to the mailing list [groups.google.com/group/webmock-users](http://groups.google.com/group/webmock-users)
 
 I'm particularly interested in how the DSL could be improved.
 
