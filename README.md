@@ -99,7 +99,7 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
       http.request(req, 'abc')
     }
 
-	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc"
+	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc", :times => 1
 	
 	assert_not_requested :get, "http://www.something.com"
 
