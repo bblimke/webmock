@@ -64,11 +64,11 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 	
 ### Custom response with body as file path
 
-		File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
+	File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
 
-		stub_request(:any, "www.google.com").to_return(:body => "/tmp/response_body.txt", :status => 200)
+	stub_request(:any, "www.google.com").to_return(:body => "/tmp/response_body.txt", :status => 200)
 
-		Net::HTTP.get('www.google.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.google.com', '/')    # ===> "abc\n"
 	
 ### Request with basic authentication
 
