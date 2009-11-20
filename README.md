@@ -60,7 +60,15 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 	stub_request(:any, "www.google.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 })
 	
-	Net::HTTP.get('www.google.com', '/').body ===> "abc"    # ===> Success
+	Net::HTTP.get('www.google.com', '/')    # ===> "abc"
+	
+### Custom response with body as file path
+
+		File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
+
+		stub_request(:any, "www.google.com").to_return(:body => "/tmp/response_body.txt", :status => 200)
+
+		Net::HTTP.get('www.google.com', '/')    # ===> "abc\n"
 	
 ### Request with basic authentication
 
@@ -80,9 +88,9 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 	stub_request(:any, "www.google.com").to_return(:body => "abc")
 
-	Net::HTTP.get('www.google.com', '/').should == "abc"    # ===> Success
+	Net::HTTP.get('www.google.com', '/')    # ===> "abc"
 	
-	Net::HTTP.get('www.something.com', '/').should =~ "Something."    # ===> Success
+	Net::HTTP.get('www.something.com', '/') # ===> /.+Something.+/
 	
 	WebMock.disable_net_connect!
 	
@@ -113,6 +121,14 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
 	
 	assert_not_requested :get, "http://www.something.com"    # ===> Success
+
+### Expecting real (not stubbed) requests
+
+	WebMock.allow_net_connect!
+	
+	Net::HTTP.get('www.google.com', '/')    # ===> Success
+
+	assert_requested :get, "http://www.google.com"    # ===> Success
 
 ### RSpec matchers 1
 
@@ -148,7 +164,7 @@ i.e
 	stub_request(:get, "www.google.com").to_return(:body => "abc")
 	stub_request(:get, "www.google.com").to_return(:body => "def")
 
-	Net::HTTP.get('www.google.com', '/').body    # ====> "def"
+	Net::HTTP.get('www.google.com', '/')   # ====> "def"
 
 Bugs and Issues
 ---------------
