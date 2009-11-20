@@ -1,0 +1,170 @@
+WebMock
+=======
+
+Library for stubbing HTTP requests in Ruby.
+
+Features
+--------
+
+* Stubbing requests and setting requests expectations
+* Matching requests based on method, url, headers and body
+* Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
+* Support for Net::Http and other http libraries based on Net::Http
+* Architecture allows adding other http library adapters easily
+
+
+Installation
+------------
+
+    gem install webmock --source http://gemcutter.org
+
+In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lines
+
+    require 'webmock'
+	
+	include WebMock
+
+Now you are ready to write your tests/specs with stubbed HTTP calls. 
+
+## Examples
+
+### Stubbed request based on url only and with the default response
+
+	 stub_request(:any, "www.google.com")
+
+	 Net::HTTP.get('www.google.com', '/')
+	
+### Stubbing requests based on method, url, body and headers
+
+	stub_request(:post, "www.google.com").with(:body => "abc", :headers => { 'Content-Length' => 3 })
+
+	url = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(url.path)
+	req['Content-Length'] = 3
+    res = Net::HTTP.start(url.host, url.port) {|http|
+      http.request(req, 'abc')
+    }
+
+### Custom response
+
+	stub_request(:any, "www.google.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 })
+	
+	Net::HTTP.get('www.google.com', '/').body ===> "abc"
+	
+### Request with basic authentication
+
+	stub_request(:any, "john:smith@www.google.com")
+	
+	Net::HTTP.get(URI.parse('http://john:smith@www.google.com'))
+	
+### Matching urls using regular expressions
+
+	 stub_request(:any, /.*google.*/)
+
+	 Net::HTTP.get('www.google.com', '/')
+
+### Real requests to network can be allowed or disables
+
+	WebMock.allow_net_connect!
+
+	stub_request(:any, "www.google.com").to_return(:body => "abc")
+
+	Net::HTTP.get('www.google.com', '/').should == "abc"
+	
+	Net::HTTP.get('www.something.com', '/').should =~ "Something."	
+	
+	WebMock.disable_net_connect!
+	
+	Net::HTTP.get('www.something.com', '/') ===> Failure
+
+### Clearing stubs
+
+	stub_request(:any, "www.google.com")
+
+	Net::HTTP.get('www.google.com', '/') ===> Success
+	
+	reset_webmock
+	
+	Net::HTTP.get('www.google.com', '/') ===> Failure
+
+
+### Test/Unit style assertions (they actually work everywhere, in RSpec too)
+
+    stub_request(:any, "www.google.com")
+
+	url = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(url.path)
+	req['Content-Length'] = 3
+    res = Net::HTTP.start(url.host, url.port) {|http|
+      http.request(req, 'abc')
+    }
+
+	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc"
+	
+	assert_not_requested :get, "http://www.something.com"
+
+### RSpec matchers 1
+
+	request(:post, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
+	
+	request(:post, "www.something.com").should have_been_made.times(3)
+	
+	request(:any, "www.example.com").should have_not_been_made
+
+### RSpec matchers 2 ([fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher) style)
+
+	WebMock.should have_requested(:get, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
+	
+	WebMock.should have_not_requested(:get, "www.something.com")
+
+Notes
+-----
+
+### Matching requests
+
+Here are the criteria of matching requests:
+
+* request url matches stubbed request url pattern
+* and request method is the same as stubbed request method or stubbed request method is :any
+* and request body is the same as stubbed request body or stubbed request body is not set (is nil)
+* and request headers are the same as stubbed request headers or stubbed request headers are a subset of request headers or stubbed request headers are not set
+
+### Precedence of stubs
+
+Always the last declared stub matching the request will be applied. 
+i.e
+
+	stub_request(:get, "www.google.com").to_return(:body => "abc")
+	stub_request(:get, "www.google.com").to_return(:body => "def")
+
+	Net::HTTP.get('www.google.com', '/').body ====> "def"
+
+Bugs and Issues
+---------------
+
+Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
+
+Suggestions
+------------
+
+If you have any suggestions on how to improve WebMock please send an email to the mailing list [groups.google.com/group/fakeweb-users](http://groups.google.com/group/fakeweb-users)
+
+I'm particularly interested in how the DSL could be improved.
+
+Todo
+----
+
+* Add EventMachine::Protocols::HttpClient adapter
+
+Credits
+-------
+
+Thank you Fakeweb! This library is based on the idea taken from [FakeWeb](fakeweb.rubyforge.org).
+I took couple of solutions from that project. I also copied some code i.e Net:Http adapter or url normalisation function. 
+Fakeweb architecture unfortunately didn't allow me to extend it easily with the features I needed.
+I also preferred some things to work differently i.e request stub precedence.
+
+Copyright
+---------
+
+Copyright 2009 Bartosz Blimke. See LICENSE for details.
