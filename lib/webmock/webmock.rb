@@ -18,11 +18,13 @@ module WebMock
     expected_times_executed = options.delete(:times) || 1
     request = RequestProfile.new(method, url, options[:body], options[:headers])
     verifier = RequestExecutionVerifier.new(request, expected_times_executed)
-    assertion_failure(verifier.failure_message) unless verifier.verify
+    assertion_failure(verifier.failure_message) unless verifier.matches?
   end
 
   def assert_not_requested(method, url, options = {})
-    assert_requested(method, url, options.update(:times => 0))
+    request = RequestProfile.new(method, url, options[:body], options[:headers])
+    verifier = RequestExecutionVerifier.new(request, options.delete(:times))
+    assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end
 
   def self.allow_net_connect!

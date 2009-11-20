@@ -55,5 +55,5 @@ describe Response do
     end
     
   end
-
+  
 end

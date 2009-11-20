@@ -230,14 +230,14 @@ describe "WebMock", :shared => true do
 
         it "should pass if request was not expected and not executed" do
           lambda {
-            request(:get, "http://www.google.com").should have_not_been_made
+            request(:get, "http://www.google.com").should_not have_been_made
           }.should_not raise_error
         end
 
         it "should fail if request was not expected but executed" do
           lambda {
             http_request(:get, "http://www.google.com/")
-            request(:get, "http://www.google.com").should have_not_been_made
+            request(:get, "http://www.google.com").should_not have_been_made
           }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
         end
 
@@ -434,10 +434,12 @@ describe "WebMock", :shared => true do
           it "should verify that non expected requests didn't occur" do
             lambda {
               http_request(:get, "http://www.google.com/")
-              WebMock.should have_not_requested(:get, "http://www.google.com")
+              WebMock.should_not have_requested(:get, "http://www.google.com")
             }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
           end
         end
+        
+
 
         describe "using assert_requested" do
 
@@ -482,7 +484,7 @@ describe "WebMock", :shared => true do
         it "should verify that non expected requests didn't occur" do
           lambda {
             http_request(:get, "http://www.google.com/")
-            request(:get, "http://www.google.com").should have_not_been_made
+            request(:get, "http://www.google.com").should_not have_been_made
           }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
         end
       end

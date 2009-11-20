@@ -10,7 +10,7 @@ Features
 * Matching requests based on method, url, headers and body
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::Http and other http libraries based on Net::Http
-* Architecture allows adding other http library adapters easily
+* Adding other http library adapters is easy
 
 
 Installation
@@ -136,13 +136,13 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 	
 	request(:post, "www.something.com").should have_been_made.times(3)
 	
-	request(:any, "www.example.com").should have_not_been_made
+	request(:any, "www.example.com").should_not have_been_made
 
 ### RSpec matchers 2 ([fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher) style)
 
 	WebMock.should have_requested(:get, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 	
-	WebMock.should have_not_requested(:get, "www.something.com")
+	WebMock.should_not have_requested(:get, "www.something.com")
 
 Notes
 -----

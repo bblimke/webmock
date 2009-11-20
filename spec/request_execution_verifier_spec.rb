@@ -23,29 +23,68 @@ describe RequestExecutionVerifier do
     end
 
   end
+  
+  describe "negative failure message" do
 
-  describe "verify" do
+    it "should report failure message if it executed number of times specified" do
+      @verifier.times_executed = 2
+      @verifier.expected_times_executed = 2
+      @verifier.negative_failure_message.should == "The request www.google.com was not expected to execute 2 times but it executed 2 times"
+    end
+
+    it "should report failure message when not expected request but it executed" do
+      @verifier.times_executed = 1
+      @verifier.negative_failure_message.should == "The request www.google.com was expected to execute 0 times but it executed 1 time"
+    end
+
+  end
+
+  describe "matches?" do
 
     it "should succeed if request was executed expected number of times" do
       RequestRegistry.instance.
         should_receive(:times_executed).with(@request_profile).and_return(10)
       @verifier.expected_times_executed = 10
-      @verifier.verify.should be_true
+      @verifier.matches?.should be_true
     end
 
     it "should fail if request was not executed expected number of times" do
       RequestRegistry.instance.
         should_receive(:times_executed).with(@request_profile).and_return(10)
       @verifier.expected_times_executed = 5
-      @verifier.verify.should be_false
+      @verifier.matches?.should be_false
     end
 
   end
+  
+  describe "does_not_match?" do
 
-  def verify
-    @times_executed =
-    RequestRegistry.instance.times_executed(@request_profile)
-    @times_executed == @expected_times_executed
+    it "should fail if request executed expected number of times" do
+      RequestRegistry.instance.
+        should_receive(:times_executed).with(@request_profile).and_return(10)
+      @verifier.expected_times_executed = 10
+      @verifier.does_not_match?.should be_false     
+    end
+    
+    it "should succeed if request was not executed at all and expected number of times was not set" do
+      RequestRegistry.instance.
+        should_receive(:times_executed).with(@request_profile).and_return(0)
+      @verifier.does_not_match?.should be_true      
+    end
+    
+    it "should fail if request was executed and expected number of times was not set" do
+      RequestRegistry.instance.
+        should_receive(:times_executed).with(@request_profile).and_return(1)
+      @verifier.does_not_match?.should be_false     
+    end
+
+    it "should succeed if request was not executed expected number of times" do
+      RequestRegistry.instance.
+        should_receive(:times_executed).with(@request_profile).and_return(10)
+      @verifier.expected_times_executed = 5
+      @verifier.does_not_match?.should be_true
+    end
+
   end
 
 end
