@@ -39,12 +39,12 @@ module WebMock
     Config.instance.allow_net_connect
   end
 
-  def self.registered_request?(request_profile)
-    RequestRegistry.instance.registered_request?(request_profile)
+  def self.registered_request?(request_signature)
+    RequestRegistry.instance.registered_request?(request_signature)
   end
 
-  def self.response_for_request(request_profile, &block)
-    RequestRegistry.instance.response_for_request(request_profile, &block)
+  def self.response_for_request(request_signature, &block)
+    RequestRegistry.instance.response_for_request(request_signature, &block)
   end
 
   def reset_webmock

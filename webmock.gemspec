@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".gitignore",
+     "CHANGELOG",
      "LICENSE",
      "README.md",
      "Rakefile",
@@ -49,6 +50,7 @@ Gem::Specification.new do |s|
      "spec/response_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
+     "spec/url_spec.rb",
      "spec/util/hash_counter_spec.rb",
      "spec/utility_spec.rb",
      "spec/vendor/right_http_connection-1.2.4/History.txt",

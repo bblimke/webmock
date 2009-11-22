@@ -76,22 +76,19 @@ module Net  #:nodoc: all
       headers = Hash[*request.to_hash.map {|k,v| [k, v.flatten]}.flatten]
       headers.reject! {|k,v| k =~ /[Aa]ccept/ && v = '*/*'}
 
-      request_profile = WebMock::RequestProfile.new(method, uri, body, headers)
+      request_signature = WebMock::RequestSignature.new(method, uri, body, headers)
 
-      if WebMock.registered_request?(request_profile)
+      if WebMock.registered_request?(request_signature)
         @socket = Net::HTTP.socket_type.new
-        webmock_response = WebMock.response_for_request(request_profile)
+        webmock_response = WebMock.response_for_request(request_signature)
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?
-        WebMock::RequestRegistry.instance.requested.put(request_profile)
+        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
         connect_without_webmock
         request_without_webmock(request, body, &block)
       else
         uri = WebMock::Utility.strip_default_port_from_uri(uri)
-        message = "Real HTTP connections are disabled. Unregistered request: #{request.method} #{uri}"
-        message << " with body '#{body}'" if body
-        message << " with headers #{WebMock::Utility.normalize_headers(headers).inspect.gsub("\"","'")}" if 
-headers && !headers.empty?
+        message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
         raise WebMock::NetConnectNotAllowedError, message
       end
     end

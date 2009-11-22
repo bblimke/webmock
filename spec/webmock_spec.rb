@@ -45,7 +45,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/")
+          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/")
       end
     end
 
@@ -85,7 +85,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:post, "http://www.google.com/")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: POST http://www.google.com/"
+          "Real HTTP connections are disabled. Unregistered request: POST http://www.google.com:80/"
         )
       end
 
@@ -113,7 +113,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/", :body => "def")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/ with body 'def'")
+          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/ with body 'def'")
       end
 
     end
@@ -143,7 +143,7 @@ describe "WebMock", :shared => true do
             :get, "http://www.google.com/",
           :headers => { 'Content-Length' => '9999'})
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/ with headers {'Content-Length'=>'9999'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/ with headers {'Content-Length'=>'9999'}))
       end
     end
 
@@ -159,7 +159,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://user:pazz@www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com:80/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
       end
 
       it "should not match if credentials are stubbed but not provided in the request" do
@@ -167,7 +167,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/))
       end
 
       it "should not match if credentials are not stubbed but exist in the request" do
@@ -175,7 +175,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://user:pazz@www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com:80/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
       end
 
     end
