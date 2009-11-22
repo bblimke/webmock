@@ -12,7 +12,7 @@ describe RequestRegistry do
   describe "reset_webmock" do
     before(:each) do
       RequestRegistry.instance.register_request_stub(@request_stub)
-      RequestRegistry.instance.response_for_request(@request_signature)
+      RequestRegistry.instance.requested_signatures.put(@request_signature)
     end
 
     it "should clean request stubs" do
@@ -59,12 +59,6 @@ describe RequestRegistry do
       RequestRegistry.instance.response_for_request(@request_signature).should == nil
     end
 
-    it "should increase number of times request was executed" do
-      RequestRegistry.instance.times_executed(@request_profile).should == 0
-      RequestRegistry.instance.response_for_request(@request_signature)
-      RequestRegistry.instance.times_executed(@request_profile).should == 1
-    end
-
     it "should always return last registered matching response" do
       @request_stub1 = RequestStub.new(:get, "www.google.com")
       @request_stub1.response = @response1 = Response.new
@@ -92,9 +86,9 @@ describe RequestRegistry do
       @request_stub1 = RequestStub.new(:get, "www.google.com")
       @request_stub2 = RequestStub.new(:get, "www.google.net")
       @request_stub3 = RequestStub.new(:get, "www.google.org")
-      RequestRegistry.instance.response_for_request(RequestSignature.new(:get, "www.google.com"))
-      RequestRegistry.instance.response_for_request(RequestSignature.new(:get, "www.google.com"))
-      RequestRegistry.instance.response_for_request(RequestSignature.new(:get, "www.google.org"))
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.com"))
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.com"))
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.org"))
     end
 
     it "should report 0 if no request matching profile was requested" do

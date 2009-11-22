@@ -20,12 +20,11 @@ module WebMock
     end
 
     def registered_request?(request_signature)
-      stub_for(request_signature)
+      request_stub_for(request_signature)
     end
 
     def response_for_request(request_signature)
-      stub = stub_for(request_signature)
-      self.requested_signatures.put(request_signature)
+      stub = request_stub_for(request_signature)
       stub ? stub.response : nil
     end
     
@@ -37,7 +36,7 @@ module WebMock
 
     private
 
-    def stub_for(request_signature)
+    def request_stub_for(request_signature)
       request_stubs.detect { |registered_request_stub|
         request_signature.match(registered_request_stub.request_profile)
       }

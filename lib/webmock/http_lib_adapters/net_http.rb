@@ -78,12 +78,13 @@ module Net  #:nodoc: all
 
       request_signature = WebMock::RequestSignature.new(method, uri, body, headers)
 
+      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+
       if WebMock.registered_request?(request_signature)
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?
-        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
         connect_without_webmock
         request_without_webmock(request, body, &block)
       else
