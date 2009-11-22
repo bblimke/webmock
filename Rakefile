@@ -10,6 +10,7 @@ begin
     gem.email = "bartosz.blimke@gmail.com"
     gem.homepage = "http://github.com/bblimke/webmock"
     gem.authors = ["Bartosz Blimke"]
+    gem.add_dependency "addressable", ">= 2.1.1"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
@@ -34,7 +35,7 @@ require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.test_files = FileList["test/**/*.rb"].exclude("test/test_helper.rb")
   test.verbose = false
-  test.warning = true
+  test.warning = false
 end
 
 task :spec => :check_dependencies
