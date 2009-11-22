@@ -8,12 +8,12 @@ module WebMock
       WebMock::RequestProfileMatcher.new.times(0)
     end
     
-    def have_requested(method, url)
-      WebMock::WebMockMatcher.new(method, url)
+    def have_requested(method, uri)
+      WebMock::WebMockMatcher.new(method, uri)
     end
     
-    def have_not_requested(method, url)
-      WebMock::WebMockMatcher.new(method, url).times(0)
+    def have_not_requested(method, uri)
+      WebMock::WebMockMatcher.new(method, uri).times(0)
     end
   end
 end

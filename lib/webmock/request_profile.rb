@@ -1,10 +1,10 @@
 module WebMock
 
   class RequestProfile < Struct.new(:method, :uri, :body, :headers)
-
+    
     def initialize(method, uri, body = nil, headers = nil)
       super
-      self.uri = WebMock::URL.normalize_uri(self.uri) unless self.uri.is_a?(Addressable::URI)
+      self.uri = WebMock::URI.normalize_uri(self.uri) unless self.uri.is_a?(Addressable::URI)
       self.headers = Utility.normalize_headers(self.headers)
     end
 
@@ -21,8 +21,6 @@ module WebMock
         string << " with headers #{WebMock::Utility.normalize_headers(headers).inspect.gsub("\"","'")}"
       end
       string
-    end
-
-  end
+    end  
 
 end

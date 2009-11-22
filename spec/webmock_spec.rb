@@ -53,19 +53,19 @@ describe "WebMock", :shared => true do
 
   describe "when matching requests" do
 
-    describe "on url" do
+    describe "on uri" do
 
-      it "should match the request by url with non escaped params if request have escaped parameters" do
+      it "should match the request by uri with non escaped params if request have escaped parameters" do
         stub_http_request(:get, "www.google.com/?#{NOT_ESCAPED_PARAMS}").to_return(:body => "abc")
         http_request(:get, "http://www.google.com/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
 
-      it "should match the request by url with escaped parameters even if request has non escaped params" do
+      it "should match the request by uri with escaped parameters even if request has non escaped params" do
         stub_http_request(:get, "www.google.com/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
         http_request(:get, "http://www.google.com/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
       end
 
-      it "should match the request by regexp matching non escaped params url if request params are escaped" do
+      it "should match the request by regexp matching non escaped params uri if request params are escaped" do
         stub_http_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
         http_request(:get, "http://www.google.com/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
@@ -224,7 +224,7 @@ describe "WebMock", :shared => true do
         http_request(:get, "http://www.google.com/").body.should == "def"
       end
 
-      it "should not be affected by the type of url or request method" do
+      it "should not be affected by the type of uri or request method" do
         stub_http_request(:get, "www.google.com").to_return(:body => "abc")
         stub_http_request(:any, /.*google.*/).to_return(:body => "def")
         http_request(:get, "http://www.google.com/").body.should == "def"
@@ -242,7 +242,7 @@ describe "WebMock", :shared => true do
           stub_http_request(:any, "https://www.google.com")
         end
 
-        it "should pass if request was executed with the same url and method" do
+        it "should pass if request was executed with the same uri and method" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should have_been_made.once
@@ -269,7 +269,7 @@ describe "WebMock", :shared => true do
           }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times")
         end
 
-        it "should fail if request was executed to different url" do
+        it "should fail if request was executed to different uri" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.org").should have_been_made
@@ -283,21 +283,21 @@ describe "WebMock", :shared => true do
           }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times")
         end
 
-        it "should pass if request was executed with different form of url" do
+        it "should pass if request was executed with different form of uri" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "www.google.com").should have_been_made
           }.should_not raise_error
         end
 
-        it "should pass if request was executed with different form of url without port " do
+        it "should pass if request was executed with different form of uri without port " do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "www.google.com:80").should have_been_made
           }.should_not raise_error
         end
 
-        it "should pass if request was executed with different form of url with port" do
+        it "should pass if request was executed with different form of uri with port" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "www.google.com:80").should have_been_made
@@ -311,14 +311,14 @@ describe "WebMock", :shared => true do
           }.should fail_with("The request GET http://www.google.com:90/ was expected to execute 1 time but it executed 0 times")
         end
 
-        it "should pass if request was executed with different form of url with https port" do
+        it "should pass if request was executed with different form of uri with https port" do
           lambda {
             http_request(:get, "https://www.google.com/")
             request(:get, "https://www.google.com:443/").should have_been_made
           }.should_not raise_error
         end
 
-        describe "when matching requests with escaped urls" do
+        describe "when matching requests with escaped uris" do
 
           before(:each) do
             WebMock.disable_net_connect!

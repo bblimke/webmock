@@ -1,6 +1,6 @@
 module WebMock
 
-  class URL
+  class URI
 
     def self.normalize_uri(uri)
       return uri if uri.is_a?(Regexp)

@@ -6,12 +6,12 @@ describe RequestSignature do
 
   describe "when matching" do
 
-    it "should match if url matches and method matches" do
+    it "should match if uri matches and method matches" do
       RequestSignature.new(:get, "www.google.com").
         should match(RequestProfile.new(:get, "www.google.com"))
     end
 
-    it "should match if url matches and method is any" do
+    it "should match if uri matches and method is any" do
       RequestSignature.new(:get, "www.google.com").
         should match(RequestProfile.new(:any, "www.google.com"))
     end

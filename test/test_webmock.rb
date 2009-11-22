@@ -4,18 +4,18 @@ require 'ostruct'
  
 class TestWebMock < Test::Unit::TestCase
     
-  def http_request(method, url, options = {})
+  def http_request(method, uri, options = {})
     begin
-      url = URI.parse(url)
+      uri = URI.parse(uri)
     rescue
-      url = Addressable::URI.heuristic_parse(url)
+      uri = Addressable::URI.heuristic_parse(uri)
     end
     response = nil
     clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
-    req = clazz.new("#{url.path}#{url.query ? '?' : ''}#{url.query}", options[:headers])
-    req.basic_auth url.user, url.password if url.user
-    http = Net::HTTP.new(url.host, url.port)
-    http.use_ssl = true if url.scheme == "https"
+    req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers])
+    req.basic_auth uri.user, uri.password if uri.user
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true if uri.scheme == "https"
     response = http.start {|http|
       http.request(req, options[:body])
     }

@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "0.7.2"
+  s.version = "0.7.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2009-11-22}
+  s.date = %q{2009-11-20}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".gitignore",
-     "CHANGELOG",
      "LICENSE",
      "README.md",
      "Rakefile",
@@ -37,7 +36,7 @@ Gem::Specification.new do |s|
      "lib/webmock/request_registry.rb",
      "lib/webmock/request_stub.rb",
      "lib/webmock/response.rb",
-     "lib/webmock/url.rb",
+     "lib/webmock/uri.rb",
      "lib/webmock/util/hash_counter.rb",
      "lib/webmock/utility.rb",
      "lib/webmock/webmock.rb",
@@ -50,7 +49,6 @@ Gem::Specification.new do |s|
      "spec/response_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
-     "spec/url_spec.rb",
      "spec/util/hash_counter_spec.rb",
      "spec/utility_spec.rb",
      "spec/vendor/right_http_connection-1.2.4/History.txt",
@@ -93,7 +91,6 @@ Gem::Specification.new do |s|
      "spec/request_stub_spec.rb",
      "spec/response_spec.rb",
      "spec/spec_helper.rb",
-     "spec/url_spec.rb",
      "spec/util/hash_counter_spec.rb",
      "spec/utility_spec.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
@@ -116,14 +113,11 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
     else
-      s.add_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
     end
   else
-    s.add_dependency(%q<addressable>, [">= 2.1.1"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
   end
 end

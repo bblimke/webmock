@@ -6,7 +6,7 @@ describe RequestStub do
     @request_stub = RequestStub.new(:get, "www.google.com")
   end
 
-  it "should have request profile with method and url" do
+  it "should have request profile with method and uri" do
     @request_stub.request_profile.method.should == :get
     @request_stub.request_profile.uri.host.should == "www.google.com"
   end

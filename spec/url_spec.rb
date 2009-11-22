@@ -62,48 +62,48 @@ URIS_FOR_HTTPS =
 ].sort
 
 
-describe URL do
+describe WebMock::URI do
 
   describe "reporting variations of uri" do
 
     it "should find all variations of the same uri for all variations of uri with params and path" do
       URIS_WITH_PATH_AND_PARAMS.each do |uri|
-        URL.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_PATH_AND_PARAMS
+        WebMock::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_PATH_AND_PARAMS
       end
     end
 
     it "should find all variations of the same uri for all variations of uri without params or path" do
       URIS_WITHOUT_PATH_OR_PARAMS.each do |uri|
-        URL.variations_of_uri_as_strings(uri).sort.should == URIS_WITHOUT_PATH_OR_PARAMS
+        WebMock::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITHOUT_PATH_OR_PARAMS
       end
     end
 
     it "should find all variations of the same uri for all variations of uri with auth" do
       URIS_WITH_AUTH.each do |uri|
-        URL.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_AUTH
+        WebMock::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_AUTH
       end
     end
 
     it "should find all variations of the same uri for all variations of uri with different port" do
       URIS_WITH_DIFFERENT_PORT.each do |uri|
-        URL.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_DIFFERENT_PORT
+        WebMock::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_DIFFERENT_PORT
       end
     end
 
     it "should find all variations of the same uri for all variations of https uris" do
       URIS_FOR_HTTPS.each do |uri|
-        URL.variations_of_uri_as_strings(uri).sort.should == URIS_FOR_HTTPS
+        WebMock::URI.variations_of_uri_as_strings(uri).sort.should == URIS_FOR_HTTPS
       end
     end
 
   end
 
-  describe "normalized url equality" do
+  describe "normalized uri equality" do
 
     it "should successfully compare all variations of the same uri with path and params" do
       URIS_WITH_PATH_AND_PARAMS.each do |uri_a|
         URIS_WITH_PATH_AND_PARAMS.each do |uri_b|
-          URL.normalize_uri(uri_a).should ===  URL.normalize_uri(uri_b)
+          WebMock::URI.normalize_uri(uri_a).should ===  WebMock::URI.normalize_uri(uri_b)
         end
       end
     end
@@ -111,7 +111,7 @@ describe URL do
     it "should successfully compare all variations of the same uri without path or params" do
       URIS_WITHOUT_PATH_OR_PARAMS.each do |uri_a|
         URIS_WITHOUT_PATH_OR_PARAMS.each do |uri_b|
-          URL.normalize_uri(uri_a).should ===  URL.normalize_uri(uri_b)
+          WebMock::URI.normalize_uri(uri_a).should ===  WebMock::URI.normalize_uri(uri_b)
         end
       end
     end
@@ -119,7 +119,7 @@ describe URL do
     it "should successfully compare all variations of the same uri with authority" do
       URIS_WITH_AUTH.each do |uri_a|
         URIS_WITH_AUTH.each do |uri_b|
-          URL.normalize_uri(uri_a).should ===  URL.normalize_uri(uri_b)
+          WebMock::URI.normalize_uri(uri_a).should ===  WebMock::URI.normalize_uri(uri_b)
         end
       end
     end
@@ -127,7 +127,7 @@ describe URL do
     it "should successfully compare all variations of the same uri custom port" do
       URIS_WITH_DIFFERENT_PORT.each do |uri_a|
         URIS_WITH_DIFFERENT_PORT.each do |uri_b|
-          URL.normalize_uri(uri_a).should ===  URL.normalize_uri(uri_b)
+          WebMock::URI.normalize_uri(uri_a).should ===  WebMock::URI.normalize_uri(uri_b)
         end
       end
     end
@@ -135,7 +135,7 @@ describe URL do
     it "should successfully compare all variations of the same https uri" do
       URIS_FOR_HTTPS.each do |uri_a|
         URIS_FOR_HTTPS.each do |uri_b|
-          URL.normalize_uri(uri_a).should ===  URL.normalize_uri(uri_b)
+          WebMock::URI.normalize_uri(uri_a).should ===  WebMock::URI.normalize_uri(uri_b)
         end
       end
     end

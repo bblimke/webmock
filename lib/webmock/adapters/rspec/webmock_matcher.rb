@@ -1,9 +1,9 @@
 module WebMock
   class WebMockMatcher
 
-    def initialize(method, url)
+    def initialize(method, uri)
       @request_execution_verifier = RequestExecutionVerifier.new
-      @request_execution_verifier.request_profile = RequestProfile.new(method, url)
+      @request_execution_verifier.request_profile = RequestProfile.new(method, uri)
     end
 
     def once

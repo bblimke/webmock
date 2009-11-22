@@ -4,25 +4,25 @@ WebMock::Utility.puts_warning_for_net_http_around_advice_libs_if_needed
 
 module WebMock
 
-  def stub_request(method, url)
-    RequestRegistry.instance.register_request_stub(RequestStub.new(method, url))
+  def stub_request(method, uri)
+    RequestRegistry.instance.register_request_stub(RequestStub.new(method, uri))
   end
   
   alias_method :stub_http_request, :stub_request
 
-  def request(method, url)
-    RequestProfile.new(method, url)
+  def request(method, uri)
+    RequestProfile.new(method, uri)
   end
 
-  def assert_requested(method, url, options = {})
+  def assert_requested(method, uri, options = {})
     expected_times_executed = options.delete(:times) || 1
-    request = RequestProfile.new(method, url, options[:body], options[:headers])
+    request = RequestProfile.new(method, uri, options[:body], options[:headers])
     verifier = RequestExecutionVerifier.new(request, expected_times_executed)
     assertion_failure(verifier.failure_message) unless verifier.matches?
   end
 
-  def assert_not_requested(method, url, options = {})
-    request = RequestProfile.new(method, url, options[:body], options[:headers])
+  def assert_not_requested(method, uri, options = {})
+    request = RequestProfile.new(method, uri, options[:body], options[:headers])
     verifier = RequestExecutionVerifier.new(request, options.delete(:times))
     assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end

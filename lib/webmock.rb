@@ -7,7 +7,7 @@ require 'webmock/http_lib_adapters/net_http'
 
 require 'webmock/errors'
 
-require 'webmock/url'
+require 'webmock/uri'
 
 require 'webmock/request_profile'
 require 'webmock/request_signature'

@@ -7,13 +7,13 @@ describe RequestProfile do
   describe "initialization" do
 
     it "should have assigned normalized uri" do
-      URL.should_receive(:normalize_uri).and_return("www.google.kom")
+      WebMock::URI.should_receive(:normalize_uri).and_return("www.google.kom")
       profile = RequestProfile.new(:get, "www.google.com")
       profile.uri.should == "www.google.kom"
     end
 
     it "should have assigned uri without normalization if uri is URI" do
-      URL.should_not_receive(:normalize_uri)
+      WebMock::URI.should_not_receive(:normalize_uri)
       uri = Addressable::URI.parse("www.google.com")
       profile = RequestProfile.new(:get, uri)
       profile.uri.should == uri

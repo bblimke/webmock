@@ -7,8 +7,8 @@ Features
 --------
 
 * Stubbing requests and setting requests expectations
-* Matching requests based on method, url, headers and body
-* Matching not escaped and escaped urls
+* Matching requests based on method, uri, headers and body
+* Matching not escaped and escaped uris
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::Http and other http libraries based on Net::Http
 * Adding other http library adapters is easy
@@ -29,20 +29,20 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
 ## Examples
 
-### Stubbed request based on url only and with the default response
+### Stubbed request based on uri only and with the default response
 
 	 stub_request(:any, "www.google.com")
 
 	 Net::HTTP.get('www.google.com', '/')    # ===> Success
 	
-### Stubbing requests based on method, url, body and headers
+### Stubbing requests based on method, uri, body and headers
 
 	stub_request(:post, "www.google.com").with(:body => "abc", :headers => { 'Content-Length' => 3 })
 
-	url = URI.parse('http://www.google.com/')
-    req = Net::HTTP::Post.new(url.path)
+	uri = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(uri.path)
 	req['Content-Length'] = 3
-    res = Net::HTTP.start(url.host, url.port) {|http|
+    res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'abc')
     }    # ===> Success
 
@@ -50,10 +50,10 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
     stub_request(:any, "www.google.com").with(:headers=>{'Header-Name'=>"Header-Value"}).to_return(:body => "abc", :status => 200)
 
-	url = URI.parse('http://www.google.com/')
-    req = Net::HTTP::Post.new(url.path)
+	uri = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(uri.path)
 	req['Header-Name'] = "Header-Value"
-    res = Net::HTTP.start(url.host, url.port) {|http|
+    res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'abc')
     }    # ===> Success
 
@@ -77,7 +77,7 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 	
 	Net::HTTP.get(URI.parse('http://john:smith@www.google.com'))    # ===> Success
 	
-### Matching urls using regular expressions
+### Matching uris using regular expressions
 
 	 stub_request(:any, /.*google.*/)
 
@@ -112,10 +112,10 @@ Now you are ready to write your tests/specs with stubbed HTTP calls.
 
     stub_request(:any, "www.google.com")
 
-	url = URI.parse('http://www.google.com/')
-    req = Net::HTTP::Post.new(url.path)
+	uri = URI.parse('http://www.google.com/')
+    req = Net::HTTP::Post.new(uri.path)
 	req['Content-Length'] = 3
-    res = Net::HTTP.start(url.host, url.port) {|http|
+    res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'abc')
     }
 
@@ -152,7 +152,7 @@ Notes
 
 Here are the criteria of matching requests:
 
-* request url matches stubbed request url pattern
+* request uri matches stubbed request uri pattern
 * and request method is the same as stubbed request method or stubbed request method is :any
 * and request body is the same as stubbed request body or stubbed request body is not set (is nil)
 * and request headers are the same as stubbed request headers or stubbed request headers are a subset of request headers or stubbed request headers are not set
