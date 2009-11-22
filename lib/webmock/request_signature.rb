@@ -2,7 +2,6 @@ module WebMock
 
   class RequestSignature < RequestProfile
 
-    #self needs to be a subset of request_profile. Other needs to be more general.
     def match(request_profile)
       match_method(request_profile) &&
         match_body(request_profile) &&
