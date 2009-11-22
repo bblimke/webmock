@@ -8,6 +8,7 @@ Features
 
 * Stubbing requests and setting requests expectations
 * Matching requests based on method, url, headers and body
+* Matching not escaped and escaped urls
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::Http and other http libraries based on Net::Http
 * Adding other http library adapters is easy
@@ -187,7 +188,7 @@ Credits
 -------
 
 Thank you Fakeweb! This library is based on the idea taken from [FakeWeb](fakeweb.rubyforge.org).
-I took couple of solutions from that project. I also copied some code i.e Net:Http adapter or url normalisation function. 
+I took couple of solutions from that project. I also copied some code i.e Net:Http adapter. 
 Fakeweb architecture unfortunately didn't allow me to extend it easily with the features I needed.
 I also preferred some things to work differently i.e request stub precedence.
 

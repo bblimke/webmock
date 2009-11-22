@@ -14,7 +14,7 @@ describe RequestProfile do
 
     it "should have assigned uri without normalization if uri is URI" do
       URL.should_not_receive(:normalize_uri)
-      uri = URI.parse("www.google.com")
+      uri = Addressable::URI.parse("www.google.com")
       profile = RequestProfile.new(:get, uri)
       profile.uri.should == uri
     end
@@ -30,9 +30,9 @@ describe RequestProfile do
 
   end
 
-  it "should report string" do
+  it "should report string describing itself" do
     RequestProfile.new(:get, "www.google.com", "abc", {'A' => 'a', 'B' => 'b'}).to_s.should ==
-    "GET http://www.google.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
+    "GET http://www.google.com:80/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
   end
 
 
@@ -75,6 +75,21 @@ describe RequestProfile do
       RequestProfile.new(:get, "www.google.com").
         should match(RequestProfile.new(:get, "www.google.com"))
     end
+    
+    it "should match if uri matches other escaped using uri" do
+      RequestProfile.new(:get, "www.google.com/big image.jpg").
+        should match(RequestProfile.new(:get, "www.google.com/big%20image.jpg"))
+    end
+    
+    it "should match if unescaped uri matches other uri" do
+      RequestProfile.new(:get, "www.google.com/big%20image.jpg").
+        should match(RequestProfile.new(:get, "www.google.com/big image.jpg"))
+    end
+    
+    it "should match if unescaped uri matches other regexp uri" do
+      RequestProfile.new(:get, "www.google.com/big%20image.jpg").
+        should match(RequestProfile.new(:get, /.*big image.jpg.*/))
+    end
 
     it "should match if uri matches other regex uri" do
       RequestProfile.new(:get, "www.google.com").
@@ -95,6 +110,32 @@ describe RequestProfile do
       RequestProfile.new(:get, "www.google.com?a=1&b=2").
         should match(RequestProfile.new(:get, "www.google.com?b=2&a=1"))
     end
+    
+    describe "when parameters are escaped" do
+    
+      it "should match if uri with non escaped parameters is the same as other uri with escaped parameters" do
+        RequestProfile.new(:get, "www.google.com/?a=a b").
+          should match(RequestProfile.new(:get, "www.google.com/?a=a%20b"))
+      end
+    
+      it "should match if uri with escaped parameters is the same as other uri with non escaped parameters" do
+        RequestProfile.new(:get, "www.google.com/?a=a%20b").
+          should match(RequestProfile.new(:get, "www.google.com/?a=a b"))
+      end
+    
+      it "should match if other regexp is for non escaped parameters but uri has escaped parameters" do
+        RequestProfile.new(:get, "www.google.com/?a=a%20b").
+          should match(RequestProfile.new(:get, /.*a=a b.*/))
+      end
+    
+      it "should match if other regexp is for escaped parameters but uri has non escaped parameters"  do
+        RequestProfile.new(:get, "www.google.com/?a=a b").
+          should match(RequestProfile.new(:get, /.*a=a%20b.*/))
+      end
+    
+    end
+    
+    
 
     it "should match for same bodies" do
       RequestProfile.new(:get, "www.google.com", "abc").

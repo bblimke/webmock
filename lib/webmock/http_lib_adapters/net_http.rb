@@ -61,7 +61,7 @@ module Net  #:nodoc: all
       protocol = use_ssl? ? "https" : "http"
 
       path = request.path
-      path = URI.parse(request.path).request_uri if request.path =~ /^http/
+      path = Addressable::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
 
       if request["authorization"] =~ /^Basic /
         userinfo = WebMock::Utility.decode_userinfo_from_header(request["authorization"])

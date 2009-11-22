@@ -1,10 +1,10 @@
 module WebMock
 
   class RequestProfile < Struct.new(:method, :uri, :body, :headers)
-
+    
     def initialize(method, uri, body = nil, headers = nil)
       super
-      self.uri = WebMock::URL.normalize_uri(self.uri) unless self.uri.is_a?(URI)
+      self.uri = WebMock::URL.normalize_uri(self.uri) unless self.uri.is_a?(Addressable::URI)
       self.headers = Utility.normalize_headers(self.headers)
     end
 
@@ -35,11 +35,10 @@ module WebMock
 
     def match_url(other)
       raise "Can't match regexp request profile" if self.uri.is_a?(Regexp)
-      @uris_to_check ||= WebMock::URL.variations_of_uri_as_strings(self.uri)
-      if other.uri.is_a?(URI)
-        @uris_to_check.include?(other.uri.to_s)
+      if other.uri.is_a?(Addressable::URI)
+        URL.normalize_uri(uri) === URL.normalize_uri(other.uri)
       elsif other.uri.is_a?(Regexp)
-        @uris_to_check.any? { |u| u.match(other.uri) }
+        WebMock::URL.variations_of_uri_as_strings(self.uri).any? { |u| u.match(other.uri) }
       else
         false
       end

@@ -5,10 +5,15 @@ require 'ostruct'
 class TestWebMock < Test::Unit::TestCase
     
   def http_request(method, url, options = {})
-    url = URI.parse(url)
+    begin
+      url = URI.parse(url)
+    rescue
+      url = Addressable::URI.heuristic_parse(url)
+    end
     response = nil
     clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
-    req = clazz.new(url.path, options[:headers])
+    req = clazz.new("#{url.path}#{url.query ? '?' : ''}#{url.query}", options[:headers])
+    req.basic_auth url.user, url.password if url.user
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true if url.scheme == "https"
     response = http.start {|http|
@@ -18,7 +23,7 @@ class TestWebMock < Test::Unit::TestCase
       :body => response.body,
       :headers => response,
       :status => response.code })
-  end  
+  end
 
   
   def setup
@@ -34,7 +39,7 @@ class TestWebMock < Test::Unit::TestCase
   end
   
   def test_verification_that_expected_request_didnt_occur
-    assert_fail("The request GET http://www.google.com/ was expected to execute 1 time but it executed 0 times") do
+    assert_fail("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times") do
       assert_requested(:get, "http://www.google.com")
     end
   end  
@@ -47,7 +52,7 @@ class TestWebMock < Test::Unit::TestCase
   end
 
   def test_verification_that_non_expected_request_didnt_occur
-    assert_fail("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time") do
+    assert_fail("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time") do
       http_request(:get, "http://www.google.com/")
       assert_not_requested(:get, "http://www.google.com")
     end

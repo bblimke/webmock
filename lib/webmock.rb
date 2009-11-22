@@ -1,5 +1,8 @@
 require 'singleton'
 
+require 'rubygems'
+require 'addressable/uri'
+
 require 'webmock/http_lib_adapters/net_http'
 
 require 'webmock/errors'

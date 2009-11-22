@@ -4,41 +4,53 @@ module WebMock
 
     def self.normalize_uri(uri)
       return uri if uri.is_a?(Regexp)
-      normalized_uri =
-      case uri
-      when URI then uri
-      when String
-        uri = 'http://' + uri unless uri.match('^https?://')
-        URI.parse(uri)
-      end
-      normalized_uri.query = sort_query_params(normalized_uri.query)
-      normalized_uri.normalize
+      uri = 'http://' + uri unless uri.match('^https?://') if uri.is_a?(String)
+      normalized_uri = Addressable::URI.heuristic_parse(uri)
+      normalized_uri.query_values = normalized_uri.query_values if normalized_uri.query_values
+      normalized_uri.normalize!
+      normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port && normalized_uri.inferred_port 
+      normalized_uri
     end
 
     def self.variations_of_uri_as_strings(uri_object)
-      normalized_uri = normalize_uri(uri_object.dup)
-      normalized_uri_string = normalized_uri.to_s
-
-      variations = [normalized_uri_string]
-
-      # if the port is implied in the original, add a copy with an explicit port
-      if normalized_uri.default_port == normalized_uri.port
-        variations << normalized_uri_string.sub(
-          /#{Regexp.escape(normalized_uri.request_uri)}$/,
-          ":#{normalized_uri.port}#{normalized_uri.request_uri}")
+      normalized_uri = normalize_uri(uri_object.dup).freeze
+      uris = [ normalized_uri ]
+      
+      if normalized_uri.port == Addressable::URI.port_mapping[normalized_uri.scheme]
+        uris = uris_with_inferred_port_and_without(uris)
       end
+      
+      if normalized_uri.scheme == "http"
+        uris = uris_with_scheme_and_without(uris)
+      end
+      
+      if normalized_uri.path == '/' && normalized_uri.query == nil
+        uris = uris_with_trailing_slash_and_without(uris)
+      end
+      
+      uris = uris_encoded_and_unencoded(uris)
 
-      variations
+      uris.map {|uri| uri.to_s.gsub(/^\/\//,'') }.uniq
     end
 
     private
 
-    def self.sort_query_params(query)
-      if query.nil? || query.empty?
-        nil
-      else
-        query.split('&').sort.join('&')
-      end
+    def self.uris_with_inferred_port_and_without(uris)
+      uris.map { |uri| [ uri, uri.omit(:port).freeze ] }.flatten
+    end
+
+    def self.uris_encoded_and_unencoded(uris)
+      uris.map do |uri|
+        [ uri, Addressable::URI.heuristic_parse(Addressable::URI.unencode(uri)).freeze ]
+      end.flatten
+    end
+
+    def self.uris_with_scheme_and_without(uris)
+      uris.map { |uri| [ uri, uri.omit(:scheme).freeze ] }.flatten
+    end
+
+    def self.uris_with_trailing_slash_and_without(uris)
+      uris = uris.map { |uri| [ uri, uri.omit(:path).freeze ] }.flatten
     end
 
   end

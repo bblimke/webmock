@@ -3,6 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'webmock'
 require 'spec'
 require 'spec/autorun'
+require 'addressable/uri'
 
 include WebMock
 
@@ -56,3 +57,4 @@ def setup_expectations_for_real_google_request(options = {})
     :response_body => "<title>Google fake response</title>" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
+

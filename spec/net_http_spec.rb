@@ -5,10 +5,14 @@ require 'ostruct'
 include WebMock
 
 def http_request(method, url, options = {})
-  url = URI.parse(url)
+  begin
+    url = URI.parse(url)
+  rescue
+    url = Addressable::URI.heuristic_parse(url)
+  end
   response = nil
   clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
-  req = clazz.new(url.path, options[:headers])
+  req = clazz.new("#{url.path}#{url.query ? '?' : ''}#{url.query}", options[:headers])
   req.basic_auth url.user, url.password if url.user
   http = Net::HTTP.new(url.host, url.port)
   http.use_ssl = true if url.scheme == "https"
@@ -20,7 +24,6 @@ def http_request(method, url, options = {})
     :headers => response,
     :status => response.code })
 end
-
 
 describe "Webmock with Net:HTTP" do
   
