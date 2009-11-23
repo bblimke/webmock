@@ -21,6 +21,3 @@ require 'webmock/utility'
 require 'webmock/config'
 require 'webmock/request_registry'
 require 'webmock/webmock'
-
-require 'webmock/adapters/rspec'
-require 'webmock/adapters/test_unit'

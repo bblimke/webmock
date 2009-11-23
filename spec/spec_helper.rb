@@ -5,6 +5,8 @@ require 'spec'
 require 'spec/autorun'
 require 'addressable/uri'
 
+require 'webmock/rspec'
+
 include WebMock
 
 def fail()

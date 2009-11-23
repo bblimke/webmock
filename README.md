@@ -105,6 +105,7 @@ In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lin
 ## Setting Expectations
 
 ### Setting expectations in Test::Unit
+	require 'webmock/test_unit'
 
     stub_request(:any, "www.google.com")
 
@@ -130,6 +131,8 @@ In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lin
 
 ### Setting expectations in RSpec
  This style is borrowed from [fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher)
+
+	require 'webmock/rspec'
 
 	WebMock.should have_requested(:get, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 	
@@ -163,9 +166,9 @@ If you want to reset all current stubs and history of requests use `WebMock.rese
 
 An executed request matches stubbed request if it passes following criteria:
 
-  Request URI matches stubbed request URI string or Regexp pattern
-  And request method is the same as stubbed request method or stubbed request method is :any
-  And request body is the same as stubbed request body or stubbed request body is not set (is nil)
+  Request URI matches stubbed request URI string or Regexp pattern<br/>
+  And request method is the same as stubbed request method or stubbed request method is :any<br/>
+  And request body is the same as stubbed request body or stubbed request body is not set (is nil)<br/>
   And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not set
 
 ## Precedence of stubs
@@ -260,6 +263,8 @@ If you have any suggestions on how to improve WebMock please send an email to th
 I'm particularly interested in how the DSL could be improved.
 
 ## Credits
+
+Thanks to my fellow [Bambinos](http://new-bamboo.co.uk/) for all the great suggestions!
 
 Thank you Fakeweb! This library was inspired by [FakeWeb](fakeweb.rubyforge.org).
 I took couple of solutions from that project. I also copied some code i.e Net:HTTP adapter. 
