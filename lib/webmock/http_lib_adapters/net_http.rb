@@ -2,7 +2,6 @@ require 'net/http'
 require 'net/https'
 require 'stringio'
 
-
 class StubSocket #:nodoc:
 
   def initialize(*args)
@@ -64,8 +63,8 @@ module Net  #:nodoc: all
       path = Addressable::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
 
       if request["authorization"] =~ /^Basic /
-        userinfo = WebMock::Utility.decode_userinfo_from_header(request["authorization"])
-        userinfo = WebMock::Utility.encode_unsafe_chars_in_userinfo(userinfo) + "@"
+        userinfo = WebMock::Headers.decode_userinfo_from_header(request["authorization"])
+        userinfo = WebMock::URI.encode_unsafe_chars_in_userinfo(userinfo) + "@"
       else
         userinfo = ""
       end
@@ -88,7 +87,6 @@ module Net  #:nodoc: all
         connect_without_webmock
         request_without_webmock(request, body, &block)
       else
-        uri = WebMock::Utility.strip_default_port_from_uri(uri)
         message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
         raise WebMock::NetConnectNotAllowedError, message
       end
@@ -99,7 +97,7 @@ module Net  #:nodoc: all
 
     def connect_with_webmock
       unless @@alredy_checked_for_net_http_replacement_libs ||= false
-        WebMock::Utility.puts_warning_for_net_http_replacement_libs_if_needed
+        WebMock::NetHTTPUtility.puts_warning_for_net_http_replacement_libs_if_needed
         @@alredy_checked_for_net_http_replacement_libs = true
       end
       nil
@@ -125,3 +123,43 @@ module Net  #:nodoc: all
   end
 
 end
+
+module WebMock
+  module NetHTTPUtility
+    def self.puts_warning_for_net_http_around_advice_libs_if_needed
+      libs = {"Samuel" => defined?(Samuel)}
+      warnings = libs.select { |_, loaded| loaded }.map do |name, _|
+        <<-TEXT.gsub(/ {10}/, '')
+        \e[1mWarning: WebMock was loaded after #{name}\e[0m
+          * #{name}'s code is being ignored when a request is handled by WebMock,
+          because both libraries work by patching Net::HTTP.
+          * To fix this, just reorder your requires so that WebMock is before #{name}.
+          TEXT
+        end
+        $stderr.puts "\n" + warnings.join("\n") + "\n" if warnings.any?
+      end
+
+      def self.record_loaded_net_http_replacement_libs
+        libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
+        @loaded_net_http_replacement_libs = libs.map { |name, loaded| name if loaded }.compact
+      end
+
+      def self.puts_warning_for_net_http_replacement_libs_if_needed
+        libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
+        warnings = libs.select { |_, loaded| loaded }.
+          reject { |name, _| @loaded_net_http_replacement_libs.include?(name) }.
+          map do |name, _|
+          <<-TEXT.gsub(/ {10}/, '')
+          \e[1mWarning: #{name} was loaded after WebMock\e[0m
+            * WebMock's code is being ignored, because #{name} replaces parts of
+            Net::HTTP without deferring to other libraries. This will break Net::HTTP requests.
+            * To fix this, just reorder your requires so that #{name} is before WebMock.
+            TEXT
+          end
+          $stderr.puts "\n" + warnings.join("\n") + "\n" if warnings.any?
+        end
+      end
+    end
+
+    WebMock::NetHTTPUtility.record_loaded_net_http_replacement_libs
+    WebMock::NetHTTPUtility.puts_warning_for_net_http_around_advice_libs_if_needed

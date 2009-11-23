@@ -39,7 +39,7 @@ class TestWebMock < Test::Unit::TestCase
   end
   
   def test_verification_that_expected_request_didnt_occur
-    assert_fail("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times") do
+    assert_fail("The request GET http://www.google.com/ was expected to execute 1 time but it executed 0 times") do
       assert_requested(:get, "http://www.google.com")
     end
   end  
@@ -52,7 +52,7 @@ class TestWebMock < Test::Unit::TestCase
   end
 
   def test_verification_that_non_expected_request_didnt_occur
-    assert_fail("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time") do
+    assert_fail("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time") do
       http_request(:get, "http://www.google.com/")
       assert_not_requested(:get, "http://www.google.com")
     end

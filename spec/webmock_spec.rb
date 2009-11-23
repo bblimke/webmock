@@ -45,7 +45,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/")
+          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/")
       end
     end
 
@@ -85,7 +85,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:post, "http://www.google.com/")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: POST http://www.google.com:80/"
+          "Real HTTP connections are disabled. Unregistered request: POST http://www.google.com/"
         )
       end
 
@@ -113,7 +113,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/", :body => "def")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/ with body 'def'")
+          "Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/ with body 'def'")
       end
 
     end
@@ -143,7 +143,7 @@ describe "WebMock", :shared => true do
             :get, "http://www.google.com/",
           :headers => { 'Content-Length' => '9999'})
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/ with headers {'Content-Length'=>'9999'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/ with headers {'Content-Length'=>'9999'}))
       end
     end
 
@@ -159,7 +159,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://user:pazz@www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com:80/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
       end
 
       it "should not match if credentials are stubbed but not provided in the request" do
@@ -167,7 +167,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com:80/))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.google.com/))
       end
 
       it "should not match if credentials are not stubbed but exist in the request" do
@@ -175,7 +175,7 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://user:pazz@www.google.com/").status.should == "200"
         }.should raise_error(WebMock::NetConnectNotAllowedError,
-          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com:80/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.google.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'}))
       end
 
     end
@@ -259,28 +259,28 @@ describe "WebMock", :shared => true do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should_not have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
         end
 
 
         it "should fail if request was not executed" do
           lambda {
             request(:get, "http://www.google.com").should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 1 time but it executed 0 times")
         end
 
         it "should fail if request was executed to different uri" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.org").should have_been_made
-          }.should fail_with("The request GET http://www.google.org:80/ was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.org/ was expected to execute 1 time but it executed 0 times")
         end
 
         it "should fail if request was executed with different method" do
           lambda {
             http_request(:post, "http://www.google.com/")
             request(:get, "http://www.google.com").should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 1 time but it executed 0 times")
         end
 
         it "should pass if request was executed with different form of uri" do
@@ -352,21 +352,21 @@ describe "WebMock", :shared => true do
             http_request(:get, "http://www.google.com/")
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 2 times")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 1 time but it executed 2 times")
         end
 
         it "should fail if requested less times than expected" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should have_been_made.twice
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 2 times but it executed 1 time")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 2 times but it executed 1 time")
         end
 
         it "should fail if requested less times than expected when 3 times expected" do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should have_been_made.times(3)
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 3 times but it executed 1 time")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 3 times but it executed 1 time")
         end
 
         it "should succeed if request was executed with the same body" do
@@ -381,7 +381,7 @@ describe "WebMock", :shared => true do
             http_request(:get, "http://www.google.com/", :body => "abc")
             request(:get, "www.google.com").
             with(:body => "def").should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ with body 'def' was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.com/ with body 'def' was expected to execute 1 time but it executed 0 times")
         end
 
         it "should succeed if request was executed with the same headers" do
@@ -397,7 +397,7 @@ describe "WebMock", :shared => true do
             http_request(:get, "http://www.google.com/", :headers => SAMPLE_HEADERS)
             request(:get, "www.google.com").
             with(:headers => { 'Content-Length' => '9999'}).should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ with headers {'Content-Length'=>'9999'} was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.com/ with headers {'Content-Length'=>'9999'} was expected to execute 1 time but it executed 0 times")
         end
 
         it "should fail if request was executed with less headers" do
@@ -405,7 +405,7 @@ describe "WebMock", :shared => true do
             http_request(:get, "http://www.google.com/", :headers => {'A' => 'a'})
             request(:get, "www.google.com").
             with(:headers => {'A' => 'a', 'B' => 'b'}).should have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ with headers {'A'=>'a', 'B'=>'b'} was expected to execute 1 time but it executed 0 times")
+          }.should fail_with("The request GET http://www.google.com/ with headers {'A'=>'a', 'B'=>'b'} was expected to execute 1 time but it executed 0 times")
         end
 
         it "should succeed if request was executed with more headers" do
@@ -446,21 +446,21 @@ describe "WebMock", :shared => true do
             lambda {
               http_request(:get, "http://user:pass@www.google.com/")
               request(:get, "http://user:pazz@www.google.com").should have_been_made.once
-            }.should fail_with("The request GET http://user:pazz@www.google.com:80/ was expected to execute 1 time but it executed 0 times")
+            }.should fail_with("The request GET http://user:pazz@www.google.com/ was expected to execute 1 time but it executed 0 times")
           end
 
           it "should fail if request was executed without credentials but credentials were expected" do
             lambda {
               http_request(:get, "http://www.google.com/")
               request(:get, "http://user:pass@www.google.com").should have_been_made.once
-            }.should fail_with("The request GET http://user:pass@www.google.com:80/ was expected to execute 1 time but it executed 0 times")
+            }.should fail_with("The request GET http://user:pass@www.google.com/ was expected to execute 1 time but it executed 0 times")
           end
 
           it "should fail if request was executed with credentials but expected without" do
             lambda {
               http_request(:get, "http://user:pass@www.google.com/")
               request(:get, "http://www.google.com").should have_been_made.once
-            }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 1 time but it executed 0 times")
+            }.should fail_with("The request GET http://www.google.com/ was expected to execute 1 time but it executed 0 times")
           end
 
         end
@@ -485,7 +485,7 @@ describe "WebMock", :shared => true do
             lambda {
               http_request(:get, "http://www.google.com/")
               WebMock.should_not have_requested(:get, "http://www.google.com")
-            }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time")
+            }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
           end
         end
 
@@ -512,7 +512,7 @@ describe "WebMock", :shared => true do
             lambda {
               http_request(:get, "http://www.google.com/")
               assert_not_requested(:get, "http://www.google.com")
-            }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time")
+            }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
           end
         end
       end
@@ -535,7 +535,7 @@ describe "WebMock", :shared => true do
           lambda {
             http_request(:get, "http://www.google.com/")
             request(:get, "http://www.google.com").should_not have_been_made
-          }.should fail_with("The request GET http://www.google.com:80/ was expected to execute 0 times but it executed 1 time")
+          }.should fail_with("The request GET http://www.google.com/ was expected to execute 0 times but it executed 1 time")
         end
       end
 

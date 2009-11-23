@@ -1,7 +1,3 @@
-WebMock::Utility.record_loaded_net_http_replacement_libs
-WebMock::Utility.puts_warning_for_net_http_around_advice_libs_if_needed
-
-
 module WebMock
 
   def stub_request(method, uri)

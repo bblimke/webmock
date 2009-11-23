@@ -20,7 +20,7 @@ describe RequestProfile do
     end
 
     it "should have assigned normalized headers" do
-      Utility.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      WebMock::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       RequestProfile.new(:get, "www.google.com", nil, 'A' => 'a').headers.should == {'B' => 'b'}
     end
 
@@ -32,7 +32,7 @@ describe RequestProfile do
 
   it "should report string describing itself" do
     RequestProfile.new(:get, "www.google.com", "abc", {'A' => 'a', 'B' => 'b'}).to_s.should ==
-    "GET http://www.google.com:80/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
+    "GET http://www.google.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
   end
 
 
@@ -47,7 +47,7 @@ describe RequestProfile do
     end
 
     it "should assign normalized headers to request profile" do
-      Utility.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      WebMock::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       @request_profile.with(:headers => {'A' => 'a'})
       @request_profile.headers.should == {'B' => 'b'}
     end
