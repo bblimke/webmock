@@ -1,3 +1,9 @@
+== 0.7.3
+
+  * Clarified documentation
+  * Fixed some issues with loading of Webmock classes
+  * Test::Unit and RSpec adapters have to be required separately
+
 == 0.7.2
 
   * Added support for matching escaped and non escaped URLs

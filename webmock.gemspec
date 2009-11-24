@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "0.7.1"
+  s.version = "0.7.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2009-11-20}
+  s.date = %q{2009-11-24}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".gitignore",
+     "CHANGELOG",
      "LICENSE",
      "README.md",
      "Rakefile",
@@ -34,23 +35,30 @@ Gem::Specification.new do |s|
      "lib/webmock/request_execution_verifier.rb",
      "lib/webmock/request_profile.rb",
      "lib/webmock/request_registry.rb",
+     "lib/webmock/request_signature.rb",
      "lib/webmock/request_stub.rb",
      "lib/webmock/response.rb",
-     "lib/webmock/uri.rb",
+     "lib/webmock/rspec.rb",
+     "lib/webmock/test_unit.rb",
      "lib/webmock/util/hash_counter.rb",
-     "lib/webmock/utility.rb",
+     "lib/webmock/util/headers.rb",
+     "lib/webmock/util/uri.rb",
      "lib/webmock/webmock.rb",
      "spec/net_http_spec.rb",
      "spec/other_net_http_libs_spec.rb",
      "spec/request_execution_verifier_spec.rb",
      "spec/request_profile_spec.rb",
      "spec/request_registry_spec.rb",
+     "spec/request_signature_spec.rb",
      "spec/request_stub_spec.rb",
      "spec/response_spec.rb",
      "spec/spec.opts",
      "spec/spec_helper.rb",
      "spec/util/hash_counter_spec.rb",
-     "spec/utility_spec.rb",
+     "spec/util/headers_spec.rb",
+     "spec/util/uri_spec.rb",
+     "spec/vendor/addressable/lib/addressable/uri.rb",
+     "spec/vendor/addressable/lib/uri.rb",
      "spec/vendor/right_http_connection-1.2.4/History.txt",
      "spec/vendor/right_http_connection-1.2.4/Manifest.txt",
      "spec/vendor/right_http_connection-1.2.4/README.txt",
@@ -88,11 +96,15 @@ Gem::Specification.new do |s|
      "spec/request_execution_verifier_spec.rb",
      "spec/request_profile_spec.rb",
      "spec/request_registry_spec.rb",
+     "spec/request_signature_spec.rb",
      "spec/request_stub_spec.rb",
      "spec/response_spec.rb",
      "spec/spec_helper.rb",
      "spec/util/hash_counter_spec.rb",
-     "spec/utility_spec.rb",
+     "spec/util/headers_spec.rb",
+     "spec/util/uri_spec.rb",
+     "spec/vendor/addressable/lib/addressable/uri.rb",
+     "spec/vendor/addressable/lib/uri.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/right_http_connection.rb",
      "spec/vendor/right_http_connection-1.2.4/setup.rb",
@@ -113,11 +125,14 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
     else
+      s.add_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
     end
   else
+    s.add_dependency(%q<addressable>, [">= 2.1.1"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
   end
 end
