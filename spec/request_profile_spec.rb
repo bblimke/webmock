@@ -1,26 +1,24 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-include WebMock
-
 describe RequestProfile do
 
   describe "initialization" do
 
     it "should have assigned normalized uri" do
-      WebMock::URI.should_receive(:normalize_uri).and_return("www.google.kom")
+      WebMock::Util::URI.should_receive(:normalize_uri).and_return("www.google.kom")
       profile = RequestProfile.new(:get, "www.google.com")
       profile.uri.should == "www.google.kom"
     end
 
     it "should have assigned uri without normalization if uri is URI" do
-      WebMock::URI.should_not_receive(:normalize_uri)
+      WebMock::Util::URI.should_not_receive(:normalize_uri)
       uri = Addressable::URI.parse("www.google.com")
       profile = RequestProfile.new(:get, uri)
       profile.uri.should == uri
     end
 
     it "should have assigned normalized headers" do
-      WebMock::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       RequestProfile.new(:get, "www.google.com", nil, 'A' => 'a').headers.should == {'B' => 'b'}
     end
 
@@ -47,7 +45,7 @@ describe RequestProfile do
     end
 
     it "should assign normalized headers to request profile" do
-      WebMock::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       @request_profile.with(:headers => {'A' => 'a'})
       @request_profile.headers.should == {'B' => 'b'}
     end

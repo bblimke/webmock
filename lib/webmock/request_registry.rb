@@ -11,7 +11,7 @@ module WebMock
 
     def reset_webmock
       self.request_stubs = []
-      self.requested_signatures = HashCounter.new
+      self.requested_signatures = Util::HashCounter.new
     end
 
     def register_request_stub(stub)

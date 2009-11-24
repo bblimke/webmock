@@ -13,9 +13,9 @@ module WebMock
 
     def match_uri(request_profile)
       if request_profile.uri.is_a?(Addressable::URI)
-        WebMock::URI.normalize_uri(uri) === WebMock::URI.normalize_uri(request_profile.uri)
+        WebMock::Util::URI.normalize_uri(uri) === WebMock::Util::URI.normalize_uri(request_profile.uri)
       elsif request_profile.uri.is_a?(Regexp)
-        WebMock::URI.variations_of_uri_as_strings(self.uri).any? { |u| u.match(request_profile.uri) }
+        WebMock::Util::URI.variations_of_uri_as_strings(self.uri).any? { |u| u.match(request_profile.uri) }
       else
         false
       end

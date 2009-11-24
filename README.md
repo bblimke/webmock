@@ -20,11 +20,18 @@ Installation
 
     gem install webmock --source http://gemcutter.org
 
-In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lines
+In your `test/test_helper.rb` add these two lines:
 
-    require 'webmock'
+    require 'webmock/test_unit'
 	
 	include WebMock
+
+or if you use RSpec add these lines to `spec/spec_helper`:
+
+	require 'webmock/rspec'
+
+	include WebMock
+
 
 ## Examples
 
@@ -52,7 +59,8 @@ In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lin
 
 ### Matching custom request headers
 
-    stub_request(:any, "www.google.com").with( :headers=>{ 'Header-Name' => 'Header-Value' } ).to_return(:body => "abc", :status => 200)
+    stub_request(:any, "www.google.com").
+	  with( :headers=>{ 'Header-Name' => 'Header-Value' } ).to_return(:body => "abc", :status => 200)
 
 	uri = URI.parse('http://www.google.com/')
     req = Net::HTTP::Post.new(uri.path)
@@ -116,7 +124,8 @@ In your `test/test_helper.rb` or `spec/spec_helper.rb` include the following lin
       http.request(req, 'abc')
     }
 
-	assert_requested :post, "http://www.google.com", :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
+	assert_requested :post, "http://www.google.com",
+	  :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
 	
 	assert_not_requested :get, "http://www.something.com"    # ===> Success
 
