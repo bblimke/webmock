@@ -6,7 +6,7 @@ module WebMock
     end
 
     def headers
-      Utility.normalize_headers(@options[:headers])
+      Util::Headers.normalize_headers(@options[:headers])
     end
 
     def body

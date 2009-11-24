@@ -1,9 +1,8 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'webmock'
 require 'spec'
 require 'spec/autorun'
-require 'addressable/uri'
+require 'rubygems'
 
 require 'webmock/rspec'
 

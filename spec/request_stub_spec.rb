@@ -23,7 +23,7 @@ describe RequestStub do
     end
 
     it "should assign normalized headers to request profile" do
-      Utility.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       @request_stub.with(:headers => {'A' => 'a'})
       @request_stub.request_profile.headers.should == {'B' => 'b'}
     end

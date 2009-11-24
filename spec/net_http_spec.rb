@@ -2,8 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'webmock_spec'
 require 'ostruct'
 
-include WebMock
-
 def http_request(method, uri, options = {})
   begin
     uri = URI.parse(uri)

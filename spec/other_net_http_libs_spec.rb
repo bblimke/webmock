@@ -3,7 +3,9 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe "loading other Net::HTTP based libraries" do
 
   def capture_output_from_requiring(libs, additional_code = "")
-    requires = libs.map { |lib| "require '#{lib}'" }.join("; ")
+    requires = libs.map { |lib| "require '#{lib}'" }
+    requires << " require 'addressable/uri'"
+    requires = requires.join("; ")
     webmock_dir = "#{File.dirname(__FILE__)}/../lib"
     vendor_dirs = Dir["#{File.dirname(__FILE__)}/vendor/*/lib"]
     load_path_opts = vendor_dirs.unshift(webmock_dir).map { |dir| "-I#{dir}" }.join(" ")

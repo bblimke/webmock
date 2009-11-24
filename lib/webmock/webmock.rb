@@ -1,4 +1,5 @@
 module WebMock
+  extend self
 
   def stub_request(method, uri)
     RequestRegistry.instance.register_request_stub(RequestStub.new(method, uri))
@@ -23,23 +24,23 @@ module WebMock
     assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end
 
-  def self.allow_net_connect!
+  def allow_net_connect!
     Config.instance.allow_net_connect = true
   end
 
-  def self.disable_net_connect!
+  def disable_net_connect!
     Config.instance.allow_net_connect = false
   end
 
-  def self.net_connect_allowed?
+  def net_connect_allowed?
     Config.instance.allow_net_connect
   end
 
-  def self.registered_request?(request_signature)
+  def registered_request?(request_signature)
     RequestRegistry.instance.registered_request?(request_signature)
   end
 
-  def self.response_for_request(request_signature, &block)
+  def response_for_request(request_signature, &block)
     RequestRegistry.instance.response_for_request(request_signature, &block)
   end
 

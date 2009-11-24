@@ -6,7 +6,7 @@ describe Response do
   end
 
   it "should report normalized headers" do
-    Utility.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
     @response.headers.should == {'B' => 'b'}
   end
 

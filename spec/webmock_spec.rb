@@ -1,7 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-include WebMock
-
 SAMPLE_HEADERS = { "Content-Length" => "8888" }
 ESCAPED_PARAMS = "x=ab%2Bc&z=%27Stop%21%27%20said%20Fred"
 NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"

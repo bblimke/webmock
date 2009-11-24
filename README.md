@@ -32,6 +32,11 @@ or if you use RSpec add these lines to `spec/spec_helper`:
 
 	include WebMock
 
+And add these lines if you want to use WebMock without RSpec or Test::Unit support:
+
+	require 'webmock'
+
+	include WebMock
 
 ## Examples
 
