@@ -86,68 +86,83 @@ describe RequestSignature do
     
 
     it "should match for same bodies" do
-      RequestSignature.new(:get, "www.google.com", "abc").
-        should match(RequestProfile.new(:get, "www.google.com", "abc"))
+      RequestSignature.new(:get, "www.google.com", :body => "abc").
+        should match(RequestProfile.new(:get, "www.google.com", :body => "abc"))
     end
 
     it "should not match for different bodies" do
-      RequestSignature.new(:get, "www.google.com", "abc").
-        should_not match(RequestProfile.new(:get, "www.google.com", "def"))
+      RequestSignature.new(:get, "www.google.com", :body => "abc").
+        should_not match(RequestProfile.new(:get, "www.google.com", :body => "def"))
     end
 
-    it "should match is other has nil body" do
-      RequestSignature.new(:get, "www.google.com", "abc").
-        should match(RequestProfile.new(:get, "www.google.com", nil))
+    it "should match if other has not specified body" do
+      RequestSignature.new(:get, "www.google.com", :body => "abc").
+        should match(RequestProfile.new(:get, "www.google.com"))
+    end
+    
+    it "should not match if other has nil body" do
+      RequestSignature.new(:get, "www.google.com", :body => "abc").
+        should_not match(RequestProfile.new(:get, "www.google.com", :body => nil))
     end
 
     it "should not match if other has empty body" do
-      RequestSignature.new(:get, "www.google.com", "abc").
-        should_not match(RequestProfile.new(:get, "www.google.com", ""))
+      RequestSignature.new(:get, "www.google.com", :body => "abc").
+        should_not match(RequestProfile.new(:get, "www.google.com", :body => ""))
+    end
+    
+    it "should not match if other has body" do
+      RequestSignature.new(:get, "www.google.com").
+        should_not match(RequestProfile.new(:get, "www.google.com", :body => "abc"))
     end
 
     it "should match for same headers" do
-      RequestSignature.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg').
-        should match(RequestProfile.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg'))
+      RequestSignature.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg'}).
+        should match(RequestProfile.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg'}))
     end
 
     it "should not match for different values of the same header" do
-      RequestSignature.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg').
-        should_not match(RequestProfile.new(:get, "www.google.com", nil, 'Content-Type' => 'image/png'))
+      RequestSignature.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg'}).
+        should_not match(RequestProfile.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/png'}))
     end
 
     it "should match if request has more headers than other" do
-      RequestSignature.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg', 'Content-Length' => '8888').
-        should match(RequestProfile.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg'))
+      RequestSignature.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg', 'Content-Length' => '8888'}).
+        should match(RequestProfile.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg'}))
     end
 
     it "should not match if request has less headers that the other and all match" do
-      RequestSignature.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg').
-        should_not match(RequestProfile.new(:get, "www.google.com", nil, 'Content-Type' => 'image/jpeg', 'Content-Length' => '8888'))
+      RequestSignature.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg'}).
+        should_not match(RequestProfile.new(:get, "www.google.com", :headers => {'Content-Type' => 'image/jpeg', 'Content-Length' => '8888'}))
     end
 
     it "should match even is header keys or values are in different format" do
-      RequestSignature.new(:get, "www.google.com", nil, :ContentLength => 8888, 'content_type' => 'image/png').
-        should match(RequestProfile.new(:get, "www.google.com", nil, 'ContentLength' => '8888', 'Content-type' => 'image/png'))
+      RequestSignature.new(:get, "www.google.com", :headers => {:ContentLength => 8888, 'content_type' => 'image/png'}).
+        should match(RequestProfile.new(:get, "www.google.com", :headers => {'ContentLength' => '8888', 'Content-type' => 'image/png'}))
+    end
+    
+    it "should match is other has not specified" do
+      RequestSignature.new(:get, "www.google.com", :headers => {'A' => 'a'}).
+        should match(RequestProfile.new(:get, "www.google.com"))
     end
 
-    it "should match is other has nil headers" do
-      RequestSignature.new(:get, "www.google.com", nil, 'A' => 'a').
-        should match(RequestProfile.new(:get, "www.google.com", nil, nil))
+    it "should not match is other has nil headers" do
+      RequestSignature.new(:get, "www.google.com", :headers => {'A' => 'a'}).
+        should match(RequestProfile.new(:get, "www.google.com", :headers => nil))
     end
 
     it "should not match if other has empty headers" do
-      RequestSignature.new(:get, "www.google.com", nil, 'A' => 'a').
-        should_not match(RequestProfile.new(:get, "www.google.com", nil, {}))
+      RequestSignature.new(:get, "www.google.com", :headers => {'A' => 'a'}).
+        should_not match(RequestProfile.new(:get, "www.google.com", :headers => {}))
     end
 
     it "should not match if profile has no headers but other has headers" do
-      RequestSignature.new(:get, "www.google.com", nil, nil).
-        should_not match(RequestProfile.new(:get, "www.google.com", nil, {'A'=>'a'}))
+      RequestSignature.new(:get, "www.google.com").
+        should_not match(RequestProfile.new(:get, "www.google.com", :headers => {'A'=>'a'}))
     end
 
     it "should not match if profile has empty headers but other has headers" do
-      RequestSignature.new(:get, "www.google.com", nil, {}).
-        should_not match(RequestProfile.new(:get, "www.google.com", nil, {'A'=>'a'}))
+      RequestSignature.new(:get, "www.google.com", :headers => {}).
+        should_not match(RequestProfile.new(:get, "www.google.com", :headers => {'A'=>'a'}))
     end
 
   end

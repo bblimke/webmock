@@ -19,17 +19,19 @@ describe RequestProfile do
 
     it "should have assigned normalized headers" do
       WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
-      RequestProfile.new(:get, "www.google.com", nil, 'A' => 'a').headers.should == {'B' => 'b'}
+      RequestProfile.new(:get, "www.google.com", :headers => {'A' => 'a'}).headers.should == {'B' => 'b'}
     end
 
     it "should have assigned body" do
-      RequestProfile.new(:get, "www.google.com", "abc").body.should == "abc"
+      RequestProfile.new(:get, "www.google.com", :body => "abc").
+        body.should == RequestProfile::Body.new("abc")
     end
 
   end
 
   it "should report string describing itself" do
-    RequestProfile.new(:get, "www.google.com", "abc", {'A' => 'a', 'B' => 'b'}).to_s.should ==
+    RequestProfile.new(:get, "www.google.com",
+      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s.should ==
     "GET http://www.google.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
   end
 
@@ -41,7 +43,12 @@ describe RequestProfile do
 
     it "should assign body to request profile" do
       @request_profile.with(:body => "abc")
-      @request_profile.body.should == "abc"
+      @request_profile.body.should == RequestProfile::Body.new("abc")
+    end
+
+    it "should have the same body" do
+      @request_profile.with(:body => "abc")
+      @request_profile.body.should == RequestProfile::Body.new("abc")
     end
 
     it "should assign normalized headers to request profile" do

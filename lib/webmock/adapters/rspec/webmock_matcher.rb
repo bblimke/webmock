@@ -17,10 +17,7 @@ module WebMock
     end
 
     def with(options)
-      @request_execution_verifier.request_profile.body =
-        options[:body] if options.has_key?(:body)
-      @request_execution_verifier.request_profile.headers = 
-        options[:headers] if options.has_key?(:headers)
+      @request_execution_verifier.request_profile.with(options)
       self
     end
 

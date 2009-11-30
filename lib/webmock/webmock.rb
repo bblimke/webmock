@@ -13,13 +13,13 @@ module WebMock
 
   def assert_requested(method, uri, options = {})
     expected_times_executed = options.delete(:times) || 1
-    request = RequestProfile.new(method, uri, options[:body], options[:headers])
+    request = RequestProfile.new(method, uri, options)
     verifier = RequestExecutionVerifier.new(request, expected_times_executed)
     assertion_failure(verifier.failure_message) unless verifier.matches?
   end
 
   def assert_not_requested(method, uri, options = {})
-    request = RequestProfile.new(method, uri, options[:body], options[:headers])
+    request = RequestProfile.new(method, uri, options)
     verifier = RequestExecutionVerifier.new(request, options.delete(:times))
     assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end

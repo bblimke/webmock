@@ -19,7 +19,7 @@ describe RequestStub do
 
     it "should assign body to request profile" do
       @request_stub.with(:body => "abc")
-      @request_stub.request_profile.body.should == "abc"
+      @request_stub.request_profile.body.should == RequestProfile::Body.new("abc")
     end
 
     it "should assign normalized headers to request profile" do

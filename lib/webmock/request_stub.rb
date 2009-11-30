@@ -9,8 +9,7 @@ module WebMock
     end
 
     def with(params)
-      @request_profile.body = params[:body]
-      @request_profile.headers = Util::Headers.normalize_headers(params[:headers])
+      @request_profile.with(params)
       self
     end
 

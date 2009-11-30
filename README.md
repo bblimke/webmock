@@ -180,10 +180,10 @@ If you want to reset all current stubs and history of requests use `WebMock.rese
 
 An executed request matches stubbed request if it passes following criteria:
 
-  Request URI matches stubbed request URI string or Regexp pattern<br/>
+  When request URI matches stubbed request URI string or Regexp pattern<br/>
   And request method is the same as stubbed request method or stubbed request method is :any<br/>
-  And request body is the same as stubbed request body or stubbed request body is not set (is nil)<br/>
-  And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not set
+  And request body is the same as stubbed request body or stubbed request body is not specified<br/>
+  And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified
 
 ## Precedence of stubs
 
