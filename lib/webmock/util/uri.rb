@@ -34,7 +34,7 @@ module WebMock
           uris = uris_with_scheme_and_without(uris)
         end
 
-        if normalized_uri.path == '/' && normalized_uri.query == nil
+        if normalized_uri.path == '/'
           uris = uris_with_trailing_slash_and_without(uris)
         end
 

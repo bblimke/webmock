@@ -13,6 +13,18 @@ URIS_WITHOUT_PATH_OR_PARAMS =
   "http://www.google.com:80/"
 ].sort
 
+URIS_WITHOUT_PATH_BUT_WITH_PARAMS =
+[
+  "www.google.com?a=b",
+  "www.google.com/?a=b",
+  "www.google.com:80?a=b",
+  "www.google.com:80/?a=b",
+  "http://www.google.com?a=b",
+  "http://www.google.com/?a=b",
+  "http://www.google.com:80?a=b",
+  "http://www.google.com:80/?a=b"
+].sort
+
 URIS_WITH_AUTH =
 [
   "a b:pass@www.google.com",
@@ -53,6 +65,7 @@ URIS_WITH_DIFFERENT_PORT =
   "http://www.google.com:88/"
 ].sort
 
+
 URIS_FOR_HTTPS =
 [
   "https://www.google.com",
@@ -69,6 +82,12 @@ describe WebMock::Util::URI do
     it "should find all variations of the same uri for all variations of uri with params and path" do
       URIS_WITH_PATH_AND_PARAMS.each do |uri|
         WebMock::Util::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITH_PATH_AND_PARAMS
+      end
+    end
+
+    it "should find all variations of the same uri for all variations of uri with params but without path" do
+      URIS_WITHOUT_PATH_BUT_WITH_PARAMS.each do |uri|
+        WebMock::Util::URI.variations_of_uri_as_strings(uri).sort.should == URIS_WITHOUT_PATH_BUT_WITH_PARAMS
       end
     end
 
@@ -103,6 +122,14 @@ describe WebMock::Util::URI do
     it "should successfully compare all variations of the same uri with path and params" do
       URIS_WITH_PATH_AND_PARAMS.each do |uri_a|
         URIS_WITH_PATH_AND_PARAMS.each do |uri_b|
+          WebMock::Util::URI.normalize_uri(uri_a).should ===  WebMock::Util::URI.normalize_uri(uri_b)
+        end
+      end
+    end
+
+    it "should successfully compare all variations of the same uri with path but with params" do
+      URIS_WITHOUT_PATH_BUT_WITH_PARAMS.each do |uri_a|
+        URIS_WITHOUT_PATH_BUT_WITH_PARAMS.each do |uri_b|
           WebMock::Util::URI.normalize_uri(uri_a).should ===  WebMock::Util::URI.normalize_uri(uri_b)
         end
       end
