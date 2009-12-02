@@ -12,6 +12,7 @@ begin
     gem.authors = ["Bartosz Blimke"]
     gem.add_dependency "addressable", ">= 2.1.1"
     gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.add_development_dependency "httpclient", ">= 2.1.5.2"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

@@ -1,8 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-SAMPLE_HEADERS = { "Content-Length" => "8888" }
-ESCAPED_PARAMS = "x=ab%2Bc&z=%27Stop%21%27%20said%20Fred"
-NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
+unless defined? SAMPLE_HEADERS
+  SAMPLE_HEADERS = { "Content-Length" => "8888" }
+  ESCAPED_PARAMS = "x=ab%2Bc&z=%27Stop%21%27%20said%20Fred"
+  NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
+end
 
 describe "WebMock", :shared => true do
   before(:each) do
@@ -20,6 +22,12 @@ describe "WebMock", :shared => true do
       it "should make a real web request if request is not stubbed" do
         setup_expectations_for_real_google_request
         http_request(:get, "http://www.google.com/").
+          body.should =~ /.*Google fake response.*/
+      end
+
+      it "should make a real https request if request is not stubbed" do
+        setup_expectations_for_real_google_request(:port => 443)
+        http_request(:get, "https://www.google.com/").
           body.should =~ /.*Google fake response.*/
       end
 
