@@ -10,12 +10,13 @@ if defined?(HTTPClient)
       auth = www_auth.basic_auth
       auth.challenge(req.header.request_uri, nil)
 
-      if auth_cred = auth.get(req)
-        req.header.set('Authorization', auth.scheme + " " + auth_cred)
+      headers = Hash[req.header.all]
 
-        if (authorization = Hash[req.header.all]["Authorization"]) =~ /^Basic /
-          userinfo = WebMock::Util::Headers.decode_userinfo_from_header(authorization)
+      if auth_cred = auth.get(req)
+        if auth.scheme == 'Basic'
+          userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
           userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
+          headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo          
         else
           userinfo = ""
         end
