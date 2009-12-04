@@ -1,6 +1,7 @@
 module WebMock
 
-  class RequestProfile < Struct.new(:method, :uri, :body, :headers)
+  class RequestProfile
+    attr_accessor :method, :uri, :body, :headers
 
     def initialize(method, uri, options = {})
       self.method = method
@@ -25,8 +26,8 @@ module WebMock
     private 
     
     def assign_options(options)
-      self.body = Body.new(options[:body]) if options.has_key?(:body)
-      self.headers = WebMock::Util::Headers.normalize_headers(options[:headers]) if options.has_key?(:headers)
+      @body = Body.new(options[:body]) if options.has_key?(:body)
+      @headers = WebMock::Util::Headers.normalize_headers(options[:headers]) if options.has_key?(:headers)
     end
     
 
