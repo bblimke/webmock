@@ -25,7 +25,7 @@ module WebMock
 
     def response_for_request(request_signature)
       stub = request_stub_for(request_signature)
-      stub ? stub.response : nil
+      stub ? stub.response.dup : nil
     end
     
     def times_executed(request_profile)

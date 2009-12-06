@@ -1,5 +1,6 @@
 module WebMock
   class Response
+    attr_reader :options
 
     def initialize(options = {})
       @options = options
@@ -26,6 +27,9 @@ module WebMock
     def raise_error_if_any
       raise @options[:exception].new('Exception from WebMock') if @options.has_key?(:exception)
     end
-
+    
+    def ==(other)
+      options == other.options
+    end
   end
 end
