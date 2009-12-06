@@ -1,7 +1,8 @@
 module HTTPClientSpecHelper
-  attr_accessor :sync_mode
-  @sync_mode = true
-
+  class << self
+    attr_accessor :async_mode
+  end
+  
   def http_request(method, uri, options = {})
     uri = Addressable::URI.heuristic_parse(uri)
     c = HTTPClient.new
@@ -9,14 +10,15 @@ module HTTPClientSpecHelper
     c.set_basic_auth(nil, uri.user, uri.password) if uri.user
     params = [method, "#{uri.omit(:userinfo, :query).normalize.to_s}",
       uri.query_values, options[:body], options[:headers] || {}]
-    if @sync
-      response = c.request(*params)
-    else
+    if HTTPClientSpecHelper.async_mode
       connection = c.request_async(*params)
+      connection.join
       response = connection.pop
+    else
+      response = c.request(*params)
     end
     OpenStruct.new({
-      :body => @sync ? response.content : response.content.read,
+      :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
       :headers => Hash[response.header.all],
       :status => response.code.to_s })
   end

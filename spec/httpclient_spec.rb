@@ -5,15 +5,20 @@ require 'ostruct'
 require 'httpclient'
 require 'httpclient_spec_helper'
 
-include HTTPClientSpecHelper
-
 describe "Webmock with HTTPClient" do
+  include HTTPClientSpecHelper
+
+  before(:each) do
+    HTTPClientSpecHelper.async_mode = false
+  end
 
   it_should_behave_like "WebMock"
 
   describe "async requests" do
 
-    sync_mode = false
+    before(:each) do
+      HTTPClientSpecHelper.async_mode = true
+    end
 
     it_should_behave_like "WebMock"
 
