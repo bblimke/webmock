@@ -29,9 +29,16 @@ module WebMock
       raise @options[:exception].new('Exception from WebMock') if @options.has_key?(:exception)
     end
 
+    def dup
+      dup_response = super
+      dup_response.options = options.dup
+      dup_response
+    end
+
     def ==(other)
       options == other.options
     end
+  
   
   end
 end

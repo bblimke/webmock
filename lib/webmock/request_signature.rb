@@ -1,8 +1,9 @@
 module WebMock
 
-  class RequestSignature < RequestProfile
+  class RequestSignature < Request
 
     def match(request_profile)
+      raise ArgumentError unless request_profile.is_a?(RequestProfile)
       match_method(request_profile) &&
         match_body(request_profile) &&
         match_headers(request_profile) &&

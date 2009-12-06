@@ -107,7 +107,6 @@ describe "WebMock", :shared => true do
 
       it "should not match requests if body is different" do
         stub_http_request(:get, "www.google.com").with(:body => "abc")
-
         lambda {
           http_request(:get, "http://www.google.com/", :body => "def")
         }.should raise_error(WebMock::NetConnectNotAllowedError,

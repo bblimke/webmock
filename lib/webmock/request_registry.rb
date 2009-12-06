@@ -44,8 +44,11 @@ module WebMock
 
     def evaluate_response_for_request(response, request_signature)
       evaluated_response = response.dup
-      evaluated_response.options[:body] = response.body.call(request_signature).to_s if response.body.is_a?(Proc)
-      evaluated_response.options[:headers] = response.headers.call(request_signature) if response.headers.is_a?(Proc)
+      [:body, :headers].each do |attribute|
+        if response.options[attribute].is_a?(Proc)
+          evaluated_response.options[attribute] = response.options[attribute].call(request_signature)
+        end
+      end
       evaluated_response
     end
 
