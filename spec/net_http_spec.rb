@@ -13,4 +13,13 @@ describe "Webmock with Net:HTTP" do
     stub_http_request(:get, "www.google.com").to_return(:body => "abc"*100000)
     Net::HTTP.start("www.google.com") { |query| query.get("/") }.body.should == "abc"*100000
   end
+  
+  it "should yield block on response" do
+    stub_http_request(:get, "www.google.com").to_return(:body => "abc")
+    response_body = ""
+    http_request(:get, "http://www.google.com/") do |response|
+      response_body = response.body
+    end
+    response_body.should == "abc"
+  end
 end

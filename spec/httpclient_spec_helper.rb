@@ -3,7 +3,7 @@ module HTTPClientSpecHelper
     attr_accessor :async_mode
   end
   
-  def http_request(method, uri, options = {})
+  def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
     c = HTTPClient.new
     c.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -15,7 +15,7 @@ module HTTPClientSpecHelper
       connection.join
       response = connection.pop
     else
-      response = c.request(*params)
+      response = c.request(*params, &block)
     end
     OpenStruct.new({
       :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,

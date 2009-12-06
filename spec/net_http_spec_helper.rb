@@ -1,5 +1,5 @@
 module NetHTTPSpecHelper
-  def http_request(method, uri, options = {})
+  def http_request(method, uri, options = {}, &block)
     begin
       uri = URI.parse(uri)
     rescue
@@ -14,7 +14,7 @@ module NetHTTPSpecHelper
     http.use_ssl = true if uri.scheme == "https"
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     response = http.start {|http|
-      http.request(req, options[:body])
+      http.request(req, options[:body], &block)
     }
     OpenStruct.new({
       :body => response.body,

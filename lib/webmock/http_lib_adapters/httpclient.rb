@@ -52,7 +52,7 @@ if defined?(HTTPClient)
     alias_method :do_request_async_without_webmock, :do_request_async
     alias_method :do_request_async, :do_request_async_with_webmock
 
-    def build_httpclient_response(webmock_response, stream = false,  &block)
+    def build_httpclient_response(webmock_response, stream = false, &block)
       body = stream ? StringIO.new(webmock_response.body) : webmock_response.body
       response = HTTP::Message.new_response(body)
       response.header.init_response(webmock_response.status)
@@ -61,7 +61,7 @@ if defined?(HTTPClient)
 
       webmock_response.raise_error_if_any
 
-      yield response if block_given?
+      block.call(nil, body) if block
 
       response
     end
