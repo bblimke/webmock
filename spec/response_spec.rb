@@ -7,6 +7,7 @@ describe Response do
 
   it "should report normalized headers" do
     Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    @response = Response.new(:headers => {'A' => 'a'})
     @response.headers.should == {'B' => 'b'}
   end
 

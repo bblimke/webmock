@@ -1,19 +1,20 @@
 module WebMock
   class Response
-    attr_reader :options
+    attr_accessor :options
 
     def initialize(options = {})
       @options = options
+      @options[:headers] = Util::Headers.normalize_headers(@options[:headers]) unless @options[:headers].is_a?(Proc)
     end
 
     def headers
-      Util::Headers.normalize_headers(@options[:headers])
+      @options[:headers]
     end
 
     def body
       return '' unless @options.has_key?(:body)
 
-      if !@options[:body].include?("\0") && File.exists?(@options[:body]) && !File.directory?(@options[:body])
+      if @options[:body].is_a?(String) && !@options[:body].include?("\0") && File.exists?(@options[:body]) && !File.directory?(@options[:body])
         File.read(@options[:body])
       else
         @options[:body]
@@ -27,9 +28,16 @@ module WebMock
     def raise_error_if_any
       raise @options[:exception].new('Exception from WebMock') if @options.has_key?(:exception)
     end
-    
+
+    def dup
+      dup_response = super
+      dup_response.options = options.dup
+      dup_response
+    end
+
     def ==(other)
       options == other.options
     end
+  
   end
 end

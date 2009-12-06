@@ -115,7 +115,6 @@ describe "WebMock", :shared => true do
 
       it "should not match requests if body is different" do
         stub_http_request(:get, "www.google.com").with(:body => "abc")
-
         lambda {
           http_request(:get, "http://www.google.com/", :body => "def")
         }.should raise_error(WebMock::NetConnectNotAllowedError,
@@ -217,6 +216,21 @@ describe "WebMock", :shared => true do
       it "should return declared status" do
         stub_http_request(:get, "www.google.com").to_return(:status => 500)
         http_request(:get, "http://www.google.com/").status.should == "500"
+      end
+
+
+      describe "dynamic responses" do
+        
+        it "should return evaluated response body" do
+          stub_http_request(:post, "www.google.com").to_return(:body => lambda { |request| request.body })
+          http_request(:post, "http://www.google.com/", :body => "echo").body.should == "echo"
+        end
+        
+        it "should return evaluated response headers" do
+          stub_http_request(:post, "www.google.com").to_return(:headers => lambda { |request| request.headers })
+          http_request(:post, "http://www.google.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
+        end        
+        
       end
 
     end
