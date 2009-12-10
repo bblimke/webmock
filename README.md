@@ -88,6 +88,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	Net::HTTP.get('www.google.com', '/')    # ===> "abc\n"
 
+### Custom response with dynamically evaluated response
+	
+    stub_request(:any, 'www.example.net').
+      to_return(:body => lambda { |request| request.body })
+
+    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
+
 ### Request with basic authentication
 
 	stub_request(:any, "john:smith@www.google.com")
