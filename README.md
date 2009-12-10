@@ -13,6 +13,7 @@ Features
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
+* Support for HTTPClient library
 * Easy to extend to other HTTP libraries except Net::HTTP
 
 Installation
