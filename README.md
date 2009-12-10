@@ -97,9 +97,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Request with basic authentication
 
-	stub_request(:any, "john:smith@www.google.com")
-	
-	Net::HTTP.get(URI.parse('http://john:smith@www.google.com'))    # ===> Success
+    stub_request(:get, "user:pass@www.google.com")
+
+    Net::HTTP.start('www.google.com') {|http|
+      req = Net::HTTP::Get.new('/')
+      req.basic_auth 'user', 'pass'
+      http.request(req)
+    }  # ===> Success
 
 ### Matching uris using regular expressions
 
