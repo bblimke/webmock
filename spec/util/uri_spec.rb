@@ -3,75 +3,75 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 URIS_WITHOUT_PATH_OR_PARAMS =
 [
-  "www.google.com",
-  "www.google.com/",
-  "www.google.com:80",
-  "www.google.com:80/",
-  "http://www.google.com",
-  "http://www.google.com/",
-  "http://www.google.com:80",
-  "http://www.google.com:80/"
+  "www.example.com",
+  "www.example.com/",
+  "www.example.com:80",
+  "www.example.com:80/",
+  "http://www.example.com",
+  "http://www.example.com/",
+  "http://www.example.com:80",
+  "http://www.example.com:80/"
 ].sort
 
 URIS_WITHOUT_PATH_BUT_WITH_PARAMS =
 [
-  "www.google.com?a=b",
-  "www.google.com/?a=b",
-  "www.google.com:80?a=b",
-  "www.google.com:80/?a=b",
-  "http://www.google.com?a=b",
-  "http://www.google.com/?a=b",
-  "http://www.google.com:80?a=b",
-  "http://www.google.com:80/?a=b"
+  "www.example.com?a=b",
+  "www.example.com/?a=b",
+  "www.example.com:80?a=b",
+  "www.example.com:80/?a=b",
+  "http://www.example.com?a=b",
+  "http://www.example.com/?a=b",
+  "http://www.example.com:80?a=b",
+  "http://www.example.com:80/?a=b"
 ].sort
 
 URIS_WITH_AUTH =
 [
-  "a b:pass@www.google.com",
-  "a b:pass@www.google.com/",
-  "a b:pass@www.google.com:80",
-  "a b:pass@www.google.com:80/",
-  "http://a b:pass@www.google.com",
-  "http://a b:pass@www.google.com/",
-  "http://a b:pass@www.google.com:80",
-  "http://a b:pass@www.google.com:80/",
-  "a%20b:pass@www.google.com",
-  "a%20b:pass@www.google.com/",
-  "a%20b:pass@www.google.com:80",
-  "a%20b:pass@www.google.com:80/",
-  "http://a%20b:pass@www.google.com",
-  "http://a%20b:pass@www.google.com/",
-  "http://a%20b:pass@www.google.com:80",
-  "http://a%20b:pass@www.google.com:80/"
+  "a b:pass@www.example.com",
+  "a b:pass@www.example.com/",
+  "a b:pass@www.example.com:80",
+  "a b:pass@www.example.com:80/",
+  "http://a b:pass@www.example.com",
+  "http://a b:pass@www.example.com/",
+  "http://a b:pass@www.example.com:80",
+  "http://a b:pass@www.example.com:80/",
+  "a%20b:pass@www.example.com",
+  "a%20b:pass@www.example.com/",
+  "a%20b:pass@www.example.com:80",
+  "a%20b:pass@www.example.com:80/",
+  "http://a%20b:pass@www.example.com",
+  "http://a%20b:pass@www.example.com/",
+  "http://a%20b:pass@www.example.com:80",
+  "http://a%20b:pass@www.example.com:80/"
 ].sort
 
 URIS_WITH_PATH_AND_PARAMS =
 [
-  "www.google.com/big image.jpg/?a=big image&b=c",
-  "www.google.com/big%20image.jpg/?a=big%20image&b=c",
-  "www.google.com:80/big image.jpg/?a=big image&b=c",
-  "www.google.com:80/big%20image.jpg/?a=big%20image&b=c",
-  "http://www.google.com/big image.jpg/?a=big image&b=c",
-  "http://www.google.com/big%20image.jpg/?a=big%20image&b=c",
-  "http://www.google.com:80/big image.jpg/?a=big image&b=c",
-  "http://www.google.com:80/big%20image.jpg/?a=big%20image&b=c",
+  "www.example.com/my path/?a=my param&b=c",
+  "www.example.com/my%20path/?a=my%20param&b=c",
+  "www.example.com:80/my path/?a=my param&b=c",
+  "www.example.com:80/my%20path/?a=my%20param&b=c",
+  "http://www.example.com/my path/?a=my param&b=c",
+  "http://www.example.com/my%20path/?a=my%20param&b=c",
+  "http://www.example.com:80/my path/?a=my param&b=c",
+  "http://www.example.com:80/my%20path/?a=my%20param&b=c",
   ].sort
 
 URIS_WITH_DIFFERENT_PORT =
 [
-  "www.google.com:88",
-  "www.google.com:88/",
-  "http://www.google.com:88",
-  "http://www.google.com:88/"
+  "www.example.com:88",
+  "www.example.com:88/",
+  "http://www.example.com:88",
+  "http://www.example.com:88/"
 ].sort
 
 
 URIS_FOR_HTTPS =
 [
-  "https://www.google.com",
-  "https://www.google.com/",
-  "https://www.google.com:443",
-  "https://www.google.com:443/"
+  "https://www.example.com",
+  "https://www.example.com/",
+  "https://www.example.com:443",
+  "https://www.example.com:443/"
 ].sort
 
 

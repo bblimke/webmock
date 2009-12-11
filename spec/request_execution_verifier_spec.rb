@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe RequestExecutionVerifier do
   before(:each) do
     @verifier = RequestExecutionVerifier.new
-    @request_profile = mock(RequestProfile, :to_s => "www.google.com")
+    @request_profile = mock(RequestProfile, :to_s => "www.example.com")
     @verifier.request_profile = @request_profile
   end
 
@@ -13,13 +13,13 @@ describe RequestExecutionVerifier do
     it "should report failure message" do
       @verifier.times_executed = 0
       @verifier.expected_times_executed = 2
-      @verifier.failure_message.should == "The request www.google.com was expected to execute 2 times but it executed 0 times"
+      @verifier.failure_message.should == "The request www.example.com was expected to execute 2 times but it executed 0 times"
     end
 
     it "should report failure message correctly when executed times is one" do
       @verifier.times_executed = 1
       @verifier.expected_times_executed = 1
-      @verifier.failure_message.should == "The request www.google.com was expected to execute 1 time but it executed 1 time"
+      @verifier.failure_message.should == "The request www.example.com was expected to execute 1 time but it executed 1 time"
     end
 
   end
@@ -29,12 +29,12 @@ describe RequestExecutionVerifier do
     it "should report failure message if it executed number of times specified" do
       @verifier.times_executed = 2
       @verifier.expected_times_executed = 2
-      @verifier.negative_failure_message.should == "The request www.google.com was not expected to execute 2 times but it executed 2 times"
+      @verifier.negative_failure_message.should == "The request www.example.com was not expected to execute 2 times but it executed 2 times"
     end
 
     it "should report failure message when not expected request but it executed" do
       @verifier.times_executed = 1
-      @verifier.negative_failure_message.should == "The request www.google.com was expected to execute 0 times but it executed 1 time"
+      @verifier.negative_failure_message.should == "The request www.example.com was expected to execute 0 times but it executed 1 time"
     end
 
   end

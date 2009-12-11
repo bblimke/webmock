@@ -23,8 +23,8 @@ class Proc
   end
 end
 
-def setup_expectations_for_real_google_request(options = {})
-  defaults = { :host => "www.google.com", :port => 80, :method => "GET",
+def setup_expectations_for_real_example_com_request(options = {})
+  defaults = { :host => "www.example.com", :port => 80, :method => "GET",
     :path => "/",
     :response_code => 200, :response_message => "OK",
     :response_body => "<title>Google fake response</title>" }

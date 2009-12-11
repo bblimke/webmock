@@ -15,9 +15,9 @@ describe "Webmock with HTTPClient" do
   it_should_behave_like "WebMock"
 
   it "should yield block on response if block provided" do
-    stub_http_request(:get, "www.google.com").to_return(:body => "abc")
+    stub_http_request(:get, "www.example.com").to_return(:body => "abc")
     response_body = ""
-    http_request(:get, "http://www.google.com/") do |body|
+    http_request(:get, "http://www.example.com/") do |body|
       response_body = body
     end
     response_body.should == "abc"

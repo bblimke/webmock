@@ -4,9 +4,9 @@ describe RequestRegistry do
 
   before(:each) do
     RequestRegistry.instance.reset_webmock
-    @request_profile = RequestProfile.new(:get, "www.google.com")
-    @request_signature = RequestSignature.new(:get, "www.google.com")
-    @request_stub = RequestStub.new(:get, "www.google.com")
+    @request_profile = RequestProfile.new(:get, "www.example.com")
+    @request_signature = RequestSignature.new(:get, "www.example.com")
+    @request_stub = RequestStub.new(:get, "www.example.com")
   end
 
   describe "reset_webmock" do
@@ -60,11 +60,11 @@ describe RequestRegistry do
     end
 
     it "should always return last registered matching response" do
-      @request_stub1 = RequestStub.new(:get, "www.google.com")
+      @request_stub1 = RequestStub.new(:get, "www.example.com")
       @request_stub1.response = @response1 = Response.new
-      @request_stub2 = RequestStub.new(:get, "www.google.com")
+      @request_stub2 = RequestStub.new(:get, "www.example.com")
       @request_stub2.response = @response2 = Response.new
-      @request_stub3 = RequestStub.new(:get, "www.google.org")
+      @request_stub3 = RequestStub.new(:get, "www.example.org")
       @request_stub3.response = @response3 = Response.new
       RequestRegistry.instance.register_request_stub(@request_stub1)
       RequestRegistry.instance.register_request_stub(@request_stub2)
@@ -83,24 +83,24 @@ describe RequestRegistry do
     end
 
     before(:each) do
-      @request_stub1 = RequestStub.new(:get, "www.google.com")
-      @request_stub2 = RequestStub.new(:get, "www.google.net")
-      @request_stub3 = RequestStub.new(:get, "www.google.org")
-      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.com"))
-      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.com"))
-      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.google.org"))
+      @request_stub1 = RequestStub.new(:get, "www.example.com")
+      @request_stub2 = RequestStub.new(:get, "www.example.net")
+      @request_stub3 = RequestStub.new(:get, "www.example.org")
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.example.com"))
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.example.com"))
+      RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.example.org"))
     end
 
     it "should report 0 if no request matching profile was requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.google.net")).should == 0
+      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.example.net")).should == 0
     end
 
     it "should report number of times matching profile was requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.google.com")).should == 2
+      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.example.com")).should == 2
     end
 
     it "should report number of times all matching profile were requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, /.*google.*/)).should == 3
+      RequestRegistry.instance.times_executed(RequestProfile.new(:get, /.*example.*/)).should == 3
     end
 
 

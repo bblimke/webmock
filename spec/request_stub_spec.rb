@@ -3,12 +3,12 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe RequestStub do
 
   before(:each) do
-    @request_stub = RequestStub.new(:get, "www.google.com")
+    @request_stub = RequestStub.new(:get, "www.example.com")
   end
 
   it "should have request profile with method and uri" do
     @request_stub.request_profile.method.should == :get
-    @request_stub.request_profile.uri.host.should == "www.google.com"
+    @request_stub.request_profile.uri.host.should == "www.example.com"
   end
 
   it "should have response" do
