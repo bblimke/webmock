@@ -13,7 +13,7 @@ Features
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
-* Support for HTTPClient library
+* Support for HTTPClient library (both sync and async requests)
 * Easy to extend to other HTTP libraries except Net::HTTP
 
 Installation
@@ -48,15 +48,15 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Stubbed request based on uri only and with the default response
 
-	 stub_request(:any, "www.google.com")
+	 stub_request(:any, "www.example.com")
 
-	 Net::HTTP.get("www.google.com", "/")    # ===> Success
+	 Net::HTTP.get("www.example.com", "/")    # ===> Success
 
 ### Stubbing requests based on method, uri, body and headers
 
-	stub_request(:post, "www.google.com").with(:body => "abc", :headers => { 'Content-Length' => 3 })
+	stub_request(:post, "www.example.com").with(:body => "abc", :headers => { 'Content-Length' => 3 })
 
-	uri = URI.parse("http://www.google.com/")
+	uri = URI.parse("http://www.example.com/")
     req = Net::HTTP::Post.new(uri.path)
 	req['Content-Length'] = 3
     res = Net::HTTP.start(uri.host, uri.port) {|http|
@@ -65,10 +65,10 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Matching custom request headers
 
-    stub_request(:any, "www.google.com").
+    stub_request(:any, "www.example.com").
 	  with( :headers=>{ 'Header-Name' => 'Header-Value' } ).to_return(:body => "abc", :status => 200)
 
-	uri = URI.parse('http://www.google.com/')
+	uri = URI.parse('http://www.example.com/')
     req = Net::HTTP::Post.new(uri.path)
 	req['Header-Name'] = 'Header-Value'
     res = Net::HTTP.start(uri.host, uri.port) {|http|
@@ -77,17 +77,17 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Stubbing with custom response
 
-	stub_request(:any, "www.google.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
+	stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
 	
-	Net::HTTP.get("www.google.com", '/')    # ===> "abc"
+	Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 
-### Custom response with body specified as a path to file
+### Custom response with body specified as IO object
 
 	File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
 
-	stub_request(:any, "www.google.com").to_return(:body => "/tmp/response_body.txt", :status => 200)
+	stub_request(:any, "www.example.com").to_return(:body => File.new('/tmp/response_body.txt'), :status => 200)
 
-	Net::HTTP.get('www.google.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 
 ### Custom response with dynamically evaluated response
 	
@@ -98,9 +98,9 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Request with basic authentication
 
-    stub_request(:get, "user:pass@www.google.com")
+    stub_request(:get, "user:pass@www.example.com")
 
-    Net::HTTP.start('www.google.com') {|http|
+    Net::HTTP.start('www.example.com') {|http|
       req = Net::HTTP::Get.new('/')
       req.basic_auth 'user', 'pass'
       http.request(req)
@@ -108,17 +108,17 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Matching uris using regular expressions
 
-	 stub_request(:any, /.*google.*/)
+	 stub_request(:any, /.*example.*/)
 
-	 Net::HTTP.get('www.google.com', '/') # ===> Success
+	 Net::HTTP.get('www.example.com', '/') # ===> Success
 
 ### Real requests to network can be allowed or disabled
 
 	WebMock.allow_net_connect!
 
-	stub_request(:any, "www.google.com").to_return(:body => "abc")
+	stub_request(:any, "www.example.com").to_return(:body => "abc")
 
-	Net::HTTP.get('www.google.com', '/')    # ===> "abc"
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc"
 	
 	Net::HTTP.get('www.something.com', '/') # ===> /.+Something.+/
 	
@@ -132,16 +132,16 @@ You can also use WebMock without RSpec or Test::Unit support:
 ### Setting expectations in Test::Unit
 	require 'webmock/test_unit'
 
-    stub_request(:any, "www.google.com")
+    stub_request(:any, "www.example.com")
 
-	uri = URI.parse('http://www.google.com/')
+	uri = URI.parse('http://www.example.com/')
     req = Net::HTTP::Post.new(uri.path)
 	req['Content-Length'] = 3
     res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'abc')
     }
 
-	assert_requested :post, "http://www.google.com",
+	assert_requested :post, "http://www.example.com",
 	  :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
 	
 	assert_not_requested :get, "http://www.something.com"    # ===> Success
@@ -150,9 +150,9 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	WebMock.allow_net_connect!
 	
-	Net::HTTP.get('www.google.com', '/')    # ===> Success
+	Net::HTTP.get('www.example.com', '/')    # ===> Success
 
-	assert_requested :get, "http://www.google.com"    # ===> Success
+	assert_requested :get, "http://www.example.com"    # ===> Success
 
 
 ### Setting expectations in RSpec
@@ -160,13 +160,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	require 'webmock/rspec'
 
-	WebMock.should have_requested(:get, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
+	WebMock.should have_requested(:get, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 	
 	WebMock.should_not have_requested(:get, "www.something.com")
 
 ### Different way of setting expectations in RSpec
 
-	request(:post, "www.google.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
+	request(:post, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
 
 	request(:post, "www.something.com").should have_been_made.times(3)
 
@@ -177,15 +177,15 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 If you want to reset all current stubs and history of requests use `WebMock.reset_webmock`
 
-	stub_request(:any, "www.google.com")
+	stub_request(:any, "www.example.com")
 
-	Net::HTTP.get('www.google.com', '/')    # ===> Success
+	Net::HTTP.get('www.example.com', '/')    # ===> Success
 
 	reset_webmock
 
-	Net::HTTP.get('www.google.com', '/')    # ===> Failure
+	Net::HTTP.get('www.example.com', '/')    # ===> Failure
 
-	assert_not_requested :get, "www.google.com"    # ===> Success
+	assert_not_requested :get, "www.example.com"    # ===> Success
 
 
 ## Matching requests
@@ -201,10 +201,10 @@ An executed request matches stubbed request if it passes following criteria:
 
 Always the last declared stub matching the request will be applied i.e:
 
-	stub_request(:get, "www.google.com").to_return(:body => "abc")
-	stub_request(:get, "www.google.com").to_return(:body => "def")
+	stub_request(:get, "www.example.com").to_return(:body => "abc")
+	stub_request(:get, "www.example.com").to_return(:body => "def")
 
-	Net::HTTP.get('www.google.com', '/')   # ====> "def"
+	Net::HTTP.get('www.example.com', '/')   # ====> "def"
 
 ## Matching URIs
 
@@ -212,49 +212,49 @@ WebMock will match all different representations of the same URI.
 
 I.e all the following representations of the URI are equal:
 
-    "www.google.com"
-    "www.google.com/"
-    "www.google.com:80"
-    "www.google.com:80/"
-    "http://www.google.com"
-    "http://www.google.com/"
-    "http://www.google.com:80"
-    "http://www.google.com:80/"
+    "www.example.com"
+    "www.example.com/"
+    "www.example.com:80"
+    "www.example.com:80/"
+    "http://www.example.com"
+    "http://www.example.com/"
+    "http://www.example.com:80"
+    "http://www.example.com:80/"
 	
 The following URIs with basic authentication are also equal for WebMock
 
-	"a b:pass@www.google.com"
-	"a b:pass@www.google.com/"
-	"a b:pass@www.google.com:80"
-	"a b:pass@www.google.com:80/"
-	"http://a b:pass@www.google.com"
-	"http://a b:pass@www.google.com/"
-	"http://a b:pass@www.google.com:80"
-	"http://a b:pass@www.google.com:80/"
-	"a%20b:pass@www.google.com"
-	"a%20b:pass@www.google.com/"
-	"a%20b:pass@www.google.com:80"
-	"a%20b:pass@www.google.com:80/"
-	"http://a%20b:pass@www.google.com"
-	"http://a%20b:pass@www.google.com/"
-	"http://a%20b:pass@www.google.com:80"
-	"http://a%20b:pass@www.google.com:80/"	
+	"a b:pass@www.example.com"
+	"a b:pass@www.example.com/"
+	"a b:pass@www.example.com:80"
+	"a b:pass@www.example.com:80/"
+	"http://a b:pass@www.example.com"
+	"http://a b:pass@www.example.com/"
+	"http://a b:pass@www.example.com:80"
+	"http://a b:pass@www.example.com:80/"
+	"a%20b:pass@www.example.com"
+	"a%20b:pass@www.example.com/"
+	"a%20b:pass@www.example.com:80"
+	"a%20b:pass@www.example.com:80/"
+	"http://a%20b:pass@www.example.com"
+	"http://a%20b:pass@www.example.com/"
+	"http://a%20b:pass@www.example.com:80"
+	"http://a%20b:pass@www.example.com:80/"	
 
 or these
 
-	"www.google.com/big image.jpg/?a=big image&b=c"
-	"www.google.com/big%20image.jpg/?a=big%20image&b=c"
-	"www.google.com:80/big image.jpg/?a=big image&b=c"
-	"www.google.com:80/big%20image.jpg/?a=big%20image&b=c"
-	"http://www.google.com/big image.jpg/?a=big image&b=c"
-	"http://www.google.com/big%20image.jpg/?a=big%20image&b=c"
-	"http://www.google.com:80/big image.jpg/?a=big image&b=c"
-	"http://www.google.com:80/big%20image.jpg/?a=big%20image&b=c"
+	"www.example.com/big image.jpg/?a=big image&b=c"
+	"www.example.com/big%20image.jpg/?a=big%20image&b=c"
+	"www.example.com:80/big image.jpg/?a=big image&b=c"
+	"www.example.com:80/big%20image.jpg/?a=big%20image&b=c"
+	"http://www.example.com/big image.jpg/?a=big image&b=c"
+	"http://www.example.com/big%20image.jpg/?a=big%20image&b=c"
+	"http://www.example.com:80/big image.jpg/?a=big image&b=c"
+	"http://www.example.com:80/big%20image.jpg/?a=big%20image&b=c"
 
 
 If you provide Regexp to match URI, WebMock will try to match it against every valid form of the same url.
 
-I.e `/.*big image.*/` will match `www.google.com/big%20image.jpg` because it is equivalent of `www.google.com/big image.jpg`
+I.e `/.*big image.*/` will match `www.example.com/big%20image.jpg` because it is equivalent of `www.example.com/big image.jpg`
 
 
 ## Matching headers
