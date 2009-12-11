@@ -32,6 +32,13 @@ class TestWebMock < Test::Unit::TestCase
     stub_http_request(:any, "https://www.google.com")
   end
     
+
+  def test_error_on_non_stubbed_request
+    assert_fail("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/") do
+      http_request(:get, "http://www.example.com/")
+    end
+  end
+
   def test_verification_that_expected_request_occured
     http_request(:get, "http://www.google.com/")
     assert_requested(:get, "http://www.google.com", :times => 1)
