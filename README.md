@@ -242,19 +242,19 @@ The following URIs with basic authentication are also equal for WebMock
 
 or these
 
-	"www.example.com/big image.jpg/?a=big image&b=c"
-	"www.example.com/big%20image.jpg/?a=big%20image&b=c"
-	"www.example.com:80/big image.jpg/?a=big image&b=c"
-	"www.example.com:80/big%20image.jpg/?a=big%20image&b=c"
-	"http://www.example.com/big image.jpg/?a=big image&b=c"
-	"http://www.example.com/big%20image.jpg/?a=big%20image&b=c"
-	"http://www.example.com:80/big image.jpg/?a=big image&b=c"
-	"http://www.example.com:80/big%20image.jpg/?a=big%20image&b=c"
+	"www.example.com/my path/?a=my param&b=c"
+	"www.example.com/my%20path/?a=my%20param&b=c"
+	"www.example.com:80/my path/?a=my param&b=c"
+	"www.example.com:80/my%20path/?a=my%20param&b=c"
+	"http://www.example.com/my path/?a=my param&b=c"
+	"http://www.example.com/my%20path/?a=my%20param&b=c"
+	"http://www.example.com:80/my path/?a=my param&b=c"
+	"http://www.example.com:80/my%20path/?a=my%20param&b=c"
 
 
 If you provide Regexp to match URI, WebMock will try to match it against every valid form of the same url.
 
-I.e `/.*big image.*/` will match `www.example.com/big%20image.jpg` because it is equivalent of `www.example.com/big image.jpg`
+I.e `/.*my param.*/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
 
 
 ## Matching headers
