@@ -1,8 +1,23 @@
+== 0.8.0
+
+  * Support for HTTPClient (sync and async requests)
+  * Support for dynamic responses. Response body and headers can be now declared as lambda. 
+	(Thanks to Ivan Vega ( @ivanyv ) for suggesting this feature)
+  * Support for stubbing and expecting requests with empty body
+  * Executing non-stubbed request leads to failed expectation instead of error
+
+=== Bug fixes
+
+  * Basic authentication now works correctly
+  * Fixed problem where WebMock didn't call a block with the response when block was provided
+  * Fixed problem where uris with single slash were not matching uris without path provided
+
 == 0.7.3
 
   * Clarified documentation
   * Fixed some issues with loading of Webmock classes
   * Test::Unit and RSpec adapters have to be required separately
+
 
 == 0.7.2
 
