@@ -50,8 +50,13 @@ describe Response do
       @response.body.should == "abc"
     end
     
-    it "should report content of a file as body if provided" do
+    it "should report string even if existing file path was provided" do
       @response = Response.new(:body => __FILE__)
+      @response.body.should == __FILE__
+    end
+    
+    it "should report content of a IO object if provided" do
+      @response = Response.new(:body => File.new(__FILE__))
       @response.body.should == File.new(__FILE__).read
     end
     

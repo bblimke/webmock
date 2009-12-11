@@ -13,14 +13,14 @@ module WebMock
 
     def body
       return '' unless @options.has_key?(:body)
-
-      if @options[:body].is_a?(String) && !@options[:body].include?("\0") && File.exists?(@options[:body]) && !File.directory?(@options[:body])
-        File.read(@options[:body])
-      else
+      case @options[:body]
+      when IO
+        @options[:body].read
+      when String
         @options[:body]
       end
     end
-    
+
     def status
       @options.has_key?(:status) ? @options[:status] : 200
     end
@@ -38,6 +38,6 @@ module WebMock
     def ==(other)
       options == other.options
     end
-  
+
   end
 end
