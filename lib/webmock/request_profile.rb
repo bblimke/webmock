@@ -2,7 +2,7 @@ module WebMock
 
   class RequestProfile < Request
 
-    def with(options, &block)
+    def with(options = {}, &block)
       assign_options(options)
       self.with_block = block
       self

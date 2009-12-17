@@ -14,7 +14,8 @@ module WebMock
       string << " with body '#{body.to_s}'" if body && body.to_s != ''
       if headers && !headers.empty?
         string << " with headers #{WebMock::Util::Headers.normalize_headers(headers).inspect.gsub("\"","'")}"
-      end
+      end      
+      string << " with given block" if with_block
       string
     end
 

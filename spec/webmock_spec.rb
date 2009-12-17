@@ -468,7 +468,20 @@ describe "WebMock", :shared => true do
             request(:get, "www.example.com").should have_been_made
           }.should_not raise_error
         end
-
+        
+        it "should suceed if request was executed and block evaluated to true" do
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "wadus")
+            request(:get, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+          }.should_not raise_error
+        end
+        
+        it "should fail if request was executed and block evaluated to false" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            request(:get, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+          }.should fail_with("The request GET http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")
+        end
 
         describe "with authentication" do
           before(:each) do
