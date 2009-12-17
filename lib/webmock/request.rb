@@ -1,7 +1,7 @@
 module WebMock
 
   class Request
-    attr_accessor :method, :uri, :body, :headers
+    attr_accessor :method, :uri, :body, :headers, :with_block
 
     def initialize(method, uri, options = {})
       self.method = method

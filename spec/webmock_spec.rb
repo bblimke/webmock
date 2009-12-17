@@ -177,6 +177,34 @@ describe "WebMock", :shared => true do
       end
 
     end
+    
+    describe "with block" do
+      
+      it "should match if block returns true" do
+        stub_http_request(:get, "www.example.com").with { |request| true }
+        http_request(
+          :get, "http://www.example.com/",
+          :body => "wadus").status.should == "200"
+      end
+      
+      it "should not match if block returns false" do
+        stub_http_request(:get, "www.example.com").with { |request| false }
+        lambda {
+          http_request(:get, "http://www.example.com/", :body => "wadus")
+        }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'wadus'")
+      end
+      
+      it "should pass the request to the block" do
+        stub_http_request(:get, "www.example.com").with { |request| request.body == "wadus" }
+        http_request(
+          :get, "http://www.example.com/",
+          :body => "wadus").status.should == "200"
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "jander")
+          }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'jander'")        
+      end
+      
+    end
 
   end
 
