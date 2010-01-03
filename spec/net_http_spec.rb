@@ -22,4 +22,11 @@ describe "Webmock with Net:HTTP" do
     end
     response_body.should == "abc"
   end
+
+  it "should handle Net::HTTP::Post#body" do
+    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    req = Net::HTTP::Post.new("/")
+    req.body = "my_params"
+    Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
+  end
 end
