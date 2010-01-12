@@ -19,7 +19,7 @@ module HTTPClientSpecHelper
     end
     OpenStruct.new({
       :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
-      :headers => Hash[response.header.all],
+      :headers => Hash[*response.header.all.flatten],
       :status => response.code.to_s })
   end
 
