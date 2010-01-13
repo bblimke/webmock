@@ -220,6 +220,17 @@ describe "WebMock", :shared => true do
         http_request(:get, "http://www.example.com/").status.should == "500"
       end
 
+      it "should return body declared as IO" do
+        stub_http_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
+        http_request(:get, "http://www.example.com/").body.should == File.new(__FILE__).read
+      end
+
+      it "should return body declared as IO if requested many times" do
+        stub_http_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
+        2.times do
+          http_request(:get, "http://www.example.com/").body.should == File.new(__FILE__).read
+        end
+      end
 
       describe "dynamic responses" do
         

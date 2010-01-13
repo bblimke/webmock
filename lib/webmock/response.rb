@@ -13,12 +13,8 @@ module WebMock
 
     def body
       return '' unless @options.has_key?(:body)
-      case @options[:body]
-      when IO
-        @options[:body].read
-      when String
-        @options[:body]
-      end
+      stringify_body!
+      @options[:body]
     end
 
     def status
@@ -30,6 +26,7 @@ module WebMock
     end
 
     def dup
+      stringify_body!
       dup_response = super
       dup_response.options = options.dup
       dup_response
@@ -37,6 +34,12 @@ module WebMock
 
     def ==(other)
       options == other.options
+    end
+
+    def stringify_body!
+      if @options[:body].is_a?(IO)
+        @options[:body] = @options[:body].read
+      end
     end
 
   end

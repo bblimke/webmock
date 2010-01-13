@@ -60,6 +60,12 @@ describe Response do
       @response.body.should == File.new(__FILE__).read
     end
     
+    it "should report many times content of a IO object if provided" do
+      @response = Response.new(:body => File.new(__FILE__))
+      @response.body.should == File.new(__FILE__).read
+      @response.body.should == File.new(__FILE__).read
+    end
+    
   end
   
 end
