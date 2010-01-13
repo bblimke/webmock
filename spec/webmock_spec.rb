@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 unless defined? SAMPLE_HEADERS
-  SAMPLE_HEADERS = { "Content-Length" => "8888" }
+  SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%2Bc&z=%27Stop%21%27%20said%20Fred"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
 end
@@ -136,7 +136,6 @@ describe "WebMock", :shared => true do
           :headers => SAMPLE_HEADERS).status.should == "200"
       end
 
-
       it "should not match requests if headers are different" do
         stub_http_request(:get, "www.example.com").with(:headers => SAMPLE_HEADERS)
 
@@ -145,6 +144,16 @@ describe "WebMock", :shared => true do
             :get, "http://www.example.com/",
           :headers => { 'Content-Length' => '9999'})
         }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'}))
+      end
+      
+      it "should not match if accept header is different" do
+        stub_http_request(:get, "www.example.com").
+          with(:headers => { 'Accept' => 'application/json', 'Api-Key' => 'abc'})
+        lambda {
+          http_request(
+            :get, "http://www.example.com/",
+            :headers => { 'Accept' => 'application/xml', 'Api-Key' => 'abc'})
+        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Api-Key'=>'abc', 'Accept'=>'application/xml'}))  
       end
     end
 
