@@ -48,8 +48,6 @@ module WebMock
     WebMock::RequestRegistry.instance.reset_webmock
   end
   
-  private
-  
   def assertion_failure(message)
     raise message
   end

@@ -27,7 +27,7 @@ if defined?(HTTPClient)
         end
       else
         message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
-        assertion_failure(message)
+        WebMock.assertion_failure(message)
       end
     end
 
@@ -39,7 +39,7 @@ if defined?(HTTPClient)
         do_request_async_without_webmock(method, uri, query, body, extheader)
       else
         message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
-        assertion_failure(message)
+        WebMock.assertion_failure(message)
       end
     end
 

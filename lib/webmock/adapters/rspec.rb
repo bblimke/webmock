@@ -14,7 +14,6 @@ Spec::Runner.configure { |config|
 }
 
 module WebMock
-  private
   def assertion_failure(message)
     raise Spec::Expectations::ExpectationNotMetError.new(message)
   end

@@ -16,7 +16,6 @@ class Test::Unit::TestCase
 end
 
 module WebMock
-  private
   def assertion_failure(message)
     raise Test::Unit::AssertionFailedError.new(message)
   end
