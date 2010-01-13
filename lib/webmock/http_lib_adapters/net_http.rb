@@ -72,7 +72,9 @@ module Net  #:nodoc: all
       headers.reject! {|k,v| k =~ /[Aa]ccept/ && v = '*/*'} #removing header added by Net::HTTP
       headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
 
-      request_signature = WebMock::RequestSignature.new(method, uri, :body => body || request.body, :headers => headers)
+      request.set_body_internal body
+
+      request_signature = WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 

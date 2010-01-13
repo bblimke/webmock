@@ -13,7 +13,7 @@ describe "Webmock with Net:HTTP" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
     Net::HTTP.start("www.example.com") { |query| query.get("/") }.body.should == "abc"*100000
   end
-  
+
   it "should yield block on response" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc")
     response_body = ""
@@ -29,4 +29,14 @@ describe "Webmock with Net:HTTP" do
     req.body = "my_params"
     Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
   end
+
+  it "should behave like Net::HTTP and raise error if both request body and body argument are set" do
+    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    req = Net::HTTP::Post.new("/")
+    req.body = "my_params"
+    lambda {
+      Net::HTTP.start("www.example.com") { |http| http.request(req, "my_params")}
+    }.should raise_error("both of body argument and HTTPRequest#body set")
+  end
+
 end
