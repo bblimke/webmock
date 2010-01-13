@@ -69,7 +69,9 @@ module Net  #:nodoc: all
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v.flatten]}.flatten]
-      headers.reject! {|k,v| k =~ /[Aa]ccept/ && v == '*/*'} #removing header added by Net::HTTP
+      
+      remove_default_net_http_headers!(headers)
+      
       headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
 
       request.set_body_internal body
@@ -119,6 +121,16 @@ module Net  #:nodoc: all
 
       response
     end
+    
+    def remove_default_net_http_headers!(headers)
+      default_request = Net::HTTPGenericRequest.new('','','','/')
+      default_net_http_headers = Hash[*default_request.to_hash.map {|k,v|
+         [k, v.flatten]
+      }.flatten]
+      headers.reject! {|k,v| default_request[k] == v}
+      headers
+    end
+    
   end
 
 end
