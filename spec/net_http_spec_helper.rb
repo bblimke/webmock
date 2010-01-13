@@ -46,8 +46,9 @@ module NetHTTPSpecHelper
     # Request/response handling
     request_parts = ["#{options[:method]} #{options[:path]} HTTP/1.1", "Host: #{options[:host]}"]
     socket.should_receive(:write).with(/#{request_parts[0]}.*#{request_parts[1]}.*/m).and_return(100)
-
-    socket.should_receive(:sysread).once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
-    socket.should_receive(:sysread).any_number_of_times.and_raise(EOFError)
+    
+    read_method = RUBY_VERSION >= "1.9.2" ? :read_nonblock : :sysread
+    socket.should_receive(read_method).once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
+    socket.should_receive(read_method).any_number_of_times.and_raise(EOFError)
   end
 end
