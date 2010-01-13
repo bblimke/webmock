@@ -148,12 +148,12 @@ describe "WebMock", :shared => true do
       
       it "should not match if accept header is different" do
         stub_http_request(:get, "www.example.com").
-          with(:headers => { 'Accept' => 'application/json', 'Api-Key' => 'abc'})
+          with(:headers => { 'Accept' => 'application/json'})
         lambda {
           http_request(
             :get, "http://www.example.com/",
-            :headers => { 'Accept' => 'application/xml', 'Api-Key' => 'abc'})
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Api-Key'=>'abc', 'Accept'=>'application/xml'}))  
+            :headers => { 'Accept' => 'application/xml'})
+        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))  
       end
     end
 
