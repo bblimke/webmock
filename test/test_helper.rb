@@ -8,6 +8,6 @@ require 'test/unit'
 include WebMock
 
 def assert_fail(message, &block)
-  e = assert_raise(Test::Unit::AssertionFailedError, &block)
+  e = assert_raise(AssertionFailedError, &block)
   assert_equal(message, e.message)
 end
