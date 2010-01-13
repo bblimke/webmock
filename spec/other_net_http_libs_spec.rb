@@ -11,7 +11,7 @@ describe "loading other Net::HTTP based libraries" do
     load_path_opts = vendor_dirs.unshift(webmock_dir).map { |dir| "-I#{dir}" }.join(" ")
 
     # TODO: use the same Ruby executable that this test was invoked with
-    `ruby #{load_path_opts} -e "#{requires}; #{additional_code}" 2>&1`
+    `ruby #{load_path_opts} -e "#{requires}; #{additional_code}" 2>&1 | cat`
   end
 
   it "should requiring samuel before webmock prints warning" do
