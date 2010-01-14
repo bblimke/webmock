@@ -1,3 +1,11 @@
+== 0.8.1
+  * Fixed HTTPClient adapter compatibility with Ruby 1.8.6 (reported by Piotr Usewicz)
+  * Net:HTTP adapter now handles request body assigned as Net::HTTP::Post#body attribute (fixed by Mack Earnhardt)
+  * Fixed issue where requests were not matching stubs with Accept header set.(reported by Piotr Usewicz)
+  * Fixed compatibility with Ruby 1.9.1, 1.9.2 and JRuby 1.3.1 (reported by Diego E. “Flameeyes” Pettenò)
+  * Fixed issue with response body declared as IO object and multiple requests (reported by Niels Meersschaert)
+  * Fixed "undefined method `assertion_failure'" error (reported by Nick Plante)
+
 == 0.8.0
 
   * Support for HTTPClient (sync and async requests)
