@@ -1,3 +1,7 @@
+== 0.8.2
+  * Fixed issue where WebMock was not closing IO object passed as response body after reading it.
+  * Ruby 1.9.2 compat: Use File#expand_path for require path because "." will not be included in LOAD_PATH since Ruby 1.9.2
+
 == 0.8.1
   * Fixed HTTPClient adapter compatibility with Ruby 1.8.6 (reported by Piotr Usewicz)
   * Net:HTTP adapter now handles request body assigned as Net::HTTP::Post#body attribute (fixed by Mack Earnhardt)
