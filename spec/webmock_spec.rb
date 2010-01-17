@@ -232,6 +232,11 @@ describe "WebMock", :shared => true do
         end
       end
 
+      it "should close IO declared as response body after reading" do
+        stub_http_request(:get, "www.example.com").to_return(:body => @file = File.new(__FILE__))
+        @file.should be_closed
+      end
+
       describe "dynamic responses" do
         
         it "should return evaluated response body" do

@@ -1,9 +1,9 @@
 module WebMock
   class Response
-    attr_accessor :options
+    attr_reader :options
 
     def initialize(options = {})
-      @options = options
+      self.options = options
       @options[:headers] = Util::Headers.normalize_headers(@options[:headers]) unless @options[:headers].is_a?(Proc)
     end
 
@@ -25,8 +25,12 @@ module WebMock
       raise @options[:exception].new('Exception from WebMock') if @options.has_key?(:exception)
     end
 
-    def dup
+    def options=(options)
+      @options = options
       stringify_body!
+    end
+
+    def dup
       dup_response = super
       dup_response.options = options.dup
       dup_response
@@ -38,7 +42,9 @@ module WebMock
 
     def stringify_body!
       if @options[:body].is_a?(IO)
-        @options[:body] = @options[:body].read
+        io = @options[:body]
+        @options[:body] = io.read
+        io.close
       end
     end
 
