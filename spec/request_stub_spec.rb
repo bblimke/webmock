@@ -38,6 +38,28 @@ describe RequestStub do
       @request_stub.response.status.should == 500
     end
 
+    it "should assign responses with provided options" do
+      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.responses.map {|r| r.body}.should == ["def", "abc"]
+    end
+
+  end
+
+  describe "response" do
+
+    it "should return responses in a sequence" do
+      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+    end
+
+    it "should repeat returning last response" do
+      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.response
+      @request_stub.response
+      @request_stub.response.body.should == "def"
+    end
+
   end
 
   describe "to_raise" do
@@ -47,6 +69,16 @@ describe RequestStub do
       lambda {
         @request_stub.response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
+    end
+
+    it "should assign a list responses to be thrown in a sequence" do
+      @request_stub.to_raise([ArgumentError, IndexError])
+      lambda {
+        @request_stub.response.raise_error_if_any
+      }.should raise_error(ArgumentError, "Exception from WebMock")
+      lambda {
+        @request_stub.response.raise_error_if_any
+      }.should raise_error(IndexError, "Exception from WebMock")
     end
 
   end

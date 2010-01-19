@@ -250,6 +250,24 @@ describe "WebMock", :shared => true do
         end        
         
       end
+      
+      describe "sequences of responses" do
+        
+        it "should return responses one by one if declared in array" do
+          stub_http_request(:get, "www.example.com").to_return([ {:body => "1"}, {:body => "2"}, {:body => "3"} ])
+          http_request(:get, "http://www.example.com/").body.should == "1"
+          http_request(:get, "http://www.example.com/").body.should == "2"
+          http_request(:get, "http://www.example.com/").body.should == "3"
+        end
+        
+        it "should repeat returning last declared response from a sequence after all responses were returned" do
+          stub_http_request(:get, "www.example.com").to_return([ {:body => "1"}, {:body => "2"} ])
+          http_request(:get, "http://www.example.com/").body.should == "1"
+          http_request(:get, "http://www.example.com/").body.should == "2"
+          http_request(:get, "http://www.example.com/").body.should == "2"
+        end
+        
+      end
 
     end
 

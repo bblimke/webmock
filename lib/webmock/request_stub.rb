@@ -1,10 +1,10 @@
 module WebMock
   class RequestStub
-    attr_accessor :request_profile, :response
+    attr_accessor :request_profile, :responses
     
     def initialize(method, uri)
       @request_profile = RequestProfile.new(method, uri)
-      @response = WebMock::Response.new
+      @responses = [WebMock::Response.new]
       self
     end
 
@@ -13,12 +13,16 @@ module WebMock
       self
     end
 
-    def to_return(response_hash)
-      @response = WebMock::Response.new(response_hash)
+    def to_return(response_hashes)
+      @responses = [response_hashes].flatten.reverse.map {|r| WebMock::Response.new(r)}
     end
     
-    def to_raise(exception)
-      @response = WebMock::Response.new({:exception => exception})
+    def to_raise(exceptions)
+      @responses = [exceptions].flatten.reverse.map {|e| WebMock::Response.new(:exception => e)}
+    end
+    
+    def response
+      @responses.length > 1 ? @responses.pop : @responses[0]
     end
     
   end

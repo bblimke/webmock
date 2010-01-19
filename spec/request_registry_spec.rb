@@ -50,7 +50,7 @@ describe RequestRegistry do
   describe "response for request" do
 
     it "should registered response for request profile" do
-      @request_stub.response = @response = Response.new
+      @request_stub.instance_variable_set(:@responses, [@response = Response.new])
       RequestRegistry.instance.register_request_stub(@request_stub)
       RequestRegistry.instance.response_for_request(@request_signature).should == @response
     end
@@ -61,11 +61,11 @@ describe RequestRegistry do
 
     it "should always return last registered matching response" do
       @request_stub1 = RequestStub.new(:get, "www.example.com")
-      @request_stub1.response = @response1 = Response.new
+      @request_stub1.instance_variable_set(:@responses, [@response1 = Response.new])
       @request_stub2 = RequestStub.new(:get, "www.example.com")
-      @request_stub2.response = @response2 = Response.new
+      @request_stub2.instance_variable_set(:@responses, [@response2 = Response.new])
       @request_stub3 = RequestStub.new(:get, "www.example.org")
-      @request_stub3.response = @response3 = Response.new
+      @request_stub3.instance_variable_set(:@responses, [@response3 = Response.new])
       RequestRegistry.instance.register_request_stub(@request_stub1)
       RequestRegistry.instance.register_request_stub(@request_stub2)
       RequestRegistry.instance.register_request_stub(@request_stub3)
