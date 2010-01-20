@@ -118,6 +118,24 @@ describe "WebMock", :shared => true do
         }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'def'")
       end
 
+      describe "with regular expressions" do
+
+        it "should match requests if body matches regexp" do
+          stub_http_request(:get, "www.example.com").with(:body => /\d+abc$/)
+          http_request(
+            :get, "http://www.example.com/",
+            :body => "123abc").status.should == "200"
+        end
+
+        it "should not match requests if body doesn't match regexp" do
+          stub_http_request(:get, "www.example.com").with(:body => /^abc/)
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "xabc")
+          }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'xabc'")
+        end
+
+      end
+
     end
 
     describe "on headers" do
@@ -145,15 +163,15 @@ describe "WebMock", :shared => true do
           :headers => { 'Content-Length' => '9999'})
         }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'}))
       end
-      
+
       it "should not match if accept header is different" do
         stub_http_request(:get, "www.example.com").
           with(:headers => { 'Accept' => 'application/json'})
         lambda {
           http_request(
             :get, "http://www.example.com/",
-            :headers => { 'Accept' => 'application/xml'})
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))  
+          :headers => { 'Accept' => 'application/xml'})
+        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))
       end
     end
 
@@ -238,17 +256,17 @@ describe "WebMock", :shared => true do
       end
 
       describe "dynamic responses" do
-        
+
         it "should return evaluated response body" do
           stub_http_request(:post, "www.example.com").to_return(:body => lambda { |request| request.body })
           http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
         end
-        
+
         it "should return evaluated response headers" do
           stub_http_request(:post, "www.example.com").to_return(:headers => lambda { |request| request.headers })
           http_request(:post, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
-        end        
-        
+        end
+
       end
 
     end

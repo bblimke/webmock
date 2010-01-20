@@ -22,7 +22,7 @@ module WebMock
       def ==(other)
         other = Body.new(other) unless other.is_a?(Body)
         other.is_a?(Body) &&
-          (other.is_empty? && self.is_empty? || other.data == self.data)        
+          (other.is_empty? && self.is_empty? || other.data == self.data || self.data === other.data )        
       end
 
       def is_empty?

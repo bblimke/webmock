@@ -89,10 +89,20 @@ describe RequestSignature do
       RequestSignature.new(:get, "www.example.com", :body => "abc").
         should match(RequestProfile.new(:get, "www.example.com", :body => "abc"))
     end
+    
+    it "should match for body matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :body => "abc").
+        should match(RequestProfile.new(:get, "www.example.com", :body => /^abc$/))
+    end
 
     it "should not match for different bodies" do
       RequestSignature.new(:get, "www.example.com", :body => "abc").
         should_not match(RequestProfile.new(:get, "www.example.com", :body => "def"))
+    end
+    
+    it "should not match for body not matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :body => "xabc").
+        should_not match(RequestProfile.new(:get, "www.example.com", :body => /^abc$/))
     end
 
     it "should match if other has not specified body" do
