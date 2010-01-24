@@ -72,7 +72,8 @@ module WebMock
       response.reading_body(socket, true) {}
       
       options = {}
-      options[:headers] = response.to_hash
+      options[:headers] = {}
+      response.each_header {|name, value| options[:headers][name] = value}
       options[:headers]['transfer-encoding'] = transfer_encoding if transfer_encoding
       options[:body] = response.read_body
       options      
