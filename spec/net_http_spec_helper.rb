@@ -18,7 +18,7 @@ module NetHTTPSpecHelper
     }
     OpenStruct.new({
       :body => response.body,
-      :headers => response,
+      :headers => WebMock::Util::Headers.normalize_headers(response.to_hash),
       :status => response.code })
   end
 

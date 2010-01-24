@@ -289,6 +289,56 @@ describe "WebMock", :shared => true do
         end
 
       end
+      
+      describe "replying responses raw responses from file" do
+        
+        before(:each) do
+          @file = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+          stub_http_request(:get, "www.example.com").to_return(@file)
+          @response = http_request(:get, "http://www.example.com/")
+        end
+        
+        it "should return recorded headers" do
+          @response.headers.should == {
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"438",
+            "Connection"=>"Keep-Alive"
+          }
+        end
+        
+        it "should return recorded body" do
+          @response.body.size.should == 438
+        end
+        
+        it "should ensure file is closed" do
+          @file.should be_closed
+        end
+        
+      end
+      
+      describe "replying responses raw responses from string" do
+        
+        before(:each) do
+          @input = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt").read
+          stub_http_request(:get, "www.example.com").to_return(@input)
+          @response = http_request(:get, "http://www.example.com/")
+        end
+        
+        it "should return recorded headers" do
+          @response.headers.should == {
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"438",
+            "Connection"=>"Keep-Alive"
+          }
+        end
+        
+        it "should return recorded body" do
+          @response.body.size.should == 438
+        end
+        
+      end
 
     end
 

@@ -1,9 +1,14 @@
 module WebMock
+  
   class Response
     attr_reader :options
 
     def initialize(options = {})
-      self.options = options
+      if options.is_a?(IO) || options.is_a?(String) 
+          self.options = read_raw_response(options)
+        else
+          self.options = options
+      end
       @options[:headers] = Util::Headers.normalize_headers(@options[:headers]) unless @options[:headers].is_a?(Proc)
     end
 
@@ -39,6 +44,8 @@ module WebMock
     def ==(other)
       options == other.options
     end
+    
+    private 
 
     def stringify_body!
       if @options[:body].is_a?(IO)
@@ -46,6 +53,24 @@ module WebMock
         @options[:body] = io.read
         io.close
       end
+    end
+    
+    def read_raw_response(raw_response)
+      if raw_response.is_a?(IO)
+        string = raw_response.read 
+        raw_response.close
+        raw_response = string
+      end        
+      socket = Net::BufferedIO.new(raw_response)
+      response = Net::HTTPResponse.read_new(socket)
+      transfer_encoding = response.delete('transfer-encoding') #chunks were already read by curl
+      response.reading_body(socket, true) {}
+      
+      options = {}
+      options[:headers] = response.to_hash
+      options[:headers]['transfer-encoding'] = transfer_encoding if transfer_encoding
+      options[:body] = response.read_body
+      options      
     end
 
   end
