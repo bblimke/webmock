@@ -16,9 +16,11 @@ module NetHTTPSpecHelper
     response = http.start {|http|
       http.request(req, options[:body], &block)
     }
+    headers = {}
+    response.each_header {|name, value| headers[name] = value}
     OpenStruct.new({
       :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(response.to_hash),
+      :headers => WebMock::Util::Headers.normalize_headers(headers),
       :status => response.code })
   end
 
