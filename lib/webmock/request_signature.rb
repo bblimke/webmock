@@ -26,7 +26,7 @@ module WebMock
       return false if self.headers && !self.headers.empty? && request_profile.headers && request_profile.headers.empty?
       if request_profile.headers && !request_profile.headers.empty?
         request_profile.headers.each do | key, value |
-          return false unless (self.headers && self.headers.has_key?(key) && value == self.headers[key])
+          return false unless (self.headers && self.headers.has_key?(key) && value === self.headers[key])
         end
       end
       return true

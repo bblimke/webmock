@@ -89,10 +89,20 @@ describe RequestSignature do
       RequestSignature.new(:get, "www.example.com", :body => "abc").
         should match(RequestProfile.new(:get, "www.example.com", :body => "abc"))
     end
+    
+    it "should match for body matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :body => "abc").
+        should match(RequestProfile.new(:get, "www.example.com", :body => /^abc$/))
+    end
 
     it "should not match for different bodies" do
       RequestSignature.new(:get, "www.example.com", :body => "abc").
         should_not match(RequestProfile.new(:get, "www.example.com", :body => "def"))
+    end
+    
+    it "should not match for body not matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :body => "xabc").
+        should_not match(RequestProfile.new(:get, "www.example.com", :body => /^abc$/))
     end
 
     it "should match if other has not specified body" do
@@ -119,10 +129,20 @@ describe RequestSignature do
       RequestSignature.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpeg'}).
         should match(RequestProfile.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpeg'}))
     end
+    
+    it "should match for header values matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpeg'}).
+        should match(RequestProfile.new(:get, "www.example.com", :headers => {'Content-Type' => %r{^image/jpeg$}}))
+    end
 
     it "should not match for different values of the same header" do
       RequestSignature.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpeg'}).
         should_not match(RequestProfile.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/png'}))
+    end
+    
+    it "should not match for header values not matching regexp" do
+      RequestSignature.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpegx'}).
+        should_not match(RequestProfile.new(:get, "www.example.com", :headers => {'Content-Type' => %r{^image\/jpeg$}}))
     end
 
     it "should match if request has more headers than other" do

@@ -118,6 +118,24 @@ describe "WebMock", :shared => true do
         }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'def'")
       end
 
+      describe "with regular expressions" do
+
+        it "should match requests if body matches regexp" do
+          stub_http_request(:get, "www.example.com").with(:body => /\d+abc$/)
+          http_request(
+            :get, "http://www.example.com/",
+            :body => "123abc").status.should == "200"
+        end
+
+        it "should not match requests if body doesn't match regexp" do
+          stub_http_request(:get, "www.example.com").with(:body => /^abc/)
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "xabc")
+          }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'xabc'")
+        end
+
+      end
+
     end
 
     describe "on headers" do
@@ -145,15 +163,36 @@ describe "WebMock", :shared => true do
           :headers => { 'Content-Length' => '9999'})
         }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'}))
       end
-      
+
       it "should not match if accept header is different" do
         stub_http_request(:get, "www.example.com").
           with(:headers => { 'Accept' => 'application/json'})
         lambda {
           http_request(
             :get, "http://www.example.com/",
-            :headers => { 'Accept' => 'application/xml'})
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))  
+          :headers => { 'Accept' => 'application/xml'})
+        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))
+      end
+
+      describe "with regular expressions" do
+
+        it "should match requests if header values match regular expression" do
+          stub_http_request(:get, "www.example.com").with(:headers => { :user_agent => /^MyAppName$/ })
+          http_request(
+            :get, "http://www.example.com/",
+            :headers => { 'user_agent' => 'MyAppName' }).status.should == "200"
+        end
+
+        it "should not match requests if headers values do not match regular expression" do
+          stub_http_request(:get, "www.example.com").with(:headers => { :user_agent => /^MyAppName$/ })
+
+          lambda {
+            http_request(
+              :get, "http://www.example.com/",
+            :headers => { 'user_agent' => 'xMyAppName' })
+          }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'User-Agent'=>'xMyAppName'}))
+        end
+
       end
     end
 
@@ -238,16 +277,66 @@ describe "WebMock", :shared => true do
       end
 
       describe "dynamic responses" do
-        
+
         it "should return evaluated response body" do
           stub_http_request(:post, "www.example.com").to_return(:body => lambda { |request| request.body })
           http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
         end
-        
+
         it "should return evaluated response headers" do
           stub_http_request(:post, "www.example.com").to_return(:headers => lambda { |request| request.headers })
           http_request(:post, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
-        end        
+        end
+
+      end
+      
+      describe "replying responses raw responses from file" do
+        
+        before(:each) do
+          @file = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+          stub_http_request(:get, "www.example.com").to_return(@file)
+          @response = http_request(:get, "http://www.example.com/")
+        end
+        
+        it "should return recorded headers" do
+          @response.headers.should == {
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"438",
+            "Connection"=>"Keep-Alive"
+          }
+        end
+        
+        it "should return recorded body" do
+          @response.body.size.should == 438
+        end
+        
+        it "should ensure file is closed" do
+          @file.should be_closed
+        end
+        
+      end
+      
+      describe "replying responses raw responses from string" do
+        
+        before(:each) do
+          @input = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt").read
+          stub_http_request(:get, "www.example.com").to_return(@input)
+          @response = http_request(:get, "http://www.example.com/")
+        end
+        
+        it "should return recorded headers" do
+          @response.headers.should == {
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"438",
+            "Connection"=>"Keep-Alive"
+          }
+        end
+        
+        it "should return recorded body" do
+          @response.body.size.should == 438
+        end
         
       end
       
@@ -440,6 +529,21 @@ describe "WebMock", :shared => true do
           }.should fail_with("The request GET http://www.example.com/ with body 'def' was expected to execute 1 time but it executed 0 times")
         end
 
+        it "should succeed if request was executed with the same body" do
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "abc")
+            request(:get, "www.example.com").with(:body => /^abc$/).should have_been_made
+          }.should_not raise_error
+        end
+
+        it "should fail if request was executed with different body" do
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => /^abc/)
+            request(:get, "www.example.com").
+            with(:body => "xabc").should have_been_made
+          }.should fail_with("The request GET http://www.example.com/ with body 'xabc' was expected to execute 1 time but it executed 0 times")
+        end
+
         it "should succeed if request was executed with the same headers" do
           lambda {
             http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
@@ -484,6 +588,21 @@ describe "WebMock", :shared => true do
           }.should_not raise_error
         end
 
+        it "should succeed if request was executed with headers matching regular expressions" do
+          lambda {
+            http_request(:get, "http://www.example.com/", :headers => { 'user_agent' => 'MyAppName' })
+            request(:get, "www.example.com").
+            with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
+          }.should_not raise_error
+        end
+
+        it "should fail if request was executed with headers not matching regular expression" do
+          lambda {
+            http_request(:get, "http://www.example.com/", :headers => { 'user_agent' => 'xMyAppName' })
+            request(:get, "www.example.com").
+            with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
+          }.should fail_with("The request GET http://www.example.com/ with headers {'User-Agent'=>/^MyAppName$/} was expected to execute 1 time but it executed 0 times")
+        end
 
         describe "with authentication" do
           before(:each) do
