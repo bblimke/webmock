@@ -45,9 +45,15 @@ describe RequestStub do
 
   end
 
+  describe "then" do
+    it "should return stub without any modifications, acting as syntactic sugar" do
+      @request_stub.then.should == @request_stub
+    end
+  end
+
   describe "response" do
 
-    it "should return responses in a sequence" do
+    it "should return responses in a sequence passed as array" do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "def"
@@ -57,6 +63,18 @@ describe RequestStub do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
       @request_stub.response
       @request_stub.response
+      @request_stub.response.body.should == "def"
+    end
+    
+    it "should return responses in a sequence passed as comma separated params" do
+      @request_stub.to_return({:body => "abc"}, {:body => "def"})
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+    end
+    
+    it "should return responses declared in multiple to_return declarations" do
+      @request_stub.to_return({:body => "abc"}).to_return({:body => "def"})
+      @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "def"
     end
 
@@ -70,15 +88,33 @@ describe RequestStub do
         @request_stub.response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
     end
+    
+    it "should assign sequence of responses with response with exception to be thrown" do
+      @request_stub.to_return(:body => "abc").then.to_raise(ArgumentError)
+      @request_stub.response.body.should == "abc"
+      lambda {
+        @request_stub.response.raise_error_if_any
+      }.should raise_error(ArgumentError, "Exception from WebMock")
+    end
 
     it "should assign a list responses to be thrown in a sequence" do
-      @request_stub.to_raise([ArgumentError, IndexError])
+      @request_stub.to_raise(ArgumentError, IndexError)
       lambda {
         @request_stub.response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
       lambda {
         @request_stub.response.raise_error_if_any
       }.should raise_error(IndexError, "Exception from WebMock")
+    end
+    
+    it "should raise exceptions declared in multiple to_raise declarations" do
+       @request_stub.to_raise(ArgumentError).then.to_raise(IndexError)
+        lambda {
+          @request_stub.response.raise_error_if_any
+        }.should raise_error(ArgumentError, "Exception from WebMock")
+        lambda {
+          @request_stub.response.raise_error_if_any
+        }.should raise_error(IndexError, "Exception from WebMock")
     end
 
   end
