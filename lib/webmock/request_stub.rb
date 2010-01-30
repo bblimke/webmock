@@ -9,8 +9,8 @@ module WebMock
       self
     end
 
-    def with(params)
-      @request_profile.with(params)
+    def with(params = {}, &block)
+      @request_profile.with(params, &block)
       self
     end
 

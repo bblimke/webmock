@@ -7,7 +7,8 @@ module WebMock
       match_method(request_profile) &&
         match_body(request_profile) &&
         match_headers(request_profile) &&
-        match_uri(request_profile)
+        match_uri(request_profile) &&
+        match_with_block(request_profile)
     end
 
     private
@@ -38,6 +39,11 @@ module WebMock
 
     def match_method(request_profile)
       request_profile.method == self.method || request_profile.method == :any
+    end
+    
+    def match_with_block(request_profile)
+      return true unless request_profile.with_block
+      request_profile.with_block.call(self)
     end
   end
 

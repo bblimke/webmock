@@ -227,6 +227,34 @@ describe "WebMock", :shared => true do
       end
 
     end
+    
+    describe "with block" do
+      
+      it "should match if block returns true" do
+        stub_http_request(:get, "www.example.com").with { |request| true }
+        http_request(
+          :get, "http://www.example.com/",
+          :body => "wadus").status.should == "200"
+      end
+      
+      it "should not match if block returns false" do
+        stub_http_request(:get, "www.example.com").with { |request| false }
+        lambda {
+          http_request(:get, "http://www.example.com/", :body => "wadus")
+        }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'wadus'")
+      end
+      
+      it "should pass the request to the block" do
+        stub_http_request(:get, "www.example.com").with { |request| request.body == "wadus" }
+        http_request(
+          :get, "http://www.example.com/",
+          :body => "wadus").status.should == "200"
+          lambda {
+            http_request(:get, "http://www.example.com/", :body => "jander")
+          }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'jander'")        
+      end
+      
+    end
 
   end
 
@@ -465,15 +493,8 @@ describe "WebMock", :shared => true do
               }.should raise_error(ArgumentError)
               http_request(:get, "http://www.example.com/").body.should == "2"
           end
-        
         end
-        
-
       end
-
-          
- 
-
 
       describe "precedence of stubs" do
 
@@ -716,6 +737,20 @@ describe "WebMock", :shared => true do
                   request(:get, "www.example.com").
                   with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ with headers {'User-Agent'=>/^MyAppName$/} was expected to execute 1 time but it executed 0 times")
+              end
+              
+             it "should suceed if request was executed and block evaluated to true" do
+                lambda {
+                  http_request(:get, "http://www.example.com/", :body => "wadus")
+                  request(:get, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+                }.should_not raise_error
+              end
+
+              it "should fail if request was executed and block evaluated to false" do
+                lambda {
+                  http_request(:get, "http://www.example.com/")
+                  request(:get, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+                }.should fail_with("The request GET http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")
               end
 
               describe "with authentication" do
