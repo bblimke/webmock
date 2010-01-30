@@ -28,6 +28,11 @@ describe RequestStub do
       @request_stub.request_profile.headers.should == {'B' => 'b'}
     end
 
+    it "should assign given block to request profile" do
+      @request_stub.with { |req| "block output" }
+      @request_stub.request_profile.with_block.call(nil).should == "block output"
+    end
+
   end
 
   describe "to_return" do

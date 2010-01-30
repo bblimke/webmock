@@ -35,6 +35,11 @@ describe RequestProfile do
     "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
   end
 
+  it "should report string describing itself with block" do
+    RequestProfile.new(:get, "www.example.com",
+      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should ==
+    "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'} with given block"
+  end
 
   describe "with" do
     before(:each) do

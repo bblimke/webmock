@@ -185,6 +185,21 @@ describe RequestSignature do
         should_not match(RequestProfile.new(:get, "www.example.com", :headers => {'A'=>'a'}))
     end
 
+    it "should match if block given to profile evaluates on request to true" do
+      RequestSignature.new(:get, "www.example.com").
+        should match(RequestProfile.new(:get, "www.example.com").with { |request| true } )
+    end
+    
+    it "should not match if block given to profile evaluates on request to false" do
+      RequestSignature.new(:get, "www.example.com").
+        should_not match( RequestProfile.new(:get, "www.example.com").with { |request| false } )
+    end
+    
+    it "should pass self to the block when matching" do
+      signature = RequestSignature.new(:get, "www.example.com")
+      signature.should match(RequestProfile.new(:get, "www.example.com").with { |request| request == signature } )
+    end
+
   end
 
 end
