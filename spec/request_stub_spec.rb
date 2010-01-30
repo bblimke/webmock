@@ -40,7 +40,7 @@ describe RequestStub do
 
     it "should assign responses with provided options" do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
-      @request_stub.responses.map {|r| r.body}.should == ["def", "abc"]
+      [@request_stub.response.body, @request_stub.response.body].should == ["abc", "def"]
     end
 
   end
@@ -117,6 +117,56 @@ describe RequestStub do
         }.should raise_error(IndexError, "Exception from WebMock")
     end
 
+  end
+  
+  
+  describe "times" do
+    
+    it "should give error if declared before any response declaration is declared" do
+      lambda {
+        @request_stub.times(3)
+       }.should raise_error("Invalid WebMock stub declaration. times(N) can be declared only after response declaration.")  
+    end
+    
+    it "should repeat returning last declared response declared number of times" do
+      @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+    end
+    
+    it "should repeat raising last declared exception declared number of times" do
+      @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+    end
+    
+    it "should repeat returning last declared sequence of responses declared number of times" do
+      @request_stub.to_return({:body => "abc"}, {:body => "def"}).times(2).then.to_return({:body => "ghj"})
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should == "ghj"
+    end
+    
+    it "should return self" do
+      @request_stub.to_return({:body => "abc"}).times(1).should == @request_stub
+    end
+    
+    it "should raise error if argument is not integer" do
+      lambda {
+         @request_stub.to_return({:body => "abc"}).times("not number")
+      }.should raise_error("times(N) accepts integers >= 1 only")  
+    end
+    
+    it "should raise error if argument is < 1" do
+      lambda {
+        @request_stub.to_return({:body => "abc"}).times(0)
+      }.should raise_error("times(N) accepts integers >= 1 only")  
+    end
+    
   end
 
 end

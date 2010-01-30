@@ -14,6 +14,7 @@ require 'webmock/util/hash_counter'
 require 'webmock/request'
 require 'webmock/request_profile'
 require 'webmock/request_signature'
+require 'webmock/responses_sequence'
 require 'webmock/request_stub'
 require 'webmock/response'
 

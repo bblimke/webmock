@@ -1,10 +1,11 @@
 module WebMock
   class RequestStub
+
     attr_accessor :request_profile, :responses
 
     def initialize(method, uri)
       @request_profile = RequestProfile.new(method, uri)
-      @responses = []
+      @responses_sequences = []
       self
     end
 
@@ -14,28 +15,37 @@ module WebMock
     end
 
     def to_return(*response_hashes)
-      @responses.unshift [*response_hashes].flatten.reverse.map {|r| WebMock::Response.new(r)}
-      @responses.flatten!
+      @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| WebMock::Response.new(r)})
       self
     end
 
     def to_raise(*exceptions)
-      @responses.unshift [*exceptions].flatten.reverse.map {|e| WebMock::Response.new(:exception => e)}
-      @responses.flatten!
+      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e| WebMock::Response.new(:exception => e)})
       self
     end
 
     def response
-      if @responses.empty?
+      if @responses_sequences.empty?
         WebMock::Response.new
-      elsif @responses.length > 1
-        @responses.pop
+      elsif @responses_sequences.length > 1
+        @responses_sequences.shift if @responses_sequences.first.end?
+        @responses_sequences.first.next_response
       else
-        @responses[0]
+        @responses_sequences[0].next_response
       end
     end
 
     def then
+      self
+    end
+
+    def times(number)
+      raise "times(N) accepts integers >= 1 only" if !number.is_a?(Fixnum) || number < 1
+      if @responses_sequences.empty?
+        raise "Invalid WebMock stub declaration." +
+          " times(N) can be declared only after response declaration."
+      end
+      @responses_sequences.last.times_to_repeat += number-1
       self
     end
 
