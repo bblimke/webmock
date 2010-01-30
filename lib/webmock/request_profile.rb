@@ -1,15 +1,23 @@
 module WebMock
 
   class RequestProfile < Request
+    
+    attr_reader :with_block
 
     def with(options = {}, &block)
       assign_options(options)
-      self.with_block = block
+      @with_block = block
       self
     end
     
     def body=(body)
       @body = Body.new(body)
+    end
+    
+    def to_s
+      string = super
+      string << " with given block" if @with_block
+      string
     end
 
     class Body

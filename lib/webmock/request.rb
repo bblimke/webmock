@@ -1,7 +1,7 @@
 module WebMock
 
   class Request
-    attr_accessor :method, :uri, :body, :headers, :with_block
+    attr_accessor :method, :uri, :body, :headers
 
     def initialize(method, uri, options = {})
       self.method = method
@@ -15,7 +15,6 @@ module WebMock
       if headers && !headers.empty?
         string << " with headers #{WebMock::Util::Headers.normalize_headers(headers).inspect.gsub("\"","'")}"
       end      
-      string << " with given block" if with_block
       string
     end
 
