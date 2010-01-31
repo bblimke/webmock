@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "0.8.2"
+  s.version = "0.9.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-01-17}
+  s.date = %q{2010-01-31}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".gitignore",
-     "CHANGELOG",
+     "CHANGELOG.md",
      "LICENSE",
      "README.md",
      "Rakefile",
@@ -40,12 +40,14 @@ Gem::Specification.new do |s|
      "lib/webmock/request_signature.rb",
      "lib/webmock/request_stub.rb",
      "lib/webmock/response.rb",
+     "lib/webmock/responses_sequence.rb",
      "lib/webmock/rspec.rb",
      "lib/webmock/test_unit.rb",
      "lib/webmock/util/hash_counter.rb",
      "lib/webmock/util/headers.rb",
      "lib/webmock/util/uri.rb",
      "lib/webmock/webmock.rb",
+     "spec/example_curl_output.txt",
      "spec/httpclient_spec.rb",
      "spec/httpclient_spec_helper.rb",
      "spec/net_http_spec.rb",
