@@ -16,8 +16,8 @@ module WebMock
       self
     end
 
-    def with(options)
-      @request_execution_verifier.request_profile.with(options)
+    def with(options = {}, &block)
+      @request_execution_verifier.request_profile.with(options, &block)
       self
     end
 
