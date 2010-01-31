@@ -1,12 +1,12 @@
 WebMock
 =======
 
-Library for stubbing HTTP requests and setting expectations on HTTP requests in Ruby.
+Library for stubbing and setting expectations on HTTP requests in Ruby.
 
 Features
 --------
 
-* Stubbing HTTP requests at low Net::HTTP level (no need to change tests when you change HTTP lib interface)
+* Stubbing HTTP requests at low http client lib level (no need to change tests when you change HTTP library)
 * Setting and verifying expectations on HTTP requests
 * Matching requests based on method, URI, headers and body
 * Smart matching of the same URIs in different representations (also encoded and non encoded forms)
@@ -14,7 +14,7 @@ Features
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
 * Support for HTTPClient library (both sync and async requests)
-* Easy to extend to other HTTP libraries except Net::HTTP
+* Easy to extend to other HTTP libraries
 
 Installation
 ------------
@@ -77,8 +77,7 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Matching custom request headers
 
-    stub_request(:any, "www.example.com").
-	  with(:headers=>{ 'Header-Name' => 'Header-Value' }).to_return(:body => "abc", :status => 200)
+    stub_request(:any, "www.example.com").with(:headers=>{ 'Header-Name' => 'Header-Value' })
 
 	uri = URI.parse('http://www.example.com/')
     req = Net::HTTP::Post.new(uri.path)
@@ -89,8 +88,8 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Matching requests against provided block
 
-	stub_request(:post, "www.example.com").with { |request| request.body == "abc" }.to_return(:body => "abc")
-	RestClient.post('www.example.com', 'abc')    # ===> "abc\n"
+	stub_request(:post, "www.example.com").with { |request| request.body == "abc" }
+	RestClient.post('www.example.com', 'abc')    # ===> Success
 	
 ### Request with basic authentication
 
@@ -261,7 +260,8 @@ An executed request matches stubbed request if it passes following criteria:
   When request URI matches stubbed request URI string or Regexp pattern<br/>
   And request method is the same as stubbed request method or stubbed request method is :any<br/>
   And request body is the same as stubbed request body or stubbed request body is not specified<br/>
-  And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified
+  And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified<br/>
+  And request matches provided block or block is not provided
 
 ## Precedence of stubs
 
@@ -365,4 +365,4 @@ I also preferred some things to work differently i.e request stub precedence.
 
 ## Copyright
 
-Copyright 2009 Bartosz Blimke. See LICENSE for details.
+Copyright 2009-2010 Bartosz Blimke. See LICENSE for details.
