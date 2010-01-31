@@ -101,42 +101,42 @@ describe "WebMock", :shared => true do
     describe "on body" do
 
       it "should match requests if body is the same" do
-        stub_http_request(:get, "www.example.com").with(:body => "abc")
+        stub_http_request(:post, "www.example.com").with(:body => "abc")
         http_request(
-          :get, "http://www.example.com/",
+          :post, "http://www.example.com/",
           :body => "abc").status.should == "200"
       end
 
       it "should match requests if body is not set in the stub" do
-        stub_http_request(:get, "www.example.com")
+        stub_http_request(:post, "www.example.com")
         http_request(
-          :get, "http://www.example.com/",
+          :post, "http://www.example.com/",
           :body => "abc").status.should == "200"
       end
 
       it "should not match requests if body is different" do
-        stub_http_request(:get, "www.example.com").with(:body => "abc")
+        stub_http_request(:post, "www.example.com").with(:body => "abc")
         lambda {
-          http_request(:get, "http://www.example.com/", :body => "def")
+          http_request(:post, "http://www.example.com/", :body => "def")
         }.should fail_with(client_specific_request_string(
-        "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'def'"))
+        "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'def'"))
       end
 
       describe "with regular expressions" do
 
         it "should match requests if body matches regexp" do
-          stub_http_request(:get, "www.example.com").with(:body => /\d+abc$/)
+          stub_http_request(:post, "www.example.com").with(:body => /\d+abc$/)
           http_request(
-            :get, "http://www.example.com/",
+            :post, "http://www.example.com/",
             :body => "123abc").status.should == "200"
         end
 
         it "should not match requests if body doesn't match regexp" do
-          stub_http_request(:get, "www.example.com").with(:body => /^abc/)
+          stub_http_request(:post, "www.example.com").with(:body => /^abc/)
           lambda {
-            http_request(:get, "http://www.example.com/", :body => "xabc")
+            http_request(:post, "http://www.example.com/", :body => "xabc")
           }.should fail_with(client_specific_request_string(
-          "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'xabc'"))
+          "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'xabc'"))
         end
 
       end
