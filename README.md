@@ -63,10 +63,22 @@ You can also use WebMock without RSpec or Test::Unit support:
       http.request(req, "abc")
     }    # ===> Success
 
+### Matching request body and headers against regular expressions
+
+	stub_request(:post, "www.example.com").
+	  with(:body => /^.*world$/, :headers => {"Content-Type" => /image\/.+/}).to_return(:body => "abc")
+
+	uri = URI.parse('http://www.example.com/')
+    req = Net::HTTP::Post.new(uri.path)
+	req['Content-Type'] = 'image/png'
+    res = Net::HTTP.start(uri.host, uri.port) {|http|
+      http.request(req, 'hello world')
+    }    # ===> Success
+
 ### Matching custom request headers
 
     stub_request(:any, "www.example.com").
-	  with( :headers=>{ 'Header-Name' => 'Header-Value' } ).to_return(:body => "abc", :status => 200)
+	  with(:headers=>{ 'Header-Name' => 'Header-Value' }).to_return(:body => "abc", :status => 200)
 
 	uri = URI.parse('http://www.example.com/')
     req = Net::HTTP::Post.new(uri.path)
@@ -75,27 +87,11 @@ You can also use WebMock without RSpec or Test::Unit support:
       http.request(req, 'abc')
     }    # ===> Success
 
-### Stubbing with custom response
+### Matching requests against provided block
 
-	stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
+	stub_request(:post, "www.example.com").with { |request| request.body == "abc" }.to_return(:body => "abc")
+	RestClient.post('www.example.com', 'abc')    # ===> "abc\n"
 	
-	Net::HTTP.get("www.example.com", '/')    # ===> "abc"
-
-### Custom response with body specified as IO object
-
-	File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
-
-	stub_request(:any, "www.example.com").to_return(:body => File.new('/tmp/response_body.txt'), :status => 200)
-
-	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
-
-### Custom response with dynamically evaluated response
-	
-    stub_request(:any, 'www.example.net').
-      to_return(:body => lambda { |request| request.body })
-
-    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
-
 ### Request with basic authentication
 
     stub_request(:get, "user:pass@www.example.com")
@@ -110,7 +106,72 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	 stub_request(:any, /.*example.*/)
 
-	 Net::HTTP.get('www.example.com', '/') # ===> Success
+	 Net::HTTP.get('www.example.com', '/') # ===> Success	
+
+### Stubbing with custom response
+
+	stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
+	
+	Net::HTTP.get("www.example.com", '/')    # ===> "abc"
+
+### Custom response with body specified as IO object
+
+	File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
+
+	stub_request(:any, "www.example.com").to_return(:body => File.new('/tmp/response_body.txt'), :status => 200)
+
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+	
+### Replaying raw responses recorded with `curl -is`
+
+	`curl -is www.example.com > /tmp/example_curl_-is_output.txt`
+	raw_response_file = File.new("/tmp/example_curl_-is_output.txt")
+
+   from file
+
+	stub_request(:get, "www.example.com").to_return(raw_response_file)
+
+   or string
+
+	stub_request(:get, "www.example.com").to_return(raw_response_file.read)
+
+### Custom response with dynamically evaluated response
+	
+    stub_request(:any, 'www.example.net').
+      to_return(:body => lambda { |request| request.body })
+
+    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
+
+### Multiple responses for repeated requests
+
+	stub_request(:get, "www.example.com").to_return({:body => "abc"}, {:body => "def"})
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+	
+	#after all responses are used the last response will be returned infinitely
+	
+	Net::HTTP.get('www.example.com', '/')    # ===> "def\n" 
+
+### Multiple responses using chained `to_return()` or `to_raise()` declarations
+
+	stub_request(:get, "www.example.com").
+		to_return({:body => "abc"}).then.  #then() just is a syntactic sugar
+		to_return({:body => "def"}).then.
+		to_raise(MyException)
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> MyException raised
+
+### Specifying number of times given response should be returned
+
+	stub_request(:get, "www.example.com").
+		to_return({:body => "abc"}).times(2).then.
+		to_return({:body => "def"})
+
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+	Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+
 
 ### Real requests to network can be allowed or disabled
 
@@ -146,6 +207,8 @@ You can also use WebMock without RSpec or Test::Unit support:
 	
 	assert_not_requested :get, "http://www.something.com"    # ===> Success
 
+	assert_requested(:post, "http://www.example.com", :times => 1) { |req| req.body == "abc" }
+
 ### Expecting real (not stubbed) requests
 
 	WebMock.allow_net_connect!
@@ -163,6 +226,8 @@ You can also use WebMock without RSpec or Test::Unit support:
 	WebMock.should have_requested(:get, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 	
 	WebMock.should_not have_requested(:get, "www.something.com")
+	
+	WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
 
 ### Different way of setting expectations in RSpec
 
@@ -172,7 +237,8 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	request(:any, "www.example.com").should_not have_been_made
 
-
+	request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+	
 ## Clearing stubs and request history
 
 If you want to reset all current stubs and history of requests use `WebMock.reset_webmock`
