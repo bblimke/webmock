@@ -25,11 +25,11 @@
 		`curl -is www.example.com > /tmp/example_curl_-is_output.txt`
 		raw_response_file = File.new("/tmp/example_curl_-is_output.txt")
 	
-   from file
+	from file
 	
 		stub_request(:get, "www.example.com").to_return(raw_response_file)
 
-   or string
+	or string
 	
 		stub_request(:get, "www.example.com").to_return(raw_response_file.read)
 
@@ -61,11 +61,11 @@
 	
 * Added support for `Net::HTTP::Post#body_stream`
 
-   This fixes compatibility with new versions of RestClient
+	This fixes compatibility with new versions of RestClient
 	
 * WebMock doesn't suppress default request headers added by http clients anymore.
 
-   i.e. Net::HTTP adds `'Accept'=>'*/*'` to all requests by default
+	i.e. Net::HTTP adds `'Accept'=>'*/*'` to all requests by default
 	
 	
 	
