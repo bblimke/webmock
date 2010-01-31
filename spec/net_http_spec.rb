@@ -29,6 +29,13 @@ describe "Webmock with Net:HTTP" do
     req.body = "my_params"
     Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
   end
+  
+  it "should handle Net::HTTP::Post#body_stream" do
+    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    req = Net::HTTP::Post.new("/")
+    req.body_stream = StringIO.new("my_params")
+    Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
+  end
 
   it "should behave like Net::HTTP and raise error if both request body and body argument are set" do
     stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
@@ -38,5 +45,6 @@ describe "Webmock with Net:HTTP" do
       Net::HTTP.start("www.example.com") { |http| http.request(req, "my_params")}
     }.should raise_error("both of body argument and HTTPRequest#body set")
   end
+
 
 end

@@ -72,7 +72,16 @@ module Net  #:nodoc: all
        
       headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
 
-      request.set_body_internal body
+      if request.body_stream
+        body = request.body_stream.read
+        request.body_stream = nil
+      end
+
+      if body != nil && body.respond_to?(:read)
+        request.set_body_internal body.read
+      else
+        request.set_body_internal body
+      end
 
       request_signature = WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
 
