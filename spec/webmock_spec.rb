@@ -52,7 +52,7 @@ describe "WebMock", :shared => true do
       it "should raise exception if request was not stubbed" do
         lambda {
           http_request(:get, "http://www.example.com/")
-        }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/")
+        }.should fail_with(client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
     end
 
@@ -91,7 +91,8 @@ describe "WebMock", :shared => true do
         http_request(:get, "http://www.example.com/").status.should == "200"
         lambda {
           http_request(:post, "http://www.example.com/")
-        }.should fail_with("Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/"
+        }.should fail_with(client_specific_request_string(
+        "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/")
         )
       end
 
@@ -117,7 +118,8 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "www.example.com").with(:body => "abc")
         lambda {
           http_request(:get, "http://www.example.com/", :body => "def")
-        }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'def'")
+        }.should fail_with(client_specific_request_string(
+        "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'def'"))
       end
 
       describe "with regular expressions" do
@@ -133,7 +135,8 @@ describe "WebMock", :shared => true do
           stub_http_request(:get, "www.example.com").with(:body => /^abc/)
           lambda {
             http_request(:get, "http://www.example.com/", :body => "xabc")
-          }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'xabc'")
+          }.should fail_with(client_specific_request_string(
+          "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with body 'xabc'"))
         end
 
       end
@@ -163,7 +166,8 @@ describe "WebMock", :shared => true do
           http_request(
             :get, "http://www.example.com/",
           :headers => { 'Content-Length' => '9999'})
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'}))
+        }.should fail_with(client_specific_request_string(
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'})))
       end
 
       it "should not match if accept header is different" do
@@ -173,7 +177,8 @@ describe "WebMock", :shared => true do
           http_request(
             :get, "http://www.example.com/",
           :headers => { 'Accept' => 'application/xml'})
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'}))
+        }.should fail_with(client_specific_request_string(
+        %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'})))
       end
 
       describe "with regular expressions" do
@@ -182,7 +187,7 @@ describe "WebMock", :shared => true do
           stub_http_request(:get, "www.example.com").with(:headers => { :user_agent => /^MyAppName$/ })
           http_request(
             :get, "http://www.example.com/",
-            :headers => { 'user_agent' => 'MyAppName' }).status.should == "200"
+            :headers => { 'user-agent' => 'MyAppName' }).status.should == "200"
         end
 
         it "should not match requests if headers values do not match regular expression" do
@@ -191,8 +196,9 @@ describe "WebMock", :shared => true do
           lambda {
             http_request(
               :get, "http://www.example.com/",
-            :headers => { 'user_agent' => 'xMyAppName' })
-          }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'User-Agent'=>'xMyAppName'}))
+            :headers => { 'user-agent' => 'xMyAppName' })
+          }.should fail_with(client_specific_request_string(
+          %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'User-Agent'=>'xMyAppName'})))
         end
 
       end
@@ -209,21 +215,24 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "user:pass@www.example.com")
         lambda {
           http_request(:get, "http://user:pazz@www.example.com/").status.should == "200"
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/))
+        }.should fail_with(client_specific_request_string(
+        %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/)))
       end
 
       it "should not match if credentials are stubbed but not provided in the request" do
         stub_http_request(:get, "user:pass@www.example.com")
         lambda {
           http_request(:get, "http://www.example.com/").status.should == "200"
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+        }.should fail_with(client_specific_request_string(
+        %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/)))
       end
 
       it "should not match if credentials are not stubbed but exist in the request" do
         stub_http_request(:get, "www.example.com")
         lambda {
           http_request(:get, "http://user:pazz@www.example.com/").status.should == "200"
-        }.should fail_with(%q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/))
+        }.should fail_with(client_specific_request_string(
+        %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/)))
       end
 
     end
@@ -239,7 +248,8 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "www.example.com").with { |request| false }
         lambda {
           http_request(:get, "http://www.example.com/")
-        }.should fail_with("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/")
+        }.should fail_with(client_specific_request_string(
+        "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
       
       it "should pass the request to the block" do
@@ -249,7 +259,8 @@ describe "WebMock", :shared => true do
           :body => "wadus").status.should == "200"
         lambda {
           http_request(:post, "http://www.example.com/", :body => "jander")
-        }.should fail_with("Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'")        
+        }.should fail_with(client_specific_request_string(
+        "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'"))
       end
       
     end
@@ -723,7 +734,7 @@ describe "WebMock", :shared => true do
 
               it "should succeed if request was executed with headers matching regular expressions" do
                 lambda {
-                  http_request(:get, "http://www.example.com/", :headers => { 'user_agent' => 'MyAppName' })
+                  http_request(:get, "http://www.example.com/", :headers => { 'user-agent' => 'MyAppName' })
                   request(:get, "www.example.com").
                   with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
                 }.should_not raise_error

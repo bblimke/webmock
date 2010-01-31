@@ -23,6 +23,13 @@ module NetHTTPSpecHelper
       :headers => WebMock::Util::Headers.normalize_headers(headers),
       :status => response.code })
   end
+  
+  def default_client_request_headers(request_method = nil, has_body = false)
+    default_request = Net::HTTPGenericRequest.new('','','','/')
+    default_net_http_headers = Hash[*default_request.to_hash.map {|k,v|
+      [k, v.flatten]
+    }.flatten]
+  end
 
   # Sets several expectations that a real HTTP request makes it
   # past WebMock to the socket layer. You can use this when you need to check

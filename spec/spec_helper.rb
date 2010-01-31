@@ -7,6 +7,8 @@ require 'spec/autorun'
 
 require 'webmock/rspec'
 
+require 'json'
+
 include WebMock
 
 def fail()
@@ -30,4 +32,29 @@ def setup_expectations_for_real_example_com_request(options = {})
     :response_body => "<title>Google fake response</title>" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
+
+def client_specific_request_string(string)
+  method = string.gsub(/.*Unregistered request: ([^ ]+).+/, '\1')
+  has_body = string.include?(" with body")
+  default_headers = default_client_request_headers(method, has_body)
+  if default_headers
+   default_headers_string = WebMock::Util::Headers.normalize_headers(default_headers).inspect.gsub("\"","'")
+   default_headers_string.gsub!(/[{}]/, "")
+   if string.include?(" with headers")
+      current_headers = JSON.parse(string.gsub(/.*with headers (\{[^}]+\}).*/, '\1').gsub("=>",":").gsub("'","\""))
+      default_headers = WebMock::Util::Headers.normalize_headers(default_headers)
+      default_headers.reject! {|k,v| current_headers.has_key?(k) }
+      default_headers_string = default_headers.inspect.gsub("\"","'").gsub!(/[{}]/, "")
+      string.gsub!(/(.*)(with headers \{[^}]*)(\}.*)/, '\1\2' + ", #{default_headers_string}}") if !default_headers_string.empty?
+      string
+    else
+      headers_string = 
+      " with headers #{WebMock::Util::Headers.normalize_headers(default_headers).inspect.gsub("\"","'")}"
+      string << headers_string
+      end
+  end
+  string
+end
+
+
 

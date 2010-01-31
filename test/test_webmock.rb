@@ -33,7 +33,8 @@ class TestWebMock < Test::Unit::TestCase
   end
 
   def test_error_on_non_stubbed_request
-    assert_fail("Real HTTP connections are disabled. Unregistered request: GET http://www.example.net/") do
+    default_ruby_headers = (RUBY_VERSION >= "1.9.1") ? "{'Accept'=>'*/*', 'User-Agent'=>'Ruby'}" : "{'Accept'=>'*/*'}"
+    assert_fail("Real HTTP connections are disabled. Unregistered request: GET http://www.example.net/ with headers #{default_ruby_headers}") do
       http_request(:get, "http://www.example.net/")
     end
   end
