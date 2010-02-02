@@ -76,6 +76,7 @@ module WebMock
       response.each_header {|name, value| options[:headers][name] = value}
       options[:headers]['transfer-encoding'] = transfer_encoding if transfer_encoding
       options[:body] = response.read_body
+      options[:status] = response.code.to_i
       options      
     end
 

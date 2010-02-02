@@ -356,6 +356,10 @@ describe "WebMock", :shared => true do
           it "should return recorded body" do
             @response.body.size.should == 438
           end
+          
+          it "should return recorded status" do
+            @response.status.should == "202"
+          end          
 
           it "should ensure file is closed" do
             @file.should be_closed
@@ -384,6 +388,9 @@ describe "WebMock", :shared => true do
             @response.body.size.should == 438
           end
 
+          it "should return recorded status" do
+            @response.status.should == "202"
+          end
         end
 
         describe "sequences of responses" do

@@ -78,7 +78,7 @@ describe Response do
 
 
       it "should read status" do
-        @response.status.should == 200
+        @response.status.should == 202
       end
 
       it "should read headers" do
@@ -107,7 +107,7 @@ describe Response do
       end
 
       it "should read status" do
-        @response.status.should == 200
+        @response.status.should == 202
       end
 
       it "should read headers" do
