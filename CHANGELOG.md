@@ -1,5 +1,9 @@
 #Changelog
 
+## 0.9.1
+
+* Fixed issue where response status code was not read from raw (curl -is) responses
+
 ## 0.9.0
   
 * Matching requests against provided block (by Sergio Gil)
