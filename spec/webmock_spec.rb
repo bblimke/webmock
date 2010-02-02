@@ -809,6 +809,14 @@ describe "WebMock", :shared => true do
                     request(:get, "http://www.example.com").should have_been_made.once
                   }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times")
                 end
+                
+                it "should be order insensitive" do
+                  stub_request(:post, "http://www.example.com")  
+                  http_request(:post, "http://www.example.com/", :body => "def")               
+                  http_request(:post, "http://www.example.com/", :body => "abc")   
+                  WebMock.should have_requested(:post, "www.example.com").with(:body => "abc")
+                  WebMock.should have_requested(:post, "www.example.com").with(:body => "def")
+                end
 
               end
 
