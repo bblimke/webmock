@@ -94,9 +94,9 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "www.example.com")
         http_request(:get, "http://www.example.com/").status.should == "200"
         lambda {
-          http_request(:post, "http://www.example.com/")
+          http_request(:delete, "http://www.example.com/")
         }.should fail_with(client_specific_request_string(
-        "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/")
+        "Real HTTP connections are disabled. Unregistered request: DELETE http://www.example.com/")
         )
       end
 
@@ -335,7 +335,7 @@ describe "WebMock", :shared => true do
 
           it "should return evaluated response headers" do
             stub_http_request(:post, "www.example.com").to_return(:headers => lambda { |request| request.headers })
-            http_request(:post, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
+            http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'B'}).headers['A'].should == 'B'
           end
 
         end
@@ -578,7 +578,7 @@ describe "WebMock", :shared => true do
 
               it "should fail if request was executed with different method" do
                 lambda {
-                  http_request(:post, "http://www.example.com/")
+                  http_request(:post, "http://www.example.com/", :body => "abc")
                   request(:get, "http://www.example.com").should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times")
               end
@@ -671,8 +671,8 @@ describe "WebMock", :shared => true do
 
               it "should succeed if request was executed with the same body" do
                 lambda {
-                  http_request(:get, "http://www.example.com/", :body => "abc")
-                  request(:get, "www.example.com").with(:body => "abc").should have_been_made
+                  http_request(:post, "http://www.example.com/", :body => "abc")
+                  request(:post, "www.example.com").with(:body => "abc").should have_been_made
                 }.should_not raise_error
               end
 
@@ -686,8 +686,8 @@ describe "WebMock", :shared => true do
 
               it "should succeed if request was executed with the same body" do
                 lambda {
-                  http_request(:get, "http://www.example.com/", :body => "abc")
-                  request(:get, "www.example.com").with(:body => /^abc$/).should have_been_made
+                  http_request(:post, "http://www.example.com/", :body => "abc")
+                  request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
                 }.should_not raise_error
               end
 
@@ -768,7 +768,7 @@ describe "WebMock", :shared => true do
 
               it "should fail if request was executed and block evaluated to false" do
                 lambda {
-                  http_request(:post, "http://www.example.com/")
+                  http_request(:post, "http://www.example.com/", :body => "abc")
                   request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
                 }.should fail_with("The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")                                                
               end
@@ -835,8 +835,8 @@ describe "WebMock", :shared => true do
 
                 it "should verify expected requests occured" do
                   lambda {
-                    http_request(:get, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-                    WebMock.should have_requested(:get, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'}).once
+                    http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
+                    WebMock.should have_requested(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'}).once
                   }.should_not raise_error
                 end
 
@@ -856,7 +856,7 @@ describe "WebMock", :shared => true do
 
                 it "should fail if request was executed and block evaluated to false" do
                   lambda {
-                    http_request(:post, "http://www.example.com/")
+                    http_request(:post, "http://www.example.com/", :body => "abc")
                     WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
                   }.should fail_with("The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")                                                
                 end
@@ -883,8 +883,8 @@ describe "WebMock", :shared => true do
 
                 it "should verify expected requests occured" do
                   lambda {
-                    http_request(:get, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-                    assert_requested(:get, "http://www.example.com", :body => "abc", :headers => {'A' => 'a'})
+                    http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
+                    assert_requested(:post, "http://www.example.com", :body => "abc", :headers => {'A' => 'a'})
                   }.should_not raise_error
                 end
 
@@ -911,7 +911,7 @@ describe "WebMock", :shared => true do
 
                  it "should verify if request was executed and block evaluated to false" do
                    lambda {
-                     http_request(:post, "http://www.example.com/")
+                     http_request(:post, "http://www.example.com/", :body => "abc")
                      assert_requested(:post, "www.example.com") { |req| req.body == "wadus" }
                    }.should fail_with("The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")
                  end

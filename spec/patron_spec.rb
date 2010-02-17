@@ -66,6 +66,15 @@ unless RUBY_PLATFORM =~ /java/
 
       end
 
+      describe "handling errors same way as patron" do
+        it "should raise error if put request has neither upload_data nor file_name" do
+          stub_http_request(:post, "www.example.com")
+          lambda {
+            @sess.post("/", nil)
+          }.should raise_error(ArgumentError, "Must provide either data or a filename when doing a PUT or POST")
+        end
+      end
+
       it "should work with WebDAV copy request" do
         stub_http_request(:copy, "www.example.com/abc").with(:headers => {'Destination' => "/def"})
         @sess.copy("/abc", "/def")

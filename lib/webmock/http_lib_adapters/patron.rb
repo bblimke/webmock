@@ -43,13 +43,17 @@ if defined?(Patron)
         uri.user = req.username
         uri.password = req.password
 
-        if req.file_name && [:put, :post].include?(req.action)
-          if !File.exist?(req.file_name) || !File.readable?(req.file_name)
-            raise ArgumentError.new("Unable to open specified file.")
+        if [:put, :post].include?(req.action)
+          if req.file_name
+            if !File.exist?(req.file_name) || !File.readable?(req.file_name)
+              raise ArgumentError.new("Unable to open specified file.")
+            end
+            request_body = File.read(req.file_name)
+          elsif req.upload_data
+            request_body = req.upload_data
+          else
+            raise ArgumentError.new("Must provide either data or a filename when doing a PUT or POST")
           end
-          request_body = File.read(req.file_name)
-        else
-          request_body = req.upload_data
         end
 
         request_signature = WebMock::RequestSignature.new(
