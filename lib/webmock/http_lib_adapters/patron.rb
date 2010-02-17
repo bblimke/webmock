@@ -2,7 +2,7 @@ if defined?(Patron)
 
   module Patron
     class Session
-            
+
       def handle_request_with_webmock(req)
         request_signature = build_request_signature(req)
 
@@ -10,6 +10,7 @@ if defined?(Patron)
 
         if WebMock.registered_request?(request_signature)
           webmock_response = WebMock.response_for_request(request_signature)
+          handle_file_name(req, webmock_response)
           build_patron_response(webmock_response)
         elsif WebMock.net_connect_allowed?
           handle_request_without_webmock(req)
@@ -18,25 +19,39 @@ if defined?(Patron)
           WebMock.assertion_failure(message)
         end
       end
-      
+
       alias_method :handle_request_without_webmock, :handle_request
       alias_method :handle_request, :handle_request_with_webmock
-      
+
+      def handle_file_name(req, webmock_response)
+        if req.action == :get && req.file_name
+          File.open(req.file_name, "w") do |f|
+            f.write webmock_response.body
+          end
+        end
+      end
+
       def build_request_signature(req)
         uri = Addressable::URI.heuristic_parse(req.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
-        uri.user = req.username       
+        uri.user = req.username
         uri.password = req.password
+
+        if req.file_name && [:put, :post].include?(req.action)
+          request_body = File.read(req.file_name)
+        else
+          request_body = req.upload_data
+        end
 
         request_signature = WebMock::RequestSignature.new(
           req.action,
           uri.to_s,
-          :body => req.upload_data,
+          :body => request_body,
           :headers => req.headers
         )
         request_signature
       end
-      
+
       def build_patron_response(webmock_response)
         webmock_response.raise_error_if_any
         res = Patron::Response.new
@@ -45,7 +60,7 @@ if defined?(Patron)
         res.instance_variable_set(:@headers, webmock_response.headers)
         res
       end
-      
+
     end
   end
 
