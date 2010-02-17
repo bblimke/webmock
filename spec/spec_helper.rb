@@ -1,5 +1,7 @@
 require 'rubygems'
 require 'httpclient'
+require 'patron' unless RUBY_PLATFORM =~ /java/
+
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'spec'
@@ -29,7 +31,7 @@ def setup_expectations_for_real_example_com_request(options = {})
   defaults = { :host => "www.example.com", :port => 80, :method => "GET",
     :path => "/",
     :response_code => 200, :response_message => "OK",
-    :response_body => "<title>Google fake response</title>" }
+    :response_body => "<title>example</title>" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
 

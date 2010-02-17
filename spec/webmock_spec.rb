@@ -24,13 +24,17 @@ describe "WebMock", :shared => true do
       it "should make a real web request if request is not stubbed" do
         setup_expectations_for_real_example_com_request
         http_request(:get, "http://www.example.com/").
-          body.should =~ /.*Google fake response.*/
+          body.should =~ /.*example.*/
       end
 
       it "should make a real https request if request is not stubbed" do
-        setup_expectations_for_real_example_com_request(:port => 443)
-        http_request(:get, "https://www.example.com/").
-          body.should =~ /.*Google fake response.*/
+        setup_expectations_for_real_example_com_request(
+         :host => "www.paypal.com",
+         :port => 443,
+         :response_body => "hello paypal"
+        )
+        http_request(:get, "https://www.paypal.com/").
+          body.should =~ /.*paypal.*/
       end
 
       it "should return stubbed response if request was stubbed" do
