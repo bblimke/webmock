@@ -7,6 +7,8 @@ module PatronSpecHelper
     sess.username = uri.user
     sess.password = uri.password
     
+    sess.timeout = 10
+    
     response = sess.request(method, "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers] || {}, {
       :data => options[:body]
     })

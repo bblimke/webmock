@@ -23,10 +23,16 @@ if defined?(Patron)
       alias_method :handle_request_without_webmock, :handle_request
       alias_method :handle_request, :handle_request_with_webmock
 
+
+
       def handle_file_name(req, webmock_response)
         if req.action == :get && req.file_name
-          File.open(req.file_name, "w") do |f|
-            f.write webmock_response.body
+          begin
+            File.open(req.file_name, "w") do |f|
+              f.write webmock_response.body
+            end
+          rescue Errno::EACCES
+            raise ArgumentError.new("Unable to open specified file.")
           end
         end
       end
@@ -38,6 +44,9 @@ if defined?(Patron)
         uri.password = req.password
 
         if req.file_name && [:put, :post].include?(req.action)
+          if !File.exist?(req.file_name) || !File.readable?(req.file_name)
+            raise ArgumentError.new("Unable to open specified file.")
+          end
           request_body = File.read(req.file_name)
         else
           request_body = req.upload_data
