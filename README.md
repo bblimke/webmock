@@ -134,12 +134,19 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	stub_request(:get, "www.example.com").to_return(raw_response_file.read)
 
-### Custom response with dynamically evaluated response
+### Custom response with dynamically evaluated response part
 	
     stub_request(:any, 'www.example.net').
       to_return(:body => lambda { |request| request.body })
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
+    
+### Custom response with dynamic full response
+    
+    stub_request(:any, 'www.example.net').
+      to_return(lambda { |request| {:body => request.body} })
+
+    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	       
 
 ### Multiple responses for repeated requests
 

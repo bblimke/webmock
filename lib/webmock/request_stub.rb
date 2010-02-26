@@ -15,7 +15,7 @@ module WebMock
     end
 
     def to_return(*response_hashes)
-      @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| WebMock::Response.new(r)})
+      @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| WebMock::Response.for(r)})
       self
     end
 
