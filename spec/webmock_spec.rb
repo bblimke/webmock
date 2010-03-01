@@ -342,6 +342,12 @@ describe "WebMock", :shared => true do
 
         describe "dynamic responses" do
 
+          class Responder
+            def call(request)
+              {:body => request.body}
+            end
+          end
+
           it "should return evaluated response body" do
             stub_http_request(:post, "www.example.com").to_return(lambda { |request|
               {:body => request.body}
@@ -354,6 +360,18 @@ describe "WebMock", :shared => true do
               {:headers => request.headers}
             })
             http_request(:post, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
+          end
+
+          it "should create dynamic responses from Procs" do
+            stub_http_request(:post, "www.example.com").to_return do |request|
+              {:body => request.body}
+            end
+            http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
+          end
+
+          it "should create dynamic responses from objects responding to call" do
+            stub_http_request(:post, "www.example.com").to_return(Responder.new)
+            http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
           end
 
         end
