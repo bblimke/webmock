@@ -113,7 +113,7 @@ You can also use WebMock without RSpec or Test::Unit support:
 	
 	Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 
-### Custom response with body specified as IO object
+### Response with body specified as IO object
 
 	File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
 
@@ -134,19 +134,26 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	stub_request(:get, "www.example.com").to_return(raw_response_file.read)
 
-### Custom response with dynamically evaluated response part
-	
-    stub_request(:any, 'www.example.net').
-      to_return(:body => lambda { |request| request.body })
+### Responses dynamically evaluated from block
 
-    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
+    stub_request(:any, 'www.example.net').
+      to_return { |request| {:body => request.body} }
+
+    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
     
-### Custom response with dynamic full response
+### Responses dynamically evaluated from lambda
     
     stub_request(:any, 'www.example.net').
       to_return(lambda { |request| {:body => request.body} })
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	       
+
+### Responses with dynamically evaluated parts
+
+    stub_request(:any, 'www.example.net').
+      to_return(:body => lambda { |request| request.body })
+
+    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
 
 ### Multiple responses for repeated requests
 
@@ -161,7 +168,7 @@ You can also use WebMock without RSpec or Test::Unit support:
 ### Multiple responses using chained `to_return()` or `to_raise()` declarations
 
 	stub_request(:get, "www.example.com").
-		to_return({:body => "abc"}).then.  #then() just is a syntactic sugar
+		to_return({:body => "abc"}).then.  #then() is just a syntactic sugar
 		to_return({:body => "def"}).then.
 		to_raise(MyException)
 	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
