@@ -1,5 +1,26 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
+describe ResponseFactory do
+
+  describe "response_for" do
+
+    it "should create response with options passed as arguments" do
+      options = {:body => "abc", :headers => {:a => :b}}
+      Response.should_receive(:new).with(options).and_return(@response = mock(Response))
+      ResponseFactory.response_for(options).should == @response
+    end
+
+
+    it "should create dynamic response for argument responding to call" do
+      callable = mock(:call => {:body => "abc"})
+      DynamicResponse.should_receive(:new).with(callable).and_return(@response = mock(Response))
+      ResponseFactory.response_for(callable).should == @response
+    end
+
+  end
+
+end
+
 describe Response do
   before(:each) do
     @response = Response.new(:headers => {'A' => 'a'})
@@ -127,6 +148,59 @@ describe Response do
         @input.gsub!("Content-Length: 438", "Transfer-Encoding: chunked")
         @response = Response.new(@input)
         @response.body.size.should == 438
+      end
+
+    end
+
+    describe "with dynamically evaluated options" do
+
+      before(:each) do
+        @request_signature = RequestSignature.new(:post, "www.example.com", :body => "abc", :headers => {'A' => 'a'})
+      end
+
+      it "should have evaluated body" do
+        @response = Response.new(:body => lambda {|request| request.body})
+        @response.evaluate!(@request_signature).body.should == "abc"
+      end
+
+      it "should have evaluated headers" do
+        @response = Response.new(:headers => lambda {|request| request.headers})
+        @response.evaluate!(@request_signature).headers.should == {'A' => 'a'}
+      end
+
+      it "should have evaluated status" do
+        @response = Response.new(:status => lambda {|request| 302})
+        @response.evaluate!(@request_signature).status.should == 302
+      end
+
+    end
+
+  end
+
+  describe DynamicResponse do
+
+    describe "evaluating response options" do
+
+      it "should have evaluated options" do
+        request_signature = RequestSignature.new(:post, "www.example.com", :body => "abc", :headers => {'A' => 'a'})
+        response = DynamicResponse.new(lambda {|request|
+          {
+            :body => request.body,
+            :headers => request.headers,
+            :status => 302
+          }
+        })
+        response.evaluate!(request_signature)
+        response.body.should == "abc"
+        response.headers.should == {'A' => 'a'}
+        response.status.should == 302
+      end
+
+      it "should be equal to static response after evaluation" do
+        request_signature = RequestSignature.new(:post, "www.example.com", :body => "abc")
+        response = DynamicResponse.new(lambda {|request| {:body => request.body}})
+        response.evaluate!(request_signature)
+        response.should == Response.new(:body => "abc")
       end
 
     end

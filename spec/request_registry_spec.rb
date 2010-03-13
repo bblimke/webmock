@@ -49,10 +49,25 @@ describe RequestRegistry do
 
   describe "response for request" do
 
-    it "should registered response for request profile" do
-      @request_stub.instance_variable_set(:@responses, [@response = Response.new])
+    it "should report registered evaluated response for request profile" do
+      @request_stub.to_return(:body => "abc")
       RequestRegistry.instance.register_request_stub(@request_stub)
-      RequestRegistry.instance.response_for_request(@request_signature).should == @response
+      RequestRegistry.instance.response_for_request(@request_signature).should == Response.new(:body => "abc")
+    end
+
+    it "should report evaluated response" do
+      @request_stub.to_return {|request| {:body => request.method.to_s} }
+      RequestRegistry.instance.register_request_stub(@request_stub)
+      response1 = RequestRegistry.instance.response_for_request(@request_signature)
+      response1.should == Response.new(:body => "get")
+    end
+
+    it "should report clone of theresponse" do
+      @request_stub.to_return {|request| {:body => request.method.to_s} }
+      RequestRegistry.instance.register_request_stub(@request_stub)
+      response1 = RequestRegistry.instance.response_for_request(@request_signature)
+      response2 = RequestRegistry.instance.response_for_request(@request_signature)
+      response1.should_not be(response2)
     end
 
     it "should report nothing if no response for request is registered" do
@@ -61,15 +76,15 @@ describe RequestRegistry do
 
     it "should always return last registered matching response" do
       @request_stub1 = RequestStub.new(:get, "www.example.com")
-      @request_stub1.instance_variable_set(:@responses, [@response1 = Response.new])
+      @request_stub1.to_return(:body => "abc")
       @request_stub2 = RequestStub.new(:get, "www.example.com")
-      @request_stub2.instance_variable_set(:@responses, [@response2 = Response.new])
+      @request_stub2.to_return(:body => "def")
       @request_stub3 = RequestStub.new(:get, "www.example.org")
-      @request_stub3.instance_variable_set(:@responses, [@response3 = Response.new])
+      @request_stub3.to_return(:body => "ghj")
       RequestRegistry.instance.register_request_stub(@request_stub1)
       RequestRegistry.instance.register_request_stub(@request_stub2)
       RequestRegistry.instance.register_request_stub(@request_stub3)
-      RequestRegistry.instance.response_for_request(@request_signature).should == @response2
+      RequestRegistry.instance.response_for_request(@request_signature).should == Response.new(:body => "def")
     end
 
   end

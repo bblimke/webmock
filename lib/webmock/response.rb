@@ -24,7 +24,9 @@ module WebMock
       else
         self.options = options
       end
-      @options[:headers] = Util::Headers.normalize_headers(@options[:headers]) unless @options[:headers].is_a?(Proc)
+      if @options.has_key?(:headers) && !@options[:headers].is_a?(Proc)
+        @options[:headers] = Util::Headers.normalize_headers(@options[:headers])
+      end
     end
 
     def headers
@@ -56,12 +58,13 @@ module WebMock
       dup_response
     end
 
-    def evaluate(request_signature)
-      [:body, :headers].each do |attribute|
+    def evaluate!(request_signature)
+      [:body, :headers, :status].each do |attribute|
         if options[attribute].is_a?(Proc)
           options[attribute] = options[attribute].call(request_signature)
         end
       end
+      self
     end
 
     def ==(other)
@@ -111,8 +114,13 @@ module WebMock
       self.class.new(@responder)
     end
 
-    def evaluate(request_signature)
+    def evaluate!(request_signature)
       self.options = @responder.call(request_signature)
+      self
+    end
+    
+    def ==(other)
+      options == other.options
     end
   end
 end

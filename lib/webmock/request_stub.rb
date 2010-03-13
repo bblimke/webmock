@@ -1,7 +1,7 @@
 module WebMock
   class RequestStub
 
-    attr_accessor :request_profile, :responses
+    attr_accessor :request_profile
 
     def initialize(method, uri)
       @request_profile = RequestProfile.new(method, uri)
