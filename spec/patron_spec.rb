@@ -3,7 +3,6 @@ require 'webmock_spec'
 
 
 unless RUBY_PLATFORM =~ /java/
-  require 'patron'
   require 'patron_spec_helper'
   require 'tmpdir'
   require 'fileutils'

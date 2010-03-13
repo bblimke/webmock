@@ -2,7 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'webmock_spec'
 require 'ostruct'
 
-require 'httpclient'
 require 'httpclient_spec_helper'
 
 describe "Webmock with HTTPClient" do
