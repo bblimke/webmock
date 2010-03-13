@@ -356,13 +356,13 @@ describe "WebMock", :shared => true do
           end
 
           it "should return evaluated response headers" do
-            stub_http_request(:post, "www.example.com").to_return(lambda { |request|
+            stub_http_request(:get, "www.example.com").to_return(lambda { |request|
               {:headers => request.headers}
             })
-            http_request(:post, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
+            http_request(:get, "http://www.example.com/", :headers => {'A' => 'B'}).headers['A'].should == 'B'
           end
 
-          it "should create dynamic responses from Procs" do
+          it "should create dynamic responses from blocks" do
             stub_http_request(:post, "www.example.com").to_return do |request|
               {:body => request.body}
             end
