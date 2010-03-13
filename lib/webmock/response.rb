@@ -5,22 +5,24 @@ end
 
 module WebMock
 
-  class Response
-    def self.for(options)
+  class ResponseFactory
+    def self.response_for(options)
       if options.respond_to?(:call)
         WebMock::DynamicResponse.new(options)
       else
         WebMock::Response.new(options)
       end
     end
+  end
 
+  class Response
     attr_reader :options
 
     def initialize(options = {})
       if options.is_a?(IO) || options.is_a?(String)
-          self.options = read_raw_response(options)
-        else
-          self.options = options
+        self.options = read_raw_response(options)
+      else
+        self.options = options
       end
       @options[:headers] = Util::Headers.normalize_headers(@options[:headers]) unless @options[:headers].is_a?(Proc)
     end
@@ -98,39 +100,19 @@ module WebMock
 
   end
 
-  class DynamicResponse
+  class DynamicResponse < Response
     attr_accessor :responder
 
     def initialize(responder)
       @responder = responder
     end
 
-    def headers
-      @headers
-    end
-
-    def body
-      @body || ''
+    def dup
+      self.class.new(@responder)
     end
 
     def evaluate(request_signature)
-      response = responder.call(request_signature)
-      @headers = response[:headers]
-      @body = response[:body]
-      @status = response[:status]
-      @exception = response[:exception]
-    end
-
-    def raise_error_if_any
-      raise @exception.new('Exception from WebMock') if @exception
-    end
-
-    def status
-      @status || 200
-    end
-
-    def ==(other)
-      other.is_a?(self.class) && other.responder == self.responder
+      self.options = @responder.call(request_signature)
     end
   end
 end

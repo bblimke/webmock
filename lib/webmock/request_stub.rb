@@ -16,15 +16,17 @@ module WebMock
 
     def to_return(*response_hashes, &block)
       if block
-        @responses_sequences << ResponsesSequence.new([WebMock::Response.for(block)])
+        @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(block)])
       else
-        @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| WebMock::Response.for(r)})
+        @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| ResponseFactory.response_for(r)})
       end
       self
     end
 
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e| WebMock::Response.new(:exception => e)})
+      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e| 
+        ResponseFactory.response_for(:exception => e)
+      })
       self
     end
 
