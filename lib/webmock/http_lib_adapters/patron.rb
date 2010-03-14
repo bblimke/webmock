@@ -66,6 +66,7 @@ if defined?(Patron)
       end
 
       def build_patron_response(webmock_response)
+        raise Patron::TimeoutError if webmock_response.should_timeout        
         webmock_response.raise_error_if_any
         res = Patron::Response.new
         res.instance_variable_set(:@body, webmock_response.body)

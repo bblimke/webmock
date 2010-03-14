@@ -124,6 +124,28 @@ describe RequestStub do
 
   end
   
+  describe "to_timeout" do
+
+     it "should assign response with timeout" do
+       @request_stub.to_timeout
+       @request_stub.response.should_timeout.should be_true
+     end
+
+     it "should assign sequence of responses with response with timeout" do
+       @request_stub.to_return(:body => "abc").then.to_timeout
+       @request_stub.response.body.should == "abc"
+       @request_stub.response.should_timeout.should be_true
+     end
+
+     it "should allow multiple timeouts to be declared" do
+       @request_stub.to_timeout.then.to_timeout.then.to_return(:body => "abc")
+       @request_stub.response.should_timeout.should be_true
+       @request_stub.response.should_timeout.should be_true
+       @request_stub.response.body.should == "abc"
+     end
+
+   end
+  
   
   describe "times" do
     

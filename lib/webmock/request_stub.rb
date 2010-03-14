@@ -29,6 +29,11 @@ module WebMock
       })
       self
     end
+    
+    def to_timeout
+      @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_timeout => true)])
+      self
+    end
 
     def response
       if @responses_sequences.empty?

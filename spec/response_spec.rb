@@ -64,6 +64,20 @@ describe Response do
     end
 
   end
+  
+  describe "timeout" do
+
+    it "should know if it should timeout" do
+      @response = Response.new(:should_timeout => true)
+      @response.should_timeout.should be_true
+    end
+
+    it "should not timeout by default" do
+      @response = Response.new
+      @response.should_timeout.should be_false
+    end
+
+  end
 
   describe "body" do
 

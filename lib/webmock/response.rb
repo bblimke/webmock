@@ -60,17 +60,24 @@ module WebMock
       raise @exception.new('Exception from WebMock') if @exception
     end
 
+    def should_timeout
+      @should_timeout == true
+    end
+
     def options=(options)
       self.headers = options[:headers]
       self.status = options[:status]
       self.body = options[:body]
       @exception = options[:exception]
+      @should_timeout = options[:should_timeout]
     end
 
     def evaluate!(request_signature)
       self.body = @body.call(request_signature) if @body.is_a?(Proc)
       self.headers = @headers.call(request_signature) if @headers.is_a?(Proc)
       self.status = @status.call(request_signature) if @status.is_a?(Proc)
+      @should_timeout = @should_timeout.call(request_signature) if @should_timeout.is_a?(Proc)
+      @exception = @exception.call(request_signature) if @exception.is_a?(Proc)
       self
     end
 
@@ -78,7 +85,8 @@ module WebMock
       self.body == other.body &&
       self.headers === other.headers &&
       self.status == other.status &&
-      self.exception == other.exception
+      self.exception == other.exception &&
+      self.should_timeout == other.should_timeout
     end
 
     private

@@ -127,7 +127,7 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	req = Net::HTTP::Get.new("/")
 	Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
-	
+		
 ### Replaying raw responses recorded with `curl -is`
 
 	`curl -is www.example.com > /tmp/example_curl_-is_output.txt`
@@ -162,6 +162,18 @@ You can also use WebMock without RSpec or Test::Unit support:
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	
 
+### Raising errors
+
+	stub_request(:any, 'www.example.net').to_raise(StandardError)
+
+    RestClient.post('www.example.net', 'abc')    # ===> StandardError
+
+### Raising timeout errors
+
+	stub_request(:any, 'www.example.net').to_timeout
+
+	RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout	
+
 ### Multiple responses for repeated requests
 
 	stub_request(:get, "www.example.com").to_return({:body => "abc"}, {:body => "def"})
@@ -172,7 +184,7 @@ You can also use WebMock without RSpec or Test::Unit support:
 	
 	Net::HTTP.get('www.example.com', '/')    # ===> "def\n" 
 
-### Multiple responses using chained `to_return()` or `to_raise()` declarations
+### Multiple responses using chained `to_return()`, `to_raise()` or `to_timeout` declarations
 
 	stub_request(:get, "www.example.com").
 		to_return({:body => "abc"}).then.  #then() is just a syntactic sugar

@@ -59,6 +59,7 @@ if defined?(HTTPClient)
       response.reason=webmock_response.status[1]
       webmock_response.headers.to_a.each { |name, value| response.header.set(name, value) }
 
+      raise HTTPClient::TimeoutError if webmock_response.should_timeout              
       webmock_response.raise_error_if_any
 
       block.call(nil, body) if block

@@ -32,6 +32,10 @@ module NetHTTPSpecHelper
       [k, v.flatten]
     }.flatten]
   end
+  
+  def client_timeout_exception_class
+    Timeout::Error
+  end
 
   # Sets several expectations that a real HTTP request makes it
   # past WebMock to the socket layer. You can use this when you need to check

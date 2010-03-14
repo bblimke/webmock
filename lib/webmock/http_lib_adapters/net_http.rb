@@ -122,6 +122,8 @@ module Net  #:nodoc: all
 
       response.extend StubResponse
 
+      raise Timeout::Error if webmock_response.should_timeout
+
       webmock_response.raise_error_if_any
 
       yield response if block_given?

@@ -291,6 +291,25 @@ describe "WebMock", :shared => true do
       end
 
 
+   describe "raising timeout errors" do
+          
+        it "should raise timeout exception if declared in a stubbed response" do
+          stub_http_request(:get, "www.example.com").to_timeout
+          lambda {
+            http_request(:get, "http://www.example.com/")
+          }.should raise_error(client_timeout_exception_class)
+        end
+
+        it "should raise exception if declared in a stubbed response after returning declared response" do
+          stub_http_request(:get, "www.example.com").to_return(:body => "abc").then.to_timeout
+          http_request(:get, "http://www.example.com/").body.should == "abc"
+          lambda {
+            http_request(:get, "http://www.example.com/")
+          }.should raise_error(client_timeout_exception_class)
+        end
+
+    end
+
       describe "returning stubbed responses" do
 
         it "should return declared body" do

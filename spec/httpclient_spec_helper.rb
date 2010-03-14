@@ -25,6 +25,10 @@ module HTTPClientSpecHelper
     })
   end
 
+  def client_timeout_exception_class
+    HTTPClient::TimeoutError
+  end
+
   def default_client_request_headers(request_method = nil, has_body = false)
     {'Content-Type'=>'application/x-www-form-urlencoded'} if request_method == 'POST' && has_body
   end
