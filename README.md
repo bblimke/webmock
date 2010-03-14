@@ -121,6 +121,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 	Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 	
+### Response with custom status message
+
+	stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
+
+	req = Net::HTTP::Get.new("/")
+	Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
+	
 ### Replaying raw responses recorded with `curl -is`
 
 	`curl -is www.example.com > /tmp/example_curl_-is_output.txt`

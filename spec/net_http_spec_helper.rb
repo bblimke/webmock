@@ -21,7 +21,9 @@ module NetHTTPSpecHelper
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(headers),
-      :status => response.code })
+      :status => response.code, 
+      :message => response.message
+    })
   end
   
   def default_client_request_headers(request_method = nil, has_body = false)

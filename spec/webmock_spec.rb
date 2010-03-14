@@ -304,10 +304,25 @@ describe "WebMock", :shared => true do
           response.headers["Content-Length"].should == "8888"
         end
 
-        it "should return declared status" do
+        it "should return declared status code" do
           stub_http_request(:get, "www.example.com").to_return(:status => 500)
           http_request(:get, "http://www.example.com/").status.should == "500"
         end
+        
+        it "should return declared status message" do
+          stub_http_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
+          http_request(:get, "http://www.example.com/").message.should == "Internal Server Error"
+        end
+        
+        it "should return default status code" do
+          stub_http_request(:get, "www.example.com")
+          http_request(:get, "http://www.example.com/").status.should == "200"
+        end
+        
+        it "should return default empty message" do
+          stub_http_request(:get, "www.example.com")
+          http_request(:get, "http://www.example.com/").message.should == ""
+        end      
 
         it "should return body declared as IO" do
           stub_http_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
@@ -401,6 +416,10 @@ describe "WebMock", :shared => true do
           it "should return recorded status" do
             @response.status.should == "202"
           end
+          
+          it "should return recorded status message" do
+            @response.message.should == "OK"
+          end
 
           it "should ensure file is closed" do
             @file.should be_closed
@@ -431,6 +450,10 @@ describe "WebMock", :shared => true do
 
           it "should return recorded status" do
             @response.status.should == "202"
+          end
+          
+          it "should return recorded status message" do
+            @response.message.should == "OK"
           end
         end
 

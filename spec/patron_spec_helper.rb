@@ -16,7 +16,9 @@ module PatronSpecHelper
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(response.headers),
-      :status => response.status.to_s })
+      :status => response.status.to_s,
+      :message => response.status_line
+    })
   end
   
   def default_client_request_headers(request_method = nil, has_body = false)

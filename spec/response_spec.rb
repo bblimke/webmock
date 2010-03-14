@@ -34,13 +34,18 @@ describe Response do
 
   describe "status" do
 
-    it "should be 200 by default" do
-      @response.status.should == 200
+    it "should have 200 code and empty message by default" do
+      @response.status.should == [200, ""]
     end
 
     it "should return assigned status" do
       @response = Response.new(:status => 500)
-      @response.status.should == 500
+      @response.status.should == [500, ""]
+    end
+
+    it "should return assigned message" do
+      @response = Response.new(:status => [500, "Internal Server Error"])
+      @response.status.should == [500, "Internal Server Error"]
     end
 
   end
@@ -99,7 +104,7 @@ describe Response do
 
 
       it "should read status" do
-        @response.status.should == 202
+        @response.status.should == [202, "OK"]
       end
 
       it "should read headers" do
@@ -128,7 +133,7 @@ describe Response do
       end
 
       it "should read status" do
-        @response.status.should == 202
+        @response.status.should == [202, "OK"]
       end
 
       it "should read headers" do
@@ -170,7 +175,7 @@ describe Response do
 
       it "should have evaluated status" do
         @response = Response.new(:status => lambda {|request| 302})
-        @response.evaluate!(@request_signature).status.should == 302
+        @response.evaluate!(@request_signature).status.should == [302, ""]
       end
 
     end
@@ -193,7 +198,7 @@ describe Response do
         response.evaluate!(request_signature)
         response.body.should == "abc"
         response.headers.should == {'A' => 'a'}
-        response.status.should == 302
+        response.status.should == [302, ""]
       end
 
       it "should be equal to static response after evaluation" do

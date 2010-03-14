@@ -14,69 +14,79 @@ module WebMock
       end
     end
   end
-
+  
   class Response
-    attr_reader :options
-
     def initialize(options = {})
       if options.is_a?(IO) || options.is_a?(String)
         self.options = read_raw_response(options)
       else
         self.options = options
       end
-      if @options.has_key?(:headers) && !@options[:headers].is_a?(Proc)
-        @options[:headers] = Util::Headers.normalize_headers(@options[:headers])
-      end
     end
 
     def headers
-      @options[:headers]
+      @headers
+    end
+    
+    def headers=(headers)
+      @headers = headers
+      if @headers && !@headers.is_a?(Proc)
+        @headers = Util::Headers.normalize_headers(@headers)
+      end
     end
 
     def body
-      return '' unless @options.has_key?(:body)
+      @body || ''
+    end
+    
+    def body=(body)
+      @body = body
       stringify_body!
-      @options[:body]
     end
 
     def status
-      @options.has_key?(:status) ? @options[:status] : 200
+      @status || [200, ""]
+    end
+
+    def status=(status)
+      @status = status.is_a?(Integer) ? [status, ""] : status
+    end
+
+    def exception
+      @exception
     end
 
     def raise_error_if_any
-      raise @options[:exception].new('Exception from WebMock') if @options.has_key?(:exception)
+      raise @exception.new('Exception from WebMock') if @exception
     end
 
     def options=(options)
-      @options = options
-      stringify_body!
-    end
-
-    def dup
-      dup_response = super
-      dup_response.options = options.dup
-      dup_response
+      self.headers = options[:headers]
+      self.status = options[:status]
+      self.body = options[:body]
+      @exception = options[:exception]
     end
 
     def evaluate!(request_signature)
-      [:body, :headers, :status].each do |attribute|
-        if options[attribute].is_a?(Proc)
-          options[attribute] = options[attribute].call(request_signature)
-        end
-      end
+      self.body = @body.call(request_signature) if @body.is_a?(Proc)
+      self.headers = @headers.call(request_signature) if @headers.is_a?(Proc)
+      self.status = @status.call(request_signature) if @status.is_a?(Proc)
       self
     end
 
     def ==(other)
-      options == other.options
+      self.body == other.body &&
+      self.headers === other.headers &&
+      self.status == other.status &&
+      self.exception == other.exception
     end
 
     private
 
     def stringify_body!
-      if @options[:body].is_a?(IO)
-        io = @options[:body]
-        @options[:body] = io.read
+      if @body.is_a?(IO)
+        io = @body
+        @body = io.read
         io.close
       end
     end
@@ -97,7 +107,7 @@ module WebMock
       response.each_header {|name, value| options[:headers][name] = value}
       options[:headers]['transfer-encoding'] = transfer_encoding if transfer_encoding
       options[:body] = response.read_body
-      options[:status] = response.code.to_i
+      options[:status] = [response.code.to_i, response.message]
       options
     end
 
@@ -117,10 +127,6 @@ module WebMock
     def evaluate!(request_signature)
       self.options = @responder.call(request_signature)
       self
-    end
-    
-    def ==(other)
-      options == other.options
     end
   end
 end

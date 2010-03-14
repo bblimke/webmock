@@ -69,7 +69,8 @@ if defined?(Patron)
         webmock_response.raise_error_if_any
         res = Patron::Response.new
         res.instance_variable_set(:@body, webmock_response.body)
-        res.instance_variable_set(:@status, webmock_response.status)
+        res.instance_variable_set(:@status, webmock_response.status[0])
+        res.instance_variable_set(:@status_line, webmock_response.status[1])
         res.instance_variable_set(:@headers, webmock_response.headers)
         res
       end

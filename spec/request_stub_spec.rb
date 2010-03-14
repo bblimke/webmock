@@ -40,7 +40,7 @@ describe RequestStub do
     it "should assign response with provided options" do
       @request_stub.to_return(:body => "abc", :status => 500)
       @request_stub.response.body.should == "abc"
-      @request_stub.response.status.should == 500
+      @request_stub.response.status.should == [500, ""]
     end
 
     it "should assign responses with provided options" do

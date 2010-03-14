@@ -46,5 +46,4 @@ describe "Webmock with Net:HTTP" do
     }.should raise_error("both of body argument and HTTPRequest#body set")
   end
 
-
 end

@@ -114,7 +114,7 @@ module Net  #:nodoc: all
     alias_method :connect, :connect_with_webmock
 
     def build_net_http_response(webmock_response, &block)
-      response = Net::HTTPResponse.send(:response_class, webmock_response.status.to_s).new("1.0", webmock_response.status.to_s, "")
+      response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
       response.instance_variable_set(:@body, webmock_response.body)
       webmock_response.headers.to_a.each { |name, value| response[name] = value }
 

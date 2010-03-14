@@ -20,7 +20,9 @@ module HTTPClientSpecHelper
     OpenStruct.new({
       :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
       :headers => Hash[*response.header.all.flatten],
-      :status => response.code.to_s })
+      :status => response.code.to_s,
+      :message => response.reason
+    })
   end
 
   def default_client_request_headers(request_method = nil, has_body = false)

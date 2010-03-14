@@ -55,8 +55,8 @@ if defined?(HTTPClient)
     def build_httpclient_response(webmock_response, stream = false, &block)
       body = stream ? StringIO.new(webmock_response.body) : webmock_response.body
       response = HTTP::Message.new_response(body)
-      response.header.init_response(webmock_response.status)
-
+      response.header.init_response(webmock_response.status[0])
+      response.reason=webmock_response.status[1]
       webmock_response.headers.to_a.each { |name, value| response.header.set(name, value) }
 
       webmock_response.raise_error_if_any
