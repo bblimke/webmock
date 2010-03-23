@@ -93,7 +93,7 @@ module Net  #:nodoc: all
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?
         connect_without_webmock
-        request_without_webmock(request, body, &block)
+        request_without_webmock(request, nil, &block)
       else
         message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
         WebMock.assertion_failure(message)
