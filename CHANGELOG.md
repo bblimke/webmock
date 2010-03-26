@@ -1,5 +1,40 @@
 #Changelog
 
+## 1.0.0
+
+* Added support for [Patron](http://toland.github.com/patron/)
+
+* Responses dynamically evaluated from block (idea and implementation by Tom Ward)
+
+		stub_request(:any, 'www.example.net').
+		     to_return { |request| {:body => request.body} }
+
+		RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
+
+* Responses dynamically evaluated from lambda (idea and implementation by Tom Ward)
+
+    	stub_request(:any, 'www.example.net').
+	      to_return(lambda { |request| {:body => request.body} })
+
+	    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	       
+
+* Response with custom status message 
+
+		stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
+
+		req = Net::HTTP::Get.new("/")
+		Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
+
+* Raising timeout errors (suggested by Jeffrey Jones)
+
+		stub_request(:any, 'www.example.net').to_timeout
+
+		RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
+
+### Bug fixes
+
+* Fixed issue where Net::HTTP adapter didn't work for requests with body responding to read (reported by Tekin Suleyman)
+
 ## 0.9.1
 
 * Fixed issue where response status code was not read from raw (curl -is) responses
@@ -14,12 +49,12 @@
 		#or 
 		assert_requested(:post, "www.example.com") { |req| req.body == "abc" }
 
-* Matching request body against regular expressions
+* Matching request body against regular expressions (suggested by Ben Pickles)
 
 		stub_request(:post, "www.example.com").with(:body => /^.*world$/).to_return(:body => "abc")
 		RestClient.post('www.example.com', 'hello world')    # ===> "abc\n"
 	
-* Matching request headers against regular expressions
+* Matching request headers against regular expressions (suggested by Ben Pickles)
 
 		stub_request(:post, "www.example.com").with(:headers => {"Content-Type" => /image\/.+/}).to_return(:body => "abc")
 		RestClient.post('www.example.com', '', {'Content-Type' => 'image/png'})    # ===> "abc\n"
