@@ -389,10 +389,31 @@ I'm particularly interested in how the DSL could be improved.
 
 ## Credits
 
+The initial lines of this project were written during New Bamboo [Hack Day](http://blog.new-bamboo.co.uk/2009/11/13/hackday-results)
 Thanks to my fellow [Bambinos](http://new-bamboo.co.uk/) for all the great suggestions!
 
+People who submitted patches and new features or suggested improvements. Many thanks to these people:
+
+* Ben Pickles
+* Mark Evans
+* Ivan Vega
+* Piotr Usewicz
+* Nick Plante
+* Nick Quaranto
+* Diego E. "Flameeyes" Pettenò
+* Niels Meersschaert
+* Mack Earnhardt
+* Arvicco
+* Sergio Gil
+* Jeffrey Jones
+* Tekin Suleyman
+* Tom Ward
+* Nadim Bitar
+
+## Background
+
 Thank you Fakeweb! This library was inspired by [FakeWeb](fakeweb.rubyforge.org).
-I took couple of solutions from that project. I also copied some code i.e Net:HTTP adapter. 
+I imported some solutions from that project to WebMock. I also copied some code i.e Net:HTTP adapter. 
 Fakeweb architecture unfortunately didn't allow me to extend it easily with the features I needed.
 I also preferred some things to work differently i.e request stub precedence.
 
