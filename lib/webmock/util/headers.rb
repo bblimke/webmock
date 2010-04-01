@@ -12,6 +12,11 @@ module WebMock
         Hash[*array.flatten]
       end
 
+      def self.sorted_headers_string(headers)
+        headers = WebMock::Util::Headers.normalize_headers(headers)
+        '{' + headers.inspect[1..-2].split(', ').sort.join(', ').gsub("\"","'").gsub("\\","") + '}'
+      end
+      
       def self.decode_userinfo_from_header(header)
         header.sub(/^Basic /, "").unpack("m").first
       end

@@ -13,7 +13,7 @@ module WebMock
       string = "#{self.method.to_s.upcase} #{WebMock::Util::URI.strip_default_port_from_uri_string(self.uri.to_s)}"
       string << " with body '#{body.to_s}'" if body && body.to_s != ''
       if headers && !headers.empty?
-        string << " with headers #{WebMock::Util::Headers.normalize_headers(headers).inspect.gsub("\"","'")}"
+        string << " with headers #{WebMock::Util::Headers.sorted_headers_string(headers)}"
       end      
       string
     end
