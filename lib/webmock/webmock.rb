@@ -28,9 +28,9 @@ module WebMock
     Config.instance.allow_net_connect = true
   end
 
-  def disable_net_connect!(localhost = false)
+  def disable_net_connect!(options = {})
     Config.instance.allow_net_connect = false
-    Config.instance.allow_localhost = localhost
+    Config.instance.allow_localhost = options[:allow_localhost]
   end
 
   def net_connect_allowed?(uri = nil)

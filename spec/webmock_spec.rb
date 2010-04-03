@@ -62,7 +62,7 @@ describe "WebMock", :shared => true do
 
     describe "is not allowed with exception for localhost" do
       before(:each) do
-        WebMock.disable_net_connect!(true)
+        WebMock.disable_net_connect!(:allow_localhost => true)
       end
 
       it "should return stubbed response if request was stubbed" do
