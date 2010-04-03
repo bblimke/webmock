@@ -19,7 +19,7 @@ if defined?(HTTPClient)
         webmock_response = WebMock.response_for_request(request_signature)
         response = build_httpclient_response(webmock_response, stream, &block)
         conn.push(response)
-      elsif WebMock.net_connect_allowed?
+      elsif WebMock.net_connect_allowed?(req.header.request_uri)
         if stream
           do_get_stream_without_webmock(req, proxy, conn, &block)
         else
@@ -35,7 +35,7 @@ if defined?(HTTPClient)
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
       
-      if WebMock.registered_request?(request_signature) || WebMock.net_connect_allowed?
+      if WebMock.registered_request?(request_signature) || WebMock.net_connect_allowed?(uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
       else
         message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"

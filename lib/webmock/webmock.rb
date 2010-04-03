@@ -28,12 +28,16 @@ module WebMock
     Config.instance.allow_net_connect = true
   end
 
-  def disable_net_connect!
+  def disable_net_connect!(localhost = false)
     Config.instance.allow_net_connect = false
+    Config.instance.allow_localhost = localhost
   end
 
-  def net_connect_allowed?
-    Config.instance.allow_net_connect
+  def net_connect_allowed?(uri = nil)
+    if uri.class == String
+      uri = URI::parse(uri)
+    end
+    Config.instance.allow_net_connect || ( Config.instance.allow_localhost && uri.is_a?(URI) && uri.host == 'localhost' )
   end
 
   def registered_request?(request_signature)

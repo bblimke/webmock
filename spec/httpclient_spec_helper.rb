@@ -29,6 +29,10 @@ module HTTPClientSpecHelper
     HTTPClient::TimeoutError
   end
 
+  def connection_refused_exception_class
+    Errno::ECONNREFUSED
+  end
+
   def default_client_request_headers(request_method = nil, has_body = false)
     {'Content-Type'=>'application/x-www-form-urlencoded'} if request_method == 'POST' && has_body
   end

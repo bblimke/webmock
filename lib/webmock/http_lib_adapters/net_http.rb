@@ -91,7 +91,7 @@ module Net  #:nodoc: all
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
         build_net_http_response(webmock_response, &block)
-      elsif WebMock.net_connect_allowed?
+      elsif WebMock.net_connect_allowed?(uri)
         connect_without_webmock
         request_without_webmock(request, nil, &block)
       else
