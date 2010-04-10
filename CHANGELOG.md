@@ -25,15 +25,25 @@
 		req = Net::HTTP::Get.new("/")
 		Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
 
-* Raising timeout errors (suggested by Jeffrey Jones)
+* Raising timeout errors (suggested by Jeffrey Jones) (compatibility with Ruby 1.8.6 by Mack Earnhardt)
 
 		stub_request(:any, 'www.example.net').to_timeout
 
 		RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
 
+* External requests can be disabled while allowing localhost (idea and implementation by Mack Earnhardt)
+
+		WebMock.disable_net_connect!(:allow_localhost => true)
+
+		Net::HTTP.get('www.something.com', '/')   # ===> Failure
+
+		Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
+
+
 ### Bug fixes
 
 * Fixed issue where Net::HTTP adapter didn't work for requests with body responding to read (reported by Tekin Suleyman)
+* Fixed issue where request stub with headers declared as nil was matching requests with non empty headers
 
 ## 0.9.1
 
