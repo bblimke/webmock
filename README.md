@@ -14,6 +14,7 @@ Features
 * Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
 * Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
 * Support for HTTPClient library (both sync and async requests)
+* Support for Patron library
 * Easy to extend to other HTTP libraries
 
 Installation
