@@ -1,10 +1,16 @@
 module WebMock
   extend self
 
+  def self.version
+    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
+      f.read.strip
+    }
+  end
+
   def stub_request(method, uri)
     RequestRegistry.instance.register_request_stub(RequestStub.new(method, uri))
   end
-  
+
   alias_method :stub_http_request, :stub_request
 
   def request(method, uri)
@@ -51,7 +57,7 @@ module WebMock
   def reset_webmock
     WebMock::RequestRegistry.instance.reset_webmock
   end
-  
+
   def assertion_failure(message)
     raise message
   end

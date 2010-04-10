@@ -8,6 +8,14 @@ end
 
 class MyException < StandardError; end;
 
+describe "WebMock version" do
+  
+  it "should report version" do
+    WebMock.version.should == open(File.join(File.dirname(__FILE__), "..", "VERSION")).read.strip
+  end
+  
+end
+
 describe "WebMock", :shared => true do
   before(:each) do
     WebMock.disable_net_connect!
