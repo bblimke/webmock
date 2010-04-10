@@ -32,7 +32,7 @@ describe RequestPattern do
   end
 
 
-  class RequestPattern
+  class WebMock::RequestPattern
     def match(request_signature)
       self.matches?(request_signature)
     end
