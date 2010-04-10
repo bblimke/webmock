@@ -53,37 +53,7 @@ module Net  #:nodoc: all
     end
 
     def request_with_webmock(request, body = nil, &block)
-      protocol = use_ssl? ? "https" : "http"
-
-      path = request.path
-      path = Addressable::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
-
-      if request["authorization"] =~ /^Basic /
-        userinfo = WebMock::Util::Headers.decode_userinfo_from_header(request["authorization"])
-        userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo) + "@"
-      else
-        userinfo = ""
-      end
-
-      uri = "#{protocol}://#{userinfo}#{self.address}:#{self.port}#{path}"
-      method = request.method.downcase.to_sym
-
-      headers = Hash[*request.to_hash.map {|k,v| [k, v.flatten]}.flatten]
-       
-      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
-
-      if request.body_stream
-        body = request.body_stream.read
-        request.body_stream = nil
-      end
-
-      if body != nil && body.respond_to?(:read)
-        request.set_body_internal body.read
-      else
-        request.set_body_internal body
-      end
-
-      request_signature = WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
+      request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -91,7 +61,7 @@ module Net  #:nodoc: all
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
         build_net_http_response(webmock_response, &block)
-      elsif WebMock.net_connect_allowed?(uri)
+      elsif WebMock.net_connect_allowed?(request_signature.uri)
         connect_without_webmock
         request_without_webmock(request, nil, &block)
       else
@@ -130,47 +100,69 @@ module Net  #:nodoc: all
 
       response
     end
-    
+
   end
 
 end
 
 module WebMock
   module NetHTTPUtility
-    def self.puts_warning_for_net_http_around_advice_libs_if_needed
-      libs = {"Samuel" => defined?(Samuel)}
-      warnings = libs.select { |_, loaded| loaded }.map do |name, _|
+
+    def self.request_signature_from_request(net_http, request, body = nil)
+      protocol = net_http.use_ssl? ? "https" : "http"
+
+      path = request.path
+      path = Addressable::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
+
+      if request["authorization"] =~ /^Basic /
+        userinfo = WebMock::Util::Headers.decode_userinfo_from_header(request["authorization"])
+        userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo) + "@"
+      else
+        userinfo = ""
+      end
+
+      uri = "#{protocol}://#{userinfo}#{net_http.address}:#{net_http.port}#{path}"
+      method = request.method.downcase.to_sym
+
+      headers = Hash[*request.to_hash.map {|k,v| [k, v.flatten]}.flatten]
+
+      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
+
+      if request.body_stream
+        body = request.body_stream.read
+        request.body_stream = nil
+      end
+
+      if body != nil && body.respond_to?(:read)
+        request.set_body_internal body.read
+      else
+        request.set_body_internal body
+      end
+
+      WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
+    end
+
+
+    def self.record_loaded_net_http_replacement_libs
+      libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
+      @loaded_net_http_replacement_libs = libs.map { |name, loaded| name if loaded }.compact
+    end
+
+    def self.puts_warning_for_net_http_replacement_libs_if_needed
+      libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
+      warnings = libs.select { |_, loaded| loaded }.
+        reject { |name, _| @loaded_net_http_replacement_libs.include?(name) }.
+        map do |name, _|
         <<-TEXT.gsub(/ {10}/, '')
-        \e[1mWarning: WebMock was loaded after #{name}\e[0m
-          * #{name}'s code is being ignored when a request is handled by WebMock,
-          because both libraries work by patching Net::HTTP.
-          * To fix this, just reorder your requires so that WebMock is before #{name}.
+        \e[1mWarning: #{name} was loaded after WebMock\e[0m
+          * WebMock's code is being ignored, because #{name} replaces parts of
+          Net::HTTP without deferring to other libraries. This will break Net::HTTP requests.
+          * To fix this, just reorder your requires so that #{name} is before WebMock.
           TEXT
         end
         $stderr.puts "\n" + warnings.join("\n") + "\n" if warnings.any?
       end
-
-      def self.record_loaded_net_http_replacement_libs
-        libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
-        @loaded_net_http_replacement_libs = libs.map { |name, loaded| name if loaded }.compact
-      end
-
-      def self.puts_warning_for_net_http_replacement_libs_if_needed
-        libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
-        warnings = libs.select { |_, loaded| loaded }.
-          reject { |name, _| @loaded_net_http_replacement_libs.include?(name) }.
-          map do |name, _|
-          <<-TEXT.gsub(/ {10}/, '')
-          \e[1mWarning: #{name} was loaded after WebMock\e[0m
-            * WebMock's code is being ignored, because #{name} replaces parts of
-            Net::HTTP without deferring to other libraries. This will break Net::HTTP requests.
-            * To fix this, just reorder your requires so that #{name} is before WebMock.
-            TEXT
-          end
-          $stderr.puts "\n" + warnings.join("\n") + "\n" if warnings.any?
-        end
-      end
     end
+  end
 
-    WebMock::NetHTTPUtility.record_loaded_net_http_replacement_libs
-    WebMock::NetHTTPUtility.puts_warning_for_net_http_around_advice_libs_if_needed
+  WebMock::NetHTTPUtility.record_loaded_net_http_replacement_libs

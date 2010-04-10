@@ -40,10 +40,11 @@ module WebMock
   end
 
   def net_connect_allowed?(uri = nil)
-    if uri.class == String
-      uri = URI::parse(uri)
+    if uri.is_a?(String)
+      uri = WebMock::Util::URI.normalize_uri(uri)
     end
-    Config.instance.allow_net_connect || ( Config.instance.allow_localhost && uri.is_a?(URI) && uri.host == 'localhost' )
+    Config.instance.allow_net_connect || 
+      (Config.instance.allow_localhost && uri.is_a?(Addressable::URI) && uri.host == 'localhost')
   end
 
   def registered_request?(request_signature)

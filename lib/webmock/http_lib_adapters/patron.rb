@@ -12,7 +12,7 @@ if defined?(Patron)
           webmock_response = WebMock.response_for_request(request_signature)
           handle_file_name(req, webmock_response)
           build_patron_response(webmock_response)
-        elsif WebMock.net_connect_allowed?(req.url)
+        elsif WebMock.net_connect_allowed?(request_signature.uri)
           handle_request_without_webmock(req)
         else
           message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
