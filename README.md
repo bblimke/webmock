@@ -221,11 +221,11 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### External requests can be disabled while allowing localhost
 	
-  WebMock.disable_net_connect!(:allow_localhost => true)
+	WebMock.disable_net_connect!(:allow_localhost => true)
 	
-  Net::HTTP.get('www.something.com', '/')   # ===> Failure
+	Net::HTTP.get('www.something.com', '/')   # ===> Failure
 	
-  Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
+	Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
 
 ## Setting Expectations
 
