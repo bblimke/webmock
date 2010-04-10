@@ -14,16 +14,6 @@ describe "loading other Net::HTTP based libraries" do
     `ruby #{load_path_opts} -e "#{requires}; #{additional_code}" 2>&1 | cat`
   end
 
-  it "should requiring samuel before webmock prints warning" do
-    output = capture_output_from_requiring %w(samuel webmock)
-    output.should match(%r(Warning: WebMock was loaded after Samuel))
-  end
-
-  it "should requiring samuel after webmock does not print warning" do
-    output = capture_output_from_requiring %w(webmock samuel)
-    output.should be_empty
-  end
-
   it "should requiring right http connection before webmock and then connecting does not print warning" do
     additional_code = "Net::HTTP.start('example.com')"
     output = capture_output_from_requiring %w(right_http_connection webmock), additional_code
