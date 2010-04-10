@@ -22,7 +22,11 @@ module PatronSpecHelper
   end
 
   def default_client_request_headers(request_method = nil, has_body = false)
-    nil
+    if Patron.version >= "0.4.6"
+      {'Expect'=>''}
+    else
+      nil
+    end
   end
 
   def client_timeout_exception_class

@@ -13,7 +13,7 @@ begin
     gem.add_dependency "addressable", ">= 2.1.1"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "httpclient", ">= 2.1.5.2"
-    gem.add_development_dependency "patron", "= 0.4.5" unless RUBY_PLATFORM =~ /java/
+    gem.add_development_dependency "patron", ">= 0.4.5" unless RUBY_PLATFORM =~ /java/
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
