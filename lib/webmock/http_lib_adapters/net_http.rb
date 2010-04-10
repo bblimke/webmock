@@ -91,7 +91,7 @@ module Net  #:nodoc: all
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
         build_net_http_response(webmock_response, &block)
-      elsif WebMock.net_connect_allowed?
+      elsif WebMock.net_connect_allowed?(uri)
         connect_without_webmock
         request_without_webmock(request, nil, &block)
       else
@@ -122,7 +122,7 @@ module Net  #:nodoc: all
 
       response.extend StubResponse
 
-      raise Timeout::Error if webmock_response.should_timeout
+      raise Timeout::Error, "execution expired" if webmock_response.should_timeout
 
       webmock_response.raise_error_if_any
 

@@ -37,6 +37,10 @@ module NetHTTPSpecHelper
     Timeout::Error
   end
 
+  def connection_refused_exception_class
+    Errno::ECONNREFUSED
+  end
+
   # Sets several expectations that a real HTTP request makes it
   # past WebMock to the socket layer. You can use this when you need to check
   # that a request isn't handled by WebMock

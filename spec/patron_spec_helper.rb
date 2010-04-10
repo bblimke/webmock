@@ -29,6 +29,10 @@ module PatronSpecHelper
     Patron::TimeoutError
   end
 
+  def connection_refused_exception_class
+    Patron::ConnectionFailed
+  end
+
   def setup_expectations_for_real_request(options = {})
     #TODO
   end
