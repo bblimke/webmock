@@ -1,51 +1,32 @@
 module WebMock
 
-  class RequestSignature < Request
+  class RequestSignature
 
-    def match(request_profile)
-      raise ArgumentError unless request_profile.is_a?(RequestProfile)
-      match_method(request_profile) &&
-        match_body(request_profile) &&
-        match_headers(request_profile) &&
-        match_uri(request_profile) &&
-        match_with_block(request_profile)
+    attr_accessor :method, :uri, :body, :headers
+
+    def initialize(method, uri, options = {})
+      self.method = method
+      self.uri = uri.is_a?(Addressable::URI) ? uri : WebMock::Util::URI.normalize_uri(uri)
+      assign_options(options)
+    end
+
+    def to_s
+      string = "#{self.method.to_s.upcase}"
+      string << " #{WebMock::Util::URI.strip_default_port_from_uri_string(self.uri.to_s)}"
+      string << " with body '#{body.to_s}'" if body && body.to_s != ''
+      if headers && !headers.empty?
+        string << " with headers #{WebMock::Util::Headers.sorted_headers_string(headers)}"
+      end
+      string
     end
 
     private
 
-    def match_uri(request_profile)
-      if request_profile.uri.is_a?(Addressable::URI)
-        WebMock::Util::URI.normalize_uri(uri) === WebMock::Util::URI.normalize_uri(request_profile.uri)
-      elsif request_profile.uri.is_a?(Regexp)
-        WebMock::Util::URI.variations_of_uri_as_strings(self.uri).any? { |u| u.match(request_profile.uri) }
-      else
-        false
-      end
+    def assign_options(options)
+      self.body = options[:body] if options.has_key?(:body)
+      self.headers = WebMock::Util::Headers.normalize_headers(options[:headers]) if options.has_key?(:headers)
     end
 
-    def match_headers(request_profile)
-      return false if self.headers && !self.headers.empty? && request_profile.headers && request_profile.headers.empty?
-      if request_profile.headers && !request_profile.headers.empty?
-        request_profile.headers.each do | key, value |
-          return false unless (self.headers && self.headers.has_key?(key) && value === self.headers[key])
-        end
-      end
-      return true
-    end
-
-    def match_body(request_profile)
-      request_profile.body == self.body || request_profile.body.nil?
-    end
-
-    def match_method(request_profile)
-      request_profile.method == self.method || request_profile.method == :any
-    end
-    
-    def match_with_block(request_profile)
-      return true unless request_profile.with_block
-      request_profile.with_block.call(self)
-    end
   end
-
 
 end

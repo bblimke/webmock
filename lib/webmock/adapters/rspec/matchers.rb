@@ -1,11 +1,11 @@
 module WebMock
   module Matchers
     def have_been_made
-      WebMock::RequestProfileMatcher.new
+      WebMock::RequestPatternMatcher.new
     end
     
     def have_not_been_made
-      WebMock::RequestProfileMatcher.new.times(0)
+      WebMock::RequestPatternMatcher.new.times(0)
     end
     
     def have_requested(method, uri)

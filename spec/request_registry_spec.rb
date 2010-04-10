@@ -4,7 +4,7 @@ describe RequestRegistry do
 
   before(:each) do
     RequestRegistry.instance.reset_webmock
-    @request_profile = RequestProfile.new(:get, "www.example.com")
+    @request_pattern = RequestPattern.new(:get, "www.example.com")
     @request_signature = RequestSignature.new(:get, "www.example.com")
     @request_stub = RequestStub.new(:get, "www.example.com")
   end
@@ -22,9 +22,9 @@ describe RequestRegistry do
     end
 
     it "should clean list of executed requests" do
-      RequestRegistry.instance.times_executed(@request_profile).should == 1
+      RequestRegistry.instance.times_executed(@request_pattern).should == 1
       RequestRegistry.instance.reset_webmock
-      RequestRegistry.instance.times_executed(@request_profile).should == 0
+      RequestRegistry.instance.times_executed(@request_pattern).should == 0
     end
 
   end
@@ -49,7 +49,7 @@ describe RequestRegistry do
 
   describe "response for request" do
 
-    it "should report registered evaluated response for request profile" do
+    it "should report registered evaluated response for request pattern" do
       @request_stub.to_return(:body => "abc")
       RequestRegistry.instance.register_request_stub(@request_stub)
       RequestRegistry.instance.response_for_request(@request_signature).should == Response.new(:body => "abc")
@@ -91,9 +91,9 @@ describe RequestRegistry do
 
   describe "times executed" do
 
-    def times_executed(request_profile)
-      self.requested.hash.select { |executed_request_profile, times_executed|
-        executed_request_profile.match(request_profile)
+    def times_executed(request_pattern)
+      self.requested.hash.select { |executed_request_pattern, times_executed|
+        executed_request_pattern.match(request_pattern)
       }.inject(0) {|sum, (_, times_executed)| sum =+ times_executed }
     end
 
@@ -106,16 +106,16 @@ describe RequestRegistry do
       RequestRegistry.instance.requested_signatures.put(RequestSignature.new(:get, "www.example.org"))
     end
 
-    it "should report 0 if no request matching profile was requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.example.net")).should == 0
+    it "should report 0 if no request matching pattern was requested" do
+      RequestRegistry.instance.times_executed(RequestPattern.new(:get, "www.example.net")).should == 0
     end
 
-    it "should report number of times matching profile was requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, "www.example.com")).should == 2
+    it "should report number of times matching pattern was requested" do
+      RequestRegistry.instance.times_executed(RequestPattern.new(:get, "www.example.com")).should == 2
     end
 
-    it "should report number of times all matching profile were requested" do
-      RequestRegistry.instance.times_executed(RequestProfile.new(:get, /.*example.*/)).should == 3
+    it "should report number of times all matching pattern were requested" do
+      RequestRegistry.instance.times_executed(RequestPattern.new(:get, /.*example.*/)).should == 3
     end
 
 

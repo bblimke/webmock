@@ -8,18 +8,18 @@ module WebMock
   alias_method :stub_http_request, :stub_request
 
   def request(method, uri)
-    RequestProfile.new(method, uri)
+    RequestPattern.new(method, uri)
   end
 
   def assert_requested(method, uri, options = {}, &block)
     expected_times_executed = options.delete(:times) || 1
-    request = RequestProfile.new(method, uri, options).with(&block)
+    request = RequestPattern.new(method, uri, options).with(&block)
     verifier = RequestExecutionVerifier.new(request, expected_times_executed)
     assertion_failure(verifier.failure_message) unless verifier.matches?
   end
 
   def assert_not_requested(method, uri, options = {}, &block)
-    request = RequestProfile.new(method, uri, options).with(&block)
+    request = RequestPattern.new(method, uri, options).with(&block)
     verifier = RequestExecutionVerifier.new(request, options.delete(:times))
     assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end

@@ -1,16 +1,16 @@
 module WebMock
   class RequestStub
 
-    attr_accessor :request_profile
+    attr_accessor :request_pattern
 
     def initialize(method, uri)
-      @request_profile = RequestProfile.new(method, uri)
+      @request_pattern = RequestPattern.new(method, uri)
       @responses_sequences = []
       self
     end
 
     def with(params = {}, &block)
-      @request_profile.with(params, &block)
+      @request_pattern.with(params, &block)
       self
     end
 

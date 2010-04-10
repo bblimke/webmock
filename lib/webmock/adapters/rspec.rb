@@ -1,6 +1,6 @@
 require 'webmock'
 require 'spec'
-require 'webmock/adapters/rspec/request_profile_matcher'
+require 'webmock/adapters/rspec/request_pattern_matcher'
 require 'webmock/adapters/rspec/webmock_matcher'
 require 'webmock/adapters/rspec/matchers'
 

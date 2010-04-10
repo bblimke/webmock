@@ -3,7 +3,7 @@ module WebMock
 
     def initialize(method, uri)
       @request_execution_verifier = RequestExecutionVerifier.new
-      @request_execution_verifier.request_profile = RequestProfile.new(method, uri)
+      @request_execution_verifier.request_pattern = RequestPattern.new(method, uri)
     end
 
     def once
@@ -17,7 +17,7 @@ module WebMock
     end
 
     def with(options = {}, &block)
-      @request_execution_verifier.request_profile.with(options, &block)
+      @request_execution_verifier.request_pattern.with(options, &block)
       self
     end
 

@@ -28,9 +28,9 @@ module WebMock
       stub ? evaluate_response_for_request(stub.response, request_signature) : nil
     end
 
-    def times_executed(request_profile)
+    def times_executed(request_pattern)
       self.requested_signatures.hash.select { |request_signature, times_executed|
-        request_signature.match(request_profile)
+        request_pattern.matches?(request_signature)
       }.inject(0) {|sum, (_, times_executed)| sum + times_executed }
     end
 
@@ -38,7 +38,7 @@ module WebMock
 
     def request_stub_for(request_signature)
       request_stubs.detect { |registered_request_stub|
-        request_signature.match(registered_request_stub.request_profile)
+        registered_request_stub.request_pattern.matches?(request_signature)
       }
     end
 

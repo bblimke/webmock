@@ -1,5 +1,5 @@
 module WebMock
-  class RequestProfileMatcher
+  class RequestPatternMatcher
 
     def initialize
       @request_execution_verifier = RequestExecutionVerifier.new
@@ -20,13 +20,13 @@ module WebMock
       self
     end
 
-    def matches?(request_profile)
-      @request_execution_verifier.request_profile = request_profile
+    def matches?(request_pattern)
+      @request_execution_verifier.request_pattern = request_pattern
       @request_execution_verifier.matches?
     end
 
-    def does_not_match?(request_profile)
-      @request_execution_verifier.request_profile = request_profile
+    def does_not_match?(request_pattern)
+      @request_execution_verifier.request_pattern = request_pattern
       @request_execution_verifier.does_not_match?
     end
 

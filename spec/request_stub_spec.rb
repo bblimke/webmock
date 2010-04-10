@@ -6,9 +6,8 @@ describe RequestStub do
     @request_stub = RequestStub.new(:get, "www.example.com")
   end
 
-  it "should have request profile with method and uri" do
-    @request_stub.request_profile.method.should == :get
-    @request_stub.request_profile.uri.host.should == "www.example.com"
+  it "should have request pattern with method and uri" do
+    @request_stub.request_pattern.to_s.should == "GET http://www.example.com/"
   end
 
   it "should have response" do
@@ -17,20 +16,20 @@ describe RequestStub do
 
   describe "with" do
 
-    it "should assign body to request profile" do
+    it "should assign body to request pattern" do
       @request_stub.with(:body => "abc")
-      @request_stub.request_profile.body.should == RequestProfile::Body.new("abc")
+      @request_stub.request_pattern.to_s.should == RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
     end
 
-    it "should assign normalized headers to request profile" do
-      Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    it "should assign normalized headers to request pattern" do
       @request_stub.with(:headers => {'A' => 'a'})
-      @request_stub.request_profile.headers.should == {'B' => 'b'}
+      @request_stub.request_pattern.to_s.should == 
+        RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
     it "should assign given block to request profile" do
-      @request_stub.with { |req| "block output" }
-      @request_stub.request_profile.with_block.call(nil).should == "block output"
+      @request_stub.with { |req| req.body == "abc" }
+      @request_stub.request_pattern.matches?(RequestSignature.new(:get, "www.example.com", :body => "abc")).should be_true
     end
 
   end
