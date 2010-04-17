@@ -177,6 +177,42 @@ describe "WebMock", :shared => true do
           :get, "http://www.example.com/",
           :headers => SAMPLE_HEADERS).status.should == "200"
       end
+      
+      it "should match requests if headers are the same and declared as array" do
+        stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b"]} )
+        http_request(
+          :get, "http://www.example.com/",
+          :headers => {"a" => "b"}).status.should == "200"
+      end
+      
+      describe "when multiple headers with the same key are used" do
+      
+        it "should match requests if headers are the same" do
+          stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
+          http_request(
+            :get, "http://www.example.com/",
+            :headers => {"a" => ["b", "c"]}).status.should == "200"
+        end
+      
+        it "should match requests if headers are the same  but in different order" do
+          stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
+          http_request(
+            :get, "http://www.example.com/",
+            :headers => {"a" => ["c", "b"]}).status.should == "200"
+        end
+        
+        it "should not match requests if headers are different" do
+          stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]})
+
+          lambda {
+            http_request(
+              :get, "http://www.example.com/",
+            :headers => {"a" => ["b", "d"]})
+          }.should fail_with(client_specific_request_string(
+            %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'A'=>['b', 'd']})))
+        end
+      
+      end
 
       it "should match requests if request headers are not stubbed" do
         stub_http_request(:get, "www.example.com")
@@ -344,6 +380,12 @@ describe "WebMock", :shared => true do
           response = http_request(:get, "http://www.example.com/")
           response.headers["Content-Length"].should == "8888"
         end
+        
+        it "should return declared headers when there are multiple headers with the same key" do
+          stub_http_request(:get, "www.example.com").to_return(:headers => {"a" => ["b", "c"]})
+          response = http_request(:get, "http://www.example.com/")
+          response.headers["A"].should == "b, c"
+        end
 
         it "should return declared status code" do
           stub_http_request(:get, "www.example.com").to_return(:status => 500)
@@ -446,7 +488,8 @@ describe "WebMock", :shared => true do
               "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
               "Content-Type"=>"text/html; charset=UTF-8",
               "Content-Length"=>"438",
-              "Connection"=>"Keep-Alive"
+              "Connection"=>"Keep-Alive",
+              "Accept"=>"image/jpeg, image/png"
               }
           end
 
@@ -481,7 +524,8 @@ describe "WebMock", :shared => true do
               "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
               "Content-Type"=>"text/html; charset=UTF-8",
               "Content-Length"=>"438",
-              "Connection"=>"Keep-Alive"
+              "Connection"=>"Keep-Alive",
+              "Accept"=>"image/jpeg, image/png"
               }
           end
 
@@ -806,6 +850,42 @@ describe "WebMock", :shared => true do
                   request(:get, "www.example.com").
                   with(:headers => SAMPLE_HEADERS).should have_been_made
                 }.should_not raise_error
+              end
+              
+               it "should succeed if request was executed with the same headers with value declared as array" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :headers => {"a" => "b"})
+                    request(:get, "www.example.com").
+                    with(:headers => {"a" => ["b"]}).should have_been_made
+                  }.should_not raise_error
+                end
+              
+              describe "when multiple headers with the same key are passed" do
+                
+                it "should succeed if request was executed with the same headers" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+                    request(:get, "www.example.com").
+                    with(:headers =>  {"a" => ["b", "c"]}).should have_been_made
+                  }.should_not raise_error
+                end
+                
+                it "should succeed if request was executed with the same headers but different order" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+                    request(:get, "www.example.com").
+                    with(:headers =>  {"a" => ["c", "b"]}).should have_been_made
+                  }.should_not raise_error
+                end
+                
+                it "should fail if request was executed with different headers" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+                    request(:get, "www.example.com").
+                    with(:headers => {"a" => ["b", "d"]}).should have_been_made
+                  }.should fail_with("The request GET http://www.example.com/ with headers {'A'=>['b', 'd']} was expected to execute 1 time but it executed 0 times")
+                end
+                
               end
 
               it "should fail if request was executed with different headers" do

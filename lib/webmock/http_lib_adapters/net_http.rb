@@ -68,9 +68,9 @@ module Net  #:nodoc: all
       uri = "#{protocol}://#{userinfo}#{self.address}:#{self.port}#{path}"
       method = request.method.downcase.to_sym
 
-      headers = Hash[*request.to_hash.map {|k,v| [k, v.flatten]}.flatten]
+      headers = Hash[*request.to_hash.map {|k,v| [k, v]}.flatten(1)]
        
-      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
+      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
 
       if request.body_stream
         body = request.body_stream.read

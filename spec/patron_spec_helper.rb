@@ -12,10 +12,16 @@ module PatronSpecHelper
     response = sess.request(method, "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers] || {}, {
       :data => options[:body]
     })
-
+    headers = {}
+    if response.headers
+      response.headers.each do |k,v|
+        v = v.join(", ") if v.is_a?(Array)
+        headers[k] = v 
+      end
+    end
     OpenStruct.new({
       :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(response.headers),
+      :headers => WebMock::Util::Headers.normalize_headers(headers),
       :status => response.status.to_s,
       :message => response.status_line
     })
