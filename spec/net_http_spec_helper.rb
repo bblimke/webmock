@@ -7,7 +7,16 @@ module NetHTTPSpecHelper
     end
     response = nil
     clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
-    req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers])
+    req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", nil)
+    options[:headers].each do |k,v| 
+      if v.is_a?(Array)
+        v.each_with_index do |v,i|
+          i == 0 ? (req[k] = v) : req.add_field(k, v)
+        end
+      else
+        req[k] = v
+      end  
+    end if options[:headers]
 
     req.basic_auth uri.user, uri.password if uri.user
     http = Net::HTTP.new(uri.host, uri.port)

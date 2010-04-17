@@ -126,7 +126,8 @@ describe Response do
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
           "Content-Length"=>"438",
-          "Connection"=>"Keep-Alive"
+          "Connection"=>"Keep-Alive",
+          "Accept"=>"image/jpeg, image/png"
           }
       end
 
@@ -155,7 +156,8 @@ describe Response do
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
           "Content-Length"=>"438",
-          "Connection"=>"Keep-Alive"
+          "Connection"=>"Keep-Alive",          
+          "Accept"=>"image/jpeg, image/png"
           }
       end
 

@@ -76,8 +76,12 @@ if defined?(HTTPClient)
 
     auth = www_auth.basic_auth
     auth.challenge(req.header.request_uri, nil)
-
-    headers = Hash[*req.header.all.flatten]
+    
+    headers = req.header.all.inject({}) do |headers, header| 
+      headers[header[0]] ||= [];
+      headers[header[0]] << header[1]
+      headers
+    end
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
       userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)

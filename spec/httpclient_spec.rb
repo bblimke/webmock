@@ -22,6 +22,14 @@ describe "Webmock with HTTPClient" do
     response_body.should == "abc"
   end
 
+   it "should match requests if headers are the same  but in different order" do
+     stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
+     http_request(
+       :get, "http://www.example.com/",
+       :headers => {"a" => ["c", "b"]}).status.should == "200"
+   end
+  
+
   describe "async requests" do
 
     before(:each) do
