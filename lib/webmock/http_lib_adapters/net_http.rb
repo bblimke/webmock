@@ -65,8 +65,7 @@ module Net  #:nodoc: all
         connect_without_webmock
         request_without_webmock(request, nil, &block)
       else
-        message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
-        WebMock.assertion_failure(message)
+        raise NetConnectNotAllowedError.new(request_signature)
       end
     end
     alias_method :request_without_webmock, :request

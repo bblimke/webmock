@@ -15,8 +15,7 @@ if defined?(Patron)
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           handle_request_without_webmock(req)
         else
-          message = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
-          WebMock.assertion_failure(message)
+          raise NetConnectNotAllowedError.new(request_signature)
         end
       end
 

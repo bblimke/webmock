@@ -64,7 +64,7 @@ describe "WebMock", :shared => true do
       it "should raise exception if request was not stubbed" do
         lambda {
           http_request(:get, "http://www.example.com/")
-        }.should fail_with(client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
     end
 
@@ -81,7 +81,7 @@ describe "WebMock", :shared => true do
       it "should raise exception if request was not stubbed" do
         lambda {
           http_request(:get, "http://www.example.com/")
-        }.should fail_with(client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
 
       it "should allow a real request localhost" do
@@ -125,7 +125,7 @@ describe "WebMock", :shared => true do
         http_request(:get, "http://www.example.com/").status.should == "200"
         lambda {
           http_request(:delete, "http://www.example.com/")
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         "Real HTTP connections are disabled. Unregistered request: DELETE http://www.example.com/")
         )
       end
@@ -152,7 +152,7 @@ describe "WebMock", :shared => true do
         stub_http_request(:post, "www.example.com").with(:body => "abc")
         lambda {
           http_request(:post, "http://www.example.com/", :body => "def")
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'def'"))
       end
 
@@ -169,7 +169,7 @@ describe "WebMock", :shared => true do
           stub_http_request(:post, "www.example.com").with(:body => /^abc/)
           lambda {
             http_request(:post, "http://www.example.com/", :body => "xabc")
-          }.should fail_with(client_specific_request_string(
+          }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
           "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'xabc'"))
         end
 
@@ -216,7 +216,7 @@ describe "WebMock", :shared => true do
             http_request(
               :get, "http://www.example.com/",
             :headers => {"a" => ["b", "d"]})
-          }.should fail_with(client_specific_request_string(
+          }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
             %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'A'=>['b', 'd']})))
         end
       
@@ -236,7 +236,7 @@ describe "WebMock", :shared => true do
           http_request(
             :get, "http://www.example.com/",
           :headers => { 'Content-Length' => '9999'})
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
           %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Content-Length'=>'9999'})))
       end
 
@@ -247,7 +247,7 @@ describe "WebMock", :shared => true do
           http_request(
             :get, "http://www.example.com/",
           :headers => { 'Accept' => 'application/xml'})
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'Accept'=>'application/xml'})))
       end
 
@@ -267,7 +267,7 @@ describe "WebMock", :shared => true do
             http_request(
               :get, "http://www.example.com/",
             :headers => { 'user-agent' => 'xMyAppName' })
-          }.should fail_with(client_specific_request_string(
+          }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
           %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers {'User-Agent'=>'xMyAppName'})))
         end
 
@@ -285,7 +285,7 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "user:pass@www.example.com")
         lambda {
           http_request(:get, "http://user:pazz@www.example.com/").status.should == "200"
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/)))
       end
 
@@ -293,7 +293,7 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "user:pass@www.example.com")
         lambda {
           http_request(:get, "http://www.example.com/").status.should == "200"
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         %q(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/)))
       end
 
@@ -301,7 +301,7 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "www.example.com")
         lambda {
           http_request(:get, "http://user:pazz@www.example.com/").status.should == "200"
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         %q(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/)))
       end
 
@@ -318,7 +318,7 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, "www.example.com").with { |request| false }
         lambda {
           http_request(:get, "http://www.example.com/")
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         "Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
 
@@ -329,7 +329,7 @@ describe "WebMock", :shared => true do
           :body => "wadus").status.should == "200"
         lambda {
           http_request(:post, "http://www.example.com/", :body => "jander")
-        }.should fail_with(client_specific_request_string(
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
         "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'"))
       end
 
