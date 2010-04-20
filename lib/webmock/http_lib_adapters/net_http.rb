@@ -65,7 +65,7 @@ module Net  #:nodoc: all
         connect_without_webmock
         request_without_webmock(request, nil, &block)
       else
-        raise NetConnectNotAllowedError.new(request_signature)
+        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
     alias_method :request_without_webmock, :request

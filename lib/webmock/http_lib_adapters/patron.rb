@@ -15,7 +15,7 @@ if defined?(Patron)
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           handle_request_without_webmock(req)
         else
-          raise NetConnectNotAllowedError.new(request_signature)
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
 
