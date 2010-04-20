@@ -15,7 +15,7 @@ module WebMock
            end
           ]
         }
-        Hash[*array.flatten(1)]
+        Hash[*array.inject([]) {|r,x| r + x}]
       end
 
       def self.sorted_headers_string(headers)
