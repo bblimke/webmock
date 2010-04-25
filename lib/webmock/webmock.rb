@@ -44,7 +44,7 @@ module WebMock
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
     Config.instance.allow_net_connect || 
-      (Config.instance.allow_localhost && uri.is_a?(Addressable::URI) && uri.host == 'localhost')
+      (Config.instance.allow_localhost && uri.is_a?(Addressable::URI) && (uri.host == 'localhost' || uri.host == '127.0.0.1'))
   end
 
   def registered_request?(request_signature)
