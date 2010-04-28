@@ -87,6 +87,15 @@ You can also use WebMock without RSpec or Test::Unit support:
       http.request(req, 'abc')
     }    # ===> Success
 
+### Matching multiple headers with the same name
+
+	stub_http_request(:get, 'www.example.com').with(:headers => {'Accept' => ['image/jpeg', 'image/png'] })
+	
+	req = Net::HTTP::Get.new("/")  
+	req['Accept'] = ['image/png']
+	req.add_field('Accept', 'image/jpeg')
+	Net::HTTP.start("www.example.com") {|http|  http.request(req) } # ===> Success
+
 ### Matching requests against provided block
 
 	stub_request(:post, "www.example.com").with { |request| request.body == "abc" }
@@ -384,6 +393,9 @@ i.e the following two sets of headers are equal:
 
 `{ :header1 => "value1",  "Content-Length" => 123, "x-cuSTOM-HeAder" => "value" }`
 
+## Recording real requests and responses and replaying them later
+
+To record your application's real HTTP interactions and replay them later in tests you can use [VCR](http://github.com/myronmarston/vcr) with WebMock.
 
 ## Bugs and Issues
 
@@ -417,6 +429,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Tekin Suleyman
 * Tom Ward
 * Nadim Bitar
+* Myron Masteron
 
 ## Background
 
