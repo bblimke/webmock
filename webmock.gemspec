@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "1.0.0"
+  s.version = "1.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-04-12}
+  s.date = %q{2010-04-28}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -75,20 +75,6 @@ Gem::Specification.new do |s|
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/right_http_connection.rb",
      "spec/vendor/right_http_connection-1.2.4/setup.rb",
-     "spec/vendor/samuel-0.2.1/.document",
-     "spec/vendor/samuel-0.2.1/.gitignore",
-     "spec/vendor/samuel-0.2.1/LICENSE",
-     "spec/vendor/samuel-0.2.1/README.rdoc",
-     "spec/vendor/samuel-0.2.1/Rakefile",
-     "spec/vendor/samuel-0.2.1/VERSION",
-     "spec/vendor/samuel-0.2.1/lib/samuel.rb",
-     "spec/vendor/samuel-0.2.1/lib/samuel/net_http.rb",
-     "spec/vendor/samuel-0.2.1/lib/samuel/request.rb",
-     "spec/vendor/samuel-0.2.1/samuel.gemspec",
-     "spec/vendor/samuel-0.2.1/test/request_test.rb",
-     "spec/vendor/samuel-0.2.1/test/samuel_test.rb",
-     "spec/vendor/samuel-0.2.1/test/test_helper.rb",
-     "spec/vendor/samuel-0.2.1/test/thread_test.rb",
      "spec/webmock_spec.rb",
      "test/test_helper.rb",
      "test/test_webmock.rb",
@@ -122,13 +108,6 @@ Gem::Specification.new do |s|
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/right_http_connection.rb",
      "spec/vendor/right_http_connection-1.2.4/setup.rb",
-     "spec/vendor/samuel-0.2.1/lib/samuel/net_http.rb",
-     "spec/vendor/samuel-0.2.1/lib/samuel/request.rb",
-     "spec/vendor/samuel-0.2.1/lib/samuel.rb",
-     "spec/vendor/samuel-0.2.1/test/request_test.rb",
-     "spec/vendor/samuel-0.2.1/test/samuel_test.rb",
-     "spec/vendor/samuel-0.2.1/test/test_helper.rb",
-     "spec/vendor/samuel-0.2.1/test/thread_test.rb",
      "spec/webmock_spec.rb",
      "test/test_helper.rb",
      "test/test_webmock.rb"
