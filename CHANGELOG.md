@@ -1,5 +1,22 @@
 #Changelog
 
+## 1.1.0
+
+* [VCR](http://github.com/myronmarston/vcr/) compatibility. Many thanks to Myron Masteron for all suggestions.
+	
+* Support for stubbing requests and returning responses with multiple headers with the same name. i.e multiple Accept headers.	
+
+		stub_http_request(:get, 'www.example.com').
+		  with(:headers => {'Accept' => ['image/png', 'image/jpeg']}).
+		  to_return(:body => 'abc')
+		RestClient.get('www.example.com',
+		 {"Accept" => ['image/png', 'image/jpeg']}) # ===> "abc\n"	
+
+* When real net connections are disabled and unstubbed request is made, WebMock throws WebMock::NetConnectNotAllowedError instead of assertion error or StandardError.
+
+* Added WebMock.version()
+
+
 ## 1.0.0
 
 * Added support for [Patron](http://toland.github.com/patron/)
