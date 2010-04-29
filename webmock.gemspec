@@ -83,7 +83,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/bblimke/webmock}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Library for stubbing HTTP requests in Ruby.}
   s.test_files = [
     "spec/httpclient_spec.rb",
