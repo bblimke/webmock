@@ -2,7 +2,7 @@
 
 ## 1.1.0
 
-* [VCR](http://github.com/myronmarston/vcr/) compatibility. Many thanks to Myron Masteron for all suggestions.
+* [VCR](http://github.com/myronmarston/vcr/) compatibility. Many thanks to Myron Marston for all suggestions.
 	
 * Support for stubbing requests and returning responses with multiple headers with the same name. i.e multiple Accept headers.	
 

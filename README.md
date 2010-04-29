@@ -429,7 +429,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Tekin Suleyman
 * Tom Ward
 * Nadim Bitar
-* Myron Masteron
+* Myron Marston
 
 ## Background
 
