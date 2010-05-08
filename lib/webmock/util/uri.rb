@@ -26,19 +26,19 @@ module WebMock
         normalized_uri = normalize_uri(uri_object.dup).freeze
         uris = [ normalized_uri ]
 
-        if normalized_uri.port == Addressable::URI.port_mapping[normalized_uri.scheme]
-          uris = uris_with_inferred_port_and_without(uris)
-        end
-
-        if normalized_uri.scheme == "http"
-          uris = uris_with_scheme_and_without(uris)
-        end
-
         if normalized_uri.path == '/'
           uris = uris_with_trailing_slash_and_without(uris)
         end
 
         uris = uris_encoded_and_unencoded(uris)
+
+        if normalized_uri.port == Addressable::URI.port_mapping[normalized_uri.scheme]
+          uris = uris_with_inferred_port_and_without(uris)
+        end
+        
+        if normalized_uri.scheme == "http"
+          uris = uris_with_scheme_and_without(uris)
+        end
 
         uris.map {|uri| uri.to_s.gsub(/^\/\//,'') }.uniq
       end
@@ -58,17 +58,17 @@ module WebMock
       private
 
       def self.uris_with_inferred_port_and_without(uris)
-        uris.map { |uri| [ uri, uri.omit(:port).freeze ] }.flatten
+        uris.map { |uri| [ uri, uri.gsub(%r{(:80)|(:443)}, "").freeze ] }.flatten
       end
 
       def self.uris_encoded_and_unencoded(uris)
         uris.map do |uri|
-          [ uri, Addressable::URI.heuristic_parse(Addressable::URI.unencode(uri)).freeze ]
+          [ uri.to_s, Addressable::URI.unencode(uri, String).freeze ]
         end.flatten
       end
 
       def self.uris_with_scheme_and_without(uris)
-        uris.map { |uri| [ uri, uri.omit(:scheme).freeze ] }.flatten
+        uris.map { |uri| [ uri, uri.gsub(%r{^https?://},"").freeze ] }.flatten
       end
 
       def self.uris_with_trailing_slash_and_without(uris)
