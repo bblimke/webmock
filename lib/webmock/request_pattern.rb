@@ -64,7 +64,7 @@ module WebMock
     def matches?(uri)
       if @pattern.is_a?(Addressable::URI)
         ##TODO : do I need to normalize again??
-        WebMock::Util::URI.normalize_uri(uri) === WebMock::Util::URI.normalize_uri(@pattern)
+        uri === @pattern
       elsif @pattern.is_a?(Regexp)
         WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) }
       else
