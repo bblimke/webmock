@@ -1,10 +1,10 @@
 require 'webmock'
-require 'spec'
+require 'rspec'
 require 'webmock/adapters/rspec/request_pattern_matcher'
 require 'webmock/adapters/rspec/webmock_matcher'
 require 'webmock/adapters/rspec/matchers'
 
-Spec::Runner.configure { |config|
+Rspec.configure { |config|
 
   config.include WebMock::Matchers
 
@@ -15,6 +15,6 @@ Spec::Runner.configure { |config|
 
 module WebMock
   def assertion_failure(message)
-    raise Spec::Expectations::ExpectationNotMetError.new(message)
+    raise Rspec::Expectations::ExpectationNotMetError.new(message)
   end
 end
