@@ -1,5 +1,14 @@
 #Changelog
 
+## 1.2.0 
+
+* RSpec 2 compatibility. Thanks to Sam Phillips!
+
+* :allow_localhost => true' now permits 127.0.0.1 as well as 'localhost'. Thanks to Mack Earnhardt
+
+* Request URI matching in now 2x faster!
+
+
 ## 1.1.0
 
 * [VCR](http://github.com/myronmarston/vcr/) compatibility. Many thanks to Myron Marston for all suggestions.
