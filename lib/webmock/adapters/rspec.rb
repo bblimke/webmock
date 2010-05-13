@@ -1,10 +1,20 @@
 require 'webmock'
-require 'rspec'
+
+# RSpec 1.x and 2.x compatibility
+begin
+  require 'rspec'
+  RSPEC_NAMESPACE = RSPEC_CONFIGURER = Rspec
+rescue LoadError
+  require 'spec'
+  RSPEC_NAMESPACE = Spec
+  RSPEC_CONFIGURER = Spec::Runner
+end
+
 require 'webmock/adapters/rspec/request_pattern_matcher'
 require 'webmock/adapters/rspec/webmock_matcher'
 require 'webmock/adapters/rspec/matchers'
-
-Rspec.configure { |config|
+  
+RSPEC_CONFIGURER.configure { |config|
 
   config.include WebMock::Matchers
 
@@ -15,6 +25,6 @@ Rspec.configure { |config|
 
 module WebMock
   def assertion_failure(message)
-    raise Rspec::Expectations::ExpectationNotMetError.new(message)
+    raise RSPEC_NAMESPACE::Expectations::ExpectationNotMetError.new(message)
   end
 end
