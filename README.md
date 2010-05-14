@@ -11,7 +11,8 @@ Features
 * Matching requests based on method, URI, headers and body
 * Smart matching of the same URIs in different representations (also encoded and non encoded forms)
 * Smart matching of the same headers in different representations.
-* Support for Test::Unit and RSpec (and can be easily extended to other frameworks)
+* Support for Test::Unit
+* Support for RSpec 1.x and RSpec 2.x
 * Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
 * Support for HTTPClient library (both sync and async requests)
 * Support for Patron library
@@ -430,6 +431,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Tom Ward
 * Nadim Bitar
 * Myron Marston
+* Sam Phillips
 
 ## Background
 
