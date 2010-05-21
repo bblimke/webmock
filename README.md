@@ -27,13 +27,17 @@ In your `test/test_helper.rb` add these two lines:
 
     require 'webmock/test_unit'
 	
-	include WebMock
+	class Test::Unit::TestCase
+	  include WebMock
+	end
 
 or if you use RSpec add these lines to `spec/spec_helper`:
 
 	require 'webmock/rspec'
 
-	include WebMock
+	Spec::Runner.configure do |config|
+	  config.include WebMock
+	end
 
 You can also use WebMock without RSpec or Test::Unit support:
 
@@ -432,6 +436,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Nadim Bitar
 * Myron Marston
 * Sam Phillips
+* Jose Angel Cortinas
 
 ## Background
 
