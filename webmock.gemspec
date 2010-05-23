@@ -86,7 +86,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.6}
   s.summary = %q{Library for stubbing HTTP requests in Ruby.}
   s.test_files = [
-    "spec/benchmark.rb",
      "spec/httpclient_spec.rb",
      "spec/httpclient_spec_helper.rb",
      "spec/net_http_spec.rb",
@@ -114,11 +113,11 @@ Gem::Specification.new do |s|
      "test/test_webmock.rb"
   ]
 
-  if s.respond_to? :specification_version then
+  if s.respond_to? :specification_version
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0')
       s.add_runtime_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<httpclient>, [">= 2.1.5.2"])
