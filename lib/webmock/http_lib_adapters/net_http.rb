@@ -73,9 +73,9 @@ module Net  #:nodoc: all
 
 
     def connect_with_webmock
-      unless @@alredy_checked_for_net_http_replacement_libs ||= false
-        WebMock::NetHTTPUtility.puts_warning_for_net_http_replacement_libs_if_needed
-        @@alredy_checked_for_net_http_replacement_libs = true
+      unless @@alredy_checked_for_right_http_connection ||= false
+        WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
+        @@alredy_checked_for_right_http_connection = true
       end
       nil
     end
@@ -124,7 +124,7 @@ module WebMock
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
-       
+
       headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
 
 
@@ -143,26 +143,17 @@ module WebMock
     end
 
 
-    def self.record_loaded_net_http_replacement_libs
-      libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
-      @loaded_net_http_replacement_libs = libs.map { |name, loaded| name if loaded }.compact
+    def self.check_right_http_connection
+      @was_right_http_connection_loaded = defined?(RightHttpConnection)
     end
 
-    def self.puts_warning_for_net_http_replacement_libs_if_needed
-      libs = {"RightHttpConnection" => defined?(RightHttpConnection)}
-      warnings = libs.select { |_, loaded| loaded }.
-        reject { |name, _| @loaded_net_http_replacement_libs.include?(name) }.
-        map do |name, _|
-        <<-TEXT.gsub(/ {10}/, '')
-        \e[1mWarning: #{name} was loaded after WebMock\e[0m
-          * WebMock's code is being ignored, because #{name} replaces parts of
-          Net::HTTP without deferring to other libraries. This will break Net::HTTP requests.
-          * To fix this, just reorder your requires so that #{name} is before WebMock.
-          TEXT
-        end
-        $stderr.puts "\n" + warnings.join("\n") + "\n" if warnings.any?
+    def self.puts_warning_for_right_http_if_needed
+      if !@was_right_http_connection_loaded && defined?(RightHttpConnection)
+        $stderr.puts "\nWarning: RightHttpConnection has to be required before WebMock is required !!!\n"
       end
     end
-  end
 
-  WebMock::NetHTTPUtility.record_loaded_net_http_replacement_libs
+  end
+end
+
+WebMock::NetHTTPUtility.check_right_http_connection

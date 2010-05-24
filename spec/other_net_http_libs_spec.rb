@@ -23,7 +23,7 @@ describe "loading other Net::HTTP based libraries" do
   it "should requiring right http connection after webmock and then connecting prints warning" do
     additional_code = "Net::HTTP.start('example.com')"
     output = capture_output_from_requiring %w(webmock right_http_connection), additional_code
-    output.should match(%r(Warning: RightHttpConnection was loaded after WebMock))
+    output.should match(%r(Warning: RightHttpConnection has to be required before WebMock is required !!!))
   end
 
 end
