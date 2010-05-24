@@ -437,6 +437,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Myron Marston
 * Sam Phillips
 * Jose Angel Cortinas
+* Razic
 
 ## Background
 
