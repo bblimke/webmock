@@ -1,5 +1,11 @@
 #Changelog
 
+## 1.2.1
+
+* Changed license from GPL to MIT
+
+* Fixed gemspec file. Thanks to Razic
+
 ## 1.2.0 
 
 * RSpec 2 compatibility. Thanks to Sam Phillips!
