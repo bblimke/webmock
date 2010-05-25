@@ -16,7 +16,7 @@ module WebMock
         return uri if uri.is_a?(Regexp)
         uri = 'http://' + uri unless uri.match('^https?://') if uri.is_a?(String)
         normalized_uri = Addressable::URI.heuristic_parse(uri)
-        normalized_uri.query_values = Hash[*normalized_uri.query_values.sort.flatten] if normalized_uri.query_values
+        normalized_uri.query_values = sort_query_values(normalized_uri.query_values) if normalized_uri.query_values
         normalized_uri = normalized_uri.normalize #normalize! is slower 
         normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
         normalized_uri
@@ -56,6 +56,10 @@ module WebMock
       end
 
       private
+
+      def self.sort_query_values(query_values)
+        Hash[*query_values.sort.inject([]) { |values, pair| values + pair}] 
+      end
 
       def self.uris_with_inferred_port_and_without(uris)
         uris.map { |uri| [ uri, uri.gsub(%r{(:80)|(:443)}, "").freeze ] }.flatten
