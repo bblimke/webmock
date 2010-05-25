@@ -167,6 +167,11 @@ describe WebMock::Util::URI do
       end
     end
 
+    it "should successfully handle array parameters" do
+      uri = 'http://www.example.com:80/path?a[]=b&a[]=c'
+      lambda { WebMock::Util::URI.normalize_uri(uri) }.should_not raise_error
+    end
+    
   end
 
   describe "stripping default port" do
