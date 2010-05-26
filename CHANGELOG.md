@@ -1,5 +1,9 @@
 #Changelog
 
+## 1.2.2
+
+* Fixed problem where ArgumentError was raised if query params were made up of an array e.g. data[]=a&data[]=b. Thanks to Steve Tooke
+
 ## 1.2.1
 
 * Changed license from GPL to MIT

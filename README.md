@@ -438,6 +438,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Sam Phillips
 * Jose Angel Cortinas
 * Razic
+* Steve Tooke
 
 ## Background
 
