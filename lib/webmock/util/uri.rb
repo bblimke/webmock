@@ -11,15 +11,27 @@ module WebMock
   module Util
 
     class URI
+      ADDRESSABLE_URIS = Hash.new do |hash, key|
+        hash[key] = Addressable::URI.heuristic_parse(key)
+      end
+
+      NORMALIZED_URIS = Hash.new do |hash, uri|
+        normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
+        p uri
+        normalized_uri.query_values = sort_query_values(normalized_uri.query_values) if normalized_uri.query_values
+        normalized_uri = normalized_uri.normalize #normalize! is slower
+        normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
+        hash[uri] = normalized_uri
+      end
+
+      def self.heuristic_parse(uri)
+        ADDRESSABLE_URIS[uri].dup
+      end
 
       def self.normalize_uri(uri)
         return uri if uri.is_a?(Regexp)
         uri = 'http://' + uri unless uri.match('^https?://') if uri.is_a?(String)
-        normalized_uri = Addressable::URI.heuristic_parse(uri)
-        normalized_uri.query_values = sort_query_values(normalized_uri.query_values) if normalized_uri.query_values
-        normalized_uri = normalized_uri.normalize #normalize! is slower 
-        normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
-        normalized_uri
+        NORMALIZED_URIS[uri].dup
       end
 
       def self.variations_of_uri_as_strings(uri_object)
@@ -35,7 +47,7 @@ module WebMock
         if normalized_uri.port == Addressable::URI.port_mapping[normalized_uri.scheme]
           uris = uris_with_inferred_port_and_without(uris)
         end
-        
+
         if normalized_uri.scheme == "http"
           uris = uris_with_scheme_and_without(uris)
         end
@@ -58,7 +70,7 @@ module WebMock
       private
 
       def self.sort_query_values(query_values)
-        Hash[*query_values.sort.inject([]) { |values, pair| values + pair}] 
+        Hash[*query_values.sort.inject([]) { |values, pair| values + pair}]
       end
 
       def self.uris_with_inferred_port_and_without(uris)

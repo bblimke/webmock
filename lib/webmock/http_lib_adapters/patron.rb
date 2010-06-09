@@ -37,7 +37,7 @@ if defined?(Patron)
       end
 
       def build_request_signature(req)
-        uri = Addressable::URI.heuristic_parse(req.url)
+        uri = WebMock::Util::URI.heuristic_parse(req.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
         uri.user = req.username
         uri.password = req.password

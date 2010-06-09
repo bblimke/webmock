@@ -67,7 +67,7 @@ if defined?(HTTPClient)
   end
 
   def build_request_signature(req)
-    uri = Addressable::URI.heuristic_parse(req.header.request_uri.to_s)
+    uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
     uri.query_values = req.header.request_query if req.header.request_query
     uri.port = req.header.request_uri.port
     uri = uri.omit(:userinfo)

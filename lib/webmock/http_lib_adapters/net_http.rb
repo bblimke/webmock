@@ -111,7 +111,7 @@ module WebMock
       protocol = net_http.use_ssl? ? "https" : "http"
 
       path = request.path
-      path = Addressable::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
+      path = WebMock::Util::URI.heuristic_parse(request.path).request_uri if request.path =~ /^http/
 
       if request["authorization"] =~ /^Basic /
         userinfo = WebMock::Util::Headers.decode_userinfo_from_header(request["authorization"])
