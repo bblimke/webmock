@@ -47,4 +47,8 @@ module PatronSpecHelper
     #TODO
   end
 
+  def http_library
+    :patron
+  end
+
 end

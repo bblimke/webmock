@@ -79,4 +79,8 @@ module NetHTTPSpecHelper
     socket.should_receive(read_method).once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
     socket.should_receive(read_method).any_number_of_times.and_raise(EOFError)
   end
+  
+  def http_library
+    :net_http
+  end
 end

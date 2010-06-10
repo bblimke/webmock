@@ -11,9 +11,15 @@ if defined?(Patron)
         if WebMock.registered_request?(request_signature)
           webmock_response = WebMock.response_for_request(request_signature)
           handle_file_name(req, webmock_response)
-          build_patron_response(webmock_response)
+          res = build_patron_response(webmock_response)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :patron}, request_signature)
+          res
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          handle_request_without_webmock(req)
+          res = handle_request_without_webmock(req)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :patron, :real_request => true}, request_signature)   
+          res
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end

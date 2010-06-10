@@ -1137,4 +1137,79 @@ describe "WebMock", :shared => true do
 
           end
 
+
+  describe "callbacks" do
+    
+    describe "after_request" do
+      before(:each) do
+        stub_request(:get, "http://www.example.com")
+      end
+  
+      it "should not invoke callback unless request is made" do
+        WebMock.after_request {
+          @called = true
+        }
+        @called.should == nil
+      end
+  
+      it "should invoke a callback after request is made" do
+        WebMock.after_request {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == true
+      end
+    
+      it "should not invoke a callback if specific http library should be ignored" do
+        WebMock.after_request(:except => [http_library()]) {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+      end
+  
+      it "should invoke a callback even if other http libraries should be ignored" do
+        WebMock.after_request(:except => [:other_lib]) {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == true
+      end
+  
+      it "should pass request signature to the callback" do
+        WebMock.after_request(:except => [:other_lib])  do |request_signature|
+          @request_signature = request_signature
         end
+        http_request(:get, "http://www.example.com/")
+        @request_signature.uri.to_s.should == "http://www.example.com:80/"
+      end
+  
+      it "should invoke multiple callbacks in order of their declarations" do
+        WebMock.after_request { @called = 1 }
+        WebMock.after_request { @called += 1 }
+        http_request(:get, "http://www.example.com/")
+        @called.should == 2
+      end
+      
+      it "should invoke callbacks only for real requests if requested" do
+        WebMock.after_request(:real_requests_only => true) { @called = true }
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+        WebMock.allow_net_connect!
+        http_request(:get, "http://www.example.net/")
+        @called.should == true
+      end
+      
+      it "should clear all declared callbacks on reset" do
+        WebMock.after_request { @called = 1 }
+        WebMock.reset_webmock
+        stub_request(:get, "http://www.example.com")        
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+      end
+      
+    end
+  
+  end
+
+end

@@ -57,10 +57,15 @@ module WebMock
 
   def reset_webmock
     WebMock::RequestRegistry.instance.reset_webmock
+    WebMock::CallbackRegistry.reset
   end
 
   def assertion_failure(message)
     raise message
+  end
+  
+  def after_request(options={}, &block)
+    CallbackRegistry.add_callback(options, block)
   end
 
 end
