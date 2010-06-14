@@ -1200,9 +1200,9 @@ describe "WebMock", :shared => true do
         @called.should == true
       end
       
-      it "should clear all declared callbacks on reset" do
+      it "should clear all declared callbacks on reset callbacks" do
         WebMock.after_request { @called = 1 }
-        WebMock.reset_webmock
+        WebMock.reset_callbacks
         stub_request(:get, "http://www.example.com")        
         http_request(:get, "http://www.example.com/")
         @called.should == nil

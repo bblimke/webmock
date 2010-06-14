@@ -57,6 +57,9 @@ module WebMock
 
   def reset_webmock
     WebMock::RequestRegistry.instance.reset_webmock
+  end
+
+  def reset_callbacks
     WebMock::CallbackRegistry.reset
   end
 
