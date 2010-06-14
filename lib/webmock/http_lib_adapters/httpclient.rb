@@ -32,7 +32,7 @@ if defined?(HTTPClient)
           {:lib => :http_client, :real_request => true}, request_signature)
         res
       else
-        raise NetConnectNotAllowedError.new(request_signature)
+        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
 
