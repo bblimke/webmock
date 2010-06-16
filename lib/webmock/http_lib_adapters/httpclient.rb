@@ -45,7 +45,7 @@ if defined?(HTTPClient)
       if WebMock.registered_request?(request_signature) || WebMock.net_connect_allowed?(request_signature.uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
       else
-        raise NetConnectNotAllowedError.new(request_signature)
+        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
 
