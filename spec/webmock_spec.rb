@@ -1142,6 +1142,7 @@ describe "WebMock", :shared => true do
     
     describe "after_request" do
       before(:each) do
+        WebMock.reset_callbacks
         stub_request(:get, "http://www.example.com")
       end
   
@@ -1177,11 +1178,56 @@ describe "WebMock", :shared => true do
       end
   
       it "should pass request signature to the callback" do
-        WebMock.after_request(:except => [:other_lib])  do |request_signature|
+        WebMock.after_request(:except => [:other_lib])  do |request_signature, _|
           @request_signature = request_signature
         end
         http_request(:get, "http://www.example.com/")
         @request_signature.uri.to_s.should == "http://www.example.com:80/"
+      end
+      
+      describe "passing response to callback" do
+
+        describe "for stubbed requests" do
+          before(:each) do
+            stub_request(:get, "http://www.example.com").
+              to_return(
+                :status => ["200", "hello"],
+                :headers => {'Content-Length' => '666', 'Hello' => 'World'},
+                :body => "foo bar"
+              )
+            WebMock.after_request(:except => [:other_lib])  do |_, response|
+              @response = response
+            end
+            http_request(:get, "http://www.example.com/")
+          end
+
+          it "should pass response with status and message" do            
+            @response.status.should == ["200", "hello"]
+          end
+        
+          it "should pass response with headers" do
+            @response.headers.should == {
+              'Content-Length' => '666', 
+              'Hello' => 'World'
+            }
+          end
+        
+          it "should pass response with body" do
+            @response.body.should == "foo bar"
+          end
+      
+        end
+        
+        describe "for real requests" do
+
+          it "should pass response with status and message"
+        
+          it "should pass response with headers"
+        
+          it "should pass response with body"
+      
+        end
+      
       end
   
       it "should invoke multiple callbacks in order of their declarations" do

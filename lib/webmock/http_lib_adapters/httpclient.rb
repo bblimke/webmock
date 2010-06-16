@@ -20,7 +20,7 @@ if defined?(HTTPClient)
         response = build_httpclient_response(webmock_response, stream, &block)
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :http_client}, request_signature) 
+          {:lib => :http_client}, request_signature, webmock_response) 
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         res = if stream
@@ -28,8 +28,10 @@ if defined?(HTTPClient)
         else
           do_get_block_without_webmock(req, proxy, conn, &block)
         end
+        webmock_response = build_webmock_response(res)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :http_client, :real_request => true}, request_signature)
+          {:lib => :http_client, :real_request => true}, request_signature,
+           webmock_response)
         res
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
@@ -70,6 +72,10 @@ if defined?(HTTPClient)
 
       response
     end
+  end
+  
+  def build_webmock_response(httpclient_response)
+    
   end
 
   def build_request_signature(req)

@@ -61,13 +61,14 @@ module Net  #:nodoc: all
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :net_http}, request_signature)        
+          {:lib => :net_http}, request_signature, webmock_response)        
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         connect_without_webmock
         response = request_without_webmock(request, nil, &block)
+        webmock_response = build_webmock_response(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :net_http, :real_request => true}, request_signature)
+          {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
         response
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
@@ -103,6 +104,9 @@ module Net  #:nodoc: all
       yield response if block_given?
 
       response
+    end
+    
+    def build_webmock_response(net_http_response)
     end
 
   end
