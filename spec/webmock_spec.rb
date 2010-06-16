@@ -1219,12 +1219,27 @@ describe "WebMock", :shared => true do
         end
         
         describe "for real requests" do
+          before(:each) do
+            WebMock.reset_webmock
+            WebMock.allow_net_connect!
+            WebMock.after_request(:except => [:other_lib])  do |_, response|
+              @response = response
+            end
+            http_request(:get, "http://www.example.com/")
+          end
 
-          it "should pass response with status and message"
+          it "should pass response with status and message" do
+            @response.status[0].should == 200
+            @response.status[1].should =~ /OK/
+          end
         
-          it "should pass response with headers"
+          it "should pass response with headers" do
+            @response.headers["Content-Length"].should == "574"
+          end
         
-          it "should pass response with body"
+          it "should pass response with body" do
+            @response.body.size.should == 574
+          end
       
         end
       

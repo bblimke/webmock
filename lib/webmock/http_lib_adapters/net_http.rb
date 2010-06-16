@@ -107,6 +107,13 @@ module Net  #:nodoc: all
     end
     
     def build_webmock_response(net_http_response)
+      webmock_response = WebMock::Response.new
+      webmock_response.status = [
+         net_http_response.code.to_i,
+         net_http_response.message]
+      webmock_response.headers = net_http_response.to_hash
+      webmock_response.body = net_http_response.body   
+      webmock_response
     end
 
   end
