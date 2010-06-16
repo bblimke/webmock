@@ -28,6 +28,8 @@ if defined?(HTTPClient)
         else
           do_get_block_without_webmock(req, proxy, conn, &block)
         end
+        res = conn.pop
+        conn.push(res)
         webmock_response = build_webmock_response(res)
         WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :http_client, :real_request => true}, request_signature,
@@ -75,7 +77,11 @@ if defined?(HTTPClient)
   end
   
   def build_webmock_response(httpclient_response)
-    
+    webmock_response = WebMock::Response.new
+    webmock_response.status = [httpclient_response.status, httpclient_response.reason]
+    webmock_response.headers = httpclient_response.header.all
+    webmock_response.body = httpclient_response.content
+    webmock_response
   end
 
   def build_request_signature(req)
