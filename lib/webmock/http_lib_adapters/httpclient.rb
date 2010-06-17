@@ -80,7 +80,14 @@ if defined?(HTTPClient)
     webmock_response = WebMock::Response.new
     webmock_response.status = [httpclient_response.status, httpclient_response.reason]
     webmock_response.headers = httpclient_response.header.all
-    webmock_response.body = httpclient_response.content
+    if  httpclient_response.content.respond_to?(:read)
+      webmock_response.body = httpclient_response.content.read
+      body = HTTP::Message::Body.new
+      body.init_response(StringIO.new(webmock_response.body))
+      httpclient_response.body = body
+    else
+      webmock_response.body = httpclient_response.content
+    end
     webmock_response
   end
 

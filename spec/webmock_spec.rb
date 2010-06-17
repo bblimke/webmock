@@ -1230,7 +1230,7 @@ describe "WebMock", :shared => true do
 
           it "should pass response with status and message" do
             @response.status[0].should == 200
-            @response.status[1].should =~ /OK/
+            @response.status[1].should == "OK"
           end
         
           it "should pass response with headers" do
