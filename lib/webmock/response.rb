@@ -105,8 +105,8 @@ module WebMock
         raw_response.close
         raw_response = string
       end
-      socket = Net::BufferedIO.new(raw_response)
-      response = Net::HTTPResponse.read_new(socket)
+      socket = ::Net::BufferedIO.new(raw_response)
+      response = ::Net::HTTPResponse.read_new(socket)
       transfer_encoding = response.delete('transfer-encoding') #chunks were already read by curl
       response.reading_body(socket, true) {}
 

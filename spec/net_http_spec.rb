@@ -76,7 +76,7 @@ describe "Webmock with Net:HTTP" do
       end
     end
 
-    it "should support the after_request callback on an asynchronous request" do
+    it "should support the after_request callback on an request with block and read_body" do
       response_body = ''
       http_request(:get, "http://www.example.com/") do |response|
         response.read_body { |fragment| response_body << fragment }

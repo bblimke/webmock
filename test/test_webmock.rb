@@ -11,10 +11,10 @@ class TestWebMock < Test::Unit::TestCase
       uri = Addressable::URI.heuristic_parse(uri)
     end
     response = nil
-    clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
+    clazz = ::Net::HTTP.const_get("#{method.to_s.capitalize}")
     req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers])
     req.basic_auth uri.user, uri.password if uri.user
-    http = Net::HTTP.new(uri.host, uri.port)
+    http = ::Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true if uri.scheme == "https"
     response = http.start {|http|
       http.request(req, options[:body])
