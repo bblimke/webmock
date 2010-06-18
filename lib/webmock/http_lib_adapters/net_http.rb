@@ -67,7 +67,7 @@ module Net  #:nodoc: all
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         connect_without_webmock
         response = request_without_webmock(request, nil)
-        if started?
+        if WebMock::CallbackRegistry.any_callbacks? && started?
           webmock_response = build_webmock_response(response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :net_http, :real_request => true}, request_signature, webmock_response)

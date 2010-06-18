@@ -26,6 +26,10 @@ module WebMock
     def self.reset
       @@callbacks = []
     end
+    
+    def self.any_callbacks?
+      !@@callbacks.empty?
+    end
 
   end
 end
