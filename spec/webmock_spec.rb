@@ -351,6 +351,20 @@ describe "WebMock", :shared => true do
           http_request(:get, "http://www.example.com/")
         }.should raise_error(MyException, "Exception from WebMock")
       end
+      
+      it "should raise exception if declared in a stubbed response as exception instance" do
+        stub_http_request(:get, "www.example.com").to_raise(MyException.new("hello world"))
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error(MyException, "hello world")
+      end
+      
+      it "should raise exception if declared in a stubbed response as exception instance" do
+        stub_http_request(:get, "www.example.com").to_raise("hello world")
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error("hello world")
+      end
 
       it "should raise exception if declared in a stubbed response after returning declared response" do
         stub_http_request(:get, "www.example.com").to_return(:body => "abc").then.to_raise(MyException)

@@ -179,9 +179,19 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Raising errors
 
+#### Exception declared by class
+
 	stub_request(:any, 'www.example.net').to_raise(StandardError)
 
     RestClient.post('www.example.net', 'abc')    # ===> StandardError
+    
+#### or by exception instance
+
+    stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
+
+#### or by string
+    
+    stub_request(:any, 'www.example.net').to_raise("some error")
 
 ### Raising timeout errors
 

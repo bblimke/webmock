@@ -14,7 +14,7 @@ module WebMock
       end
     end
   end
-  
+
   class Response
     def initialize(options = {})
       if options.is_a?(IO) || options.is_a?(String)
@@ -27,7 +27,7 @@ module WebMock
     def headers
       @headers
     end
-    
+
     def headers=(headers)
       @headers = headers
       if @headers && !@headers.is_a?(Proc)
@@ -38,7 +38,7 @@ module WebMock
     def body
       @body || ''
     end
-    
+
     def body=(body)
       @body = body
       stringify_body!
@@ -56,8 +56,16 @@ module WebMock
       @exception
     end
 
+    def exception=(exception)
+      @exception = case exception
+      when String then StandardError.new(exception)
+      when Class then exception.new('Exception from WebMock')
+      when Exception then exception
+      end
+    end
+
     def raise_error_if_any
-      raise @exception.new('Exception from WebMock') if @exception
+      raise @exception if @exception
     end
 
     def should_timeout
@@ -68,7 +76,7 @@ module WebMock
       self.headers = options[:headers]
       self.status = options[:status]
       self.body = options[:body]
-      @exception = options[:exception]
+      self.exception = options[:exception]
       @should_timeout = options[:should_timeout]
     end
 
