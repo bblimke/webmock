@@ -412,6 +412,20 @@ i.e the following two sets of headers are equal:
 
 To record your application's real HTTP interactions and replay them later in tests you can use [VCR](http://github.com/myronmarston/vcr) with WebMock.
 
+## Request callbacks
+
+####WebMock can invoke a callback for each, stubbed or real, request:
+
+    WebMock.after_request do |request_signature, response|
+      Log.info("Request #{request_signature} was made and #{response} was returned")
+    end
+
+#### invoke callbacks for real requests only and except requests made with Patron
+
+    WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
+      Log.info("Request #{request_signature} was made and #{response} was returned")
+    end
+
 ## Bugs and Issues
 
 Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
