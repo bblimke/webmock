@@ -58,6 +58,20 @@ describe Response do
         @response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
     end
+    
+    it "should raise error if any assigned as instance" do
+      @response = Response.new(:exception => ArgumentError.new("hello world"))
+      lambda {
+        @response.raise_error_if_any
+      }.should raise_error(ArgumentError, "hello world")
+    end
+    
+    it "should raise error if any assigned as string" do
+      @response = Response.new(:exception => "hello world")
+      lambda {
+        @response.raise_error_if_any
+      }.should raise_error("hello world")
+    end
 
     it "should not raise error if no error assigned" do
       @response.raise_error_if_any

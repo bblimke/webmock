@@ -1,6 +1,7 @@
 require 'net/http'
 require 'net/https'
 require 'stringio'
+require File.join(File.dirname(__FILE__), 'net_http_response')
 
 class StubSocket #:nodoc:
 
@@ -60,10 +61,20 @@ module Net  #:nodoc: all
       if WebMock.registered_request?(request_signature)
         @socket = Net::HTTP.socket_type.new
         webmock_response = WebMock.response_for_request(request_signature)
+        WebMock::CallbackRegistry.invoke_callbacks(
+          {:lib => :net_http}, request_signature, webmock_response)
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         connect_without_webmock
-        request_without_webmock(request, nil, &block)
+        response = request_without_webmock(request, nil)
+        if WebMock::CallbackRegistry.any_callbacks? && started?
+          webmock_response = build_webmock_response(response)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
+          response.extend WebMock::Net::HTTPResponse   
+        end
+        yield response if block_given?
+        response
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
@@ -99,10 +110,21 @@ module Net  #:nodoc: all
 
       response
     end
+    
+    def build_webmock_response(net_http_response)
+      webmock_response = WebMock::Response.new
+      webmock_response.status = [
+         net_http_response.code.to_i,
+         net_http_response.message]
+      webmock_response.headers = net_http_response.to_hash
+      webmock_response.body = net_http_response.body   
+      webmock_response
+    end
 
   end
 
 end
+
 
 module WebMock
   module NetHTTPUtility

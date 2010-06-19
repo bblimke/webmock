@@ -11,9 +11,19 @@ if defined?(Patron)
         if WebMock.registered_request?(request_signature)
           webmock_response = WebMock.response_for_request(request_signature)
           handle_file_name(req, webmock_response)
-          build_patron_response(webmock_response)
+          res = build_patron_response(webmock_response)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :patron}, request_signature, webmock_response)
+          res
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          handle_request_without_webmock(req)
+          res = handle_request_without_webmock(req)
+          if WebMock::CallbackRegistry.any_callbacks?
+            webmock_response = build_webmock_response(res)
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :patron, :real_request => true}, request_signature,
+                webmock_response)   
+          end
+          res
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
@@ -73,6 +83,15 @@ if defined?(Patron)
         res.instance_variable_set(:@status_line, webmock_response.status[1])
         res.instance_variable_set(:@headers, webmock_response.headers)
         res
+      end
+      
+      def build_webmock_response(patron_response)
+        webmock_response = WebMock::Response.new
+        reason = patron_response.status_line.scan(%r(\AHTTP/(\d+\.\d+)\s+(\d\d\d)\s*([^\r\n]+)?\r?\z))[0][2]
+        webmock_response.status = [patron_response.status, reason]
+        webmock_response.body = patron_response.body
+        webmock_response.headers = patron_response.headers
+        webmock_response
       end
 
     end

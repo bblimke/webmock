@@ -13,10 +13,13 @@ Features
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit
 * Support for RSpec 1.x and RSpec 2.x
-* Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
-* Support for HTTPClient library (both sync and async requests)
-* Support for Patron library
-* Easy to extend to other HTTP libraries
+
+Supported HTTP libraries
+------------------------
+
+* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
+* HTTPClient
+* Patron
 
 Installation
 ------------
@@ -80,6 +83,20 @@ You can also use WebMock without RSpec or Test::Unit support:
     res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'hello world')
     }    # ===> Success
+    
+### Matching requests with URL-Encoded, JSON or XML body against hash
+
+	stub_http_request(:post, "www.example.com").
+		with(:body => {:data => {:a => '1', :b => 'five'}})
+
+	RestClient.post('www.example.com', "data[a]=1&data[b]=five", 
+	  :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+	
+	RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}', 
+	  :content_type => 'application/json')    # ===> Success
+	
+	RestClient.post('www.example.com', '<data a="1" b="five" />', 
+	  :content_type => 'application/xml' )    # ===> Success
 
 ### Matching custom request headers
 
@@ -121,7 +138,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 	 stub_request(:any, /.*example.*/)
 
 	 Net::HTTP.get('www.example.com', '/') # ===> Success	
+	 
+### Matching query params using hash	 
 
+	 stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+	 
+	 RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success	
+	 
 ### Stubbing with custom response
 
 	stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
@@ -179,9 +202,19 @@ You can also use WebMock without RSpec or Test::Unit support:
 
 ### Raising errors
 
+#### Exception declared by class
+
 	stub_request(:any, 'www.example.net').to_raise(StandardError)
 
     RestClient.post('www.example.net', 'abc')    # ===> StandardError
+    
+#### or by exception instance
+
+    stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
+
+#### or by string
+    
+    stub_request(:any, 'www.example.net').to_raise("some error")
 
 ### Raising timeout errors
 
@@ -282,6 +315,11 @@ You can also use WebMock without RSpec or Test::Unit support:
 	WebMock.should_not have_requested(:get, "www.something.com")
 	
 	WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
+	
+	WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}) 
+
+	WebMock.should have_requested(:get, "www.example.com").
+	  with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json')
 
 ### Different way of setting expectations in RSpec
 
@@ -292,6 +330,11 @@ You can also use WebMock without RSpec or Test::Unit support:
 	request(:any, "www.example.com").should_not have_been_made
 
 	request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+	
+	request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+	
+	request(:post, "www.example.com").
+	  with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json').should have_been_made
 	
 ## Clearing stubs and request history
 
@@ -402,6 +445,20 @@ i.e the following two sets of headers are equal:
 
 To record your application's real HTTP interactions and replay them later in tests you can use [VCR](http://github.com/myronmarston/vcr) with WebMock.
 
+## Request callbacks
+
+####WebMock can invoke a callback for each, stubbed or real, request:
+
+    WebMock.after_request do |request_signature, response|
+      Log.info("Request #{request_signature} was made and #{response} was returned")
+    end
+
+#### invoke callbacks for real requests only and except requests made with Patron
+
+    WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
+      Log.info("Request #{request_signature} was made and #{response} was returned")
+    end
+
 ## Bugs and Issues
 
 Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
@@ -439,6 +496,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Jose Angel Cortinas
 * Razic
 * Steve Tooke
+* Nathaniel Bibler
 
 ## Background
 

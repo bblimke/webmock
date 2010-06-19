@@ -18,15 +18,27 @@ if defined?(HTTPClient)
       if WebMock.registered_request?(request_signature)
         webmock_response = WebMock.response_for_request(request_signature)
         response = build_httpclient_response(webmock_response, stream, &block)
-        conn.push(response)
+        res = conn.push(response)
+        WebMock::CallbackRegistry.invoke_callbacks(
+          {:lib => :http_client}, request_signature, webmock_response) 
+        res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
-        if stream
+        res = if stream
           do_get_stream_without_webmock(req, proxy, conn, &block)
         else
           do_get_block_without_webmock(req, proxy, conn, &block)
         end
+        res = conn.pop
+        conn.push(res)
+        if WebMock::CallbackRegistry.any_callbacks?
+          webmock_response = build_webmock_response(res)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :http_client, :real_request => true}, request_signature,
+            webmock_response)
+        end
+        res
       else
-        raise NetConnectNotAllowedError.new(request_signature)
+        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
 
@@ -37,7 +49,7 @@ if defined?(HTTPClient)
       if WebMock.registered_request?(request_signature) || WebMock.net_connect_allowed?(request_signature.uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
       else
-        raise NetConnectNotAllowedError.new(request_signature)
+        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
 
@@ -64,6 +76,21 @@ if defined?(HTTPClient)
 
       response
     end
+  end
+  
+  def build_webmock_response(httpclient_response)
+    webmock_response = WebMock::Response.new
+    webmock_response.status = [httpclient_response.status, httpclient_response.reason]
+    webmock_response.headers = httpclient_response.header.all
+    if  httpclient_response.content.respond_to?(:read)
+      webmock_response.body = httpclient_response.content.read
+      body = HTTP::Message::Body.new
+      body.init_response(StringIO.new(webmock_response.body))
+      httpclient_response.body = body
+    else
+      webmock_response.body = httpclient_response.content
+    end
+    webmock_response
   end
 
   def build_request_signature(req)

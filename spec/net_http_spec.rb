@@ -49,9 +49,54 @@ describe "Webmock with Net:HTTP" do
   it "should handle real requests with readable body" do
     WebMock.allow_net_connect!
     req = Net::HTTP::Post.new("/")
-    Net::HTTP.start("www.example.com") {|http| 
+    Net::HTTP.start("www.example.com") {|http|
       http.request(req, StringIO.new("my_params"))
     }.body.should =~ /Example Web Page/
+  end
+
+  describe 'after_request callback support' do
+    let(:expected_body_regex) { /You have reached this web page by typing.*example\.com/ }
+
+    before(:each) do
+      WebMock.allow_net_connect!
+      @callback_invocation_count = 0
+      WebMock.after_request do |_, response|
+        @callback_invocation_count += 1
+        @callback_response = response
+      end
+    end
+
+    after(:each) do
+      WebMock.reset_callbacks
+    end
+
+    def perform_get_with_returning_block
+      http_request(:get, "http://www.example.com/") do |response|
+        return response.body
+      end
+    end
+
+    it "should support the after_request callback on an request with block and read_body" do
+      response_body = ''
+      http_request(:get, "http://www.example.com/") do |response|
+        response.read_body { |fragment| response_body << fragment }
+      end
+      response_body.should =~ expected_body_regex
+
+      @callback_response.body.should == response_body
+    end
+
+    it "should support the after_request callback on a request with a returning block" do
+      response_body = perform_get_with_returning_block
+      response_body.should =~ expected_body_regex
+      @callback_response.should be_instance_of(WebMock::Response)
+      @callback_response.body.should == response_body
+    end
+
+    it "should only invoke the after_request callback once, even for a recursive post request" do
+      Net::HTTP.new('example.com', 80).post('/', nil)
+      @callback_invocation_count.should == 1
+    end
   end
 
 end

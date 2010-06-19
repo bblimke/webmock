@@ -75,5 +75,9 @@ module HTTPClientSpecHelper
 
     socket.should_receive(:readpartial).any_number_of_times.and_raise(EOFError)
   end
+  
+  def http_library
+    :http_client
+  end
 
 end

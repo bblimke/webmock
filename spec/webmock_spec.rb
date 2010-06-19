@@ -116,7 +116,26 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
+        
+    end
 
+    describe "on query params" do
+      
+      it "should match the request by query params declared as a hash" do
+        stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
+      end
+      
+      it "should match the request by query declared as a string" do
+        stub_http_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
+      end
+      
+      it "should match the request by query params declared both in uri and query option" do
+        stub_http_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c").body.should == "abc"
+      end
+    
     end
 
     describe "on method" do
@@ -179,6 +198,78 @@ describe "WebMock", :shared => true do
           "Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'xabc'"))
         end
 
+      end
+      
+      describe "when body is declared as a hash" do        
+        before(:each) do
+          stub_http_request(:post, "www.example.com").
+            with(:body => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} })
+        end
+      
+        describe "for request with url encoded body" do
+      
+          it "should match request if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/",
+              :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
+          end
+        
+          it "should match request if hash matches body in different order of params" do
+            http_request(
+              :post, "http://www.example.com/",
+              :body => 'a=1&c[d][]=e&b=five&c[d][]=f').status.should == "200"
+          end
+        
+          it "should not match if hash doesn't match url encoded body" do
+            lambda {
+              http_request(
+                :post, "http://www.example.com/",
+                :body => 'c[d][]=f&a=1&c[d][]=e').status.should == "200"
+            }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
+            "Real HTTP connections are disabled. Unregistered request: "+
+            "POST http://www.example.com/ with body 'c[d][]=f&a=1&c[d][]=e'"))
+          end
+        
+        end
+        
+        
+        describe "for request with json body and content type is set to json" do
+          
+          it "should match if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+          end
+        
+          it "should match if hash matches body in different form" do
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
+          end
+        
+        end
+        
+        describe "for request with xml body and content type is set to xml" do
+          before(:each) do
+            WebMock.reset_webmock
+            stub_http_request(:post, "www.example.com").
+              with(:body => { "opt" => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} }})
+          end
+        
+          it "should match if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'}, 
+              :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
+          end
+        
+          it "should match if hash matches body in different form" do
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'}, 
+              :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
+          end
+        
+        end
+      
       end
 
     end
@@ -350,6 +441,20 @@ describe "WebMock", :shared => true do
         lambda {
           http_request(:get, "http://www.example.com/")
         }.should raise_error(MyException, "Exception from WebMock")
+      end
+      
+      it "should raise exception if declared in a stubbed response as exception instance" do
+        stub_http_request(:get, "www.example.com").to_raise(MyException.new("hello world"))
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error(MyException, "hello world")
+      end
+      
+      it "should raise exception if declared in a stubbed response as exception instance" do
+        stub_http_request(:get, "www.example.com").to_raise("hello world")
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error("hello world")
       end
 
       it "should raise exception if declared in a stubbed response after returning declared response" do
@@ -804,6 +909,35 @@ describe "WebMock", :shared => true do
                     request(:get, /.*example.*/).should have_been_made
                   }.should_not raise_error
                 end
+                
+              end
+
+              describe "when matching requests with query params" do
+                before(:each) do
+                  stub_http_request(:any, /.*example.*/)
+                end
+              
+                it "should pass if the request was executed with query params declared in a hash in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
+                    request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should pass if the request was executed with query params declared as string in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
+                    request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should pass if the request was executed with query params both in uri and in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c")
+                    request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                  }.should_not raise_error
+                end
+              
               end
 
               it "should fail if requested more times than expected" do
@@ -840,22 +974,99 @@ describe "WebMock", :shared => true do
                   http_request(:get, "http://www.example.com/", :body => "abc")
                   request(:get, "www.example.com").
                   with(:body => "def").should have_been_made
-                }.should fail_with("The request GET http://www.example.com/ with body 'def' was expected to execute 1 time but it executed 0 times")
+                }.should fail_with('The request GET http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times')
               end
 
-              it "should succeed if request was executed with the same body" do
-                lambda {
-                  http_request(:post, "http://www.example.com/", :body => "abc")
-                  request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
-                }.should_not raise_error
-              end
+              describe "when expected body is declared as regexp" do
 
-              it "should fail if request was executed with different body" do
-                lambda {
-                  http_request(:get, "http://www.example.com/", :body => /^abc/)
-                  request(:get, "www.example.com").
-                  with(:body => "xabc").should have_been_made
-                }.should fail_with("The request GET http://www.example.com/ with body 'xabc' was expected to execute 1 time but it executed 0 times")
+                it "should succeed if request was executed with the same body" do
+                  lambda {
+                    http_request(:post, "http://www.example.com/", :body => "abc")
+                    request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should fail if request was executed with different body" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :body => /^abc/)
+                    request(:get, "www.example.com").
+                    with(:body => "xabc").should have_been_made
+                  }.should fail_with('The request GET http://www.example.com/ with body "xabc" was expected to execute 1 time but it executed 0 times')
+                end
+              
+              end
+              
+              describe "when expected body is declared as a hash" do
+                let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
+                let(:fail_message) {'The request POST http://www.example.com/ with body {"a"=>"1", "b"=>"five", "c"=>{"d"=>["e", "f"]}} was expected to execute 1 time but it executed 0 times'}
+
+                describe "when request is executed with url encoded body matching hash" do
+                
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                  
+                  it "should succeed if url encoded params have different order" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&b=five&c[d][]=f')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+
+                  it "should fail if request is executed with url encoded body not matching hash" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should fail_with(fail_message)
+                  end
+                
+                end
+
+                describe "when request is executed with json body matching hash and content type is set to json" do
+
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+                        :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                  
+                  it "should succeed if json body is in different form" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+                        :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                
+                end
+
+
+                describe "when request is executed with xml body matching hash and content type is set to xml" do
+                  let(:body_hash) { { "opt" => {:a => "1", :b => 'five', 'c' => {'d' => ['e', 'f']}} }}
+                  
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+                        :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                
+                  it "should succeed if xml body is in different form" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+                        :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+              
+                end
+                
               end
 
               it "should succeed if request was executed with the same headers" do
@@ -1137,4 +1348,140 @@ describe "WebMock", :shared => true do
 
           end
 
+
+  describe "callbacks" do
+    
+    describe "after_request" do
+      before(:each) do
+        WebMock.reset_callbacks
+        stub_request(:get, "http://www.example.com")
+      end
+  
+      it "should not invoke callback unless request is made" do
+        WebMock.after_request {
+          @called = true
+        }
+        @called.should == nil
+      end
+  
+      it "should invoke a callback after request is made" do
+        WebMock.after_request {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == true
+      end
+    
+      it "should not invoke a callback if specific http library should be ignored" do
+        WebMock.after_request(:except => [http_library()]) {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+      end
+  
+      it "should invoke a callback even if other http libraries should be ignored" do
+        WebMock.after_request(:except => [:other_lib]) {
+          @called = true
+        }
+        http_request(:get, "http://www.example.com/")
+        @called.should == true
+      end
+  
+      it "should pass request signature to the callback" do
+        WebMock.after_request(:except => [:other_lib])  do |request_signature, _|
+          @request_signature = request_signature
         end
+        http_request(:get, "http://www.example.com/")
+        @request_signature.uri.to_s.should == "http://www.example.com:80/"
+      end
+      
+      describe "passing response to callback" do
+
+        describe "for stubbed requests" do
+          before(:each) do
+            stub_request(:get, "http://www.example.com").
+              to_return(
+                :status => ["200", "hello"],
+                :headers => {'Content-Length' => '666', 'Hello' => 'World'},
+                :body => "foo bar"
+              )
+            WebMock.after_request(:except => [:other_lib])  do |_, response|
+              @response = response
+            end
+            http_request(:get, "http://www.example.com/")
+          end
+
+          it "should pass response with status and message" do            
+            @response.status.should == ["200", "hello"]
+          end
+        
+          it "should pass response with headers" do
+            @response.headers.should == {
+              'Content-Length' => '666', 
+              'Hello' => 'World'
+            }
+          end
+        
+          it "should pass response with body" do
+            @response.body.should == "foo bar"
+          end
+      
+        end
+        
+        describe "for real requests" do
+          before(:each) do
+            WebMock.reset_webmock
+            WebMock.allow_net_connect!
+            WebMock.after_request(:except => [:other_lib])  do |_, response|
+              @response = response
+            end
+            http_request(:get, "http://www.example.com/")
+          end
+
+          it "should pass response with status and message" do
+            @response.status[0].should == 200
+            @response.status[1].should == "OK"
+          end
+        
+          it "should pass response with headers" do
+            @response.headers["Content-Length"].should == "574"
+          end
+        
+          it "should pass response with body" do
+            @response.body.size.should == 574
+          end
+      
+        end
+      
+      end
+  
+      it "should invoke multiple callbacks in order of their declarations" do
+        WebMock.after_request { @called = 1 }
+        WebMock.after_request { @called += 1 }
+        http_request(:get, "http://www.example.com/")
+        @called.should == 2
+      end
+      
+      it "should invoke callbacks only for real requests if requested" do
+        WebMock.after_request(:real_requests_only => true) { @called = true }
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+        WebMock.allow_net_connect!
+        http_request(:get, "http://www.example.net/")
+        @called.should == true
+      end
+      
+      it "should clear all declared callbacks on reset callbacks" do
+        WebMock.after_request { @called = 1 }
+        WebMock.reset_callbacks
+        stub_request(:get, "http://www.example.com")        
+        http_request(:get, "http://www.example.com/")
+        @called.should == nil
+      end
+      
+    end
+  
+  end
+
+end
