@@ -116,7 +116,26 @@ describe "WebMock", :shared => true do
         stub_http_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
+        
+    end
 
+    describe "on query params" do
+      
+      it "should match the request by query params declared as a hash" do
+        stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
+      end
+      
+      it "should match the request by query declared as a string" do
+        stub_http_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
+      end
+      
+      it "should match the request by query params declared both in uri and query option" do
+        stub_http_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c").body.should == "abc"
+      end
+    
     end
 
     describe "on method" do
@@ -890,6 +909,35 @@ describe "WebMock", :shared => true do
                     request(:get, /.*example.*/).should have_been_made
                   }.should_not raise_error
                 end
+                
+              end
+
+              describe "when matching requests with query params" do
+                before(:each) do
+                  stub_http_request(:any, /.*example.*/)
+                end
+              
+                it "should pass if the request was executed with query params declared in a hash in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
+                    request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should pass if the request was executed with query params declared as string in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
+                    request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should pass if the request was executed with query params both in uri and in query option" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c")
+                    request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                  }.should_not raise_error
+                end
+              
               end
 
               it "should fail if requested more times than expected" do
