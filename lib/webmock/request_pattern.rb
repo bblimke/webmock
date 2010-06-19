@@ -15,17 +15,18 @@ module WebMock
     end
 
     def matches?(request_signature)
+      content_type = request_signature.headers['Content-Type'] if request_signature.headers
       @method_pattern.matches?(request_signature.method) &&
-      @uri_pattern.matches?(request_signature.uri) &&
-      (@body_pattern.nil? || @body_pattern.matches?(request_signature.body)) &&
-      (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
-      (@with_block.nil? || @with_block.call(request_signature))
+        @uri_pattern.matches?(request_signature.uri) &&
+        (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, content_type || "")) &&
+        (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
+        (@with_block.nil? || @with_block.call(request_signature))
     end
 
     def to_s
       string = "#{@method_pattern.to_s.upcase}"
       string << " #{@uri_pattern.to_s}"
-      string << " with body '#{@body_pattern.to_s}'" if @body_pattern
+      string << " with body #{@body_pattern.to_s}" if @body_pattern
       string << " with headers #{@headers_pattern.to_s}" if @headers_pattern
       string << " with given block" if @with_block
       string
@@ -40,7 +41,7 @@ module WebMock
     end
 
   end
-  
+
 
   class MethodPattern
     def initialize(pattern)
@@ -78,18 +79,48 @@ module WebMock
   end
 
   class BodyPattern
+
+    BODY_FORMATS = {
+      'text/xml'               => :xml,
+      'application/xml'        => :xml,
+      'application/json'       => :json,
+      'text/json'              => :json,
+      'application/javascript' => :json,
+      'text/javascript'        => :json,
+      'text/html'              => :html,
+      'application/x-yaml'     => :yaml,
+      'text/yaml'              => :yaml,
+      'text/plain'             => :plain
+    }
+
     def initialize(pattern)
       @pattern = pattern
+      if (@pattern).is_a?(Hash)
+        @pattern = normalize_hash(@pattern)
+      end
     end
 
-    def matches?(uri)
-      empty_string?(@pattern) && empty_string?(uri) ||
-        @pattern == uri ||
-        @pattern === uri
+    def matches?(body, content_type = "")
+      if (@pattern).is_a?(Hash)
+        return true if @pattern.empty?
+
+        case BODY_FORMATS[content_type]
+        when :json then
+          Crack::JSON.parse(body) == @pattern
+        when :xml then
+          Crack::XML.parse(body) == @pattern
+        else
+          Addressable::URI.parse('?' + body).query_values == @pattern
+        end
+      else
+        empty_string?(@pattern) && empty_string?(body) ||
+          @pattern == body ||
+          @pattern === body
+      end
     end
-    
+
     def to_s
-      @pattern.to_s
+      @pattern.inspect
     end
 
     private
@@ -97,6 +128,11 @@ module WebMock
     def empty_string?(string)
       string.nil? || string == ""
     end
+
+    def normalize_hash(hash)
+      JSON.parse(JSON.generate(hash))
+    end
+
   end
 
   class HeadersPattern
@@ -115,7 +151,7 @@ module WebMock
         true
       end
     end
-    
+
     def to_s
       WebMock::Util::Headers.sorted_headers_string(@pattern)
     end
