@@ -13,10 +13,13 @@ Features
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit
 * Support for RSpec 1.x and RSpec 2.x
-* Support for Net::HTTP and other http libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
-* Support for HTTPClient library (both sync and async requests)
-* Support for Patron library
-* Easy to extend to other HTTP libraries
+
+Supported HTTP libraries
+------------------------
+
+* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
+* HTTPClient
+* Patron
 
 Installation
 ------------
@@ -80,6 +83,20 @@ You can also use WebMock without RSpec or Test::Unit support:
     res = Net::HTTP.start(uri.host, uri.port) {|http|
       http.request(req, 'hello world')
     }    # ===> Success
+    
+### Matching requests with URL-Encoded, JSON or XML body against hash
+
+	stub_http_request(:post, "www.example.com").
+		with(:body => {:data => {:a => '1', :b => 'five'}})
+
+	RestClient.post('www.example.com', "data[a]=1&data[b]=five", 
+	  :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+	
+	RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}', 
+	  :content_type => 'application/json')    # ===> Success
+	
+	RestClient.post('www.example.com', '<data a="1" b="five" />', 
+	  :content_type => 'application/xml' )    # ===> Success
 
 ### Matching custom request headers
 
@@ -463,6 +480,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Jose Angel Cortinas
 * Razic
 * Steve Tooke
+* Nathaniel Bibler
 
 ## Background
 
