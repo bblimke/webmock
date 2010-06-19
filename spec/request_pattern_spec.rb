@@ -119,6 +119,40 @@ describe RequestPattern do
 
     end
 
+    describe "when matching requests on query params" do
+
+      it "should match request query params even if uri is declared as regexp" do
+        RequestPattern.new(:get, /.*example.*/, :query => {"a" => ["b", "c"]}).
+          should match(RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+      end
+
+      it "should match request query params if uri is declared as regexp but params don't match" do
+        RequestPattern.new(:get, /.*example.*/, :query => {"x" => ["b", "c"]}).
+          should_not match(RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+      end
+
+      it "should match for query params are the same as declared in hash" do
+        RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
+          should match(RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+      end
+      
+      it "should not match for query params are different than the declared in hash" do
+        RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
+          should_not match(RequestSignature.new(:get, "www.example.com?x[]=b&a[]=c"))
+      end
+
+      it "should match for query params are the same as declared as string" do
+        RequestPattern.new(:get, "www.example.com", :query => "a[]=b&a[]=c").
+          should match(RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+      end
+
+      it "should match for query params are the same as declared both in query option or url" do
+        RequestPattern.new(:get, "www.example.com/?x=3", :query => "a[]=b&a[]=c").
+          should match(RequestSignature.new(:get, "www.example.com/?x=3&a[]=b&a[]=c"))
+      end
+
+    end
+
     describe "when matching requests with body" do
 
       it "should match if request body and body pattern are the same" do
@@ -179,12 +213,12 @@ describe RequestPattern do
             RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should_not match(RequestSignature.new(:post, "www.example.com", :body => 'c[d][]=f&a=1&c[d][]=e'))
           end
-          
+
           it "should not match when body is not url encoded" do
             RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should_not match(RequestSignature.new(:post, "www.example.com", :body => 'foo bar'))
           end
-          
+
         end
 
         describe "for request with json body and content type is set to json" do
@@ -199,17 +233,17 @@ describe RequestPattern do
               should match(RequestSignature.new(:post, "www.example.com", :headers => {:content_type => 'application/json'},
               :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}"))
           end
-          
+
           it "should not match when body is not json" do
             RequestPattern.new(:post, 'www.example.com', :body => body_hash).
-              should_not match(RequestSignature.new(:post, "www.example.com", 
-                :headers => {:content_type => 'application/json'}, :body => "foo bar"))
+              should_not match(RequestSignature.new(:post, "www.example.com",
+              :headers => {:content_type => 'application/json'}, :body => "foo bar"))
           end
         end
 
         describe "for request with xml body and content type is set to xml" do
           let(:body_hash) { {"opt" => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}}} }
-          
+
           it "should match when hash matches body" do
             RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should match(RequestSignature.new(:post, "www.example.com", :headers => {:content_type => 'application/xml'},
@@ -221,12 +255,12 @@ describe RequestPattern do
               should match(RequestSignature.new(:post, "www.example.com", :headers => {:content_type => 'application/xml'},
               :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n"))
           end
-          
+
           it "should not match when body is not xml" do
             RequestPattern.new(:post, 'www.example.com', :body => body_hash).
-              should_not match(RequestSignature.new(:post, "www.example.com", 
+              should_not match(RequestSignature.new(:post, "www.example.com",
               :headers => {:content_type => 'application/xml'}, :body => "foo bar"))
-          end    
+          end
         end
       end
     end

@@ -138,7 +138,13 @@ You can also use WebMock without RSpec or Test::Unit support:
 	 stub_request(:any, /.*example.*/)
 
 	 Net::HTTP.get('www.example.com', '/') # ===> Success	
+	 
+### Matching query params using hash	 
 
+	 stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+	 
+	 RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success	
+	 
 ### Stubbing with custom response
 
 	stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )

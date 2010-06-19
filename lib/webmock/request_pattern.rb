@@ -38,6 +38,7 @@ module WebMock
     def assign_options(options)
       @body_pattern = BodyPattern.new(options[:body]) if options.has_key?(:body)
       @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
+      @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
     end
 
   end
@@ -67,7 +68,8 @@ module WebMock
         ##TODO : do I need to normalize again??
         uri === @pattern
       elsif @pattern.is_a?(Regexp)
-        WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) }
+        WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
+        (@query_params.nil? || @query_params == uri.query_values)
       else
         false
       end
@@ -76,6 +78,18 @@ module WebMock
     def to_s
       WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
     end
+    
+    def add_query_params(query_params)
+      if @pattern.is_a?(Addressable::URI)
+        if !query_params.is_a?(Hash)
+          query_params = Addressable::URI.parse('?' + query_params).query_values
+        end  
+        @pattern.query_values = (@pattern.query_values || {}).merge(query_params)
+      else
+        @query_params = query_params.is_a?(Hash) ? query_params : Addressable::URI.parse('?' + query_params).query_values
+      end      
+    end
+    
   end
 
   class BodyPattern
