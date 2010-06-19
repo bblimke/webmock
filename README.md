@@ -315,6 +315,11 @@ You can also use WebMock without RSpec or Test::Unit support:
 	WebMock.should_not have_requested(:get, "www.something.com")
 	
 	WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
+	
+	WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}) 
+
+	WebMock.should have_requested(:get, "www.example.com").
+	  with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json')
 
 ### Different way of setting expectations in RSpec
 
@@ -325,6 +330,11 @@ You can also use WebMock without RSpec or Test::Unit support:
 	request(:any, "www.example.com").should_not have_been_made
 
 	request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+	
+	request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+	
+	request(:post, "www.example.com").
+	  with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json').should have_been_made
 	
 ## Clearing stubs and request history
 
