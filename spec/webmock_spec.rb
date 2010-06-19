@@ -180,6 +180,73 @@ describe "WebMock", :shared => true do
         end
 
       end
+      
+      describe "when body is declared as a hash" do        
+        before(:each) do
+          stub_http_request(:post, "www.example.com").
+            with(:body => {:a => 1, :b => 'five', 'c' => {'d' => ['e', 'f']} })
+        end
+      
+        describe "for request with url encoded body" do
+      
+          it "should match request if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/",
+              :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
+          end
+        
+          it "should match request if hash matches body in different order of params" do
+            http_request(
+              :post, "http://www.example.com/",
+              :body => 'c[d][]=f&a=1&c[d][]=e&b=five').status.should == "200"
+          end
+        
+          it "should not match if hash doesn't match url encoded body" do
+            lambda {
+              http_request(
+                :post, "http://www.example.com/",
+                :body => 'c[d][]=f&a=1&c[d][]=e').status.should == "200"
+            }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string(
+            "Real HTTP connections are disabled. Unregistered request: "+
+            "POST http://www.example.com/ with body 'c[d][]=f&a=1&c[d][]=e'"))
+          end
+        
+        end
+        
+        
+        describe "for request with json body and content type is set to json" do
+          
+          it "should match if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/", :headers => 'application/json',
+              :body => "{\"a\":1,\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+          end
+        
+          it "should match if hash matches body in different form" do
+            http_request(
+              :post, "http://www.example.com/", :headers => 'application/json',
+              :body => "{\"a\":1,\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
+          end
+        
+        end
+        
+        describe "for request with xml body and content type is set to xml" do
+        
+          it "should match if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/", :headers => 'application/xml', 
+              :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
+          end
+        
+          it "should match if hash matches body in different form" do
+            http_request(
+              :post, "http://www.example.com/", :headers => 'application/xml', 
+              :body => "<opt a=\"1\" b=\"five\">\n  <c>\n  <d>f</d>\n  <d>e</d>\n </c>\n</opt>\n").status.should == "200"
+          end
+        
+        end
+      
+      end
 
     end
 
@@ -857,19 +924,95 @@ describe "WebMock", :shared => true do
                 }.should fail_with("The request GET http://www.example.com/ with body 'def' was expected to execute 1 time but it executed 0 times")
               end
 
-              it "should succeed if request was executed with the same body" do
-                lambda {
-                  http_request(:post, "http://www.example.com/", :body => "abc")
-                  request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
-                }.should_not raise_error
-              end
+              describe "when expected body is declared as regexp" do
 
-              it "should fail if request was executed with different body" do
-                lambda {
-                  http_request(:get, "http://www.example.com/", :body => /^abc/)
-                  request(:get, "www.example.com").
-                  with(:body => "xabc").should have_been_made
-                }.should fail_with("The request GET http://www.example.com/ with body 'xabc' was expected to execute 1 time but it executed 0 times")
+                it "should succeed if request was executed with the same body" do
+                  lambda {
+                    http_request(:post, "http://www.example.com/", :body => "abc")
+                    request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
+                  }.should_not raise_error
+                end
+
+                it "should fail if request was executed with different body" do
+                  lambda {
+                    http_request(:get, "http://www.example.com/", :body => /^abc/)
+                    request(:get, "www.example.com").
+                    with(:body => "xabc").should have_been_made
+                  }.should fail_with("The request GET http://www.example.com/ with body 'xabc' was expected to execute 1 time but it executed 0 times")
+                end
+              
+              end
+              
+              describe "when expected body is declared as a hash" do
+                let(:body_hash) { {:a => 1, :b => 'five', 'c' => {'d' => ['e', 'f']}} }
+                let(:fail_message) {"The request GET http://www.example.com/ with headers {:a => 1, :b => 'five', 'c' => {'d' => ['e', 'f']}} was expected to execute 1 time but it executed 0 times"}
+
+                describe "when request is executed with url encoded body matching hash" do
+                
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                  
+                  it "should succeed if url encoded params have different order" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e&b=five')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+
+                  it "should fail if request is executed with url encoded body not matching hash" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should fail_with(fail_message)
+                  end
+                
+                end
+
+                describe "when request is executed with json body matching hash and content type is set to json" do
+
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => 'application/json',
+                        :body => "{\"a\":1,\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                  
+                  it "should succeed if json body is in different form" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => 'application/json',
+                        :body => "{\"a\":1,\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                
+                end
+
+
+                describe "when request is executed with xml body matching hash and content type is set to xml" do
+                  
+                  it "should succeed" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => 'application/xml',
+                        :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+                
+                  it "should succeed if xml body is in different form" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => 'application/xml',
+                        :body => "<opt a=\"1\" b=\"five\">\n  <c>\n  <d>f</d>\n  <d>e</d>\n </c>\n</opt>\n")
+                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+              
+                end
+                
               end
 
               it "should succeed if request was executed with the same headers" do
