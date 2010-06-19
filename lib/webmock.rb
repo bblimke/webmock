@@ -1,6 +1,7 @@
 require 'singleton'
 
 require 'addressable/uri'
+require 'crack'
 
 require 'webmock/http_lib_adapters/net_http'
 require 'webmock/http_lib_adapters/httpclient'
