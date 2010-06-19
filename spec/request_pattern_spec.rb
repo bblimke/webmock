@@ -13,6 +13,11 @@ describe RequestPattern do
       :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should ==
     "GET http://www.example.com/ with body \"abc\" with headers {'A'=>'a', 'B'=>'b'} with given block"
   end
+  
+  it "should report string describing itself with query params" do
+    RequestPattern.new(:get, /.*example.*/, :query => {'a' => ['b', 'c']}).to_s.should ==
+    "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
+  end
 
   describe "with" do
     before(:each) do

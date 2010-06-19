@@ -76,7 +76,13 @@ module WebMock
     end
 
     def to_s
-      WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
+      if @pattern.is_a?(Regexp)
+        str = @pattern.inspect
+        str += " with query params #{@query_params.inspect}" if @query_params
+        str
+      else
+        WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
+      end
     end
     
     def add_query_params(query_params)
