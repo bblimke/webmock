@@ -17,7 +17,6 @@ module WebMock
 
       NORMALIZED_URIS = Hash.new do |hash, uri|
         normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
-        p uri
         normalized_uri.query_values = sort_query_values(normalized_uri.query_values) if normalized_uri.query_values
         normalized_uri = normalized_uri.normalize #normalize! is slower
         normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
