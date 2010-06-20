@@ -85,7 +85,7 @@ You can also use WebMock without RSpec or Test::Unit support:
       http.request(req, 'hello world')
     }    # ===> Success
     
-### Matching requests with URL-Encoded, JSON or XML body against hash
+### Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
 
 	stub_http_request(:post, "www.example.com").
 		with(:body => {:data => {:a => '1', :b => 'five'}})
@@ -448,16 +448,16 @@ To record your application's real HTTP interactions and replay them later in tes
 
 ## Request callbacks
 
-####WebMock can invoke a callback for each, stubbed or real, request:
+####WebMock can invoke callbacks stubbed or real requests:
 
     WebMock.after_request do |request_signature, response|
-      Log.info("Request #{request_signature} was made and #{response} was returned")
+      puts "Request #{request_signature} was made and #{response} was returned"
     end
 
 #### invoke callbacks for real requests only and except requests made with Patron
 
     WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
-      Log.info("Request #{request_signature} was made and #{response} was returned")
+      puts "Request #{request_signature} was made and #{response} was returned"
     end
 
 ## Bugs and Issues
