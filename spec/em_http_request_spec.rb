@@ -13,6 +13,8 @@ unless RUBY_PLATFORM =~ /java/
     it "should work with block"
     
     it "should work with streaming"
+    
+    it "should work with optional query params"
 
   end
 end

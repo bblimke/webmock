@@ -66,11 +66,20 @@ if defined?(EventMachine::HttpRequest)
       end
 
       def build_request_signature
+        
+        if @options[:authorization] || @options['authorization']
+          auth = (@options[:authorization] || @options['authorization'])
+          userinfo = auth.join(':')
+          userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
+          @options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
+          @uri.userinfo = userinfo
+        end
+        
         WebMock::RequestSignature.new(
           @method.downcase.to_sym,
           @uri.to_s,
-          :body => @options[:body],
-          :headers => @options[:head]
+          :body => (@options[:body] || @options['body']),
+          :headers => (@options[:head] || @options['head'])
         )
       end
 
