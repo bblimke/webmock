@@ -16,6 +16,7 @@ describe "WebMock version" do
   
 end
 
+
 describe "WebMock", :shared => true do
   before(:each) do
     WebMock.disable_net_connect!
@@ -39,9 +40,10 @@ describe "WebMock", :shared => true do
         setup_expectations_for_real_example_com_request(
          :host => "www.paypal.com",
          :port => 443,
+         :path => "/uk/cgi-bin/webscr",
          :response_body => "hello paypal"
         )
-        http_request(:get, "https://www.paypal.com/").
+        http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
           body.should =~ /.*paypal.*/
       end
 

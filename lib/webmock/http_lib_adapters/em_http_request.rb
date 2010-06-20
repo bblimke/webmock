@@ -1,0 +1,99 @@
+if defined?(EventMachine::HttpRequest)
+
+  module EventMachine
+    class HttpRequest
+
+      class WebMockFakeHttpClient < EventMachine::HttpClient
+
+        def setup(response, uri, error = nil)
+          @uri = uri
+          if error
+            on_error(error)
+            fail(self)
+          else
+            receive_data(response)
+            succeed(self)
+          end
+        end
+
+        def unbind
+        end
+
+      end
+
+      def send_request_with_webmock(&block)
+        request_signature = build_request_signature
+
+        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+
+        if WebMock.registered_request?(request_signature)
+          webmock_response = WebMock.response_for_request(request_signature)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :em_http_request}, request_signature, webmock_response)
+          client = WebMockFakeHttpClient.new(nil)
+          client.on_error("WebMock timeout error") if webmock_response.should_timeout
+          client.setup(make_raw_response(webmock_response), @uri,
+            webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          client
+        elsif WebMock.net_connect_allowed?(request_signature.uri)
+          http = send_request_without_webmock(&block)
+          http.callback {
+            if WebMock::CallbackRegistry.any_callbacks?
+              webmock_response = build_webmock_response(http)
+              WebMock::CallbackRegistry.invoke_callbacks(
+                {:lib => :em_http_request, :real_request => true}, request_signature,
+                webmock_response)
+            end
+          }
+          http
+        else
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        end
+      end
+      
+      alias_method :send_request_without_webmock, :send_request
+      alias_method :send_request, :send_request_with_webmock
+      
+
+      private
+      
+      def build_webmock_response(http)
+        webmock_response = WebMock::Response.new
+        webmock_response.status = [http.response_header.status, http.response_header.http_reason]
+        webmock_response.headers = http.response_header
+        webmock_response.body = http.response
+        webmock_response
+      end
+
+      def build_request_signature
+        WebMock::RequestSignature.new(
+          @method.downcase.to_sym,
+          @uri.to_s,
+          :body => @options[:body],
+          :headers => @options[:head]
+        )
+      end
+
+
+      def make_raw_response(response)            
+        response.raise_error_if_any
+        
+        status, headers, body = response.status, response.headers, response.body
+        
+        response_string = []
+        response_string << "HTTP/1.1 #{status[0]} #{status[1]}"
+
+        headers.each do |header, value|
+          value = value.join(", ") if value.is_a?(Array)
+          response_string << "#{header}: #{value}"
+        end if headers
+
+        response_string << "" << body
+        response_string.join("\n")
+      end
+
+
+    end
+  end
+
+end

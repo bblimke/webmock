@@ -1,6 +1,6 @@
-if defined?(HTTPClient)
+if defined?(::HTTPClient)
 
-  class HTTPClient
+  class ::HTTPClient
 
     def do_get_block_with_webmock(req, proxy, conn, &block)
       do_get_with_webmock(req, proxy, conn, false, &block)

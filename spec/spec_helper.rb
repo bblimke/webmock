@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'httpclient'
 require 'patron' unless RUBY_PLATFORM =~ /java/
+require 'em-http' unless RUBY_PLATFORM =~ /java/
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
