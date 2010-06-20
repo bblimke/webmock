@@ -14,7 +14,10 @@ unless RUBY_PLATFORM =~ /java/
     
     it "should work with streaming"
     
-    it "should work with optional query params"
+    it "should work with optional query params" do
+      stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
+      http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"
+    end
 
   end
 end

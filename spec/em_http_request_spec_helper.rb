@@ -14,7 +14,7 @@ module EMHttpRequestSpecHelper
       http = request.send(:setup_request, method, {
         :timeout => 2, 
         :body => options[:body],
-        :query => options[:query]
+        :query => options[:query],
         'authorization' => [uri.user, uri.password],
         :head => options[:headers]}, &block)
       http.errback {

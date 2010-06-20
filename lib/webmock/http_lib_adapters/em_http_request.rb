@@ -75,6 +75,8 @@ if defined?(EventMachine::HttpRequest)
           @uri.userinfo = userinfo
         end
         
+       @uri.query_values = (@uri.query_values || {}).merge(@options[:query]) if @options[:query]
+        
         WebMock::RequestSignature.new(
           @method.downcase.to_sym,
           @uri.to_s,
