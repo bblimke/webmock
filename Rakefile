@@ -15,7 +15,7 @@ begin
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "httpclient", ">= 2.1.5.2"
     gem.add_development_dependency "patron", ">= 0.4.5" unless RUBY_PLATFORM =~ /java/
-    gem.add_development_dependency "em-http-request", ">= 0.2.7"
+    gem.add_development_dependency "em-http-request", ">= 0.2.7" unless RUBY_PLATFORM =~ /java/
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
