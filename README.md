@@ -17,9 +17,10 @@ Features
 Supported HTTP libraries
 ------------------------
 
-* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, rest-client, HTTParty)
+* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, REST Client, HTTParty)
 * HTTPClient
 * Patron
+* EM-HTTP-Request
 
 Installation
 ------------
