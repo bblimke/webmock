@@ -15,6 +15,10 @@ if defined?(EventMachine::HttpRequest)
             succeed(self)
           end
         end
+        
+        def stream(&blk)
+          blk.call(@response)
+        end
 
         def unbind
         end
