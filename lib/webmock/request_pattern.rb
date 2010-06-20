@@ -4,7 +4,7 @@ module WebMock
 
     def initialize(method, uri, options = {})
       @method_pattern = MethodPattern.new(method)
-      @uri_pattern = URIPattern.new(uri)
+      @uri_pattern = create_uri_pattern(uri)
       assign_options(options)
     end
 
@@ -40,6 +40,14 @@ module WebMock
       @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
       @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
     end
+    
+    def create_uri_pattern(uri)
+      if uri.is_a?(Regexp)
+        URIRegexpPattern.new(uri)
+      else
+        URIStringPattern.new(uri)
+      end
+    end
 
   end
 
@@ -58,45 +66,54 @@ module WebMock
     end
   end
 
+
   class URIPattern
     def initialize(pattern)
       @pattern = pattern.is_a?(Addressable::URI) ? pattern : WebMock::Util::URI.normalize_uri(pattern)
     end
+  end
+
+  class URIRegexpPattern  < URIPattern
 
     def matches?(uri)
-      if @pattern.is_a?(Addressable::URI)
-        ##TODO : do I need to normalize again??
-        uri === @pattern
-      elsif @pattern.is_a?(Regexp)
-        WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
         (@query_params.nil? || @query_params == uri.query_values)
+    end
+
+    def to_s
+      str = @pattern.inspect
+      str += " with query params #{@query_params.inspect}" if @query_params
+      str
+    end
+
+    def add_query_params(query_params)
+      @query_params = query_params.is_a?(Hash) ? query_params : Addressable::URI.parse('?' + query_params).query_values
+    end
+
+  end
+
+  class URIStringPattern < URIPattern
+    def matches?(uri)
+      if @pattern.is_a?(Addressable::URI)
+        uri === @pattern
       else
         false
       end
     end
 
-    def to_s
-      if @pattern.is_a?(Regexp)
-        str = @pattern.inspect
-        str += " with query params #{@query_params.inspect}" if @query_params
-        str
-      else
-        WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
-      end
-    end
-    
     def add_query_params(query_params)
-      if @pattern.is_a?(Addressable::URI)
-        if !query_params.is_a?(Hash)
-          query_params = Addressable::URI.parse('?' + query_params).query_values
-        end  
-        @pattern.query_values = (@pattern.query_values || {}).merge(query_params)
-      else
-        @query_params = query_params.is_a?(Hash) ? query_params : Addressable::URI.parse('?' + query_params).query_values
-      end      
+      if !query_params.is_a?(Hash)
+        query_params = Addressable::URI.parse('?' + query_params).query_values
+      end
+      @pattern.query_values = (@pattern.query_values || {}).merge(query_params)
     end
-    
+
+    def to_s
+      WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
+    end
+
   end
+
 
   class BodyPattern
 
