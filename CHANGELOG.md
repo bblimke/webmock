@@ -13,6 +13,7 @@
 	 	 request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made  # ===> Success
 
 * Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
+
   (Thanks to Steve Tooke for the idea and a solution for url-encoded bodies)
 
 		stub_http_request(:post, "www.example.com").
@@ -51,7 +52,7 @@
     
 		stub_request(:any, 'www.example.net').to_raise("some error")
 
-* Matching request stubs based on a URI is 30% faster
+* Matching requests based on a URI is 30% faster
 
 * Fixed constant namespace issues in HTTPClient adapter. Thanks to Nathaniel Bibler for submitting a patch.
 
