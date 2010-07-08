@@ -19,6 +19,7 @@ module WebMock
         object.instance_variable_set(:@__orig_body__,
           case body_object
             when String then body_object
+            when nil then nil
             else raise ArgumentError.new("Unexpected body object: #{body_object}")
           end
         )
