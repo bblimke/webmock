@@ -2,7 +2,9 @@
 
 ## 1.3.1
 
-* The less hacky way to get the stream behaviour working for em-http-request. Suggested by Martyn Loughran
+* The less hacky way to get the stream behaviour working for em-http-request. Thanks to Martyn Loughran
+
+* Fixed issues where Net::HTTP was not accepting valid nil response body. Thanks to Muness Alrubaie
 
 ## 1.3.0
 

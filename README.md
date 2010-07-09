@@ -499,6 +499,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Steve Tooke
 * Nathaniel Bibler
 * Martyn Loughran
+* Muness Alrubaie
 
 ## Background
 
