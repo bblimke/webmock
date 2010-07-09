@@ -11,14 +11,16 @@ if defined?(EventMachine::HttpRequest)
             on_error(error)
             fail(self)
           else
-            receive_data(response)
-            succeed(self)
+            EM.next_tick do
+              receive_data(response)
+              succeed(self)
+            end
           end
         end
         
-        def stream(&blk)
-          blk.call(@response)
-        end
+        # def stream(&blk)
+          # blk.call(@response)
+        # end
 
         def unbind
         end

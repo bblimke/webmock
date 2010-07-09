@@ -498,6 +498,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Razic
 * Steve Tooke
 * Nathaniel Bibler
+* Martyn Loughran
 
 ## Background
 

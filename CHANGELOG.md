@@ -1,5 +1,9 @@
 #Changelog
 
+## 1.3.1
+
+* The less hacky way to get the stream behaviour working for em-http-request. Suggested by Martyn Loughran
+
 ## 1.3.0
 
 * Added support for [em-http-request](http://github.com/igrigorik/em-http-request)
