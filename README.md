@@ -22,20 +22,23 @@ Supported HTTP libraries
 * Patron
 * EM-HTTP-Request
 
-Installation
-------------
+##Installation
 
     gem install webmock --source http://gemcutter.org
 
-In your `test/test_helper.rb` add these two lines:
+### Test::Unit 
 
-    require 'webmock/test_unit'
+Add the following code to `test/test_helper.rb`
+
+	require 'webmock/test_unit'
 	
 	class Test::Unit::TestCase
-	  include WebMock
+	  config.include WebMock
 	end
 
-or if you use RSpec add these lines to `spec/spec_helper`:
+### RSpec
+	
+Add the following code to `spec/spec_helper`:
 
 	require 'webmock/rspec'
 
@@ -43,11 +46,33 @@ or if you use RSpec add these lines to `spec/spec_helper`:
 	  config.include WebMock
 	end
 
-You can also use WebMock without RSpec or Test::Unit support:
+### RSpec 2
+
+Add the following code to `spec/spec_helper`:
+
+	require 'webmock/rspec'
+	
+	RSpec.configure do |config|
+	  config.include WebMock
+	end
+
+### Cucumber
+
+Add the following code to `features/support/env.rb`
+
+	require 'webmock/rspec'  
+	module WebMockWorld
+	  include WebMock
+	  include WebMock::Matchers
+	end
+
+	World(WebMockWorld)
+
+You can also use WebMock outside a test framework:
 
 	require 'webmock'
-
 	include WebMock
+	include WebMock::Matchers
 
 ## Examples
 
