@@ -18,13 +18,11 @@ if defined?(EventMachine::HttpRequest)
           end
         end
         
-        # def stream(&blk)
-          # blk.call(@response)
-        # end
-
         def unbind
         end
 
+        def close_connection
+        end
       end
 
       def send_request_with_webmock(&block)
@@ -72,22 +70,31 @@ if defined?(EventMachine::HttpRequest)
       end
 
       def build_request_signature
-        
-        if @options[:authorization] || @options['authorization']
-          auth = (@options[:authorization] || @options['authorization'])
+        if @req
+          options = @req.options
+          method = @req.method
+          uri = @req.uri
+        else
+          options = @options
+          method = @method
+          uri = @uri
+        end  
+
+        if options[:authorization] || options['authorization']
+          auth = (options[:authorization] || options['authorization'])
           userinfo = auth.join(':')
           userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
-          @options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
-          @uri.userinfo = userinfo
+          options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
+          uri.userinfo = userinfo
         end
         
-       @uri.query_values = (@uri.query_values || {}).merge(@options[:query]) if @options[:query]
+       uri.query_values = (uri.query_values || {}).merge(options[:query]) if options[:query]
         
         WebMock::RequestSignature.new(
-          @method.downcase.to_sym,
-          @uri.to_s,
-          :body => (@options[:body] || @options['body']),
-          :headers => (@options[:head] || @options['head'])
+          method.downcase.to_sym,
+          uri.to_s,
+          :body => (options[:body] || options['body']),
+          :headers => (options[:head] || options['head'])
         )
       end
 

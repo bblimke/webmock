@@ -18,7 +18,11 @@ module EMHttpRequestSpecHelper
         'authorization' => [uri.user, uri.password],
         :head => options[:headers]}, &block)
       http.errback {
-        error = http.errors         
+        error = if http.respond_to?(:errors)
+          http.errors         
+        else
+          http.error
+        end  
         failed 
       }
       http.callback {    
