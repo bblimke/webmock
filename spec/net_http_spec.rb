@@ -13,6 +13,12 @@ describe "Webmock with Net:HTTP" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
     Net::HTTP.start("www.example.com") { |query| query.get("/") }.body.should == "abc"*100000
   end
+  
+  it "should handle multiple values for the same response header" do
+    stub_http_request(:get, "www.example.com").to_return(:headers => { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
+    response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
+    response.get_fields('Set-Cookie').should == ['bar=bazz', 'foo=bar']
+  end
 
   it "should yield block on response" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc")

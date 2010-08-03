@@ -96,7 +96,12 @@ module Net  #:nodoc: all
     def build_net_http_response(webmock_response, &block)
       response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
       response.instance_variable_set(:@body, webmock_response.body)
-      webmock_response.headers.to_a.each { |name, value| response[name] = value }
+      webmock_response.headers.to_a.each do |name, values| 
+        values = [values] unless values.is_a?(Array)
+        values.each do |value|
+          response.add_field(name, value)
+        end
+      end  
 
       response.instance_variable_set(:@read, true)
 
