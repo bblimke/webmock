@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "1.3.2"
+  s.version = "1.3.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-07-23}
+  s.date = %q{2010-08-03}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -89,7 +89,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/bblimke/webmock}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Library for stubbing HTTP requests in Ruby.}
   s.test_files = [
     "spec/em_http_request_spec.rb",
@@ -126,7 +126,7 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<addressable>, [">= 2.1.1"])
       s.add_runtime_dependency(%q<crack>, [">= 0.1.7"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
