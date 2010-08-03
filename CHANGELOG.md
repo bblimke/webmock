@@ -1,5 +1,9 @@
 #Changelog
 
+## 1.3.3
+
+* Fixed handling of multiple values for the same response header for Net::HTTP. Thanks to Myron Marston for reporting the issue.
+
 ## 1.3.2
 
 * Fixed compatibility with EM-HTTP-Request >= 0.2.9. Thanks to Myron Marston for reporting the issue.
