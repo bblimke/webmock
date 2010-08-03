@@ -4,6 +4,7 @@ unless defined? SAMPLE_HEADERS
   SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%2Bc&z=%27Stop%21%27%20said%20Fred"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
+  WWW_EXAMPLE_COM_CONTENT_LENGTH = 596
 end
 
 class MyException < StandardError; end;
@@ -1447,11 +1448,11 @@ describe "WebMock", :shared => true do
           end
         
           it "should pass response with headers" do
-            @response.headers["Content-Length"].should == "574"
+            @response.headers["Content-Length"].should == "#{WWW_EXAMPLE_COM_CONTENT_LENGTH}"
           end
         
           it "should pass response with body" do
-            @response.body.size.should == 574
+            @response.body.size.should == WWW_EXAMPLE_COM_CONTENT_LENGTH
           end
       
         end
