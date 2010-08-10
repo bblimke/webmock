@@ -1,5 +1,10 @@
 #Changelog
 
+## 1.3.4
+
+* Fixed Net::HTTP adapter to handle cases where a block with `read_body` call is passed to `request`.
+  This fixes compatibility with `open-uri`. Thanks to Mark Evans for reporting the issue.
+
 ## 1.3.3
 
 * Fixed handling of multiple values for the same response header for Net::HTTP. Thanks to Myron Marston for reporting the issue.
