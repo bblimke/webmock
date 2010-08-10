@@ -59,6 +59,20 @@ describe "Webmock with Net:HTTP" do
       http.request(req, StringIO.new("my_params"))
     }.body.should =~ /Example Web Page/
   end
+  
+  it "should handle requests with block passed to read_body" do
+    body = ""
+    WebMock.allow_net_connect!
+    req = Net::HTTP::Get.new("/")
+    Net::HTTP.start("www.example.com") do |http|
+      http.request(req) do |res|  
+        res.read_body do |str|
+          body << str
+        end 
+      end
+    end
+    body.should =~ /Example Web Page/
+  end
 
   describe 'after_request callback support' do
     let(:expected_body_regex) { /You have reached this web page by typing.*example\.com/ }

@@ -71,8 +71,8 @@ module Net  #:nodoc: all
           webmock_response = build_webmock_response(response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
-          response.extend WebMock::Net::HTTPResponse   
         end
+        response.extend WebMock::Net::HTTPResponse
         yield response if block_given?
         response
       else
