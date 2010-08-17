@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
+  require 'curb'
   require 'patron' 
   require 'em-http'
 end

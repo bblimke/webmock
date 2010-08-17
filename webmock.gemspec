@@ -37,6 +37,7 @@ Gem::Specification.new do |s|
      "lib/webmock/http_lib_adapters/net_http.rb",
      "lib/webmock/http_lib_adapters/net_http_response.rb",
      "lib/webmock/http_lib_adapters/patron.rb",
+     "lib/webmock/http_lib_adapters/curb.rb",
      "lib/webmock/request_execution_verifier.rb",
      "lib/webmock/request_pattern.rb",
      "lib/webmock/request_registry.rb",
@@ -60,6 +61,8 @@ Gem::Specification.new do |s|
      "spec/other_net_http_libs_spec.rb",
      "spec/patron_spec.rb",
      "spec/patron_spec_helper.rb",
+     "spec/curb_spec.rb",
+     "spec/curb_spec_helper.rb",
      "spec/request_execution_verifier_spec.rb",
      "spec/request_pattern_spec.rb",
      "spec/request_registry_spec.rb",
@@ -101,6 +104,8 @@ Gem::Specification.new do |s|
      "spec/other_net_http_libs_spec.rb",
      "spec/patron_spec.rb",
      "spec/patron_spec_helper.rb",
+     "spec/curb_spec.rb",
+     "spec/curb_spec_helper.rb",
      "spec/request_execution_verifier_spec.rb",
      "spec/request_pattern_spec.rb",
      "spec/request_registry_spec.rb",
@@ -132,6 +137,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<httpclient>, [">= 2.1.5.2"])
       s.add_development_dependency(%q<patron>, [">= 0.4.5"])
+      s.add_development_dependency(%q<curb>, [">= 0.7.7.1"])
       s.add_development_dependency(%q<em-http-request>, [">= 0.2.7"])
     else
       s.add_dependency(%q<addressable>, [">= 2.1.1"])
@@ -139,6 +145,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<httpclient>, [">= 2.1.5.2"])
       s.add_dependency(%q<patron>, [">= 0.4.5"])
+      s.add_dependency(%q<curb>, [">= 0.7.7.1"])
       s.add_dependency(%q<em-http-request>, [">= 0.2.7"])
     end
   else
@@ -147,6 +154,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<httpclient>, [">= 2.1.5.2"])
     s.add_dependency(%q<patron>, [">= 0.4.5"])
+    s.add_dependency(%q<curb>, [">= 0.7.7.1"])
     s.add_dependency(%q<em-http-request>, [">= 0.2.7"])
   end
 end
