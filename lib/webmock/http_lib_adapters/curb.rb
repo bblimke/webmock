@@ -61,7 +61,9 @@ if defined?(Curl)
 
         @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
         if webmock_response.headers
-          @header_str << webmock_response.headers.map {|k,v| "#{k}: #{v}" }.join("\r\n")
+          @header_str << webmock_response.headers.map do |k,v| 
+            "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
+          end.join("\r\n")
         end
       end
 
@@ -82,8 +84,6 @@ if defined?(Curl)
       end
       alias :header_str_without_webmock :header_str
       alias :header_str :header_str_with_webmock
-
-
       
       def build_webmock_response
         status, headers = WebmockHelper.parse_header_string(self.header_str)
