@@ -118,7 +118,6 @@ if defined?(Curl)
             end
           end
 
-          $stderr.puts headers.inspect
           return status, headers
         end
       end
