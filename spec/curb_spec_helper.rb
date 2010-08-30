@@ -33,15 +33,13 @@ module CurbSpecHelper
 
     curl.http(method)
 
-    headers = curl.parsed_headers
-
-    status_line = curl.header_str.split("\n").first.split[2..-1].join(" ") rescue ""
+    status, headers = Curl::Easy::WebmockHelper.parse_header_string(curl.header_str)
 
     OpenStruct.new(
       :body => curl.body_str,
       :headers => WebMock::Util::Headers.normalize_headers(headers),
       :status => curl.response_code.to_s,
-      :message => status_line
+      :message => status
     )
   end
 

@@ -86,37 +86,41 @@ if defined?(Curl)
 
       
       def build_webmock_response
+        status, headers = WebmockHelper.parse_header_string(self.header_str)
+
         webmock_response = WebMock::Response.new
-        reason = self.header_str.split(/\r\n/).first.scan(%r(\AHTTP/(\d+\.\d+)\s+(\d\d\d)\s*([^\r\n]+)?\r?\z))[0][2]
-        webmock_response.status = [self.response_code, reason]
+        webmock_response.status = [self.response_code, status]
         webmock_response.body = self.body_str
-        webmock_response.headers = self.parsed_headers
+        webmock_response.headers = headers
         webmock_response
       end
+  
+      module WebmockHelper
+        # Borrowed from Patron:
+        # http://github.com/toland/patron/blob/master/lib/patron/response.rb
+        def self.parse_header_string(header_string)
+          status, headers = nil, {}
 
-      # Borrowed from Patron:
-      # http://github.com/toland/patron/blob/master/lib/patron/response.rb
-      def parsed_headers
-        headers = {}
-
-        self.header_str.split(/\r\n/).each do |header|
-          if header =~ %r|^HTTP/1.[01]|
-            status_line = header.strip
-          else
-            parts = header.split(':', 2)
-            unless parts.empty?
-              parts[1].strip! unless parts[1].nil?
-              if headers.has_key?(parts[0])
-                headers[parts[0]] = [headers[parts[0]]] unless headers[parts[0]].kind_of? Array
-                headers[parts[0]] << parts[1]
-              else
-                headers[parts[0]] = parts[1]
+          header_string.split(/\r\n/).each do |header|
+            if header =~ %r|^HTTP/1.[01] \d\d\d (.*)|
+              status = $1
+            else
+              parts = header.split(':', 2)
+              unless parts.empty?
+                parts[1].strip! unless parts[1].nil?
+                if headers.has_key?(parts[0])
+                  headers[parts[0]] = [headers[parts[0]]] unless headers[parts[0]].kind_of? Array
+                  headers[parts[0]] << parts[1]
+                else
+                  headers[parts[0]] = parts[1]
+                end
               end
             end
           end
-        end
 
-        headers
+          $stderr.puts headers.inspect
+          return status, headers
+        end
       end
 
     end
