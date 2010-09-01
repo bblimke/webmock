@@ -37,14 +37,16 @@ module WebMock
   def disable_net_connect!(options = {})
     Config.instance.allow_net_connect = false
     Config.instance.allow_localhost = options[:allow_localhost]
+    Config.instance.allow = options[:allow]
   end
 
   def net_connect_allowed?(uri = nil)
     if uri.is_a?(String)
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
-    Config.instance.allow_net_connect || 
-      (Config.instance.allow_localhost && uri.is_a?(Addressable::URI) && (uri.host == 'localhost' || uri.host == '127.0.0.1'))
+    Config.instance.allow_net_connect ||
+      (Config.instance.allow_localhost && uri.is_a?(Addressable::URI) && (uri.host == 'localhost' || uri.host == '127.0.0.1')) ||
+      Config.instance.allow && Config.instance.allow.include?(uri.host)
   end
 
   def registered_request?(request_signature)
