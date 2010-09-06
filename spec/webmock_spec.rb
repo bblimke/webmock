@@ -102,7 +102,7 @@ describe "WebMock", :shared => true do
     
    describe "is not allowed with exception for allowed domains" do
       before(:each) do
-        WebMock.disable_net_connect!(:allow => ["cms.local"])
+        WebMock.disable_net_connect!(:allow => ["www.example.org"])
       end
 
       it "should return stubbed response if request was stubbed" do
@@ -117,9 +117,7 @@ describe "WebMock", :shared => true do
       end
 
       it "should allow a real request to cms.local" do
-        lambda {
-          http_request(:get, "http://cms.local:12345/")
-        }.should raise_error(connection_refused_exception_class)
+        http_request(:get, "http://www.example.org/").status.should == "200"
       end
     end
   end
