@@ -17,13 +17,6 @@ class StubSocket #:nodoc:
 
 end
 
-module StubResponse
-  def read_body(*args, &block)
-    yield @body if block_given?
-    @body
-  end
-end
-
 module Net  #:nodoc: all
 
   class BufferedIO
@@ -105,7 +98,7 @@ module Net  #:nodoc: all
 
       response.instance_variable_set(:@read, true)
 
-      response.extend StubResponse
+      response.extend WebMock::Net::HTTPResponse
 
       raise Timeout::Error, "execution expired" if webmock_response.should_timeout
 

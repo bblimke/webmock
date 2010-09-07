@@ -1,5 +1,22 @@
 #Changelog
 
+## 1.3.5
+
+* External requests can be disabled while allowing selected hosts. Thanks to Charles Li and Ryan Bigg
+
+  This feature was available before only for localhost with `:allow_localhost => true`
+
+		WebMock.disable_net_connect!(:allow => "www.example.org")
+
+		Net::HTTP.get('www.something.com', '/')   # ===> Failure
+
+		Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
+
+* Fixed Net::HTTP adapter so that it preserves the original behavior of Net::HTTP.
+
+  When making a request with a block that calls #read_body on the request,
+  Net::HTTP causes the body to be set to a Net::ReadAdapter, but WebMock was causing the body to be set to a string.
+
 ## 1.3.4
 
 * Fixed Net::HTTP adapter to handle cases where a block with `read_body` call is passed to `request`.

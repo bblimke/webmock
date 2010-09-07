@@ -99,6 +99,27 @@ describe "WebMock", :shared => true do
         }.should raise_error(connection_refused_exception_class)
       end
     end
+    
+   describe "is not allowed with exception for allowed domains" do
+      before(:each) do
+        WebMock.disable_net_connect!(:allow => ["www.example.org"])
+      end
+
+      it "should return stubbed response if request was stubbed" do
+        stub_http_request(:get, "www.example.com").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/").body.should == "abc"
+      end
+
+      it "should raise exception if request was not stubbed" do
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
+      end
+
+      it "should allow a real request to cms.local" do
+        http_request(:get, "http://www.example.org/").status.should == "200"
+      end
+    end
   end
 
   describe "when matching requests" do
