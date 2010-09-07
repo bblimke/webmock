@@ -12,32 +12,13 @@ module CurbSpecHelper
       headers.each {|k,v| curl.headers[k] = v }
     end
 
-    case method
-    when :post
-      fields = options[:body]
-      if fields.respond_to?(:map)
-        curl.post_body = fields.map{|f,k| "#{curl.escape(f)}=#{curl.escape(k)}"}.join('&')
-      else
-        curl.post_body = fields
-      end
-    when :put
-      curl.put_data = options[:body]
-    when :head
-      curl.head = true
-    when :delete
-      curl.delete = true
-    when :get
-    else
-      # XXX: nil is treated like a GET
-    end
+    curb_http_request(curl, method, options)
 
-    curl.http(method)
-
-    status, headers = Curl::Easy::WebmockHelper.parse_header_string(curl.header_str)
+    status, response_headers = Curl::Easy::WebmockHelper.parse_header_string(curl.header_str)
 
     OpenStruct.new(
       :body => curl.body_str,
-      :headers => WebMock::Util::Headers.normalize_headers(headers),
+      :headers => WebMock::Util::Headers.normalize_headers(response_headers),
       :status => curl.response_code.to_s,
       :message => status
     )
@@ -61,5 +42,40 @@ module CurbSpecHelper
 
   def http_library
     :curb
+  end
+
+  module DynamicHttp
+    def curb_http_request(curl, method, options)
+      case method
+      when :post
+        fields = options[:body]
+        if fields.respond_to?(:map)
+          curl.post_body = fields.map{|f,k| "#{curl.escape(f)}=#{curl.escape(k)}"}.join('&')
+        else
+          curl.post_body = fields
+        end
+      when :put
+        curl.put_data = options[:body]
+      when :head
+        curl.head = true
+      when :delete
+        curl.delete = true
+      when :get
+      else
+        # XXX: nil is treated like a GET
+      end
+
+      curl.http(method)
+    end
+  end
+
+  module NamedHttp
+    def curb_http_request(curl, method, options)
+    end
+  end
+
+  module Perform
+    def curb_http_request(curl, method, options)
+    end
   end
 end
