@@ -5,6 +5,14 @@ if defined?(Curl)
       def http_with_webmock(method)
         request_signature = build_request_signature(method)
 
+        curb_or_webmock(request_signature) do
+          http_without_webmock(method.to_s)
+        end
+      end
+      alias_method :http_without_webmock, :http
+      alias_method :http, :http_with_webmock
+
+      def curb_or_webmock(request_signature)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if WebMock.registered_request?(request_signature)
@@ -14,7 +22,7 @@ if defined?(Curl)
             {:lib => :curb}, request_signature, webmock_response)
           true
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          res = http_without_webmock(method.to_s)
+          res = yield
           if WebMock::CallbackRegistry.any_callbacks?
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
@@ -25,10 +33,8 @@ if defined?(Curl)
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
-      end
 
-      alias_method :http_without_webmock, :http
-      alias_method :http, :http_with_webmock
+      end
 
       def build_request_signature(method)
         uri = WebMock::Util::URI.heuristic_parse(self.url)
