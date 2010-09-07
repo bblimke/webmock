@@ -116,7 +116,7 @@ describe "WebMock", :shared => true do
         }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
 
-      it "should allow a real request to cms.local" do
+      it "should allow a real request to allowed host" do
         http_request(:get, "http://www.example.org/").status.should == "200"
       end
     end
