@@ -14,36 +14,17 @@
 module WebMock
   module Net
     module HTTPResponse
-      def self.extended(object)
-        body_object = object.instance_variable_get(:@body)
-        object.instance_variable_set(:@__orig_body__,
-          case body_object
-            when String then body_object
-            when nil then nil
-            else raise ArgumentError.new("Unexpected body object: #{body_object}")
-          end
-        )
-      end
-
       def read_body(dest = nil, &block)
-        if @__orig_body__
-          if dest && block
-            raise ArgumentError.new("both arg and block given for HTTP method")
-          elsif dest
-            dest << @__orig_body__
-          elsif block
-            @body = ::Net::ReadAdapter.new(block)
-            @body << @__orig_body__
-            @body
-          else
-            @body = @__orig_body__
-          end
-        else
-          super
-        end
+        return super if @__read_body_previously_called
+        return @body if dest.nil? && block.nil?
+        raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
+
+        dest ||= ::Net::ReadAdapter.new(block)
+        dest << @body
+        @body = dest
       ensure
         # allow subsequent calls to #read_body to proceed as normal, without our hack...
-        @__orig_body__ = nil
+        @__read_body_previously_called = true
       end
     end
   end
