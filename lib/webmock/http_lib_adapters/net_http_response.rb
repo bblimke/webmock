@@ -18,6 +18,7 @@ module WebMock
         return super if @__read_body_previously_called
         return @body if dest.nil? && block.nil?
         raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
+        return nil if @body.nil?
 
         dest ||= ::Net::ReadAdapter.new(block)
         dest << @body
