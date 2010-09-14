@@ -3,8 +3,6 @@ require 'webmock_spec'
 
 unless RUBY_PLATFORM =~ /java/
   require 'curb_spec_helper'
-  require 'tmpdir'
-  require 'fileutils'
 
   describe "Webmock with Curb" do
     describe "using dynamic #http for requests" do

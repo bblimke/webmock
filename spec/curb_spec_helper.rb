@@ -46,23 +46,13 @@ module CurbSpecHelper
 
   module DynamicHttp
     def curb_http_request(curl, method, options)
-      case method
-      when :post
+      if method == :post
         fields = options[:body]
         if fields.respond_to?(:map)
-          curl.post_body = fields.map{|f,k| "#{curl.escape(f)}=#{curl.escape(k)}"}.join('&')
+          curl.post_body = fields.map {|f,k| "#{curl.escape(f)}=#{curl.escape(k)}" }.join('&')
         else
           curl.post_body = fields
         end
-      when :put
-        curl.put_data = options[:body]
-      when :head
-        curl.head = true
-      when :delete
-        curl.delete = true
-      when :get
-      else
-        # XXX: nil is treated like a GET
       end
 
       curl.http(method)
