@@ -7,7 +7,6 @@ module CurbSpecHelper
     curl.password = uri.password
     curl.timeout = 10
 
-    #curl.headers = options[:headers] if options[:headers]
     if headers = options[:headers]
       headers.each {|k,v| curl.headers[k] = v }
     end

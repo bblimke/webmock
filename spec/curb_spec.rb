@@ -10,6 +10,15 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::DynamicHttp
 
       it_should_behave_like "WebMock"
+
+      it "should work with uppercase arguments" do
+        stub_request(:get, "www.example.com").to_return(:body => "abc")
+
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http(:GET)
+        c.body_str.should == "abc"
+      end
     end
 
 #    describe "using named #http_* methods for requests" do

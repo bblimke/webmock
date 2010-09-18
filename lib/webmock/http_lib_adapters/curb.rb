@@ -6,7 +6,7 @@ if defined?(Curl)
         request_signature = build_request_signature(method)
 
         curb_or_webmock(request_signature) do
-          http_without_webmock(method.to_s)
+          http_without_webmock(method)
         end
       end
       alias_method :http_without_webmock, :http
@@ -37,6 +37,8 @@ if defined?(Curl)
       end
 
       def build_request_signature(method)
+        method = method.to_s.downcase.to_sym
+
         uri = WebMock::Util::URI.heuristic_parse(self.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
         uri.user = self.username
