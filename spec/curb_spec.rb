@@ -21,12 +21,12 @@ unless RUBY_PLATFORM =~ /java/
       end
     end
 
-#    describe "using named #http_* methods for requests" do
-#      include CurbSpecHelper
-#      include CurbSpecHelper::NamedHttp
-#
-#      it_should_behave_like "WebMock"
-#    end
+    describe "using named #http_* methods for requests" do
+      include CurbSpecHelper
+      include CurbSpecHelper::NamedHttp
+
+      it_should_behave_like "WebMock"
+    end
 #
 #    describe "using named #perform for requests" do
 #      include CurbSpecHelper

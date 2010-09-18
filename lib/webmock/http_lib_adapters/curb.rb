@@ -12,6 +12,19 @@ if defined?(Curl)
       alias_method :http_without_webmock, :http
       alias_method :http, :http_with_webmock
 
+      %w[ get head post put delete ].each do |verb|
+        define_method "http_#{verb}_with_webmock" do
+          request_signature = build_request_signature(verb)
+
+          curb_or_webmock(request_signature) do
+            send( "http_#{verb}_without_webmock" )
+          end
+        end
+
+        alias_method "http_#{verb}_without_webmock", "http_#{verb}"
+        alias_method "http_#{verb}", "http_#{verb}_with_webmock"
+      end
+
       def curb_or_webmock(request_signature)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
