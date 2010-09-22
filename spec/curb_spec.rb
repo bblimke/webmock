@@ -4,12 +4,24 @@ require 'webmock_spec'
 unless RUBY_PLATFORM =~ /java/
   require 'curb_spec_helper'
 
+  describe "Curb", :shared => true do
+    include CurbSpecHelper
+    
+    it_should_behave_like "WebMock"
+
+    describe "when doing PUTs" do
+      it "should stub them" do
+        stub_http_request(:put, "www.example.com").with(:body => "put_data")
+        http_request(:put, "http://www.example.com", 
+          :body => "put_data").status.should == "200"
+      end
+    end
+  end
+
   describe "Webmock with Curb" do
     describe "using dynamic #http for requests" do
-      include CurbSpecHelper
+      it_should_behave_like "Curb"
       include CurbSpecHelper::DynamicHttp
-
-      it_should_behave_like "WebMock"
 
       it "should work with uppercase arguments" do
         stub_request(:get, "www.example.com").to_return(:body => "abc")
@@ -22,17 +34,13 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     describe "using named #http_* methods for requests" do
-      include CurbSpecHelper
+      it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
-
-      it_should_behave_like "WebMock"
     end
 
     describe "using named #perform for requests" do
-      include CurbSpecHelper
+      it_should_behave_like "Curb"
       include CurbSpecHelper::Perform
-
-      it_should_behave_like "WebMock"
     end
   end
 end
