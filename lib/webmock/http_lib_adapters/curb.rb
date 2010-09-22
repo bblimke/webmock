@@ -46,8 +46,24 @@ if defined?(Curl)
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
-
       end
+
+      def perform_with_webmock(method)
+        case method
+        when :head
+          self.head = true
+        when :delete
+          self.delete = true
+        end
+        
+        request_signature = build_request_signature(method)
+
+        curb_or_webmock(request_signature) do
+          perform_without_webmock
+        end 
+      end
+      alias :perform_without_webmock :perform
+      alias :perform :perform_with_webmock
 
       def build_request_signature(method)
         method = method.to_s.downcase.to_sym

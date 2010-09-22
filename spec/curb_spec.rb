@@ -27,12 +27,12 @@ unless RUBY_PLATFORM =~ /java/
 
       it_should_behave_like "WebMock"
     end
-#
-#    describe "using named #perform for requests" do
-#      include CurbSpecHelper
-#      include CurbSpecHelper::Perform
-#
-#      it_should_behave_like "WebMock"
-#    end
+
+    describe "using named #perform for requests" do
+      include CurbSpecHelper
+      include CurbSpecHelper::Perform
+
+      it_should_behave_like "WebMock"
+    end
   end
 end
