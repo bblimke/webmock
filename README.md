@@ -60,13 +60,8 @@ Add the following code to `spec/spec_helper`:
 
 Add the following code to `features/support/env.rb`
 
-	require 'webmock/rspec'  
-	module WebMockWorld
-	  include WebMock
-	  include WebMock::Matchers
-	end
-
-	World(WebMockWorld)
+	require 'webmock/rspec'
+	World(WebMock, WebMock::Matchers)
 
 You can also use WebMock outside a test framework:
 
