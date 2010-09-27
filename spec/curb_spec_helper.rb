@@ -75,13 +75,18 @@ module CurbSpecHelper
 
   module Perform
     def curb_http_request(curl, method, options)
-       if method == :post
+      case method
+      when :post
         fields = options[:body]
         if fields.respond_to?(:map)
           curl.post_body = fields.map {|f,k| "#{curl.escape(f)}=#{curl.escape(k)}" }.join('&')
         else
           curl.post_body = fields
         end
+      when :head
+        curl.head = true
+      when :delete
+        curl.delete = true
       end
 
       curl.perform(method)
