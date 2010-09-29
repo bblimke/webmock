@@ -11,9 +11,10 @@ unless RUBY_PLATFORM =~ /java/
 
     describe "when doing PUTs" do
       it "should stub them" do
-        stub_http_request(:put, "www.example.com").with(:body => "put_data")
+        stub_http_request(:put, "www.example.com").
+          with(:body => "01234")
         http_request(:put, "http://www.example.com", 
-          :body => "put_data").status.should == "200"
+          :body => "01234").status.should == "200"
       end
     end
   end

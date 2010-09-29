@@ -3,20 +3,18 @@ if defined?(Curl)
   module Curl
     class Easy
       def http_with_webmock(method)
-        request_signature = build_request_signature(method)
-
-        curb_or_webmock(request_signature) do
+        @webmock_method = method
+        curb_or_webmock do
           http_without_webmock(method)
         end
       end
       alias_method :http_without_webmock, :http
       alias_method :http, :http_with_webmock
 
-      %w[ get head post put delete ].each do |verb|
+      %w[ get head delete ].each do |verb|
         define_method "http_#{verb}_with_webmock" do
-          request_signature = build_request_signature(verb)
-
-          curb_or_webmock(request_signature) do
+          @webmock_method = verb
+          curb_or_webmock do
             send( "http_#{verb}_without_webmock" )
           end
         end
@@ -25,7 +23,28 @@ if defined?(Curl)
         alias_method "http_#{verb}", "http_#{verb}_with_webmock"
       end
 
-      def curb_or_webmock(request_signature)
+      def http_put_with_webmock data
+        @webmock_method = :put
+        @put_data = data
+        curb_or_webmock do
+          http_put_without_webmock(data)
+        end
+      end
+      alias_method :http_put_without_webmock, :http_put
+      alias_method :http_put, :http_put_with_webmock
+
+      def http_post_with_webmock data
+        @webmock_method = :post
+        @post_body = data
+        curb_or_webmock do
+          http_post_without_webmock(data)
+        end
+      end
+      alias_method :http_post_without_webmock, :http_post
+      alias_method :http_post, :http_post_with_webmock
+
+      def curb_or_webmock
+        request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if WebMock.registered_request?(request_signature)
@@ -48,18 +67,17 @@ if defined?(Curl)
         end
       end
 
-      def perform_with_webmock(method)
-        request_signature = build_request_signature(method)
-
-        curb_or_webmock(request_signature) do
+      def perform_with_webmock
+        @webmock_method ||= :get
+        curb_or_webmock do
           perform_without_webmock
         end 
       end
       alias :perform_without_webmock :perform
       alias :perform :perform_with_webmock
 
-      def build_request_signature(method)
-        method = method.to_s.downcase.to_sym
+      def build_request_signature
+        method = @webmock_method.to_s.downcase.to_sym
 
         uri = WebMock::Util::URI.heuristic_parse(self.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
@@ -68,7 +86,9 @@ if defined?(Curl)
 
         request_body = case method
         when :post
-          self.post_body
+          self.post_body || @post_body
+        when :put
+          @put_data
         else
           nil
         end
@@ -82,6 +102,35 @@ if defined?(Curl)
         request_signature
       end
       
+      def put_data_with_webmock= data
+        @webmock_method = :put
+        @put_data = data
+        self.put_data_without_webmock = data
+      end
+      alias_method :put_data_without_webmock=, :put_data=
+      alias_method :put_data=, :put_data_with_webmock=
+      
+      def post_body_with_webmock= data
+        @webmock_method = :post
+        self.post_body_without_webmock = data
+      end
+      alias_method :post_body_without_webmock=, :post_body=
+      alias_method :post_body=, :post_body_with_webmock=
+
+      def delete_with_webmock= value
+        @webmock_method = :delete if value
+        self.delete_without_webmock = value
+      end
+      alias_method :delete_without_webmock=, :delete=
+      alias_method :delete=, :delete_with_webmock=
+
+      def head_with_webmock= value
+        @webmock_method = :head if value
+        self.head_without_webmock = value
+      end
+      alias_method :head_without_webmock=, :head=
+      alias_method :head=, :head_with_webmock=
+
       def build_curb_response(webmock_response)
         raise Curl::Err::TimeoutError if webmock_response.should_timeout        
         webmock_response.raise_error_if_any

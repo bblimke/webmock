@@ -11,7 +11,9 @@ module CurbSpecHelper
       headers.each {|k,v| curl.headers[k] = v }
     end
 
-    curb_http_request(curl, method, options)
+    body = options[:body]
+
+    curb_http_request(curl, method, body)
 
     status, response_headers = Curl::Easy::WebmockHelper.parse_header_string(curl.header_str)
 
@@ -44,52 +46,43 @@ module CurbSpecHelper
   end
 
   module DynamicHttp
-    def curb_http_request(curl, method, options)
-      if method == :post
-        fields = options[:body]
-        if fields.respond_to?(:map)
-          curl.post_body = fields.map {|f,k| "#{curl.escape(f)}=#{curl.escape(k)}" }.join('&')
-        else
-          curl.post_body = fields
-        end
-      end
+    def curb_http_request(curl, method, body)
+      case method
+      when :post
+        curl.post_body = body
+      when :put
+        curl.put_data = body
+      end  
 
       curl.http(method)
     end
   end
 
   module NamedHttp
-    def curb_http_request(curl, method, options)
-       if method == :post
-        fields = options[:body]
-        if fields.respond_to?(:map)
-          curl.post_body = fields.map {|f,k| "#{curl.escape(f)}=#{curl.escape(k)}" }.join('&')
-        else
-          curl.post_body = fields
-        end
+    def curb_http_request(curl, method, body)
+      case method
+      when :put, :post
+        curl.send( "http_#{method}", body )
+      else
+        curl.send( "http_#{method}" )
       end
-
-      curl.send( "http_#{method}" )
     end
   end
 
   module Perform
-    def curb_http_request(curl, method, options)
+    def curb_http_request(curl, method, body)
       case method
       when :post
-        fields = options[:body]
-        if fields.respond_to?(:map)
-          curl.post_body = fields.map {|f,k| "#{curl.escape(f)}=#{curl.escape(k)}" }.join('&')
-        else
-          curl.post_body = fields
-        end
+        curl.post_body = body
+      when :put
+        curl.put_data = body
       when :head
         curl.head = true
       when :delete
         curl.delete = true
       end
 
-      curl.perform(method)
+      curl.perform
     end
   end
 end
