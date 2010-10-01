@@ -11,16 +11,15 @@ unless RUBY_PLATFORM =~ /java/
 
     describe "when doing PUTs" do
       it "should stub them" do
-        stub_http_request(:put, "www.example.com").
-          with(:body => "01234")
-        http_request(:put, "http://www.example.com", 
-          :body => "01234").status.should == "200"
+        stub_http_request(:put, "www.example.com").with(:body => "01234")
+        http_request(:put, "http://www.example.com", :body => "01234").
+          status.should == "200"
       end
     end
   end
 
   describe "Webmock with Curb" do
-    describe "using dynamic #http for requests" do
+    describe "using #http for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::DynamicHttp
 
@@ -34,12 +33,12 @@ unless RUBY_PLATFORM =~ /java/
       end
     end
 
-    describe "using named #http_* methods for requests" do
+    describe "using #http_* methods for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
     end
 
-    describe "using named #perform for requests" do
+    describe "using #perform for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::Perform
     end
