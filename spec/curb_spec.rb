@@ -43,7 +43,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should call on_failure with 5xx response" do
-        response_code = 580
+        response_code = 599
         stub_request(:any, "example.com").
           to_return(:status => [response_code, "Server On Fire"])
 
@@ -53,6 +53,43 @@ unless RUBY_PLATFORM =~ /java/
         end
         @curl.http_get
         test.should == response_code
+      end
+
+      it "should call on_body when response body is read" do
+        body = "on_body fired"
+        stub_request(:any, "example.com").
+          to_return(:body => body)
+
+        test = nil
+        @curl.on_body do |data| 
+          test = data
+        end
+        @curl.http_get
+        test.should == body
+      end
+      
+      it "should call on_header when response headers are read" do
+        stub_request(:any, "example.com").
+          to_return(:headers => {:one => 1})
+
+        test = nil
+        @curl.on_header do |data| 
+          test = data
+        end
+        @curl.http_get
+        test.should match /One: 1/
+      end
+
+      it "should call on_complete when request is complete" do
+        body = "on_complete fired"
+        stub_request(:any, "example.com").to_return(:body => body)
+
+        test = nil
+        @curl.on_complete do |curl|
+          test = curl.body_str
+        end
+        @curl.http_get
+        test.should == body
       end
     end
   end

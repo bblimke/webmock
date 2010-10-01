@@ -179,13 +179,39 @@ if defined?(Curl)
       alias :on_failure_without_webmock :on_failure
       alias :on_failure :on_failure_with_webmock
       
+      def on_header_with_webmock &block
+        @on_header = block
+        on_header_without_webmock &block
+      end
+      alias :on_header_without_webmock :on_header
+      alias :on_header :on_header_with_webmock
+      
+      def on_body_with_webmock &block
+        @on_body = block
+        on_body_without_webmock &block
+      end
+      alias :on_body_without_webmock :on_body
+      alias :on_body :on_body_with_webmock
+      
+      def on_complete_with_webmock &block
+        @on_complete = block
+        on_complete_without_webmock &block
+      end
+      alias :on_complete_without_webmock :on_complete
+      alias :on_complete :on_complete_with_webmock
+      
       def invoke_curb_callbacks
+        @on_header.call(self.header_str) if @on_header
+        @on_body.call(self.body_str) if @on_body
+        
         case response_code
         when 200..299
           @on_success.call(self) if @on_success
         when 500..599
           @on_failure.call(self, self.response_code) if @on_failure
         end
+
+        @on_complete.call(self) if @on_complete
       end
 
       def build_webmock_response
