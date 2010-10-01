@@ -52,6 +52,7 @@ if defined?(Curl)
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :curb}, request_signature, webmock_response)
+          invoke_curb_callbacks
           true
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           res = yield
@@ -163,7 +164,30 @@ if defined?(Curl)
       end
       alias :header_str_without_webmock :header_str
       alias :header_str :header_str_with_webmock
+
+      def on_success_with_webmock &block
+        @on_success = block
+        on_success_without_webmock &block
+      end
+      alias :on_success_without_webmock :on_success
+      alias :on_success :on_success_with_webmock
+
+      def on_failure_with_webmock &block
+        @on_failure = block
+        on_failure_without_webmock &block
+      end
+      alias :on_failure_without_webmock :on_failure
+      alias :on_failure :on_failure_with_webmock
       
+      def invoke_curb_callbacks
+        case response_code
+        when 200..299
+          @on_success.call(self) if @on_success
+        when 500..599
+          @on_failure.call(self, self.response_code) if @on_failure
+        end
+      end
+
       def build_webmock_response
         status, headers = WebmockHelper.parse_header_string(self.header_str)
 

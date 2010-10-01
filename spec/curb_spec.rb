@@ -18,6 +18,45 @@ unless RUBY_PLATFORM =~ /java/
     end
   end
 
+  describe "Curb features" do
+    before(:each) do
+      WebMock.disable_net_connect!
+      RequestRegistry.instance.reset_webmock
+    end
+
+    describe "callbacks" do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
+
+      it "should call on_success with 2xx response" do
+        body = "on_success fired"
+        stub_request(:any, "example.com").to_return(:body => body)
+
+        test = nil
+        @curl.on_success do |c| 
+          test = c.body_str
+        end
+        @curl.http_get
+        test.should == body
+      end
+
+      it "should call on_failure with 5xx response" do
+        response_code = 580
+        stub_request(:any, "example.com").
+          to_return(:status => [response_code, "Server On Fire"])
+
+        test = nil
+        @curl.on_failure do |c, code| 
+          test = code
+        end
+        @curl.http_get
+        test.should == response_code
+      end
+    end
+  end
+
   describe "Webmock with Curb" do
     describe "using #http for requests" do
       it_should_behave_like "Curb"
