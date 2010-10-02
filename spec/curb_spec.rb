@@ -104,6 +104,34 @@ unless RUBY_PLATFORM =~ /java/
         @curl.http_get
         test.should == true
       end
+
+      it "should call callbacks in correct order on successful request" do
+        stub_request(:any, "example.com")
+        order = []
+        @curl.on_success {|*args| order << :on_success }
+        @curl.on_failure {|*args| order << :on_failure }
+        @curl.on_header {|*args| order << :on_header }
+        @curl.on_body {|*args| order << :on_body }
+        @curl.on_complete {|*args| order << :on_complete }
+        @curl.on_progress {|*args| order << :on_progress }
+        @curl.http_get
+
+        order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_success]
+      end
+
+      it "should call callbacks in correct order on successful request" do
+        stub_request(:any, "example.com").to_return(:status => [500, ""])
+        order = []
+        @curl.on_success {|*args| order << :on_success }
+        @curl.on_failure {|*args| order << :on_failure }
+        @curl.on_header {|*args| order << :on_header }
+        @curl.on_body {|*args| order << :on_body }
+        @curl.on_complete {|*args| order << :on_complete }
+        @curl.on_progress {|*args| order << :on_progress }
+        @curl.http_get
+
+        order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
+      end
     end
   end
 
