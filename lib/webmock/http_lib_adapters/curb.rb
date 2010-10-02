@@ -165,52 +165,20 @@ if defined?(Curl)
       alias :header_str_without_webmock :header_str
       alias :header_str :header_str_with_webmock
 
-      def on_success_with_webmock &block
-        @on_success = block
-        on_success_without_webmock &block
+      %w[ success failure header body complete progress ].each do |callback|
+        define_method "on_#{callback}_with_webmock" do |&block|
+          instance_variable_set( "@on_#{callback}", block )
+          send( "on_#{callback}_without_webmock", &block )
+        end
+        alias_method "on_#{callback}_without_webmock", "on_#{callback}"
+        alias_method "on_#{callback}", "on_#{callback}_with_webmock"
       end
-      alias :on_success_without_webmock :on_success
-      alias :on_success :on_success_with_webmock
-
-      def on_failure_with_webmock &block
-        @on_failure = block
-        on_failure_without_webmock &block
-      end
-      alias :on_failure_without_webmock :on_failure
-      alias :on_failure :on_failure_with_webmock
-      
-      def on_header_with_webmock &block
-        @on_header = block
-        on_header_without_webmock &block
-      end
-      alias :on_header_without_webmock :on_header
-      alias :on_header :on_header_with_webmock
-      
-      def on_body_with_webmock &block
-        @on_body = block
-        on_body_without_webmock &block
-      end
-      alias :on_body_without_webmock :on_body
-      alias :on_body :on_body_with_webmock
-      
-      def on_complete_with_webmock &block
-        @on_complete = block
-        on_complete_without_webmock &block
-      end
-      alias :on_complete_without_webmock :on_complete
-      alias :on_complete :on_complete_with_webmock
-      
-      def on_progress_with_webmock &block
-        @on_progress = block
-        on_progress_without_webmock &block
-      end
-      alias :on_progress_without_webmock :on_progress
-      alias :on_progress :on_progress_with_webmock
       
       def invoke_curb_callbacks
         @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
         @on_header.call(self.header_str) if @on_header
         @on_body.call(self.body_str) if @on_body
+        @on_complete.call(self) if @on_complete
 
         case response_code
         when 200..299
@@ -218,8 +186,6 @@ if defined?(Curl)
         when 500..599
           @on_failure.call(self, self.response_code) if @on_failure
         end
-
-        @on_complete.call(self) if @on_complete
       end
 
       def build_webmock_response
