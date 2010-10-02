@@ -91,6 +91,19 @@ unless RUBY_PLATFORM =~ /java/
         @curl.http_get
         test.should == body
       end
+
+      it "should call on_progress when portion of response body is read" do
+        stub_request(:any, "example.com").to_return(:body => "01234")
+
+        test = nil
+        @curl.on_progress do |*args|
+          args.length.should == 4
+          args.each {|arg| arg.is_a?(Float).should == true }
+          test = true
+        end
+        @curl.http_get
+        test.should == true
+      end
     end
   end
 

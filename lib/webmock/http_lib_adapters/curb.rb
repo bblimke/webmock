@@ -200,10 +200,18 @@ if defined?(Curl)
       alias :on_complete_without_webmock :on_complete
       alias :on_complete :on_complete_with_webmock
       
+      def on_progress_with_webmock &block
+        @on_progress = block
+        on_progress_without_webmock &block
+      end
+      alias :on_progress_without_webmock :on_progress
+      alias :on_progress :on_progress_with_webmock
+      
       def invoke_curb_callbacks
+        @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
         @on_header.call(self.header_str) if @on_header
         @on_body.call(self.body_str) if @on_body
-        
+
         case response_code
         when 200..299
           @on_success.call(self) if @on_success
