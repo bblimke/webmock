@@ -1,5 +1,13 @@
 #Changelog
 
+## Master
+
+* Fixed issue with both Rspec 1.x and 2.x being available.
+
+  WebMock now tries to use already loaded version of RSpec (1.x or 2.x). Previously it was loading Rspec 2.0 if available, even if RSpec 1.3 was already loaded.
+
+  Thanks to Hans de Graaff for reporting this.
+
 ## 1.3.5
 
 * External requests can be disabled while allowing selected hosts. Thanks to Charles Li and Ryan Bigg

@@ -1,13 +1,20 @@
 require 'webmock'
 
 # RSpec 1.x and 2.x compatibility
-begin
-  require 'rspec'
+if defined?(Rspec)
   RSPEC_NAMESPACE = RSPEC_CONFIGURER = Rspec
-rescue LoadError
-  require 'spec'
+elsif defined?(Spec)
   RSPEC_NAMESPACE = Spec
   RSPEC_CONFIGURER = Spec::Runner
+else  
+  begin
+    require 'rspec'
+    RSPEC_NAMESPACE = RSPEC_CONFIGURER = Rspec
+  rescue LoadError
+    require 'spec'
+    RSPEC_NAMESPACE = Spec
+    RSPEC_CONFIGURER = Spec::Runner
+  end
 end
 
 require 'webmock/adapters/rspec/request_pattern_matcher'
