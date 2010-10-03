@@ -2,6 +2,8 @@
 
 ## Master
 
+* :allow_localhost => true' now permits 0.0.0.0 in addition to 127.0.0.1 and 'localhost'. Thanks to Myron Marston and Mike Gehard for suggesting this.
+
 * Fixed issue with both Rspec 1.x and 2.x being available.
 
   WebMock now tries to use already loaded version of RSpec (1.x or 2.x). Previously it was loading Rspec 2.0 if available, even if RSpec 1.3 was already loaded.

@@ -98,6 +98,12 @@ describe "WebMock", :shared => true do
           http_request(:get, "http://127.0.0.1:12345/")
         }.should raise_error(connection_refused_exception_class)
       end
+
+       it "should allow a real request to 0.0.0.0" do
+          lambda {
+            http_request(:get, "http://0.0.0.0:12345/")
+          }.should raise_error(connection_refused_exception_class)
+        end
     end
     
    describe "is not allowed with exception for allowed domains" do
