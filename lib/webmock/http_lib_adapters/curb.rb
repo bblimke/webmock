@@ -2,6 +2,100 @@ if defined?(Curl)
 
   module Curl
     class Easy
+      def curb_or_webmock
+        request_signature = build_request_signature
+        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+
+        if WebMock.registered_request?(request_signature)
+          webmock_response = WebMock.response_for_request(request_signature)
+          build_curb_response(webmock_response)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {:lib => :curb}, request_signature, webmock_response)
+          invoke_curb_callbacks
+          true
+        elsif WebMock.net_connect_allowed?(request_signature.uri)
+          res = yield
+          if WebMock::CallbackRegistry.any_callbacks?
+            webmock_response = build_webmock_response
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :curb, :real_request => true}, request_signature,
+                webmock_response)   
+          end
+          res
+        else
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        end
+      end
+
+      def build_request_signature
+        method = @webmock_method.to_s.downcase.to_sym
+
+        uri = WebMock::Util::URI.heuristic_parse(self.url)
+        uri.path = uri.normalized_path.gsub("[^:]//","/")
+        uri.user = self.username
+        uri.password = self.password
+
+        request_body = case method
+        when :post
+          self.post_body || @post_body
+        when :put
+          @put_data
+        else
+          nil
+        end
+
+        request_signature = WebMock::RequestSignature.new(
+          method,
+          uri.to_s,
+          :body => request_body,
+          :headers => self.headers
+        )
+        request_signature
+      end
+
+      def build_curb_response(webmock_response)
+        raise Curl::Err::TimeoutError if webmock_response.should_timeout        
+        webmock_response.raise_error_if_any
+        
+        @body_str = webmock_response.body
+        @response_code = webmock_response.status[0]
+
+        @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
+        if webmock_response.headers
+          @header_str << webmock_response.headers.map do |k,v| 
+            "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
+          end.join("\r\n")
+        end
+      end
+
+      def invoke_curb_callbacks
+        @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
+        @on_header.call(self.header_str) if @on_header
+        @on_body.call(self.body_str) if @on_body
+        @on_complete.call(self) if @on_complete
+
+        case response_code
+        when 200..299
+          @on_success.call(self) if @on_success
+        when 500..599
+          @on_failure.call(self, self.response_code) if @on_failure
+        end
+      end
+
+      def build_webmock_response
+        status, headers = WebmockHelper.parse_header_string(self.header_str)
+
+        webmock_response = WebMock::Response.new
+        webmock_response.status = [self.response_code, status]
+        webmock_response.body = self.body_str
+        webmock_response.headers = headers
+        webmock_response
+      end
+
+      ###
+      ### Mocks of Curl::Easy methods below here.
+      ### 
+
       def http_with_webmock(method)
         @webmock_method = method
         curb_or_webmock do
@@ -43,30 +137,6 @@ if defined?(Curl)
       alias_method :http_post_without_webmock, :http_post
       alias_method :http_post, :http_post_with_webmock
 
-      def curb_or_webmock
-        request_signature = build_request_signature
-        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
-
-        if WebMock.registered_request?(request_signature)
-          webmock_response = WebMock.response_for_request(request_signature)
-          build_curb_response(webmock_response)
-          WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :curb}, request_signature, webmock_response)
-          invoke_curb_callbacks
-          true
-        elsif WebMock.net_connect_allowed?(request_signature.uri)
-          res = yield
-          if WebMock::CallbackRegistry.any_callbacks?
-            webmock_response = build_webmock_response
-            WebMock::CallbackRegistry.invoke_callbacks(
-              {:lib => :curb, :real_request => true}, request_signature,
-                webmock_response)   
-          end
-          res
-        else
-          raise WebMock::NetConnectNotAllowedError.new(request_signature)
-        end
-      end
 
       def perform_with_webmock
         @webmock_method ||= :get
@@ -76,32 +146,6 @@ if defined?(Curl)
       end
       alias :perform_without_webmock :perform
       alias :perform :perform_with_webmock
-
-      def build_request_signature
-        method = @webmock_method.to_s.downcase.to_sym
-
-        uri = WebMock::Util::URI.heuristic_parse(self.url)
-        uri.path = uri.normalized_path.gsub("[^:]//","/")
-        uri.user = self.username
-        uri.password = self.password
-
-        request_body = case method
-        when :post
-          self.post_body || @post_body
-        when :put
-          @put_data
-        else
-          nil
-        end
-
-        request_signature = WebMock::RequestSignature.new(
-          method,
-          uri.to_s,
-          :body => request_body,
-          :headers => self.headers
-        )
-        request_signature
-      end
       
       def put_data_with_webmock= data
         @webmock_method = :put
@@ -132,21 +176,6 @@ if defined?(Curl)
       alias_method :head_without_webmock=, :head=
       alias_method :head=, :head_with_webmock=
 
-      def build_curb_response(webmock_response)
-        raise Curl::Err::TimeoutError if webmock_response.should_timeout        
-        webmock_response.raise_error_if_any
-        
-        @body_str = webmock_response.body
-        @response_code = webmock_response.status[0]
-
-        @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
-        if webmock_response.headers
-          @header_str << webmock_response.headers.map do |k,v| 
-            "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
-          end.join("\r\n")
-        end
-      end
-
       def body_str_with_webmock
         @body_str || body_str_without_webmock
       end
@@ -174,47 +203,26 @@ if defined?(Curl)
         alias_method "on_#{callback}", "on_#{callback}_with_webmock"
       end
       
-      def invoke_curb_callbacks
-        @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
-        @on_header.call(self.header_str) if @on_header
-        @on_body.call(self.body_str) if @on_body
-        @on_complete.call(self) if @on_complete
 
-        case response_code
-        when 200..299
-          @on_success.call(self) if @on_success
-        when 500..599
-          @on_failure.call(self, self.response_code) if @on_failure
+      class << self
+        %w[ http_get http_head http_delete perform ].each do |method|
+          define_method(method) do |url, &block|
+            c = new
+            c.url = url
+            block.call(c) if block
+            c.send(method)
+            c
+          end
         end
-      end
 
-      def build_webmock_response
-        status, headers = WebmockHelper.parse_header_string(self.header_str)
-
-        webmock_response = WebMock::Response.new
-        webmock_response.status = [self.response_code, status]
-        webmock_response.body = self.body_str
-        webmock_response.headers = headers
-        webmock_response
-      end
-
-      %w[ http_get http_head http_delete perform ].each do |method|
-        define_singleton_method(method) do |url, &block|
-          c = new
-          c.url = url
-          block.call(c) if block
-          c.send(method)
-          c
-        end
-      end
-
-      %w[ put post ].each do |verb|
-        define_singleton_method("http_#{verb}") do |url, data, &block|
-          c = new
-          c.url = url
-          block.call(c) if block
-          c.send("http_#{verb}", data)
-          c
+        %w[ put post ].each do |verb|
+          define_method("http_#{verb}") do |url, data, &block|
+            c = new
+            c.url = url
+            block.call(c) if block
+            c.send("http_#{verb}", data)
+            c
+          end
         end
       end
   
@@ -244,8 +252,6 @@ if defined?(Curl)
           return status, headers
         end
       end
-
     end
   end
-
 end
