@@ -197,6 +197,26 @@ if defined?(Curl)
         webmock_response.headers = headers
         webmock_response
       end
+
+      %w[ get head delete].each do |verb|
+        define_singleton_method("http_#{verb}") do |url, &block|
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send("http_#{verb}")
+          c
+        end
+      end
+
+      %w[ put post ].each do |verb|
+        define_singleton_method("http_#{verb}") do |url, data, &block|
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send("http_#{verb}", data)
+          c
+        end
+      end
   
       module WebmockHelper
         # Borrowed from Patron:

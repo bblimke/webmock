@@ -159,5 +159,10 @@ unless RUBY_PLATFORM =~ /java/
       it_should_behave_like "Curb"
       include CurbSpecHelper::Perform
     end
+
+    describe "using .http_* methods for requests" do
+      it_should_behave_like "Curb"
+      include CurbSpecHelper::ClassNamedHttp
+    end
   end
 end
