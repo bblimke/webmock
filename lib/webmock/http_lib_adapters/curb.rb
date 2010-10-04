@@ -198,12 +198,12 @@ if defined?(Curl)
         webmock_response
       end
 
-      %w[ get head delete].each do |verb|
-        define_singleton_method("http_#{verb}") do |url, &block|
+      %w[ http_get http_head http_delete perform ].each do |method|
+        define_singleton_method(method) do |url, &block|
           c = new
           c.url = url
           block.call(c) if block
-          c.send("http_#{verb}")
+          c.send(method)
           c
         end
       end

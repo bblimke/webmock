@@ -110,4 +110,28 @@ module CurbSpecHelper
       c
     end
   end
+
+  module ClassPerform
+    def curb_http_request(uri, method, body, options)
+      args = ["http_#{method}", uri]
+      args << body if method == :post || method == :put
+
+      c = Curl::Easy.send(*args) do |curl|
+        setup_request(uri, curl, options)
+
+        case method
+        when :post
+          curl.post_body = body
+        when :put
+          curl.put_data = body
+        when :head
+          curl.head = true
+        when :delete
+          curl.delete = true
+        end
+      end
+
+      c
+    end
+  end
 end
