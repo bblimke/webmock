@@ -21,6 +21,7 @@ Supported HTTP libraries
 * HTTPClient
 * Patron
 * EM-HTTP-Request
+* Curb
 
 ##Installation
 
@@ -530,6 +531,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Muness Alrubaie
 * Charles Li
 * Ryan Bigg
+* Pete Higgins
 
 ## Background
 

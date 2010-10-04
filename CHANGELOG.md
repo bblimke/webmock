@@ -2,6 +2,8 @@
 
 ## Master
 
+* Curb support!!! Thanks to the awesome work of Pete Higgins!
+
 * :allow_localhost => true' now permits 0.0.0.0 in addition to 127.0.0.1 and 'localhost'. Thanks to Myron Marston and Mike Gehard for suggesting this.
 
 * Fixed issue with both Rspec 1.x and 2.x being available.
