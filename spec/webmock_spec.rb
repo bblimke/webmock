@@ -839,76 +839,83 @@ describe "WebMock", :shared => true do
               it "should pass if request was executed with the same uri and method" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should have_been_made.once
+                  a_request(:get, "http://www.example.com").should have_been_made.once
+                }.should_not raise_error
+              end
+
+              it "should accept verification as WebMock class method invocation" do
+                lambda {
+                  http_request(:get, "http://www.example.com/")
+                  WebMock.request(:get, "http://www.example.com").should have_been_made.once
                 }.should_not raise_error
               end
 
               it "should pass if request was not expected and not executed" do
                 lambda {
-                  request(:get, "http://www.example.com").should_not have_been_made
+                  a_request(:get, "http://www.example.com").should_not have_been_made
                 }.should_not raise_error
               end
 
               it "should fail if request was not expected but executed" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should_not have_been_made
+                  a_request(:get, "http://www.example.com").should_not have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time")
               end
 
 
               it "should fail if request was not executed" do
                 lambda {
-                  request(:get, "http://www.example.com").should have_been_made
+                  a_request(:get, "http://www.example.com").should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times")
               end
 
               it "should fail if request was executed to different uri" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.org").should have_been_made
+                  a_request(:get, "http://www.example.org").should have_been_made
                 }.should fail_with("The request GET http://www.example.org/ was expected to execute 1 time but it executed 0 times")
               end
 
               it "should fail if request was executed with different method" do
                 lambda {
                   http_request(:post, "http://www.example.com/", :body => "abc")
-                  request(:get, "http://www.example.com").should have_been_made
+                  a_request(:get, "http://www.example.com").should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times")
               end
 
               it "should pass if request was executed with different form of uri" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "www.example.com").should have_been_made
+                  a_request(:get, "www.example.com").should have_been_made
                 }.should_not raise_error
               end
 
               it "should pass if request was executed with different form of uri without port " do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "www.example.com:80").should have_been_made
+                  a_request(:get, "www.example.com:80").should have_been_made
                 }.should_not raise_error
               end
 
               it "should pass if request was executed with different form of uri with port" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "www.example.com:80").should have_been_made
+                  a_request(:get, "www.example.com:80").should have_been_made
                 }.should_not raise_error
               end
 
               it "should fail if request was executed with different  port" do
                 lambda {
                   http_request(:get, "http://www.example.com:80/")
-                  request(:get, "www.example.com:90").should have_been_made
+                  a_request(:get, "www.example.com:90").should have_been_made
                 }.should fail_with("The request GET http://www.example.com:90/ was expected to execute 1 time but it executed 0 times")
               end
 
               it "should pass if request was executed with different form of uri with https port" do
                 lambda {
                   http_request(:get, "https://www.example.com/")
-                  request(:get, "https://www.example.com:443/").should have_been_made
+                  a_request(:get, "https://www.example.com:443/").should have_been_made
                 }.should_not raise_error
               end
 
@@ -922,21 +929,21 @@ describe "WebMock", :shared => true do
                 it "should pass if request was executed with escaped params" do
                   lambda {
                     http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}")
-                    request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}").should have_been_made
+                    a_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}").should have_been_made
                   }.should_not raise_error
                 end
 
                 it "should pass if request was executed with non escaped params but escaped expected" do
                   lambda {
                     http_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}")
-                    request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").should have_been_made
+                    a_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").should have_been_made
                   }.should_not raise_error
                 end
 
                 it "should pass if request was executed with escaped params but uri matichg regexp expected" do
                   lambda {
                     http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}")
-                    request(:get, /.*example.*/).should have_been_made
+                    a_request(:get, /.*example.*/).should have_been_made
                   }.should_not raise_error
                 end
                 
@@ -950,21 +957,21 @@ describe "WebMock", :shared => true do
                 it "should pass if the request was executed with query params declared in a hash in query option" do
                   lambda {
                     http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-                    request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                    a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
                   }.should_not raise_error
                 end
 
                 it "should pass if the request was executed with query params declared as string in query option" do
                   lambda {
                     http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-                    request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").should have_been_made
+                    a_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").should have_been_made
                   }.should_not raise_error
                 end
 
                 it "should pass if the request was executed with query params both in uri and in query option" do
                   lambda {
                     http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c")
-                    request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
+                    a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
                   }.should_not raise_error
                 end
               
@@ -974,35 +981,35 @@ describe "WebMock", :shared => true do
                 lambda {
                   http_request(:get, "http://www.example.com/")
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should have_been_made
+                  a_request(:get, "http://www.example.com").should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 2 times")
               end
 
               it "should fail if requested less times than expected" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should have_been_made.twice
+                  a_request(:get, "http://www.example.com").should have_been_made.twice
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 2 times but it executed 1 time")
               end
 
               it "should fail if requested less times than expected when 3 times expected" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should have_been_made.times(3)
+                  a_request(:get, "http://www.example.com").should have_been_made.times(3)
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 3 times but it executed 1 time")
               end
 
               it "should succeed if request was executed with the same body" do
                 lambda {
                   http_request(:post, "http://www.example.com/", :body => "abc")
-                  request(:post, "www.example.com").with(:body => "abc").should have_been_made
+                  a_request(:post, "www.example.com").with(:body => "abc").should have_been_made
                 }.should_not raise_error
               end
 
               it "should fail if request was executed with different body" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :body => "abc")
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:body => "def").should have_been_made
                 }.should fail_with('The request GET http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times')
               end
@@ -1012,14 +1019,14 @@ describe "WebMock", :shared => true do
                 it "should succeed if request was executed with the same body" do
                   lambda {
                     http_request(:post, "http://www.example.com/", :body => "abc")
-                    request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
+                    a_request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
                   }.should_not raise_error
                 end
 
                 it "should fail if request was executed with different body" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :body => /^abc/)
-                    request(:get, "www.example.com").
+                    a_request(:get, "www.example.com").
                     with(:body => "xabc").should have_been_made
                   }.should fail_with('The request GET http://www.example.com/ with body "xabc" was expected to execute 1 time but it executed 0 times')
                 end
@@ -1035,21 +1042,21 @@ describe "WebMock", :shared => true do
                   it "should succeed" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
                   
                   it "should succeed if url encoded params have different order" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&b=five&c[d][]=f')
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
 
                   it "should fail if request is executed with url encoded body not matching hash" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should fail_with(fail_message)
                   end
                 
@@ -1061,7 +1068,7 @@ describe "WebMock", :shared => true do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                         :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
                   
@@ -1069,7 +1076,7 @@ describe "WebMock", :shared => true do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                         :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
                 
@@ -1083,7 +1090,7 @@ describe "WebMock", :shared => true do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                         :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
                 
@@ -1091,7 +1098,7 @@ describe "WebMock", :shared => true do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                         :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-                      request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                      a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
               
@@ -1102,7 +1109,7 @@ describe "WebMock", :shared => true do
               it "should succeed if request was executed with the same headers" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => SAMPLE_HEADERS).should have_been_made
                 }.should_not raise_error
               end
@@ -1110,7 +1117,7 @@ describe "WebMock", :shared => true do
                it "should succeed if request was executed with the same headers with value declared as array" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => "b"})
-                    request(:get, "www.example.com").
+                    a_request(:get, "www.example.com").
                     with(:headers => {"a" => ["b"]}).should have_been_made
                   }.should_not raise_error
                 end
@@ -1120,7 +1127,7 @@ describe "WebMock", :shared => true do
                 it "should succeed if request was executed with the same headers" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-                    request(:get, "www.example.com").
+                    a_request(:get, "www.example.com").
                     with(:headers =>  {"a" => ["b", "c"]}).should have_been_made
                   }.should_not raise_error
                 end
@@ -1128,7 +1135,7 @@ describe "WebMock", :shared => true do
                 it "should succeed if request was executed with the same headers but different order" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-                    request(:get, "www.example.com").
+                    a_request(:get, "www.example.com").
                     with(:headers =>  {"a" => ["c", "b"]}).should have_been_made
                   }.should_not raise_error
                 end
@@ -1136,7 +1143,7 @@ describe "WebMock", :shared => true do
                 it "should fail if request was executed with different headers" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-                    request(:get, "www.example.com").
+                    a_request(:get, "www.example.com").
                     with(:headers => {"a" => ["b", "d"]}).should have_been_made
                   }.should fail_with("The request GET http://www.example.com/ with headers {'A'=>['b', 'd']} was expected to execute 1 time but it executed 0 times")
                 end
@@ -1146,7 +1153,7 @@ describe "WebMock", :shared => true do
               it "should fail if request was executed with different headers" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => { 'Content-Length' => '9999'}).should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ with headers {'Content-Length'=>'9999'} was expected to execute 1 time but it executed 0 times")
               end
@@ -1154,7 +1161,7 @@ describe "WebMock", :shared => true do
               it "should fail if request was executed with less headers" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :headers => {'A' => 'a'})
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => {'A' => 'a', 'B' => 'b'}).should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ with headers {'A'=>'a', 'B'=>'b'} was expected to execute 1 time but it executed 0 times")
               end
@@ -1164,7 +1171,7 @@ describe "WebMock", :shared => true do
                   http_request(:get, "http://www.example.com/",
                     :headers => {'A' => 'a', 'B' => 'b'}
                   )
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => {'A' => 'a'}).should have_been_made
                 }.should_not raise_error
               end
@@ -1175,14 +1182,14 @@ describe "WebMock", :shared => true do
                     :body => "abc",
                     :headers => SAMPLE_HEADERS
                   )
-                  request(:get, "www.example.com").should have_been_made
+                  a_request(:get, "www.example.com").should have_been_made
                 }.should_not raise_error
               end
 
               it "should succeed if request was executed with headers matching regular expressions" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :headers => { 'user-agent' => 'MyAppName' })
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
                 }.should_not raise_error
               end
@@ -1190,7 +1197,7 @@ describe "WebMock", :shared => true do
               it "should fail if request was executed with headers not matching regular expression" do
                 lambda {
                   http_request(:get, "http://www.example.com/", :headers => { 'user_agent' => 'xMyAppName' })
-                  request(:get, "www.example.com").
+                  a_request(:get, "www.example.com").
                   with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
                 }.should fail_with("The request GET http://www.example.com/ with headers {'User-Agent'=>/^MyAppName$/} was expected to execute 1 time but it executed 0 times")
               end
@@ -1198,21 +1205,21 @@ describe "WebMock", :shared => true do
              it "should suceed if request was executed and block evaluated to true" do
                 lambda {
                   http_request(:post, "http://www.example.com/", :body => "wadus")
-                  request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+                  a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
                 }.should_not raise_error
               end
 
               it "should fail if request was executed and block evaluated to false" do
                 lambda {
                   http_request(:post, "http://www.example.com/", :body => "abc")
-                  request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
+                  a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
                 }.should fail_with("The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times")
               end
 
               it "should fail if request was not expected but it executed and block matched request" do
                 lambda {
                   http_request(:post, "http://www.example.com/", :body => "wadus")
-                  request(:post, "www.example.com").with { |req| req.body == "wadus" }.should_not have_been_made
+                  a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should_not have_been_made
                 }.should fail_with("The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time")
               end
 
@@ -1225,28 +1232,28 @@ describe "WebMock", :shared => true do
                 it "should succeed if succeed if request was executed with expected credentials" do
                   lambda {
                     http_request(:get, "http://user:pass@www.example.com/")
-                    request(:get, "http://user:pass@www.example.com").should have_been_made.once
+                    a_request(:get, "http://user:pass@www.example.com").should have_been_made.once
                   }.should_not raise_error
                 end
 
                 it "should fail if request was executed with different credentials than expected" do
                   lambda {
                     http_request(:get, "http://user:pass@www.example.com/")
-                    request(:get, "http://user:pazz@www.example.com").should have_been_made.once
+                    a_request(:get, "http://user:pazz@www.example.com").should have_been_made.once
                   }.should fail_with("The request GET http://user:pazz@www.example.com/ was expected to execute 1 time but it executed 0 times")
                 end
 
                 it "should fail if request was executed without credentials but credentials were expected" do
                   lambda {
                     http_request(:get, "http://www.example.com/")
-                    request(:get, "http://user:pass@www.example.com").should have_been_made.once
+                    a_request(:get, "http://user:pass@www.example.com").should have_been_made.once
                   }.should fail_with("The request GET http://user:pass@www.example.com/ was expected to execute 1 time but it executed 0 times")
                 end
 
                 it "should fail if request was executed with credentials but expected without" do
                   lambda {
                     http_request(:get, "http://user:pass@www.example.com/")
-                    request(:get, "http://www.example.com").should have_been_made.once
+                    a_request(:get, "http://www.example.com").should have_been_made.once
                   }.should fail_with("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times")
                 end
 
@@ -1364,14 +1371,14 @@ describe "WebMock", :shared => true do
                 setup_expectations_for_real_example_com_request
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should have_been_made
+                  a_request(:get, "http://www.example.com").should have_been_made
                 }.should_not raise_error
               end
 
               it "should verify that non expected requests didn't occur" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
-                  request(:get, "http://www.example.com").should_not have_been_made
+                  a_request(:get, "http://www.example.com").should_not have_been_made
                 }.should fail_with("The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time")
               end
             end

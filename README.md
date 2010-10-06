@@ -353,19 +353,19 @@ You can also use WebMock outside a test framework:
 
 ### Different way of setting expectations in RSpec
 
-	request(:post, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
+	a_request(:post, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
 
-	request(:post, "www.something.com").should have_been_made.times(3)
+	a_request(:post, "www.something.com").should have_been_made.times(3)
 
-	request(:any, "www.example.com").should_not have_been_made
+	a_request(:any, "www.example.com").should_not have_been_made
 
-	request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
-	
-	request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
-	
-	request(:post, "www.example.com").
+	a_request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+
+	a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+
+	a_request(:post, "www.example.com").
 	  with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json').should have_been_made
-	
+
 ## Clearing stubs and request history
 
 If you want to reset all current stubs and history of requests use `WebMock.reset_webmock`

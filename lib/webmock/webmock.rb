@@ -13,8 +13,12 @@ module WebMock
 
   alias_method :stub_http_request, :stub_request
 
-  def request(method, uri)
+  def a_request(method, uri)
     RequestPattern.new(method, uri)
+  end
+
+  class << self
+    alias :request :a_request
   end
 
   def assert_requested(method, uri, options = {}, &block)
