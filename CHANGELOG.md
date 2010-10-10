@@ -4,6 +4,11 @@
 
 * Curb support!!! Thanks to the awesome work of Pete Higgins!
 
+* `include WebMock` is now deprecated to avoid method and constant name conflicts. Please `include WebMock::API` instead.
+
+* `WebMock::API#request` is renamed to `WebMock::API#a_request` to avoid method name conflicts with i.e. rspec-rails. 
+  WebMock.request is still available.
+
 * :allow_localhost => true' now permits 0.0.0.0 in addition to 127.0.0.1 and 'localhost'. Thanks to Myron Marston and Mike Gehard for suggesting this.
 
 * Fixed issue with both Rspec 1.x and 2.x being available.
