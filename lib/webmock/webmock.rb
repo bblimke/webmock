@@ -53,10 +53,6 @@ module WebMock
       Config.instance.allow && Config.instance.allow.include?(uri.host)
   end
 
-  def self.response_for_request(request_signature, &block)
-    RequestRegistry.instance.response_for_request(request_signature, &block)
-  end
-
   def self.reset_webmock
     WebMock::RequestRegistry.instance.reset_webmock
   end

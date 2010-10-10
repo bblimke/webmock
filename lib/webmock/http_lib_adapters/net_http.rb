@@ -53,7 +53,7 @@ module Net  #:nodoc: all
 
       if WebMock::RequestRegistry.instance.registered_request?(request_signature)
         @socket = Net::HTTP.socket_type.new
-        webmock_response = WebMock.response_for_request(request_signature)
+        webmock_response = WebMock::RequestRegistry.instance.response_for_request(request_signature)
         WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :net_http}, request_signature, webmock_response)
         build_net_http_response(webmock_response, &block)

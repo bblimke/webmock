@@ -9,7 +9,7 @@ if defined?(Patron)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if WebMock::RequestRegistry.instance.registered_request?(request_signature)
-          webmock_response = WebMock.response_for_request(request_signature)
+          webmock_response = WebMock::RequestRegistry.instance.response_for_request(request_signature)
           handle_file_name(req, webmock_response)
           res = build_patron_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
