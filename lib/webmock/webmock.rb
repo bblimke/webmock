@@ -34,17 +34,17 @@ module WebMock
     assertion_failure(verifier.negative_failure_message) unless verifier.does_not_match?
   end
 
-  def allow_net_connect!
+  def self.allow_net_connect!
     Config.instance.allow_net_connect = true
   end
 
-  def disable_net_connect!(options = {})
+  def self.disable_net_connect!(options = {})
     Config.instance.allow_net_connect = false
     Config.instance.allow_localhost = options[:allow_localhost]
     Config.instance.allow = options[:allow]
   end
 
-  def net_connect_allowed?(uri = nil)
+  def self.net_connect_allowed?(uri = nil)
     if uri.is_a?(String)
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
@@ -53,27 +53,23 @@ module WebMock
       Config.instance.allow && Config.instance.allow.include?(uri.host)
   end
 
-  def registered_request?(request_signature)
+  def self.registered_request?(request_signature)
     RequestRegistry.instance.registered_request?(request_signature)
   end
 
-  def response_for_request(request_signature, &block)
+  def self.response_for_request(request_signature, &block)
     RequestRegistry.instance.response_for_request(request_signature, &block)
   end
 
-  def reset_webmock
+  def self.reset_webmock
     WebMock::RequestRegistry.instance.reset_webmock
   end
 
-  def reset_callbacks
+  def self.reset_callbacks
     WebMock::CallbackRegistry.reset
   end
-
-  def assertion_failure(message)
-    raise message
-  end
   
-  def after_request(options={}, &block)
+  def self.after_request(options={}, &block)
     CallbackRegistry.add_callback(options, block)
   end
   
@@ -82,6 +78,10 @@ module WebMock
   def uri_is_localhost(uri)
     uri.is_a?(Addressable::URI) && 
     %w(localhost 127.0.0.1 0.0.0.0).include?(uri.host)
+  end
+
+  def assertion_failure(message)
+    raise message
   end
 
 end
