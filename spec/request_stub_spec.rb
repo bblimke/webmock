@@ -1,9 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-describe RequestStub do
+describe WebMock::RequestStub do
 
   before(:each) do
-    @request_stub = RequestStub.new(:get, "www.example.com")
+    @request_stub = WebMock::RequestStub.new(:get, "www.example.com")
   end
 
   it "should have request pattern with method and uri" do
@@ -18,18 +18,18 @@ describe RequestStub do
 
     it "should assign body to request pattern" do
       @request_stub.with(:body => "abc")
-      @request_stub.request_pattern.to_s.should == RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
+      @request_stub.request_pattern.to_s.should == WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
     end
 
     it "should assign normalized headers to request pattern" do
       @request_stub.with(:headers => {'A' => 'a'})
       @request_stub.request_pattern.to_s.should == 
-        RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
+        WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
     it "should assign given block to request profile" do
       @request_stub.with { |req| req.body == "abc" }
-      @request_stub.request_pattern.matches?(RequestSignature.new(:get, "www.example.com", :body => "abc")).should be_true
+      @request_stub.request_pattern.matches?(WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc")).should be_true
     end
 
   end

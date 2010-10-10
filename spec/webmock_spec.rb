@@ -21,7 +21,7 @@ end
 describe "WebMock", :shared => true do
   before(:each) do
     WebMock.disable_net_connect!
-    RequestRegistry.instance.reset_webmock
+    WebMock::RequestRegistry.instance.reset_webmock
   end
 
   describe "when web connect" do
