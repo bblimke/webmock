@@ -21,6 +21,7 @@ require 'webmock/responses_sequence'
 require 'webmock/request_stub'
 require 'webmock/response'
 
+require 'webmock/assertion_failure'
 require 'webmock/request_execution_verifier'
 require 'webmock/config'
 require 'webmock/callback_registry'

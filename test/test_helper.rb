@@ -8,7 +8,7 @@ require 'test/unit'
 
 class Test::Unit::TestCase
   include WebMock
-
+  AssertionFailedError =  Test::Unit::AssertionFailedError rescue MiniTest::Assertion
   def assert_fail(message, &block)
     e = assert_raise(AssertionFailedError, &block)
     assert_equal(message, e.message)

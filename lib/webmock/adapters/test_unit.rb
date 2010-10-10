@@ -15,10 +15,5 @@ class Test::Unit::TestCase
   end
 end
 
-module WebMock
-  AssertionFailedError = Test::Unit::AssertionFailedError rescue MiniTest::Assertion # ruby1.9 compat
-  def assertion_failure(message)
-    raise AssertionFailedError.new(message)
-  end
-end
 
+WebMock::AssertionFailure.error_class = Test::Unit::AssertionFailedError rescue MiniTest::Assertion # ruby1.9 compat

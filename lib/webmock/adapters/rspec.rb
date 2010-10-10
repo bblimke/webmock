@@ -30,8 +30,4 @@ RSPEC_CONFIGURER.configure { |config|
   end
 }
 
-module WebMock
-  def assertion_failure(message)
-    raise RSPEC_NAMESPACE::Expectations::ExpectationNotMetError.new(message)
-  end
-end
+WebMock::AssertionFailure.error_class = RSPEC_NAMESPACE::Expectations::ExpectationNotMetError
