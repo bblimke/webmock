@@ -66,6 +66,11 @@ module WebMock
         Addressable::URI.encode_component(userinfo, Addressable::URI::CharacterClasses::USERINFO)
       end
 
+      def self.is_uri_localhost?(uri)
+        uri.is_a?(Addressable::URI) && 
+        %w(localhost 127.0.0.1 0.0.0.0).include?(uri.host)
+      end
+
       private
 
       def self.sort_query_values(query_values)
