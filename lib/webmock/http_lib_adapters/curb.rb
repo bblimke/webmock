@@ -6,7 +6,7 @@ if defined?(Curl)
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-        if WebMock.registered_request?(request_signature)
+        if WebMock::RequestRegistry.instance.registered_request?(request_signature)
           webmock_response = WebMock.response_for_request(request_signature)
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
