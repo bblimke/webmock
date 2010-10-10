@@ -49,5 +49,9 @@ module WebMock
   def self.after_request(options={}, &block)
     CallbackRegistry.add_callback(options, block)
   end
+  
+  def self.registered_request?(request_signature)
+    RequestRegistry.instance.registered_request?(request_signature)
+  end
 
 end
