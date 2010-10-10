@@ -49,7 +49,7 @@ module WebMock
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
     Config.instance.allow_net_connect ||
-      (Config.instance.allow_localhost && uri_is_localhost(uri)) ||
+      (Config.instance.allow_localhost && is_uri_localhost?(uri)) ||
       Config.instance.allow && Config.instance.allow.include?(uri.host)
   end
 
@@ -75,7 +75,7 @@ module WebMock
   
   private
   
-  def uri_is_localhost(uri)
+  def is_uri_localhost?(uri)
     uri.is_a?(Addressable::URI) && 
     %w(localhost 127.0.0.1 0.0.0.0).include?(uri.host)
   end
