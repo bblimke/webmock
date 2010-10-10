@@ -16,7 +16,7 @@ require 'webmock/rspec'
 require 'json'
 
 Spec::Runner.configure do |config|
-   config.include WebMock
+   config.include WebMock::API
 end
 
 def fail()

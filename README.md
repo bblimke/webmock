@@ -34,7 +34,7 @@ Add the following code to `test/test_helper.rb`
 	require 'webmock/test_unit'
 	
 	class Test::Unit::TestCase
-	  include WebMock
+	  include WebMock::API
 	end
 
 ### RSpec
@@ -44,7 +44,7 @@ Add the following code to `spec/spec_helper`:
 	require 'webmock/rspec'
 
 	Spec::Runner.configure do |config|
-	  config.include WebMock
+	  config.include WebMock::API
 	end
 
 ### RSpec 2
@@ -54,7 +54,7 @@ Add the following code to `spec/spec_helper`:
 	require 'webmock/rspec'
 	
 	RSpec.configure do |config|
-	  config.include WebMock
+	  config.include WebMock::API
 	end
 
 ### Cucumber
@@ -67,7 +67,7 @@ Add the following code to `features/support/env.rb`
 You can also use WebMock outside a test framework:
 
 	require 'webmock'
-	include WebMock
+	include WebMock::API
 	include WebMock::Matchers
 
 ## Examples

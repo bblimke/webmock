@@ -1,37 +1,22 @@
 module WebMock
+  
+  def self.included(clazz)
+    $stderr.puts "include WebMock is deprecated. Please include WebMock::API instead"
+  end
+  
   extend self
 
-  def self.version
-    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
-      f.read.strip
-    }
-  end
-
-  def stub_request(method, uri)
-    RequestRegistry.instance.register_request_stub(RequestStub.new(method, uri))
-  end
-
-  alias_method :stub_http_request, :stub_request
-
-  def a_request(method, uri)
-    RequestPattern.new(method, uri)
-  end
+  include WebMock::API
+  extend WebMock::API
 
   class << self
     alias :request :a_request
   end
-
-  def assert_requested(method, uri, options = {}, &block)
-    expected_times_executed = options.delete(:times) || 1
-    request = RequestPattern.new(method, uri, options).with(&block)
-    verifier = RequestExecutionVerifier.new(request, expected_times_executed)
-    WebMock::AssertionFailure.failure(verifier.failure_message) unless verifier.matches?
-  end
-
-  def assert_not_requested(method, uri, options = {}, &block)
-    request = RequestPattern.new(method, uri, options).with(&block)
-    verifier = RequestExecutionVerifier.new(request, options.delete(:times))
-    WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
+  
+  def self.version
+    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
+      f.read.strip
+    }
   end
 
   def self.allow_net_connect!
