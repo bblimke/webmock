@@ -6,14 +6,18 @@
 
 * `include WebMock` is now deprecated to avoid method and constant name conflicts. Please `include WebMock::API` instead.
 
-* `WebMock::API#request` is renamed to `WebMock::API#a_request` to avoid method name conflicts with i.e. rspec-rails. 
+* `WebMock::API#request` is renamed to `WebMock::API#a_request` to avoid method name conflicts with i.e. Rails controller specs. 
   WebMock.request is still available.
+
+* Removed `WebMock.response_for_request` and `WebMock.assertion_failure` which were only used internally and not documented.
+
+* Changed `WebMock#allow_net_connect!`, `WebMock#net_connect_allowed?`, `WebMock#registered_request?`, `WebMock#reset_callbacks`, `WebMock#after_request` instance methods to be WebMock class methods only.
 
 * :allow_localhost => true' now permits 0.0.0.0 in addition to 127.0.0.1 and 'localhost'. Thanks to Myron Marston and Mike Gehard for suggesting this.
 
 * Fixed issue with both Rspec 1.x and 2.x being available.
 
-  WebMock now tries to use already loaded version of RSpec (1.x or 2.x). Previously it was loading Rspec 2.0 if available, even if RSpec 1.3 was already loaded.
+  WebMock now tries to use already loaded version of RSpec (1.x or 2.x). Previously it was loading Rspec 2.0 if available, even if Rspec 1.3 was already loaded.
 
   Thanks to Hans de Graaff for reporting this.
 
