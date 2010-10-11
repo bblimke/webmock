@@ -9,9 +9,9 @@
 * `WebMock::API#request` is renamed to `WebMock::API#a_request` to avoid method name conflicts with i.e. Rails controller specs. 
   WebMock.request is still available.
 
-* Removed `WebMock.response_for_request` and `WebMock.assertion_failure` which were only used internally and not documented.
+* Removed `WebMock.response_for_request` and `WebMock.assertion_failure` which were only used internally and were not documented.
 
-* Changed `WebMock#allow_net_connect!`, `WebMock#net_connect_allowed?`, `WebMock#registered_request?`, `WebMock#reset_callbacks`, `WebMock#after_request` instance methods to be WebMock class methods only.
+* Deprecated `WebMock#request`, `WebMock#allow_net_connect!`, `WebMock#net_connect_allowed?`, `WebMock#registered_request?`, `WebMock#reset_callbacks`, `WebMock#after_request` instance methods. They are still available, but only as WebMock class methods.
 
 * :allow_localhost => true' now permits 0.0.0.0 in addition to 127.0.0.1 and 'localhost'. Thanks to Myron Marston and Mike Gehard for suggesting this.
 

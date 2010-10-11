@@ -3,6 +3,8 @@ require 'singleton'
 require 'addressable/uri'
 require 'crack'
 
+require 'webmock/deprecation'
+
 require 'webmock/http_lib_adapters/net_http'
 require 'webmock/http_lib_adapters/httpclient'
 require 'webmock/http_lib_adapters/patron'
