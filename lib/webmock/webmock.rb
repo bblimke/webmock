@@ -3,7 +3,7 @@ module WebMock
   def self.included(clazz)
     WebMock::Deprecation.warning("include WebMock is deprecated. Please include WebMock::API instead")
     if clazz.instance_methods.map(&:to_s).include?('request')
-      $stderr.puts "WebMock#request was not included in #{clazz} to avoid name collision"
+      warn "WebMock#request was not included in #{clazz} to avoid name collision"
     else
       clazz.class_eval do
         def request(method, uri)
