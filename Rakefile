@@ -10,7 +10,7 @@ begin
     gem.email = "bartosz.blimke@gmail.com"
     gem.homepage = "http://github.com/bblimke/webmock"
     gem.authors = ["Bartosz Blimke"]
-    gem.add_dependency "addressable", ">= 2.1.1"
+    gem.add_dependency "addressable", ">= 2.2.2"
     gem.add_dependency "crack", ">=0.1.7"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "httpclient", ">= 2.1.5.2"
