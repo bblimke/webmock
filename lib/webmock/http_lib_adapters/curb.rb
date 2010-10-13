@@ -195,35 +195,38 @@ if defined?(Curl)
       alias :header_str :header_str_with_webmock
 
       %w[ success failure header body complete progress ].each do |callback|
-        define_method "on_#{callback}_with_webmock" do |&block|
-          instance_variable_set( "@on_#{callback}", block )
-          send( "on_#{callback}_without_webmock", &block )
-        end
+        class_eval <<-METHOD, __FILE__, __LINE__
+          def on_#{callback}_with_webmock &block
+            @on_#{callback} = block
+            on_#{callback}_without_webmock &block
+          end
+        METHOD
         alias_method "on_#{callback}_without_webmock", "on_#{callback}"
         alias_method "on_#{callback}", "on_#{callback}_with_webmock"
       end
-      
 
-      class << self
-        %w[ http_get http_head http_delete perform ].each do |method|
-          define_method(method) do |url, &block|
+      %w[ http_get http_head http_delete perform ].each do |method|
+        class_eval <<-METHOD, __FILE__, __LINE__
+          def self.#{method}(url, &block)
             c = new
             c.url = url
             block.call(c) if block
-            c.send(method)
+            c.send("#{method}")
             c
           end
-        end
+        METHOD
+      end
 
-        %w[ put post ].each do |verb|
-          define_method("http_#{verb}") do |url, data, &block|
+      %w[ put post ].each do |verb|
+        class_eval <<-METHOD, __FILE__, __LINE__
+          def self.http_#{verb}(url, data, &block)
             c = new
             c.url = url
             block.call(c) if block
             c.send("http_#{verb}", data)
             c
           end
-        end
+        METHOD
       end
   
       module WebmockHelper
