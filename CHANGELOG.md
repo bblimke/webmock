@@ -21,6 +21,8 @@
 
   Thanks to Hans de Graaff for reporting this.
 
+* Changed runtime dependency on Addressable version 2.2.2 which fixes handling of percent-escaped '+'
+
 ## 1.3.5
 
 * External requests can be disabled while allowing selected hosts. Thanks to Charles Li and Ryan Bigg
