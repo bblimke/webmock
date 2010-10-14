@@ -1,0 +1,10 @@
+source 'http://gemcutter.org'
+
+gem 'jeweler'
+gem 'addressable', '>= 2.2.2'
+gem 'crack', '>= 0.1.7'
+gem 'rspec', '1.2.9'
+gem 'httpclient', '>= 2.1.5.2'
+gem 'patron', '>= 0.4.9'
+gem 'em-http-request', '>= 0.2.14'
+gem 'curb', '>= 0.7.8'

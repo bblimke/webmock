@@ -1,0 +1,35 @@
+GEM
+  remote: http://gemcutter.org/
+  specs:
+    addressable (2.2.2)
+    crack (0.1.8)
+    curb (0.7.8)
+    em-http-request (0.2.14)
+      addressable (>= 2.0.0)
+      eventmachine (>= 0.12.9)
+    eventmachine (0.12.10)
+    gemcutter (0.6.1)
+    git (1.2.5)
+    httpclient (2.1.5.2)
+    jeweler (1.4.0)
+      gemcutter (>= 0.1.0)
+      git (>= 1.2.5)
+      rubyforge (>= 2.0.0)
+    json_pure (1.4.6)
+    patron (0.4.9)
+    rspec (1.2.9)
+    rubyforge (2.0.4)
+      json_pure (>= 1.1.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  addressable (>= 2.2.2)
+  crack (>= 0.1.7)
+  curb (>= 0.7.8)
+  em-http-request (>= 0.2.14)
+  httpclient (>= 2.1.5.2)
+  jeweler
+  patron (>= 0.4.9)
+  rspec (= 1.2.9)
