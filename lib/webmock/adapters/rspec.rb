@@ -1,8 +1,8 @@
 require 'webmock'
 
 # RSpec 1.x and 2.x compatibility
-if defined?(Rspec)
-  RSPEC_NAMESPACE = RSPEC_CONFIGURER = Rspec
+if defined?(RSpec)
+  RSPEC_NAMESPACE = RSPEC_CONFIGURER = RSpec
 elsif defined?(Spec)
   RSPEC_NAMESPACE = Spec
   RSPEC_CONFIGURER = Spec::Runner
