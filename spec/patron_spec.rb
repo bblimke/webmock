@@ -21,7 +21,7 @@ unless RUBY_PLATFORM =~ /java/
       describe "file requests" do
 
         before(:each) do
-          @dir_path = Dir.tmpdir
+          @dir_path = Dir.mktmpdir('webmock-')
           @file_path = File.join(@dir_path, "webmock_temp_test_file")
           FileUtils.rm_rf(@file_path) if File.exists?(@file_path)
         end
