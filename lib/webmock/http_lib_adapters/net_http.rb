@@ -79,6 +79,7 @@ module Net  #:nodoc: all
     def connect_with_webmock
         
         if WebMock.force_net_connect?
+          puts "connecting without webmock"
           return connect_without_webmock
         end
         
