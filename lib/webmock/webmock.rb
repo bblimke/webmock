@@ -46,7 +46,7 @@ module WebMock
   end
   
   def self.force_net_connect?
-    Config.instance.force_net_connect
+    Config.instance.force_net_connect == true
   end
   
 
