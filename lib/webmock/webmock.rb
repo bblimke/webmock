@@ -36,6 +36,19 @@ module WebMock
     Config.instance.allow_localhost = options[:allow_localhost]
     Config.instance.allow = options[:allow]
   end
+  
+  def self.original_net_connect!
+    Config.instance.force_net_connect = true
+  end
+  
+  def self.webmock_net_connect!
+    Config.instance.force_net_connect = false
+  end
+  
+  def self.force_net_connect?
+    Config.instance.force_net_connect
+  end
+  
 
   def self.net_connect_allowed?(uri = nil)
     if uri.is_a?(String)

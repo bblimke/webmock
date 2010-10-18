@@ -85,6 +85,24 @@ describe "Webmock with Net:HTTP" do
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
     response.body.should be_a(Net::ReadAdapter)
   end
+  
+  
+  it "should give a peer cert when webmock is turned off" do
+    WebMock.original_net_connect!
+    host = 'www.google.com'
+    port = 443
+    path = '/'
+
+    http = Net::HTTP.new(host, port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    
+    http.start do |http|
+      cert = OpenSSL::X509::Certificate.new http.peer_cert
+      cert.should be_a(OpenSSL::X509::Certificate)
+    end
+    WebMock.webmock_net_connect!
+  end
 
   describe 'after_request callback support' do
     let(:expected_body_regex) { /You have reached this web page by typing.*example\.com/ }

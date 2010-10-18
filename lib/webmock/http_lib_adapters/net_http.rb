@@ -77,11 +77,17 @@ module Net  #:nodoc: all
 
 
     def connect_with_webmock
-      unless @@alredy_checked_for_right_http_connection ||= false
-        WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
-        @@alredy_checked_for_right_http_connection = true
-      end
-      nil
+        
+        if WebMock.force_net_connect?
+          return connect_without_webmock
+        end
+        
+        unless @@alredy_checked_for_right_http_connection ||= false
+          WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
+          @@alredy_checked_for_right_http_connection = true
+        end
+        nil
+      # end
     end
     alias_method :connect_without_webmock, :connect
     alias_method :connect, :connect_with_webmock
