@@ -1,5 +1,13 @@
 #Changelog
 
+## Master
+
+* Support for dynamically evaluated raw responses recorded with `curl -is` <br/>
+  i.e.
+
+		`curl -is www.example.com > /tmp/www.example.com.txt`
+		stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
+
 ## 1.4.0
 
 * Curb support!!! Thanks to the awesome work of Pete Higgins!

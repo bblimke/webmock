@@ -207,13 +207,18 @@ You can also use WebMock outside a test framework:
       to_return { |request| {:body => request.body} }
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
-    
+
 ### Responses dynamically evaluated from lambda
-    
+
     stub_request(:any, 'www.example.net').
       to_return(lambda { |request| {:body => request.body} })
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	       
+
+### Dynamically evaluated raw responses recorded with `curl -is`
+
+    `curl -is www.example.com > /tmp/www.example.com.txt`
+    stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
 
 ### Responses with dynamically evaluated parts
 

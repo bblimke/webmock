@@ -58,14 +58,14 @@ describe WebMock::Response do
         @response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
     end
-    
+
     it "should raise error if any assigned as instance" do
       @response = WebMock::Response.new(:exception => ArgumentError.new("hello world"))
       lambda {
         @response.raise_error_if_any
       }.should raise_error(ArgumentError, "hello world")
     end
-    
+
     it "should raise error if any assigned as string" do
       @response = WebMock::Response.new(:exception => "hello world")
       lambda {
@@ -78,7 +78,7 @@ describe WebMock::Response do
     end
 
   end
-  
+
   describe "timeout" do
 
     it "should know if it should timeout" do
@@ -170,7 +170,7 @@ describe WebMock::Response do
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
           "Content-Length"=>"438",
-          "Connection"=>"Keep-Alive",          
+          "Connection"=>"Keep-Alive",
           "Accept"=>"image/jpeg, image/png"
           }
       end
@@ -195,17 +195,17 @@ describe WebMock::Response do
 
       it "should have evaluated body" do
         @response = WebMock::Response.new(:body => lambda {|request| request.body})
-        @response.evaluate!(@request_signature).body.should == "abc"
+        @response.evaluate(@request_signature).body.should == "abc"
       end
 
       it "should have evaluated headers" do
         @response = WebMock::Response.new(:headers => lambda {|request| request.headers})
-        @response.evaluate!(@request_signature).headers.should == {'A' => 'a'}
+        @response.evaluate(@request_signature).headers.should == {'A' => 'a'}
       end
 
       it "should have evaluated status" do
         @response = WebMock::Response.new(:status => lambda {|request| 302})
-        @response.evaluate!(@request_signature).status.should == [302, ""]
+        @response.evaluate(@request_signature).status.should == [302, ""]
       end
 
     end
@@ -216,7 +216,7 @@ describe WebMock::Response do
 
     describe "evaluating response options" do
 
-      it "should have evaluated options" do
+      it "should evaluate new response with evaluated options" do
         request_signature = WebMock::RequestSignature.new(:post, "www.example.com", :body => "abc", :headers => {'A' => 'a'})
         response = WebMock::DynamicResponse.new(lambda {|request|
           {
@@ -225,19 +225,41 @@ describe WebMock::Response do
             :status => 302
           }
         })
-        response.evaluate!(request_signature)
-        response.body.should == "abc"
-        response.headers.should == {'A' => 'a'}
-        response.status.should == [302, ""]
+        evaluated_response = response.evaluate(request_signature)
+        evaluated_response.body.should == "abc"
+        evaluated_response.headers.should == {'A' => 'a'}
+        evaluated_response.status.should == [302, ""]
       end
 
       it "should be equal to static response after evaluation" do
         request_signature = WebMock::RequestSignature.new(:post, "www.example.com", :body => "abc")
         response = WebMock::DynamicResponse.new(lambda {|request| {:body => request.body}})
-        response.evaluate!(request_signature)
-        response.should == WebMock::Response.new(:body => "abc")
+        evaluated_response = response.evaluate(request_signature)
+        evaluated_response.should == WebMock::Response.new(:body => "abc")
       end
 
+      describe "when raw response is evaluated" do
+        before(:each) do
+          @files = {
+            "www.example.com" => File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+          }
+          @request_signature = WebMock::RequestSignature.new(:get, "www.example.com")
+        end
+
+        describe "as a file" do
+          it "should return response" do
+            response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s] })
+            response.evaluate(@request_signature).body.size.should == 438
+          end
+        end
+
+        describe "as a string" do
+          it "should return response" do
+            response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s].read })
+            response.evaluate(@request_signature).body.size.should == 438
+          end
+        end
+      end
     end
 
   end

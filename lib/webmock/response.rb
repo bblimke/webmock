@@ -80,7 +80,7 @@ module WebMock
       @should_timeout = options[:should_timeout]
     end
 
-    def evaluate!(request_signature)
+    def evaluate(request_signature)
       self.body = @body.call(request_signature) if @body.is_a?(Proc)
       self.headers = @headers.call(request_signature) if @headers.is_a?(Proc)
       self.status = @status.call(request_signature) if @status.is_a?(Proc)
@@ -136,13 +136,9 @@ module WebMock
       @responder = responder
     end
 
-    def dup
-      self.class.new(@responder)
-    end
-
-    def evaluate!(request_signature)
-      self.options = @responder.call(request_signature)
-      self
+    def evaluate(request_signature)
+      options = @responder.call(request_signature)
+      Response.new(options)
     end
   end
 end

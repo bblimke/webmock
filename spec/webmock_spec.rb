@@ -691,6 +691,25 @@ describe "WebMock", :shared => true do
           end
         end
 
+        describe "replying raw responses evaluated dynamically" do
+          before(:each) do
+            @files = {
+              "www.example.com" => File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+            }
+          end
+
+          it "should return response from evaluated file" do
+            stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s] })
+            http_request(:get, "http://www.example.com/").body.size.should == 438
+          end
+
+          it "should return response from evaluated string" do
+            stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s].read })
+            http_request(:get, "http://www.example.com/").body.size.should == 438
+          end
+
+        end
+
         describe "sequences of responses" do
 
           it "should return responses one by one if declared in array" do

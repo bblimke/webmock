@@ -43,8 +43,7 @@ module WebMock
     end
 
     def evaluate_response_for_request(response, request_signature)
-      evaluated_response = response.dup
-      evaluated_response.evaluate!(request_signature)
+      response.evaluate(request_signature)
     end
 
   end
