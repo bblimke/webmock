@@ -537,6 +537,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Charles Li
 * Ryan Bigg
 * Pete Higgins
+* Hans de Graaff
 
 ## Background
 

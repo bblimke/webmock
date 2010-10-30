@@ -8,6 +8,13 @@
 		`curl -is www.example.com > /tmp/www.example.com.txt`
 		stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
 
+* Fixed an issue where Patron spec tried to remove system temporary directory.
+  Thanks to Hans de Graaff
+
+* WebMock specs now use RSpec 2
+
+* `rake spec NO_CONNECTION=true` can now be used to only run WebMock specs which do not make real network connections
+
 ## 1.4.0
 
 * Curb support!!! Thanks to the awesome work of Pete Higgins!
