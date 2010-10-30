@@ -15,7 +15,10 @@ require 'webmock/rspec'
 require 'json'
 
 RSpec.configure do |config|
-   config.include WebMock::API
+  config.include WebMock::API  
+  if ENV["NO_CONNECTION"]
+    config.filter_run_excluding :net_connect => true
+  end
 end
 
 def fail()

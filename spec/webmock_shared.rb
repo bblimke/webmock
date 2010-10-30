@@ -26,7 +26,7 @@ shared_examples_for "WebMock" do
 
   describe "when web connect" do
 
-    describe "is allowed" do
+    describe "is allowed", :net_connect => true do
       before(:each) do
         WebMock.allow_net_connect!
       end
@@ -122,7 +122,7 @@ shared_examples_for "WebMock" do
         }.should raise_error(WebMock::NetConnectNotAllowedError, client_specific_request_string("Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/"))
       end
 
-      it "should allow a real request to allowed host" do
+      it "should allow a real request to allowed host", :net_connect => true do
         http_request(:get, "http://www.example.org/").status.should == "200"
       end
     end
@@ -1381,7 +1381,7 @@ shared_examples_for "WebMock" do
             end
 
 
-            describe "when net connect allowed" do
+            describe "when net connect allowed", :net_connect => true do
               before(:each) do
                 WebMock.allow_net_connect!
               end
@@ -1485,7 +1485,7 @@ shared_examples_for "WebMock" do
       
         end
         
-        describe "for real requests" do
+        describe "for real requests", :net_connect => true do
           before(:each) do
             WebMock.reset_webmock
             WebMock.allow_net_connect!
@@ -1519,7 +1519,7 @@ shared_examples_for "WebMock" do
         @called.should == 2
       end
       
-      it "should invoke callbacks only for real requests if requested" do
+      it "should invoke callbacks only for real requests if requested", :net_connect => true do
         WebMock.after_request(:real_requests_only => true) { @called = true }
         http_request(:get, "http://www.example.com/")
         @called.should == nil

@@ -52,7 +52,7 @@ describe "Webmock with Net:HTTP" do
     }.should raise_error("both of body argument and HTTPRequest#body set")
   end
 
-  it "should handle real requests with readable body" do
+  it "should handle real requests with readable body", :net_connect => true do
     WebMock.allow_net_connect!
     req = Net::HTTP::Post.new("/")
     Net::HTTP.start("www.example.com") {|http|
@@ -60,7 +60,7 @@ describe "Webmock with Net:HTTP" do
     }.body.should =~ /Example Web Page/
   end
   
-  it "should handle requests with block passed to read_body" do
+  it "should handle requests with block passed to read_body", :net_connect => true do
     body = ""
     WebMock.allow_net_connect!
     req = Net::HTTP::Get.new("/")
@@ -80,13 +80,13 @@ describe "Webmock with Net:HTTP" do
     response.body.should be_a(Net::ReadAdapter)
   end
 
-  it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body" do
+  it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body", :net_connect => true do
     WebMock.allow_net_connect!
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
     response.body.should be_a(Net::ReadAdapter)
   end
 
-  describe 'after_request callback support' do
+  describe 'after_request callback support', :net_connect => true do
     let(:expected_body_regex) { /You have reached this web page by typing.*example\.com/ }
 
     before(:each) do
