@@ -20,7 +20,10 @@ module NetHTTPSpecHelper
 
     req.basic_auth uri.user, uri.password if uri.user
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true if uri.scheme == "https"
+    if uri.scheme == "https"
+      http.use_ssl = true
+      http.ssl_timeout = 10
+    end
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     response = http.start {|http|
       http.request(req, options[:body], &block)

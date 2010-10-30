@@ -12,7 +12,7 @@ module EMHttpRequestSpecHelper
     EventMachine.run {
       request = EventMachine::HttpRequest.new("#{uri.omit(:userinfo).normalize.to_s}")
       http = request.send(:setup_request, method, {
-        :timeout => 2, 
+        :timeout => 10, 
         :body => options[:body],
         :query => options[:query],
         'authorization' => [uri.user, uri.password],
