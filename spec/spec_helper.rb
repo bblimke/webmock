@@ -12,11 +12,17 @@ require 'rspec'
 
 require 'webmock/rspec'
 
+require 'network_connection'
+
 require 'json'
 
 RSpec.configure do |config|
   config.include WebMock::API  
-  if ENV["NO_CONNECTION"]
+  unless NetworkConnection.is_network_available?
+    warn("No network connectivity. Only examples which do not make real network connections will run.")
+    no_network_connection = true
+  end
+  if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
   end
 end
@@ -58,3 +64,4 @@ def client_specific_request_string(string)
   end
   string
 end
+
