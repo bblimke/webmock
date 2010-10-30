@@ -8,23 +8,22 @@ end
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'spec'
-require 'spec/autorun'
+require 'rspec'
 
 require 'webmock/rspec'
 
 require 'json'
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
    config.include WebMock::API
 end
 
 def fail()
-  raise_error(Spec::Expectations::ExpectationNotMetError)
+  raise_error(RSpec::Expectations::ExpectationNotMetError)
 end
 
 def fail_with(message)
-  raise_error(Spec::Expectations::ExpectationNotMetError, message)
+  raise_error(RSpec::Expectations::ExpectationNotMetError, message)
 end
 
 class Proc

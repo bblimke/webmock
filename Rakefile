@@ -12,7 +12,7 @@ begin
     gem.authors = ["Bartosz Blimke"]
     gem.add_dependency "addressable", ">= 2.2.2"
     gem.add_dependency "crack", ">=0.1.7"
-    gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.add_development_dependency "rspec", ">= 2.0.0"
     gem.add_development_dependency "httpclient", ">= 2.1.5.2"
     gem.add_development_dependency "patron", ">= 0.4.9" unless RUBY_PLATFORM =~ /java/
     gem.add_development_dependency "em-http-request", ">= 0.2.14" unless RUBY_PLATFORM =~ /java/
@@ -23,16 +23,10 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
-require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/**/*_spec.rb'].exclude("spec/vendor")
-end
-
-Spec::Rake::SpecTask.new(:rcov) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rcov = true
+require "rspec/core/rake_task"
+RSpec::Core::RakeTask.new do |t|
+  t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"] 
+  t.pattern = 'spec/**/*_spec.rb'
 end
 
 require 'rake/testtask'

@@ -9,7 +9,7 @@ elsif defined?(Spec)
 else  
   begin
     require 'rspec'
-    RSPEC_NAMESPACE = RSPEC_CONFIGURER = Rspec
+    RSPEC_NAMESPACE = RSPEC_CONFIGURER = RSpec
   rescue LoadError
     require 'spec'
     RSPEC_NAMESPACE = Spec

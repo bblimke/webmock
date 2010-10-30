@@ -1,10 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require 'webmock_spec'
+require 'webmock_shared'
 
 unless RUBY_PLATFORM =~ /java/
   require 'curb_spec_helper'
 
-  describe "Curb", :shared => true do
+  shared_examples_for "Curb" do
     include CurbSpecHelper
     
     it_should_behave_like "WebMock"

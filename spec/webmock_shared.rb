@@ -18,7 +18,7 @@ describe "WebMock version" do
 end
 
 
-describe "WebMock", :shared => true do
+shared_examples_for "WebMock" do
   before(:each) do
     WebMock.disable_net_connect!
     WebMock::RequestRegistry.instance.reset_webmock

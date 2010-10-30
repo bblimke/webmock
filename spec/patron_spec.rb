@@ -1,6 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require 'webmock_spec'
-
+require 'webmock_shared'
 
 unless RUBY_PLATFORM =~ /java/
   require 'patron_spec_helper'
