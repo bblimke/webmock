@@ -81,6 +81,9 @@ module Net  #:nodoc: all
         WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
         @@alredy_checked_for_right_http_connection = true
       end
+      if WebMock::Config.instance.net_http_connect_on_start
+        return connect_without_webmock
+      end
       nil
     end
     alias_method :connect_without_webmock, :connect

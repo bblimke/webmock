@@ -13,7 +13,7 @@ describe "Webmock with Net:HTTP" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
     Net::HTTP.start("www.example.com") { |query| query.get("/") }.body.should == "abc"*100000
   end
-  
+
   it "should handle multiple values for the same response header" do
     stub_http_request(:get, "www.example.com").to_return(:headers => { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
     response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
@@ -59,16 +59,16 @@ describe "Webmock with Net:HTTP" do
       http.request(req, StringIO.new("my_params"))
     }.body.should =~ /Example Web Page/
   end
-  
+
   it "should handle requests with block passed to read_body", :net_connect => true do
     body = ""
     WebMock.allow_net_connect!
     req = Net::HTTP::Get.new("/")
     Net::HTTP.start("www.example.com") do |http|
-      http.request(req) do |res|  
+      http.request(req) do |res|
         res.read_body do |str|
           body << str
-        end 
+        end
       end
     end
     body.should =~ /Example Web Page/
@@ -84,6 +84,47 @@ describe "Webmock with Net:HTTP" do
     WebMock.allow_net_connect!
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
     response.body.should be_a(Net::ReadAdapter)
+  end
+
+  describe "connecting on Net::HTTP.start" do
+    before(:each) do
+      @http = Net::HTTP.new('www.google.com', 443)
+      @http.use_ssl = true
+      @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    end
+    describe "when net http is allowed" do
+      it "should not connect to the server until the request", :net_connect => true do
+        WebMock.allow_net_connect!
+        @http.start {|conn|
+          conn.peer_cert.should be_nil
+        }
+      end
+
+      it "should connect to the server on start", :net_connect => true do
+        WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+        @http.start {|conn|
+          cert = OpenSSL::X509::Certificate.new conn.peer_cert
+          cert.should be_a(OpenSSL::X509::Certificate)
+        }
+      end
+    end
+
+    describe "when net http is disabled and allowed only for some hosts" do
+      it "should not connect to the server until the request", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => "www.google.com")
+        @http.start {|conn|
+          conn.peer_cert.should be_nil
+        }
+      end
+
+      it "should connect to the server on start", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => "www.google.com", :net_http_connect_on_start => true)
+        @http.start {|conn|
+          cert = OpenSSL::X509::Certificate.new conn.peer_cert
+          cert.should be_a(OpenSSL::X509::Certificate)
+        }
+      end
+    end
   end
 
   describe 'after_request callback support', :net_connect => true do
