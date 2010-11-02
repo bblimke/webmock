@@ -1,6 +1,6 @@
 #Changelog
 
-## Master
+## 1.5.0
 
 * Support for dynamically evaluated raw responses recorded with `curl -is` <br/>
   i.e.
@@ -8,20 +8,20 @@
 		`curl -is www.example.com > /tmp/www.example.com.txt`
 		stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
 
+* `:net_http_connect_on_start` option can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` methods, i.e.
+
+		WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+
+  This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. Check 'Connecting on Net::HTTP.start' in README for more information.
+
+  Thanks to Alastair Brunton for reporting the issue and for fix suggestions.
+
 * Fixed an issue where Patron spec tried to remove system temporary directory.
   Thanks to Hans de Graaff
 
 * WebMock specs now use RSpec 2
 
 * `rake spec NO_CONNECTION=true` can now be used to only run WebMock specs which do not make real network connections
-
-* `net_http_connect_on_start` option can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` methods, i.e.
-
-		WebMock.allow_net_connect!(:net_http_connect_on_start => true)
-
-  This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. Look for 'Connecting on Net::HTTP.start' in README, for more information.
-
-  Thanks to Alastair Brunton for reporting the issue and fix suggestions.
 
 ## 1.4.0
 
