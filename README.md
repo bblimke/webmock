@@ -310,6 +310,25 @@ You can also use WebMock outside a test framework:
 
 	Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
 
+## Connecting on Net::HTTP.start
+
+	HTTP protocol has 3 steps: connect, request and response (or 4 with close). Most Ruby HTTP client libraries
+	treat connect as a part of request step, with the exception of `Net::HTTP` which
+	allows opening connection to the server separately to the request, by using `Net::HTTP.start`.
+
+	WebMock API was also designed with connect being part of request step, and it only allows stubbing
+	requests, not connections. When `Net::HTTP.start` is called, WebMock doesn't know yet whether
+	a request is stubbed or not. WebMock by default delays a connection until the request is invoked,
+	so when there is no request, `Net::HTTP.start` doesn't do anything.
+	**This means that WebMock breaks the Net::HTTP behaviour by default!**
+
+	To workaround this issue, WebMock offers `net_http_connect_on_start` option,
+	which can be passed to `WebMock.allow_net_connect!` and `WebMock#disable_net_connect!` metods, i.e.
+
+	  WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+
+	This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
+
 ## Setting Expectations
 
 ### Setting expectations in Test::Unit
@@ -538,6 +557,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Ryan Bigg
 * Pete Higgins
 * Hans de Graaff
+* Alastair Brunton
 
 ## Background
 

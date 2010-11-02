@@ -15,6 +15,14 @@
 
 * `rake spec NO_CONNECTION=true` can now be used to only run WebMock specs which do not make real network connections
 
+* `net_http_connect_on_start` option can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` methods, i.e.
+
+		WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+
+  This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. Look for 'Connecting on Net::HTTP.start' in README, for more information.
+
+  Thanks to Alastair Brunton for reporting the issue and fix suggestions.
+
 ## 1.4.0
 
 * Curb support!!! Thanks to the awesome work of Pete Higgins!
