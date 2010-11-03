@@ -2,7 +2,16 @@
 
 ## Master
 
-* `WebMock.reset_webmock` is deprecated in favour of `WebMock.reset!`
+* `WebMock.reset_webmock` is deprecated in favour of new `WebMock.reset!`
+
+* Fixed integration with Cucumber. Previously documented example didn't work with new versions of Cucumber.
+
+* Simplified integration with Test::Unit, RSpec and Cucumber, by requiring a single file i.e.
+
+		require 'webmock/test_unit'
+		require 'webmock/rspec'
+		require 'webmock/cucumber'
+
 
 ## 1.5.0
 
