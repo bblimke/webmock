@@ -25,7 +25,13 @@ Supported HTTP libraries
 
 ##Installation
 
-    gem install webmock --source http://gemcutter.org
+	gem install webmock --source http://gemcutter.org
+
+### or to install the latest development version from github master
+
+	git clone http://github.com/bblimke/webmock.git
+	cd webmock
+	rake install
 
 ### Test::Unit 
 
