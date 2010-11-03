@@ -43,10 +43,6 @@ Add the following code to `spec/spec_helper`:
 
 	require 'webmock/rspec'
 
-	Spec::Runner.configure do |config|
-	  config.include WebMock::API
-	end
-
 ### RSpec 2
 
 Add the following code to `spec/spec_helper`:

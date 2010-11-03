@@ -21,6 +21,7 @@ require 'webmock/rspec/matchers'
   
 RSPEC_CONFIGURER.configure { |config|
 
+  config.include WebMock::API
   config.include WebMock::Matchers
 
   config.before :each do
