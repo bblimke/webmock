@@ -21,7 +21,7 @@ end
 shared_examples_for "WebMock" do
   before(:each) do
     WebMock.disable_net_connect!
-    WebMock::RequestRegistry.instance.reset_webmock
+    WebMock::RequestRegistry.instance.reset!
   end
 
   describe "when web connect" do
@@ -281,7 +281,7 @@ shared_examples_for "WebMock" do
         
         describe "for request with xml body and content type is set to xml" do
           before(:each) do
-            WebMock.reset_webmock
+            WebMock.reset!
             stub_http_request(:post, "www.example.com").
               with(:body => { "opt" => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} }})
           end
@@ -1487,7 +1487,7 @@ shared_examples_for "WebMock" do
         
         describe "for real requests", :net_connect => true do
           before(:each) do
-            WebMock.reset_webmock
+            WebMock.reset!
             WebMock.allow_net_connect!
             WebMock.after_request(:except => [:other_lib])  do |_, response|
               @response = response

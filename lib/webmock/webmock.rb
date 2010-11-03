@@ -48,10 +48,15 @@ module WebMock
       Config.instance.allow && Config.instance.allow.include?(uri.host)
   end
 
-  def self.reset_webmock
-    WebMock::RequestRegistry.instance.reset_webmock
+  def self.reset!
+    WebMock::RequestRegistry.instance.reset!
   end
-
+  
+  def self.reset_webmock
+    WebMock::Deprecation.warning("WebMock.reset_webmock is deprecated. Please use WebMock.reset! method instead")
+    reset!
+  end
+  
   def self.reset_callbacks
     WebMock::CallbackRegistry.reset
   end

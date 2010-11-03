@@ -3,13 +3,13 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe WebMock::RequestRegistry do
 
   before(:each) do
-    WebMock::RequestRegistry.instance.reset_webmock
+    WebMock::RequestRegistry.instance.reset!
     @request_pattern = WebMock::RequestPattern.new(:get, "www.example.com")
     @request_signature = WebMock::RequestSignature.new(:get, "www.example.com")
     @request_stub = WebMock::RequestStub.new(:get, "www.example.com")
   end
 
-  describe "reset_webmock" do
+  describe "reset!" do
     before(:each) do
       WebMock::RequestRegistry.instance.register_request_stub(@request_stub)
       WebMock::RequestRegistry.instance.requested_signatures.put(@request_signature)
@@ -17,13 +17,13 @@ describe WebMock::RequestRegistry do
 
     it "should clean request stubs" do
       WebMock::RequestRegistry.instance.registered_request?(@request_signature).should == @request_stub
-      WebMock::RequestRegistry.instance.reset_webmock
+      WebMock::RequestRegistry.instance.reset!
       WebMock::RequestRegistry.instance.registered_request?(@request_signature).should == nil
     end
 
     it "should clean list of executed requests" do
       WebMock::RequestRegistry.instance.times_executed(@request_pattern).should == 1
-      WebMock::RequestRegistry.instance.reset_webmock
+      WebMock::RequestRegistry.instance.reset!
       WebMock::RequestRegistry.instance.times_executed(@request_pattern).should == 0
     end
 

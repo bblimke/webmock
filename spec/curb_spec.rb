@@ -21,7 +21,7 @@ unless RUBY_PLATFORM =~ /java/
   describe "Curb features" do
     before(:each) do
       WebMock.disable_net_connect!
-      WebMock::RequestRegistry.instance.reset_webmock
+      WebMock::RequestRegistry.instance.reset!
     end
 
     describe "callbacks" do

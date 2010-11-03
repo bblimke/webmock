@@ -4,7 +4,7 @@ require 'webmock'
 class Test::Unit::TestCase
   alias setup_without_webmock setup
   def setup
-    WebMock.reset_webmock
+    WebMock.reset!
     @original_allow_net_connect = WebMock.net_connect_allowed?
     WebMock.disable_net_connect!
   end

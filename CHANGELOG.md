@@ -1,5 +1,9 @@
 #Changelog
 
+## Master
+
+* `WebMock.reset_webmock` is deprecated in favour of `WebMock.reset!`
+
 ## 1.5.0
 
 * Support for dynamically evaluated raw responses recorded with `curl -is` <br/>

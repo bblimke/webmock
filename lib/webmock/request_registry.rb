@@ -6,10 +6,10 @@ module WebMock
     attr_accessor :request_stubs, :requested_signatures
 
     def initialize
-      reset_webmock
+      reset!
     end
 
-    def reset_webmock
+    def reset!
       self.request_stubs = []
       self.requested_signatures = Util::HashCounter.new
     end

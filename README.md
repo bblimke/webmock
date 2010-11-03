@@ -392,13 +392,13 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
 
 ## Clearing stubs and request history
 
-If you want to reset all current stubs and history of requests use `WebMock.reset_webmock`
+If you want to reset all current stubs and history of requests use `WebMock.reset!`
 
 	stub_request(:any, "www.example.com")
 
 	Net::HTTP.get('www.example.com', '/')    # ===> Success
 
-	reset_webmock
+	WebMock.reset!
 
 	Net::HTTP.get('www.example.com', '/')    # ===> Failure
 
