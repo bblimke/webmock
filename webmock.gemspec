@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{webmock}
-  s.version = "1.5.0"
+  s.version = "1.6.0.pre"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-11-02}
+  s.date = %q{2010-11-03}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -24,15 +24,11 @@ Gem::Specification.new do |s|
      "Rakefile",
      "VERSION",
      "lib/webmock.rb",
-     "lib/webmock/adapters/rspec.rb",
-     "lib/webmock/adapters/rspec/matchers.rb",
-     "lib/webmock/adapters/rspec/request_pattern_matcher.rb",
-     "lib/webmock/adapters/rspec/webmock_matcher.rb",
-     "lib/webmock/adapters/test_unit.rb",
      "lib/webmock/api.rb",
      "lib/webmock/assertion_failure.rb",
      "lib/webmock/callback_registry.rb",
      "lib/webmock/config.rb",
+     "lib/webmock/cucumber.rb",
      "lib/webmock/deprecation.rb",
      "lib/webmock/errors.rb",
      "lib/webmock/http_lib_adapters/curb.rb",
@@ -49,6 +45,9 @@ Gem::Specification.new do |s|
      "lib/webmock/response.rb",
      "lib/webmock/responses_sequence.rb",
      "lib/webmock/rspec.rb",
+     "lib/webmock/rspec/matchers.rb",
+     "lib/webmock/rspec/matchers/request_pattern_matcher.rb",
+     "lib/webmock/rspec/matchers/webmock_matcher.rb",
      "lib/webmock/test_unit.rb",
      "lib/webmock/util/hash_counter.rb",
      "lib/webmock/util/headers.rb",
