@@ -64,7 +64,6 @@ You can also use WebMock outside a test framework:
 
 	require 'webmock'
 	include WebMock::API
-	include WebMock::Matchers
 
 ## Examples
 
