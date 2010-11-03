@@ -1,19 +1,20 @@
 require 'test/unit'
 require 'webmock'
 
-class Test::Unit::TestCase
-  alias setup_without_webmock setup
-  def setup
-    WebMock.reset!
-    @original_allow_net_connect = WebMock.net_connect_allowed?
-    WebMock.disable_net_connect!
-  end
+module Test
+  module Unit
+    class TestCase
+      include WebMock::API
 
-  alias teardown_without_webmock teardown
-  def teardown
-    @original_allow_net_connect ? WebMock.allow_net_connect! : WebMock.disable_net_connect!
+      alias_method :setup_without_webmock, :setup
+      def setup_with_webmock
+        setup_without_webmock
+        WebMock.reset!
+      end
+      alias_method :setup, :setup_with_webmock
+
+    end
   end
 end
-
 
 WebMock::AssertionFailure.error_class = Test::Unit::AssertionFailedError rescue MiniTest::Assertion # ruby1.9 compat

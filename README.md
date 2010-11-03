@@ -32,10 +32,6 @@ Supported HTTP libraries
 Add the following code to `test/test_helper.rb`
 
 	require 'webmock/test_unit'
-	
-	class Test::Unit::TestCase
-	  include WebMock::API
-	end
 
 ### RSpec
 	
