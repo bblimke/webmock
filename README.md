@@ -57,8 +57,7 @@ Add the following code to `spec/spec_helper`:
 
 Add the following code to `features/support/env.rb`
 
-	require 'webmock/rspec'
-	World(WebMock::API, WebMock::Matchers)
+	require 'webmock/cucumber'
 
 You can also use WebMock outside a test framework:
 
