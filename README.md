@@ -43,16 +43,6 @@ Add the following code to `spec/spec_helper`:
 
 	require 'webmock/rspec'
 
-### RSpec 2
-
-Add the following code to `spec/spec_helper`:
-
-	require 'webmock/rspec'
-	
-	RSpec.configure do |config|
-	  config.include WebMock::API
-	end
-
 ### Cucumber
 
 Add the following code to `features/support/env.rb`
