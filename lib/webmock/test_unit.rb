@@ -6,12 +6,12 @@ module Test
     class TestCase
       include WebMock::API
 
-      alias_method :setup_without_webmock, :setup
-      def setup_with_webmock
-        setup_without_webmock
+      alias_method :teardown_without_webmock, :teardown
+      def teardown_with_webmock
+        teardown_without_webmock
         WebMock.reset!
       end
-      alias_method :setup, :setup_with_webmock
+      alias_method :teardown, :teardown_with_webmock
 
     end
   end

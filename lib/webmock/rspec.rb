@@ -24,7 +24,7 @@ RSPEC_CONFIGURER.configure { |config|
   config.include WebMock::API
   config.include WebMock::Matchers
 
-  config.before :each do
+  config.after(:each) do
     WebMock.reset!
   end
 }
