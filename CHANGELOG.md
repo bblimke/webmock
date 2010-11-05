@@ -12,6 +12,8 @@
 		require 'webmock/rspec'
 		require 'webmock/cucumber'
 
+* Fixed issue with stubbing requests with request body declared as a hash, when json was not required. Thanks to Erik Michaels-Ober for reporting the issue.
+
 
 ## 1.5.0
 

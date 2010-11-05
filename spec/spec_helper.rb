@@ -14,8 +14,6 @@ require 'webmock/rspec'
 
 require 'network_connection'
 
-require 'json'
-
 RSpec.configure do |config|
   config.include WebMock::API  
   unless NetworkConnection.is_network_available?
@@ -55,7 +53,7 @@ def client_specific_request_string(string)
   default_headers = default_client_request_headers(method, has_body)
   if default_headers
     if string.include?(" with headers")
-      current_headers = JSON.parse(string.gsub(/.*with headers (\{[^}]+\}).*/, '\1').gsub("=>",":").gsub("'","\""))
+      current_headers = Crack::JSON.parse(string.gsub(/.*with headers (\{[^}]+\}).*/, '\1').gsub("=>",":").gsub("'","\""))
       default_headers = WebMock::Util::Headers.normalize_headers(default_headers)
       default_headers.merge!(current_headers)
       string.gsub!(/(.*) with headers.*/,'\1')

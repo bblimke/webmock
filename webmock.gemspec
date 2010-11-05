@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-11-03}
+  s.date = %q{2010-11-05}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -122,6 +122,7 @@ Gem::Specification.new do |s|
      "spec/vendor/addressable/lib/addressable/uri.rb",
      "spec/vendor/addressable/lib/uri.rb",
      "spec/vendor/crack/lib/crack.rb",
+     "spec/vendor/json/lib/json.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/right_http_connection.rb",
      "spec/vendor/right_http_connection-1.2.4/setup.rb",
