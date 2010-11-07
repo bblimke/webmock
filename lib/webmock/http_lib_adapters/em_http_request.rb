@@ -3,6 +3,8 @@ if defined?(EventMachine::HttpRequest)
   module EventMachine
     class HttpRequest
 
+      include HttpEncoding
+
       class WebMockFakeHttpClient < EventMachine::HttpClient
 
         def setup(response, uri, error = nil)
@@ -17,7 +19,7 @@ if defined?(EventMachine::HttpRequest)
             end
           end
         end
-        
+
         def unbind
         end
 
@@ -33,7 +35,7 @@ if defined?(EventMachine::HttpRequest)
         if WebMock::RequestRegistry.instance.registered_request?(request_signature)
           webmock_response = WebMock::RequestRegistry.instance.response_for_request(request_signature)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :em_http_request}, request_signature, webmock_response)
+          {:lib => :em_http_request}, request_signature, webmock_response)
           client = WebMockFakeHttpClient.new(nil)
           client.on_error("WebMock timeout error") if webmock_response.should_timeout
           client.setup(make_raw_response(webmock_response), @uri,
@@ -54,13 +56,13 @@ if defined?(EventMachine::HttpRequest)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
-      
+
       alias_method :send_request_without_webmock, :send_request
       alias_method :send_request, :send_request_with_webmock
-      
+
 
       private
-      
+
       def build_webmock_response(http)
         webmock_response = WebMock::Response.new
         webmock_response.status = [http.response_header.status, http.response_header.http_reason]
@@ -78,7 +80,7 @@ if defined?(EventMachine::HttpRequest)
           options = @options
           method = @method
           uri = @uri
-        end  
+        end
 
         if options[:authorization] || options['authorization']
           auth = (options[:authorization] || options['authorization'])
@@ -87,9 +89,9 @@ if defined?(EventMachine::HttpRequest)
           options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
           uri.userinfo = userinfo
         end
-        
-       uri.query_values = (uri.query_values || {}).merge(options[:query]) if options[:query]
-        
+
+        uri.query = encode_query(@req.uri, options[:query])[2..-1]
+
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
@@ -99,11 +101,11 @@ if defined?(EventMachine::HttpRequest)
       end
 
 
-      def make_raw_response(response)            
+      def make_raw_response(response)
         response.raise_error_if_any
-        
+
         status, headers, body = response.status, response.headers, response.body
-        
+
         response_string = []
         response_string << "HTTP/1.1 #{status[0]} #{status[1]}"
 

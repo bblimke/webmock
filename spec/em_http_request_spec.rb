@@ -25,5 +25,10 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"
     end
 
+    it "should work with optional query params declared as string" do
+      stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
+      http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
+    end
+
   end
 end

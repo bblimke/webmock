@@ -14,6 +14,8 @@
 
 * Fixed issue with stubbing requests with request body declared as a hash, when json was not required. Thanks to Erik Michaels-Ober for reporting the issue.
 
+* Fixed issue with em-http-request adapter which didn't work when :query option value was as a string, not a hash. Thanks to Chee Yeo for reporting the issue.
+
 
 ## 1.5.0
 
