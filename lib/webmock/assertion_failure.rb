@@ -1,13 +1,11 @@
 module WebMock
   class AssertionFailure
+    @error_class = RuntimeError
     class << self
-      attr_writer :error_class
-      @error_class = RuntimeError
-    
+      attr_accessor :error_class
       def failure(message)
         raise @error_class.new(message)
       end
-    
     end
   end
 end

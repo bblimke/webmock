@@ -16,6 +16,7 @@
 
 * Fixed issue with em-http-request adapter which didn't work when :query option value was as a string, not a hash. Thanks to Chee Yeo for reporting the issue.
 
+* Fixed problem with assert_requested, which doesn't work if used outside rspec or test/unit
 
 ## 1.5.0
 
