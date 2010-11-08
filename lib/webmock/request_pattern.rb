@@ -169,7 +169,7 @@ module WebMock
     end
 
     def normalize_hash(hash)
-      JSON.parse(JSON.generate(hash))
+      WebMock::Util::HashKeysStringifier.stringify_keys!(hash)
     end
 
   end

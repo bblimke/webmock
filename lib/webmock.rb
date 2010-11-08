@@ -16,6 +16,7 @@ require 'webmock/errors'
 require 'webmock/util/uri'
 require 'webmock/util/headers'
 require 'webmock/util/hash_counter'
+require 'webmock/util/hash_keys_stringifier'
 
 require 'webmock/request_pattern'
 require 'webmock/request_signature'

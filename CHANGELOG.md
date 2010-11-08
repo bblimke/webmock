@@ -18,6 +18,8 @@
 
 * Fixed problem with assert_requested, which doesn't work if used outside rspec or test/unit
 
+* Removed dependency on json gem
+
 ## 1.5.0
 
 * Support for dynamically evaluated raw responses recorded with `curl -is` <br/>
