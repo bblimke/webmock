@@ -6,7 +6,6 @@ describe "loading other Net::HTTP based libraries" do
     requires = libs.map { |lib| "require '#{lib}'" }
     requires << " require 'addressable/uri'"
     requires << " require 'crack'"
-    requires << " require 'json'"
     requires = requires.join("; ")
     webmock_dir = "#{File.dirname(__FILE__)}/../lib"
     vendor_dirs = Dir["#{File.dirname(__FILE__)}/vendor/*/lib"]
