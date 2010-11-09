@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bartosz Blimke"]
-  s.date = %q{2010-11-05}
+  s.date = %q{2010-11-09}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.email = %q{bartosz.blimke@gmail.com}
   s.extra_rdoc_files = [
@@ -50,6 +50,7 @@ Gem::Specification.new do |s|
      "lib/webmock/rspec/matchers/webmock_matcher.rb",
      "lib/webmock/test_unit.rb",
      "lib/webmock/util/hash_counter.rb",
+     "lib/webmock/util/hash_keys_stringifier.rb",
      "lib/webmock/util/headers.rb",
      "lib/webmock/util/uri.rb",
      "lib/webmock/webmock.rb",
@@ -74,6 +75,7 @@ Gem::Specification.new do |s|
      "spec/response_spec.rb",
      "spec/spec_helper.rb",
      "spec/util/hash_counter_spec.rb",
+     "spec/util/hash_keys_stringifier_spec.rb",
      "spec/util/headers_spec.rb",
      "spec/util/uri_spec.rb",
      "spec/vendor/addressable/lib/addressable/uri.rb",
@@ -117,12 +119,12 @@ Gem::Specification.new do |s|
      "spec/response_spec.rb",
      "spec/spec_helper.rb",
      "spec/util/hash_counter_spec.rb",
+     "spec/util/hash_keys_stringifier_spec.rb",
      "spec/util/headers_spec.rb",
      "spec/util/uri_spec.rb",
      "spec/vendor/addressable/lib/addressable/uri.rb",
      "spec/vendor/addressable/lib/uri.rb",
      "spec/vendor/crack/lib/crack.rb",
-     "spec/vendor/json/lib/json.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/net_fix.rb",
      "spec/vendor/right_http_connection-1.2.4/lib/right_http_connection.rb",
      "spec/vendor/right_http_connection-1.2.4/setup.rb",
