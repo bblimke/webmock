@@ -1,3 +1,5 @@
+require 'ostruct'
+
 module PatronSpecHelper
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
