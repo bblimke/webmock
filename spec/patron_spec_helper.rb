@@ -29,7 +29,7 @@ module PatronSpecHelper
   end
 
   def default_client_request_headers(request_method = nil, has_body = false)
-    if Patron.version >= "0.4.6"
+    if Gem::Version.new(Patron.version) >= Gem::Version.new("0.4.6")
       {'Expect'=>''}
     else
       nil
