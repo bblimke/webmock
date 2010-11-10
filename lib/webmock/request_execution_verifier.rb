@@ -27,16 +27,21 @@ module WebMock
 
     def failure_message
       expected_times_executed = @expected_times_executed || 1
-      %Q(The request #{request_pattern.to_s} was expected to execute #{expected_times_executed} time#{ (expected_times_executed == 1) ? '' : 's'} but it executed #{times_executed} time#{ (times_executed == 1) ? '' : 's'})
+      %Q(The request #{request_pattern.to_s} was expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
     end
 
     def negative_failure_message
       if @expected_times_executed
-        %Q(The request #{request_pattern.to_s} was not expected to execute #{expected_times_executed} time#{ (expected_times_executed == 1) ? '' : 's'} but it executed #{times_executed} time#{ (times_executed == 1) ? '' : 's'})
+        %Q(The request #{request_pattern.to_s} was not expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
       else
-        %Q(The request #{request_pattern.to_s} was expected to execute 0 times but it executed #{times_executed} time#{ (times_executed == 1) ? '' : 's'})
+        %Q(The request #{request_pattern.to_s} was expected to execute 0 times but it executed #{times(times_executed)})
       end
     end
 
+    private
+
+    def times(times)
+      "#{times} time#{ (times == 1) ? '' : 's'}"
+    end
   end
 end
