@@ -54,4 +54,22 @@ describe WebMock::RequestRegistry do
     end
   end
 
+  describe "to_s" do
+    it "should output string with all executed requests and numbers of executions" do
+      [
+        WebMock::RequestSignature.new(:get, "www.example.com"),
+        WebMock::RequestSignature.new(:get, "www.example.com"),
+        WebMock::RequestSignature.new(:put, "www.example.org"),
+      ].each do |s|
+        WebMock::RequestRegistry.instance.requested_signatures.put(s)
+      end
+      WebMock::RequestRegistry.instance.to_s.should ==
+      "PUT http://www.example.org/ was made 1 time\nGET http://www.example.com/ was made 2 times\n"
+    end
+
+    it "should output info if no requests were executed" do
+      WebMock::RequestRegistry.instance.to_s.should == "No requests were made."
+    end
+  end
+
 end

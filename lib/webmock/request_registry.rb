@@ -19,5 +19,17 @@ module WebMock
       }.inject(0) {|sum, (_, times_executed)| sum + times_executed }
     end
 
+    def to_s
+      if requested_signatures.hash.empty?
+        "No requests were made."
+      else
+        text = ""
+        self.requested_signatures.hash.each do |request_signature, times_executed|
+          text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
+        end
+        text
+      end
+    end
+
   end
 end
