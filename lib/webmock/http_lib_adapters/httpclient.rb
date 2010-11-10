@@ -15,8 +15,8 @@ if defined?(::HTTPClient)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-      if WebMock::RequestRegistry.instance.registered_request?(request_signature)
-        webmock_response = WebMock::RequestRegistry.instance.response_for_request(request_signature)
+      if WebMock::StubRegistry.instance.registered_request?(request_signature)
+        webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
         response = build_httpclient_response(webmock_response, stream, &block)
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
@@ -46,7 +46,7 @@ if defined?(::HTTPClient)
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
       
-      if WebMock::RequestRegistry.instance.registered_request?(request_signature) ||
+      if WebMock::StubRegistry.instance.registered_request?(request_signature) ||
          WebMock.net_connect_allowed?(request_signature.uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
       else

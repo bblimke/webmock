@@ -50,6 +50,7 @@ module WebMock
 
   def self.reset!
     WebMock::RequestRegistry.instance.reset!
+    WebMock::StubRegistry.instance.reset!
   end
   
   def self.reset_webmock
@@ -62,11 +63,11 @@ module WebMock
   end
 
   def self.after_request(options={}, &block)
-    CallbackRegistry.add_callback(options, block)
+    WebMock::CallbackRegistry.add_callback(options, block)
   end
 
   def self.registered_request?(request_signature)
-    RequestRegistry.instance.registered_request?(request_signature)
+    WebMock::StubRegistry.instance.registered_request?(request_signature)
   end
 
   %w(

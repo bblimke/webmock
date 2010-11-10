@@ -21,7 +21,7 @@ end
 shared_examples_for "WebMock" do
   before(:each) do
     WebMock.disable_net_connect!
-    WebMock::RequestRegistry.instance.reset!
+    WebMock.reset!
   end
 
   describe "when web connect" do
