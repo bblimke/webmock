@@ -25,6 +25,14 @@ module WebMock
       @headers = WebMock::Util::Headers.normalize_headers(headers)
     end
 
+    def hash
+      self.to_s.hash
+    end
+
+    def eql?(other)
+      self.to_s == other.to_s
+    end
+
     private
 
     def assign_options(options)

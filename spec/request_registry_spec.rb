@@ -43,8 +43,15 @@ describe WebMock::RequestRegistry do
     it "should report number of times all matching pattern were requested" do
       WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, /.*example.*/)).should == 3
     end
+  end
 
-
+  describe "request_signatures" do
+    it "should return hash of unique request signatures with accumulated number" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      WebMock::RequestRegistry.instance.requested_signatures.
+        get(WebMock::RequestSignature.new(:get, "www.example.com")).should == 2
+    end
   end
 
 end
