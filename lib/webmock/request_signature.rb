@@ -2,7 +2,8 @@ module WebMock
 
   class RequestSignature
 
-    attr_accessor :method, :uri, :body, :headers
+    attr_accessor :method, :uri, :body
+    attr_reader :headers
 
     def initialize(method, uri, options = {})
       self.method = method
@@ -20,11 +21,15 @@ module WebMock
       string
     end
 
+    def headers=(headers)
+      @headers = WebMock::Util::Headers.normalize_headers(headers)
+    end
+
     private
 
     def assign_options(options)
       self.body = options[:body] if options.has_key?(:body)
-      self.headers = WebMock::Util::Headers.normalize_headers(options[:headers]) if options.has_key?(:headers)
+      self.headers = options[:headers] if options.has_key?(:headers)
     end
 
   end
