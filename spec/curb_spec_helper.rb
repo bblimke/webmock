@@ -30,10 +30,6 @@ module CurbSpecHelper
     curl
   end
 
-  def default_client_request_headers(request_method = nil, has_body = false)
-    nil
-  end
-
   def client_timeout_exception_class
     Curl::Err::TimeoutError
   end

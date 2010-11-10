@@ -39,13 +39,6 @@ module NetHTTPSpecHelper
     })
   end
   
-  def default_client_request_headers(request_method = nil, has_body = false)
-    default_request = Net::HTTPGenericRequest.new('','','','/')
-    default_net_http_headers = Hash[*default_request.to_hash.map {|k,v|
-      [k, v.flatten]
-    }.flatten]
-  end
-  
   def client_timeout_exception_class
     Timeout::Error
   end

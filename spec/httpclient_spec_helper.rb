@@ -41,10 +41,6 @@ module HTTPClientSpecHelper
     Errno::ECONNREFUSED
   end
 
-  def default_client_request_headers(request_method = nil, has_body = false)
-    {'Content-Type'=>'application/x-www-form-urlencoded'} if request_method == 'POST' && has_body
-  end
-
   def setup_expectations_for_real_request(options = {})
     socket = mock("TCPSocket")
     TCPSocket.should_receive(:new).

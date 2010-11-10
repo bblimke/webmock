@@ -47,19 +47,3 @@ def setup_expectations_for_real_example_com_request(options = {})
   setup_expectations_for_real_request(defaults.merge(options))
 end
 
-def client_specific_request_string(string)
-  method = string.gsub(/.*Unregistered request: ([^ ]+).+/, '\1')
-  has_body = string.include?(" with body")
-  default_headers = default_client_request_headers(method, has_body)
-  if default_headers
-    if string.include?(" with headers")
-      current_headers = Crack::JSON.parse(string.gsub(/.*with headers (\{[^}]+\}).*/, '\1').gsub("=>",":").gsub("'","\""))
-      default_headers = WebMock::Util::Headers.normalize_headers(default_headers)
-      default_headers.merge!(current_headers)
-      string.gsub!(/(.*) with headers.*/,'\1')
-    end
-    string << " with headers #{WebMock::Util::Headers.sorted_headers_string(default_headers)}"
-  end
-  string
-end
-

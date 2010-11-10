@@ -47,10 +47,6 @@ module EMHttpRequestSpecHelper
     ""
   end
 
-  def default_client_request_headers(request_method = nil, has_body = false)
-    nil
-  end
-
   def setup_expectations_for_real_request(options = {})
   end
 
