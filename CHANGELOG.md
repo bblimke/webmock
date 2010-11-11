@@ -16,6 +16,8 @@
 
 * The expectation failure message now contains a list of made requests. Thanks to Martyn Loughran for suggesting this feature.
 
+* Added `WebMock.print_executed_requests` method which can be useful to find out what requests were made until given point.
+
 * Fixed issue with stubbing requests with request body declared as a hash, when json was not required. Thanks to Erik Michaels-Ober for reporting the issue.
 
 * Fixed issue with em-http-request adapter which didn't work when :query option value was as a string, not a hash. Thanks to Chee Yeo for reporting the issue.

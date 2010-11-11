@@ -70,6 +70,10 @@ module WebMock
     WebMock::StubRegistry.instance.registered_request?(request_signature)
   end
 
+  def self.print_executed_requests
+    puts WebMock::RequestExecutionVerifier.executed_requests_message
+  end
+
   %w(
     allow_net_connect!
     disable_net_connect!
