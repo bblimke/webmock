@@ -63,6 +63,11 @@ shared_examples_for "WebMock" do
         stub_http_request(:get, "www.example.com").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/").body.should == "abc"
       end
+      
+      it "should return stubbed response if request with path was stubbed" do
+        stub_http_request(:get, "www.example.com/hello_world").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/hello_world").body.should == "abc"
+      end
 
       it "should raise exception if request was not stubbed" do
         lambda {
@@ -133,18 +138,18 @@ shared_examples_for "WebMock" do
     describe "on uri" do
 
       it "should match the request by uri with non escaped params if request have escaped parameters" do
-        stub_http_request(:get, "www.example.com/?#{NOT_ESCAPED_PARAMS}").to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").body.should == "abc"
+        stub_http_request(:get, "www.example.com/hello/?#{NOT_ESCAPED_PARAMS}").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/hello/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
 
       it "should match the request by uri with escaped parameters even if request has non escaped params" do
-        stub_http_request(:get, "www.example.com/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
+        stub_http_request(:get, "www.example.com/hello/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
       end
 
       it "should match the request by regexp matching non escaped params uri if request params are escaped" do
         stub_http_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").body.should == "abc"
+        http_request(:get, "http://www.example.com/hello/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
         
     end
