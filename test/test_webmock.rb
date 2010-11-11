@@ -46,7 +46,9 @@ class TestWebMock < Test::Unit::TestCase
   end
 
   def test_verification_that_expected_request_didnt_occur
-    assert_fail("The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times") do
+    expected_message = "The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times"
+    expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
+    assert_fail(expected_message) do
       assert_requested(:get, "http://www.example.com")
     end
   end
@@ -59,7 +61,9 @@ class TestWebMock < Test::Unit::TestCase
   end
 
   def test_verification_that_non_expected_request_didnt_occur
-    assert_fail("The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time") do
+    expected_message = "The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time"
+    expected_message << "\n\nThe following requests were made:\n\nGET http://www.example.com/ with headers {'Accept'=>'*/*'} was made 1 time\n\n============================================================"
+    assert_fail(expected_message) do
       http_request(:get, "http://www.example.com/")
       assert_not_requested(:get, "http://www.example.com")
     end
