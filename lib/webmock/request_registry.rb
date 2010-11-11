@@ -24,7 +24,7 @@ module WebMock
         "No requests were made."
       else
         text = ""
-        self.requested_signatures.hash.each do |request_signature, times_executed|
+        self.requested_signatures.each do |request_signature, times_executed|
           text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
         end
         text

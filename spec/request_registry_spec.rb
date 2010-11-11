@@ -64,7 +64,7 @@ describe WebMock::RequestRegistry do
         WebMock::RequestRegistry.instance.requested_signatures.put(s)
       end
       WebMock::RequestRegistry.instance.to_s.should ==
-      "PUT http://www.example.org/ was made 1 time\nGET http://www.example.com/ was made 2 times\n"
+      "GET http://www.example.com/ was made 2 times\nPUT http://www.example.org/ was made 1 time\n"
     end
 
     it "should output info if no requests were executed" do

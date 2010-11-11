@@ -21,4 +21,19 @@ describe WebMock::Util::HashCounter do
     counter.get(:def).should == 0
   end
 
+  describe "each" do
+    it "should provide elements in order of the last modified" do
+      counter = WebMock::Util::HashCounter.new
+      counter.put(:a)
+      counter.put(:b)
+      counter.put(:c)
+      counter.put(:b)
+      counter.put(:a)
+      counter.put(:d)
+
+      elements = []
+      counter.each {|k,v| elements << [k,v]}
+      elements.should == [[:c, 1], [:b, 2], [:a, 2], [:d, 1]]
+    end
+  end
 end
