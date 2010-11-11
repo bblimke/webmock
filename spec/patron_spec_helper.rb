@@ -4,14 +4,13 @@ module PatronSpecHelper
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
     sess = Patron::Session.new
-    sess.base_url = "#{uri.omit(:userinfo, :query).normalize.to_s}".gsub(/\/$/,"")
-
+    sess.base_url = "#{uri.omit(:userinfo, :path, :query).normalize.to_s}".gsub(/\/$/,"")
     sess.username = uri.user
     sess.password = uri.password
 
     sess.connect_timeout = 10
     sess.timeout = 10
-
+   
     response = sess.request(method, "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers] || {}, {
       :data => options[:body]
     })
