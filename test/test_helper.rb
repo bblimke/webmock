@@ -11,6 +11,10 @@ class Test::Unit::TestCase
   AssertionFailedError =  Test::Unit::AssertionFailedError rescue MiniTest::Assertion
   def assert_fail(message, &block)
     e = assert_raise(AssertionFailedError, &block)
-    assert_equal(message, e.message)
+    if message.is_a?(Regexp)
+      assert_match(message, e.message)
+    else
+      assert_equal(message, e.message)
+    end
   end
 end
