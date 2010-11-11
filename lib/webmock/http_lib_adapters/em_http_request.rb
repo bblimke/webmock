@@ -92,7 +92,7 @@ if defined?(EventMachine::HttpRequest)
           uri.userinfo = userinfo
         end
 
-        uri.query = encode_query(@req.uri, options[:query])[2..-1]
+        uri.query = encode_query(@req.uri, options[:query]).slice(/\?(.*)/, 1)
 
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
