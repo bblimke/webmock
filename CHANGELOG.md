@@ -16,7 +16,16 @@
 
 * The expectation failure message now contains a list of made requests. Thanks to Martyn Loughran for suggesting this feature.
 
-* Added `WebMock.print_executed_requests` method which can be useful to find out what requests were made until given point.
+* Added `WebMock.print_executed_requests` method which can be useful to find out what requests were made until a given point.
+
+* em-http-request adapter is activated by replacing EventMachine::HttpRequest constant, instead of monkeypatching the original class.
+
+ This technique is borrowed from em-http-request native mocking module. It allows switching WebMock adapter on an off, and using interchangeably with em-http-request native mocking i.e:
+
+		EventMachine::WebMockHttpRequest.activate!
+		EventMachine::WebMockHttpRequest.deactivate!
+
+	Thanks to Martyn Loughran for suggesting this feature.
 
 * Fixed issue with stubbing requests with request body declared as a hash, when json was not required. Thanks to Erik Michaels-Ober for reporting the issue.
 

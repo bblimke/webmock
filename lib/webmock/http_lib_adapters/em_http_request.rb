@@ -1,11 +1,13 @@
 if defined?(EventMachine::HttpRequest)
 
   module EventMachine
-    class HttpRequest
+    OriginalHttpRequest = HttpRequest unless const_defined?(:OriginalHttpRequest)
+
+    class WebMockHttpRequest < EventMachine::HttpRequest
 
       include HttpEncoding
 
-      class WebMockFakeHttpClient < EventMachine::HttpClient
+      class WebMockHttpClient < EventMachine::HttpClient
 
         def setup(response, uri, error = nil)
           @uri = uri
@@ -36,7 +38,7 @@ if defined?(EventMachine::HttpRequest)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :em_http_request}, request_signature, webmock_response)
-          client = WebMockFakeHttpClient.new(nil)
+          client = WebMockHttpClient.new(nil)
           client.on_error("WebMock timeout error") if webmock_response.should_timeout
           client.setup(make_raw_response(webmock_response), @uri,
             webmock_response.should_timeout ? "WebMock timeout error" : nil)
@@ -118,8 +120,18 @@ if defined?(EventMachine::HttpRequest)
         response_string.join("\n")
       end
 
+      def self.activate!
+        EventMachine.send(:remove_const, :HttpRequest)
+        EventMachine.send(:const_set, :HttpRequest, WebMockHttpRequest)
+      end
 
+      def self.deactivate!
+        EventMachine.send(:remove_const, :HttpRequest)
+        EventMachine.send(:const_set, :HttpRequest, OriginalHttpRequest)
+      end
     end
   end
+
+  EventMachine::WebMockHttpRequest.activate!
 
 end
