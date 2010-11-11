@@ -28,7 +28,7 @@ module WebMock
     def failure_message
       expected_times_executed = @expected_times_executed || 1
       text = %Q(The request #{request_pattern.to_s} was expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
-      text << executed_requests_message
+      text << self.class.executed_requests_message
       text
     end
 
@@ -38,7 +38,7 @@ module WebMock
       else
         %Q(The request #{request_pattern.to_s} was expected to execute 0 times but it executed #{times(times_executed)})
       end
-      text << executed_requests_message
+      text << self.class.executed_requests_message
       text
     end
 
