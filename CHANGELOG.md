@@ -1,12 +1,8 @@
 #Changelog
 
-## Master
+## 1.6.0
 
-* `WebMock.reset_webmock` is deprecated in favour of new `WebMock.reset!`
-
-* Fixed integration with Cucumber. Previously documented example didn't work with new versions of Cucumber.
-
-* Simplified integration with Test::Unit, RSpec and Cucumber, by requiring a single file i.e.
+* Simplified integration with Test::Unit, RSpec and Cucumber. Now only a single file has to be required i.e.
 
 		require 'webmock/test_unit'
 		require 'webmock/rspec'
@@ -18,20 +14,24 @@
 
 * Added `WebMock.print_executed_requests` method which can be useful to find out what requests were made until a given point.
 
-* em-http-request adapter is activated by replacing EventMachine::HttpRequest constant, instead of monkeypatching the original class.
+* em-http-request adapter is now activated by replacing EventMachine::HttpRequest constant, instead of monkeypatching the original class.
 
- This technique is borrowed from em-http-request native mocking module. It allows switching WebMock adapter on an off, and using interchangeably with em-http-request native mocking i.e:
+ This technique is borrowed from em-http-request native mocking module. It allows switching WebMock adapter on an off, and using it interchangeably with em-http-request native mocking i.e:
 
 		EventMachine::WebMockHttpRequest.activate!
 		EventMachine::WebMockHttpRequest.deactivate!
 
 	Thanks to Martyn Loughran for suggesting this feature.
+	
+* `WebMock.reset_webmock` is deprecated in favour of new `WebMock.reset!`	
 
-* Fixed issue with stubbing requests with request body declared as a hash, when json was not required. Thanks to Erik Michaels-Ober for reporting the issue.
+* Fixed integration with Cucumber. Previously documented example didn't work with new versions of Cucumber.
 
-* Fixed issue with em-http-request adapter which didn't work when :query option value was as a string, not a hash. Thanks to Chee Yeo for reporting the issue.
+* Fixed stubbing requests with body declared as a hash. Thanks to Erik Michaels-Ober for reporting the issue.
 
-* Fixed problem with assert_requested, which doesn't work if used outside rspec or test/unit
+* Fixed issue with em-http-request adapter which didn't work when :query option value was passed as a string, not a hash. Thanks to Chee Yeo for reporting the issue.
+
+* Fixed problem with assert_requested which didn't work if used outside rspec or test/unit
 
 * Removed dependency on json gem
 
