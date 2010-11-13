@@ -1,5 +1,9 @@
 #Changelog
 
+## 1.6.1
+
+* Fixed issue with `webmock/rspec` which didn't load correctly if `rspec/core` was already required but `rspec/expectations` not.
+
 ## 1.6.0
 
 * Simplified integration with Test::Unit, RSpec and Cucumber. Now only a single file has to be required i.e.
