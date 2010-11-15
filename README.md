@@ -21,7 +21,7 @@ Supported HTTP libraries
 * HTTPClient
 * Patron
 * EM-HTTP-Request
-* Curb
+* Curb (currently only Curb::Easy)
 
 ##Installation
 
