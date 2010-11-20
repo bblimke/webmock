@@ -31,7 +31,7 @@ if defined?(Typhoeus)
         raise Curl::Err::TimeoutError if webmock_response.should_timeout        
         webmock_response.raise_error_if_any
         @response_body = webmock_response.body
-        @webmock_response_code = webmock_response.status[0]
+        @webmock_response_code = webmock_response.status[0].to_i
         
         @response_header = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
         if webmock_response.headers
@@ -65,7 +65,7 @@ if defined?(Typhoeus)
       alias :reset_without_webmock :reset
       alias :reset :reset_with_webmock
       
-      def perform_with_webmock
+      def easy_perform_with_webmock
         @webmock_response_code = nil
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -74,10 +74,10 @@ if defined?(Typhoeus)
           build_easy_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :typhoeus}, request_signature, webmock_response)
-          # invoke_curb_callbacks
+          # invoke_easy_callbacks
           true
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          res = perform_without_webmock
+          res = easy_perform_without_webmock
           if WebMock::CallbackRegistry.any_callbacks?
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
@@ -89,8 +89,8 @@ if defined?(Typhoeus)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
-      alias :perform_without_webmock :perform
-      alias :perform :perform_with_webmock
+      alias :easy_perform_without_webmock :easy_perform
+      alias :easy_perform :easy_perform_with_webmock
     end
     
     
