@@ -119,7 +119,7 @@ unless RUBY_PLATFORM =~ /java/
         order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_success]
       end
 
-      it "should call callbacks in correct order on successful request" do
+      it "should call callbacks in correct order on failed request" do
         stub_request(:any, "example.com").to_return(:status => [500, ""])
         order = []
         @curl.on_success {|*args| order << :on_success }
