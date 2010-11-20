@@ -17,6 +17,7 @@ begin
     gem.add_development_dependency "patron", ">= 0.4.9" unless RUBY_PLATFORM =~ /java/
     gem.add_development_dependency "em-http-request", ">= 0.2.14" unless RUBY_PLATFORM =~ /java/
     gem.add_development_dependency "curb", ">= 0.7.8" unless RUBY_PLATFORM =~ /java/
+    gem.add_development_dependency "typhoeus", ">= 0.2.0" unless RUBY_PLATFORM =~ /java/
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
