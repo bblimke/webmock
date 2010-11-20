@@ -1,7 +1,7 @@
 require 'ostruct'
 
 module TyphoeusHydraSpecHelper
-  class FakeTyphoeusError < StandardError; end
+  class FakeTyphoeusHydraError < StandardError; end
   
   
   def http_request(method, uri, options = {}, &block)
@@ -14,7 +14,7 @@ module TyphoeusHydraSpecHelper
         :timeout => 2000 # milliseconds
       }
     )
-    raise FakeTyphoeusError.new if response.code.to_s == "0"
+    raise FakeTyphoeusHydraError.new if response.code.to_s == "0"
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
@@ -24,11 +24,11 @@ module TyphoeusHydraSpecHelper
   end
 
   def client_timeout_exception_class
-    FakeTyphoeusError
+    FakeTyphoeusHydraError
   end
 
   def connection_refused_exception_class
-    FakeTyphoeusError
+    FakeTyphoeusHydraError
   end
 
   def setup_expectations_for_real_request(options = {})
@@ -37,19 +37,6 @@ module TyphoeusHydraSpecHelper
 
   def http_library
     :typhoeus
-  end
-
-  private
-  
-  def join_array_values(headers)
-    joined = {}
-    if headers
-      headers.each do |k,v|
-        v = v.join(", ") if v.is_a?(Array)
-        joined[k] = v 
-      end
-    end
-    joined
   end
 
 end

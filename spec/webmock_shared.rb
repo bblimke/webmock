@@ -1041,10 +1041,10 @@ shared_examples_for "WebMock" do
 
                 it "should fail if request was executed with different body" do
                   lambda {
-                    http_request(:get, "http://www.example.com/", :body => /^abc/)
+                    http_request(:get, "http://www.example.com/", :body => "abc")
                     a_request(:get, "www.example.com").
-                    with(:body => "xabc").should have_been_made
-                  }.should fail_with(%r(The request GET http://www.example.com/ with body "xabc" was expected to execute 1 time but it executed 0 times))
+                    with(:body => /^xabc/).should have_been_made
+                  }.should fail_with(%r(The request GET http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
                 end
               
               end
