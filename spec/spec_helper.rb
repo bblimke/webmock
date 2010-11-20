@@ -4,6 +4,7 @@ unless RUBY_PLATFORM =~ /java/
   require 'curb'
   require 'patron' 
   require 'em-http'
+  require 'typhoeus'
 end
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
