@@ -378,19 +378,19 @@ shared_examples_for "WebMock" do
       describe "with regular expressions" do
 
         it "should match requests if header values match regular expression" do
-          stub_http_request(:get, "www.example.com").with(:headers => { :user_agent => /^MyAppName$/ })
+          stub_http_request(:get, "www.example.com").with(:headers => { :some_header => /^MyAppName$/ })
           http_request(
             :get, "http://www.example.com/",
-            :headers => { 'user-agent' => 'MyAppName' }).status.should == "200"
+            :headers => { 'some-header' => 'MyAppName' }).status.should == "200"
         end
 
         it "should not match requests if headers values do not match regular expression" do
-          stub_http_request(:get, "www.example.com").with(:headers => { :user_agent => /^MyAppName$/ })
+          stub_http_request(:get, "www.example.com").with(:headers => { :some_header => /^MyAppName$/ })
 
           lambda {
             http_request(
               :get, "http://www.example.com/",
-            :headers => { 'user-agent' => 'xMyAppName' })
+            :headers => { 'some-header' => 'xMyAppName' })
           }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers))
         end
 
@@ -1204,18 +1204,18 @@ shared_examples_for "WebMock" do
 
               it "should succeed if request was executed with headers matching regular expressions" do
                 lambda {
-                  http_request(:get, "http://www.example.com/", :headers => { 'user-agent' => 'MyAppName' })
+                  http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'MyAppName' })
                   a_request(:get, "www.example.com").
-                  with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
+                  with(:headers => { :some_header => /^MyAppName$/ }).should have_been_made
                 }.should_not raise_error
               end
 
               it "should fail if request was executed with headers not matching regular expression" do
                 lambda {
-                  http_request(:get, "http://www.example.com/", :headers => { 'user_agent' => 'xMyAppName' })
+                  http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'xMyAppName' })
                   a_request(:get, "www.example.com").
-                  with(:headers => { :user_agent => /^MyAppName$/ }).should have_been_made
-                }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'User-Agent'=>/\^MyAppName\$/\} was expected to execute 1 time but it executed 0 times))
+                  with(:headers => { :some_header => /^MyAppName$/ }).should have_been_made
+                }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'Some-Header'=>/\^MyAppName\$/\} was expected to execute 1 time but it executed 0 times))
               end
 
              it "should suceed if request was executed and block evaluated to true" do
