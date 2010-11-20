@@ -1,6 +1,6 @@
 require 'ostruct'
 
-module TyphoeusSpecHelper
+module TyphoeusHydraSpecHelper
   class FakeTyphoeusError < StandardError; end
   
   

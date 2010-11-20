@@ -4,7 +4,7 @@ if defined?(Typhoeus)
 
   module WebMock
     module HttpLibAdapters
-      class Typhoeus
+      class TyphoeusHydra
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
@@ -72,14 +72,15 @@ if defined?(Typhoeus)
       def queue_with_webmock(request)
         self.clear_stubs
         request_signature =
-         ::WebMock::HttpLibAdapters::Typhoeus.build_request_signature(request)
+         ::WebMock::HttpLibAdapters::TyphoeusHydra.build_request_signature(request)
 
         ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if ::WebMock::StubRegistry.instance.registered_request?(request_signature)
           webmock_response =
             ::WebMock::StubRegistry.instance.response_for_request(request_signature)
-          ::WebMock::HttpLibAdapters::Typhoeus.stub_typhoeus(request_signature, webmock_response, self)
+          ::WebMock::HttpLibAdapters::TyphoeusHydra.
+            stub_typhoeus(request_signature, webmock_response, self)
           webmock_response.raise_error_if_any
         elsif !WebMock.net_connect_allowed?(request_signature.uri)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
@@ -95,9 +96,9 @@ if defined?(Typhoeus)
 
   Typhoeus::Hydra.after_request_before_on_complete do |request|
     request_signature =
-      ::WebMock::HttpLibAdapters::Typhoeus.build_request_signature(request)
+      ::WebMock::HttpLibAdapters::TyphoeusHydra.build_request_signature(request)
     webmock_response =
-      ::WebMock::HttpLibAdapters::Typhoeus.build_webmock_response(request.response)
+      ::WebMock::HttpLibAdapters::TyphoeusHydra.build_webmock_response(request.response)
     if request.response.mock?
       WebMock::CallbackRegistry.invoke_callbacks(
         {:lib => :typhoeus}, 
