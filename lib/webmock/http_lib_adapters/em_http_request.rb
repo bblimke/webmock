@@ -10,7 +10,7 @@ if defined?(EventMachine::HttpRequest)
       class WebMockHttpClient < EventMachine::HttpClient
 
         def setup(response, uri, error = nil)
-          @uri = uri
+          @last_effective_url = @uri = uri
           if error
             on_error(error)
             fail(self)
