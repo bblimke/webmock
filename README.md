@@ -544,6 +544,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Pete Higgins
 * Hans de Graaff
 * Alastair Brunton
+* Sam Stokes
+* Eugene Bolshakov
 
 ## Background
 

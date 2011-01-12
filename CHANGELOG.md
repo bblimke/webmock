@@ -1,5 +1,11 @@
 #Changelog
 
+## 1.6.2
+
+* Em-http-request adapter sets `last_effective_url` property. Thanks to [Sam Stokes](https://github.com/samstokes).
+
+* Curb adapter supports `Curb::Easy#http_post` and `Curb::Easy#http_put` without arguments (by setting `post_body` or `put_data` beforehand). Thanks to [Eugene Bolshakov](https://github.com/eugenebolshakov)
+
 ## 1.6.1
 
 * Fixed issue with `webmock/rspec` which didn't load correctly if `rspec/core` was already required but `rspec/expectations` not.
