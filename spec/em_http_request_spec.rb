@@ -30,5 +30,26 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
     end
 
+    describe "mocking EM::HttpClient API" do
+      before { stub_http_request(:get, "www.example.com/") }
+      subject do
+        client = nil
+        EM.run do
+          client = EventMachine::HttpRequest.new('http://www.example.com/').get
+          client.callback { EM.stop }
+          client.errback { failed }
+        end
+        client
+      end
+
+      it 'should support #uri' do
+        subject.uri.should == Addressable::URI.parse('http://www.example.com/')
+      end
+
+      it 'should support #last_effective_url' do
+        subject.last_effective_url.should == Addressable::URI.parse('http://www.example.com/')
+      end
+    end
+
   end
 end
