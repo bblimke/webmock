@@ -117,9 +117,9 @@ if defined?(Curl)
         alias_method "http_#{verb}", "http_#{verb}_with_webmock"
       end
 
-      def http_put_with_webmock data
+      def http_put_with_webmock data = nil
         @webmock_method = :put
-        @put_data = data
+        @put_data = data if data
         curb_or_webmock do
           http_put_without_webmock(data)
         end
@@ -127,9 +127,9 @@ if defined?(Curl)
       alias_method :http_put_without_webmock, :http_put
       alias_method :http_put, :http_put_with_webmock
 
-      def http_post_with_webmock data
+      def http_post_with_webmock data = nil
         @webmock_method = :post
-        @post_body = data
+        @post_body = data if data
         curb_or_webmock do
           http_post_without_webmock(data)
         end

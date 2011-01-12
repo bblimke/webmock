@@ -153,6 +153,24 @@ unless RUBY_PLATFORM =~ /java/
     describe "using #http_* methods for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
+
+      it "should work with blank arguments for post" do
+        stub_http_request(:post, "www.example.com").with(:body => "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.post_body = "01234"
+        c.http_post
+        c.response_code.should == 200
+      end
+
+      it "should work with blank arguments for put" do
+        stub_http_request(:put, "www.example.com").with(:body => "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.put_data = "01234"
+        c.http_put
+        c.response_code.should == 200
+      end
     end
 
     describe "using #perform for requests" do
