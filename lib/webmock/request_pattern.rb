@@ -147,7 +147,7 @@ module WebMock
         when :xml then
           Crack::XML.parse(body) == @pattern
         else
-          Addressable::URI.parse('?' + body).query_values == @pattern
+          hash_contains?(Addressable::URI.parse('?' + body).query_values, @pattern)
         end
       else
         empty_string?(@pattern) && empty_string?(body) ||
@@ -161,6 +161,10 @@ module WebMock
     end
 
     private
+    
+    def hash_contains?(haystack, needle)
+      needle.select{|k, v| haystack[k] != v}.empty?
+    end
 
     def empty_string?(string)
       string.nil? || string == ""

@@ -214,7 +214,12 @@ describe WebMock::RequestPattern do
               should match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=1&c[d][]=e&b=five&c[d][]=f'))
           end
 
-          it "should not match when hash doesn't match url encoded body" do
+          it "should match if body is a superset of pattern hash" do
+            WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => "1"}).
+              should match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=1&c[d][]=e&c[d][]=f&b=five'))
+          end
+
+          it "should not match when hash is not completely contained by url encoded body" do
            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'c[d][]=f&a=1&c[d][]=e'))
           end
