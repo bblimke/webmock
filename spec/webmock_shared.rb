@@ -4,7 +4,7 @@ unless defined? SAMPLE_HEADERS
   SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%20c&z=%27Stop%21%27%20said%20Fred"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
-  WWW_EXAMPLE_COM_CONTENT_LENGTH = 596
+  WWW_EXAMPLE_COM_CONTENT_LENGTH = 0
 end
 
 class MyException < StandardError; end;
@@ -33,8 +33,7 @@ shared_examples_for "WebMock" do
 
       it "should make a real web request if request is not stubbed" do
         setup_expectations_for_real_example_com_request
-        http_request(:get, "http://www.example.com/").
-          body.should =~ /.*example.*/
+        http_request(:get, "http://www.example.com/").status.should == "302"
       end
 
       it "should make a real https request if request is not stubbed" do
@@ -128,7 +127,7 @@ shared_examples_for "WebMock" do
       end
 
       it "should allow a real request to allowed host", :net_connect => true do
-        http_request(:get, "http://www.example.org/").status.should == "200"
+        http_request(:get, "http://www.example.org/").status.should == "302"
       end
     end
   end
@@ -1493,8 +1492,8 @@ shared_examples_for "WebMock" do
           end
 
           it "should pass response with status and message" do
-            @response.status[0].should == 200
-            @response.status[1].should == "OK"
+            @response.status[0].should == 302
+            @response.status[1].should == "Found"
           end
         
           it "should pass response with headers" do
