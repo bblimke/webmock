@@ -38,9 +38,16 @@ unless RUBY_PLATFORM =~ /java/
 
         it "should raise same error as Patron if file is not readable for get request" do
           stub_http_request(:get, "www.example.com")
-          lambda {
-            @sess.get_file("/", "/non_existing_file")
-          }.should raise_error(ArgumentError, "Unable to open specified file.")
+          File.open("/tmp/read_only_file", "w") do |tmpfile|
+            tmpfile.chmod(0400)
+          end
+          begin
+            lambda {
+              @sess.get_file("/", "/tmp/read_only_file")
+            }.should raise_error(ArgumentError, "Unable to open specified file.")
+          ensure
+            File.unlink("/tmp/read_only_file")
+          end
         end
 
         it "should work with put_file" do
@@ -58,7 +65,7 @@ unless RUBY_PLATFORM =~ /java/
         it "should raise same error as Patron if file is not readable for post request" do
           stub_http_request(:post, "www.example.com").with(:body => "abc")
           lambda {
-            @sess.post_file("/", "/non_existing_file")
+            @sess.post_file("/", "/path/to/non/existing/file")
           }.should raise_error(ArgumentError, "Unable to open specified file.")
         end
 
