@@ -64,12 +64,16 @@ module HTTPClientSpecHelper
 
     socket.stub!(:sync=).with(true)
 
-    socket.should_receive(:gets).with("\n").once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
+    socket.should_receive(:gets).with("\n").
+      and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\r\n",
+                 "Content-Length: #{options[:response_body].length}\r\n",
+                 "\r\n")
+    socket.stub(:readpartial) do |size, buf|
+      buf << options[:response_body]
+    end
 
     socket.stub!(:eof?).and_return(true)
     socket.stub!(:close).and_return(true)
-
-    socket.should_receive(:readpartial).any_number_of_times.and_raise(EOFError)
   end
   
   def http_library

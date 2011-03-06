@@ -41,6 +41,8 @@ shared_examples_for "WebMock" do
          :host => "www.paypal.com",
          :port => 443,
          :path => "/uk/cgi-bin/webscr",
+         :response_code => 200,
+         :response_message => "OK",
          :response_body => "hello paypal"
         )
         http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
