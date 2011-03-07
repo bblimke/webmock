@@ -10,6 +10,7 @@ module PatronSpecHelper
 
     sess.connect_timeout = 10
     sess.timeout = 10
+    sess.max_redirects = 0
    
     response = sess.request(method, "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers] || {}, {
       :data => options[:body]
