@@ -23,6 +23,9 @@ RSpec.configure do |config|
   if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
   end
+
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
 end
 
 def fail()
