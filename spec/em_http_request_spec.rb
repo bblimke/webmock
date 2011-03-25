@@ -20,6 +20,11 @@ unless RUBY_PLATFORM =~ /java/
       response.should == "abc"
     end
 
+    it "should work with responses that use chunked transfer encoding" do
+      stub_http_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
+      http_request(:get, "http://www.example.com").body.should == "abc"
+    end
+
     it "should work with optional query params" do
       stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
       http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"

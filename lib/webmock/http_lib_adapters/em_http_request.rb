@@ -113,6 +113,13 @@ if defined?(EventMachine::HttpRequest)
 
         headers.each do |header, value|
           value = value.join(", ") if value.is_a?(Array)
+
+          # WebMock's internal processing will not handle the body
+          # correctly if the header indicates that it is chunked, unless
+          # we also create all the chunks.
+          # It's far easier just to remove the header.
+          next if header =~ /transfer-encoding/i && value =~/chunked/i
+
           response_string << "#{header}: #{value}"
         end if headers
 
