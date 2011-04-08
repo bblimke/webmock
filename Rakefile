@@ -36,10 +36,6 @@ Rake::TestTask.new(:test) do |test|
   test.warning = false
 end
 
-task :spec => :check_dependencies
-
-task :test => :check_dependencies
-
 task :default => [:spec, :test]
 
 require 'rake/rdoctask'
@@ -51,3 +47,4 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/webmock/webmock.rb')
 end
+
