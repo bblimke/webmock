@@ -119,7 +119,7 @@ if defined?(::HTTPClient)
     request_signature = WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
       uri.to_s,
-      :body => req.body.content,
+      :body => req.content,
       :headers => headers
     )
   end
