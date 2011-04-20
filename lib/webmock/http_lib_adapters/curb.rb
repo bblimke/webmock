@@ -65,7 +65,27 @@ if defined?(Curl)
           @header_str << webmock_response.headers.map do |k,v| 
             "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
           end.join("\r\n")
+
+          webmock_response.headers['Location'].tap do |location|
+            if self.follow_location? && location
+              @last_effective_url = location
+              webmock_follow_location(location)
+            end
+          end
         end
+
+        @last_effective_url ||= self.url
+      end
+
+      def webmock_follow_location(location)
+        first_url = self.url
+        self.url = location
+
+        curb_or_webmock do
+          send( "http_#{@webmock_method}_without_webmock" )
+        end
+
+        self.url = first_url
       end
 
       def invoke_curb_callbacks
@@ -193,6 +213,12 @@ if defined?(Curl)
       end
       alias :header_str_without_webmock :header_str
       alias :header_str :header_str_with_webmock
+
+      def last_effective_url_with_webmock
+        @last_effective_url || last_effective_url_without_webmock
+      end
+      alias :last_effective_url_without_webmock :last_effective_url
+      alias :last_effective_url :last_effective_url_with_webmock
 
       %w[ success failure header body complete progress ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
