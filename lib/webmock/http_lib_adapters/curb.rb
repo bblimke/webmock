@@ -66,12 +66,12 @@ if defined?(Curl)
             "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
           end.join("\r\n")
 
-          webmock_response.headers['Location'].tap do |location|
-            if self.follow_location? && location
-              @last_effective_url = location
-              webmock_follow_location(location)
-            end
+          location = webmock_response.headers['Location']
+          if self.follow_location? && location
+            @last_effective_url = location
+            webmock_follow_location(location)
           end
+          location
         end
 
         @last_effective_url ||= self.url
