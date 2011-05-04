@@ -13,6 +13,7 @@ require 'rspec'
 require 'webmock/rspec'
 
 require 'network_connection'
+require "support/webmock_server"
 
 RSpec.configure do |config|
   config.include WebMock::API
@@ -22,6 +23,14 @@ RSpec.configure do |config|
   end
   if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
+  end
+
+  config.before(:all) do
+    WebMockServer.instance.start
+  end
+
+  config.after(:all) do
+    WebMockServer.instance.stop
   end
 
   config.filter_run :focus => true
