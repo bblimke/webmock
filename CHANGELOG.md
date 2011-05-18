@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.6.4
+
+This is a quick slip release to regenerate the gemspec. Apparently
+jeweler inserts dependencies twice if you use the `gemspec` method in
+your Gemfile and declare gem dependencies in your gemspec.
+
+https://github.com/technicalpickles/jeweler/issues/154
+
+josevalim:
+
+> This just bit me. I just released a gem with the wrong dependencies
+> because I have updated jeweler. This should have been opt-in,
+> otherwise a bunch of people using jeweler are going to release gems
+> with the wrong dependencies because you are automatically importing
+> from the Gemfile.
+
 ## 1.6.3
 
 * Update the dependency on addressable to get around an issue in v2.2.5.
