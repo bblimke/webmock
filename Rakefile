@@ -23,6 +23,17 @@ rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: sudo gem install jeweler"
 end
 
+namespace :spec do
+  desc 'Run specs against 1.8.6, REE, 1.8.7, 1.9.2 and jRuby'
+  task :rubies do
+    # JCF: I'd love to be able to use RVM's `rvm {rubies} specs` command but
+    # the require tests in spec/other_net_http_libs_spec.rb break when doing
+    # so.
+    spec_files = Dir[File.dirname(__FILE__) + '/spec/**/*_spec.rb'].join(' ')
+    sh "rvm 1.8.6@webmock,ree@webmock,1.8.7@webmock,1.9.2@webmock,jruby@webmock exec rspec #{spec_files}"
+  end
+end
+
 require "rspec/core/rake_task"
 RSpec::Core::RakeTask.new do |t|
   t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"] 
