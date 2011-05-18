@@ -20,7 +20,7 @@ if defined?(::HTTPClient)
         response = build_httpclient_response(webmock_response, stream, &block)
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :http_client}, request_signature, webmock_response) 
+          {:lib => :http_client}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         res = if stream
@@ -45,7 +45,7 @@ if defined?(::HTTPClient)
     def do_request_async_with_webmock(method, uri, query, body, extheader)
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
-      
+
       if WebMock::StubRegistry.instance.registered_request?(request_signature) ||
          WebMock.net_connect_allowed?(request_signature.uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
@@ -70,7 +70,7 @@ if defined?(::HTTPClient)
       response.reason=webmock_response.status[1]
       webmock_response.headers.to_a.each { |name, value| response.header.set(name, value) }
 
-      raise HTTPClient::TimeoutError if webmock_response.should_timeout              
+      raise HTTPClient::TimeoutError if webmock_response.should_timeout
       webmock_response.raise_error_if_any
 
       block.call(nil, body) if block
@@ -78,7 +78,7 @@ if defined?(::HTTPClient)
       response
     end
   end
-  
+
   def build_webmock_response(httpclient_response)
     webmock_response = WebMock::Response.new
     webmock_response.status = [httpclient_response.status, httpclient_response.reason]
@@ -102,8 +102,8 @@ if defined?(::HTTPClient)
 
     auth = www_auth.basic_auth
     auth.challenge(req.header.request_uri, nil)
-    
-    headers = req.header.all.inject({}) do |headers, header| 
+
+    headers = req.header.all.inject({}) do |headers, header|
       headers[header[0]] ||= [];
       headers[header[0]] << header[1]
       headers

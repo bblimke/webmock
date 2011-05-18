@@ -1,5 +1,5 @@
 module WebMock
-  
+
   class NetConnectNotAllowedError < StandardError
     def initialize(request_signature)
       text = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"

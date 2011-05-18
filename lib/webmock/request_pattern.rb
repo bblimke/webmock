@@ -40,7 +40,7 @@ module WebMock
       @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
       @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
     end
-    
+
     def create_uri_pattern(uri)
       if uri.is_a?(Regexp)
         URIRegexpPattern.new(uri)

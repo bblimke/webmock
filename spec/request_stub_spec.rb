@@ -23,7 +23,7 @@ describe WebMock::RequestStub do
 
     it "should assign normalized headers to request pattern" do
       @request_stub.with(:headers => {'A' => 'a'})
-      @request_stub.request_pattern.to_s.should == 
+      @request_stub.request_pattern.to_s.should ==
         WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
@@ -69,13 +69,13 @@ describe WebMock::RequestStub do
       @request_stub.response
       @request_stub.response.body.should == "def"
     end
-    
+
     it "should return responses in a sequence passed as comma separated params" do
       @request_stub.to_return({:body => "abc"}, {:body => "def"})
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "def"
     end
-    
+
     it "should return responses declared in multiple to_return declarations" do
       @request_stub.to_return({:body => "abc"}).to_return({:body => "def"})
       @request_stub.response.body.should == "abc"
@@ -92,7 +92,7 @@ describe WebMock::RequestStub do
         @request_stub.response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
     end
-    
+
     it "should assign sequence of responses with response with exception to be thrown" do
       @request_stub.to_return(:body => "abc").then.to_raise(ArgumentError)
       @request_stub.response.body.should == "abc"
@@ -110,7 +110,7 @@ describe WebMock::RequestStub do
         @request_stub.response.raise_error_if_any
       }.should raise_error(IndexError, "Exception from WebMock")
     end
-    
+
     it "should raise exceptions declared in multiple to_raise declarations" do
        @request_stub.to_raise(ArgumentError).then.to_raise(IndexError)
         lambda {
@@ -122,7 +122,7 @@ describe WebMock::RequestStub do
     end
 
   end
-  
+
   describe "to_timeout" do
 
      it "should assign response with timeout" do
@@ -144,30 +144,30 @@ describe WebMock::RequestStub do
      end
 
    end
-  
-  
+
+
   describe "times" do
-    
+
     it "should give error if declared before any response declaration is declared" do
       lambda {
         @request_stub.times(3)
-       }.should raise_error("Invalid WebMock stub declaration. times(N) can be declared only after response declaration.")  
+       }.should raise_error("Invalid WebMock stub declaration. times(N) can be declared only after response declaration.")
     end
-    
+
     it "should repeat returning last declared response declared number of times" do
       @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "def"
     end
-    
+
     it "should repeat raising last declared exception declared number of times" do
       @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "abc"
       @request_stub.response.body.should == "def"
     end
-    
+
     it "should repeat returning last declared sequence of responses declared number of times" do
       @request_stub.to_return({:body => "abc"}, {:body => "def"}).times(2).then.to_return({:body => "ghj"})
       @request_stub.response.body.should == "abc"
@@ -176,23 +176,23 @@ describe WebMock::RequestStub do
       @request_stub.response.body.should == "def"
       @request_stub.response.body.should == "ghj"
     end
-    
+
     it "should return self" do
       @request_stub.to_return({:body => "abc"}).times(1).should == @request_stub
     end
-    
+
     it "should raise error if argument is not integer" do
       lambda {
          @request_stub.to_return({:body => "abc"}).times("not number")
-      }.should raise_error("times(N) accepts integers >= 1 only")  
+      }.should raise_error("times(N) accepts integers >= 1 only")
     end
-    
+
     it "should raise error if argument is < 1" do
       lambda {
         @request_stub.to_return({:body => "abc"}).times(0)
-      }.should raise_error("times(N) accepts integers >= 1 only")  
+      }.should raise_error("times(N) accepts integers >= 1 only")
     end
-    
+
   end
 
 end

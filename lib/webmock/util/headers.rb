@@ -26,12 +26,12 @@ module WebMock
             when Regexp then v.inspect
             when Array then "["+v.map{|v| "'#{v.to_s}'"}.join(", ")+"]"
             else "'#{v.to_s}'"
-          end    
+          end
           "'#{k}'=>#{v}"
-        end.sort.join(", ") 
+        end.sort.join(", ")
         str << '}'
       end
-      
+
       def self.decode_userinfo_from_header(header)
         header.sub(/^Basic /, "").unpack("m").first
       end

@@ -2,7 +2,7 @@ require 'rubygems'
 require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
   require 'curb'
-  require 'patron' 
+  require 'patron'
   require 'em-http'
 end
 
@@ -15,7 +15,7 @@ require 'webmock/rspec'
 require 'network_connection'
 
 RSpec.configure do |config|
-  config.include WebMock::API  
+  config.include WebMock::API
   unless NetworkConnection.is_network_available?
     warn("No network connectivity. Only examples which do not make real network connections will run.")
     no_network_connection = true

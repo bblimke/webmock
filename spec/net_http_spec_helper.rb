@@ -8,14 +8,14 @@ module NetHTTPSpecHelper
     response = nil
     clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
     req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", nil)
-    options[:headers].each do |k,v| 
+    options[:headers].each do |k,v|
       if v.is_a?(Array)
         v.each_with_index do |v,i|
           i == 0 ? (req[k] = v) : req.add_field(k, v)
         end
       else
         req[k] = v
-      end  
+      end
     end if options[:headers]
 
     req.basic_auth uri.user, uri.password if uri.user
@@ -34,11 +34,11 @@ module NetHTTPSpecHelper
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(headers),
-      :status => response.code, 
+      :status => response.code,
       :message => response.message
     })
   end
-  
+
   def client_timeout_exception_class
     Timeout::Error
   end
@@ -71,12 +71,12 @@ module NetHTTPSpecHelper
     # Request/response handling
     request_parts = ["#{options[:method]} #{options[:path]} HTTP/1.1", "Host: #{options[:host]}"]
     socket.should_receive(:write).with(/#{request_parts[0]}.*#{request_parts[1]}.*/m).and_return(100)
-    
+
     read_method = RUBY_VERSION >= "1.9.2" ? :read_nonblock : :sysread
     socket.should_receive(read_method).once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
     socket.should_receive(read_method).any_number_of_times.and_raise(EOFError)
   end
-  
+
   def http_library
     :net_http
   end

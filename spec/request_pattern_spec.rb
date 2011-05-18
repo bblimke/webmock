@@ -13,7 +13,7 @@ describe WebMock::RequestPattern do
       :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should ==
     "GET http://www.example.com/ with body \"abc\" with headers {'A'=>'a', 'B'=>'b'} with given block"
   end
-  
+
   it "should report string describing itself with query params" do
     WebMock::RequestPattern.new(:get, /.*example.*/, :query => {'a' => ['b', 'c']}).to_s.should ==
     "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
@@ -140,12 +140,12 @@ describe WebMock::RequestPattern do
        WebMock::RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
           should match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
       end
-      
+
       it "should not match for query params are different than the declared in hash" do
        WebMock::RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
           should_not match(WebMock::RequestSignature.new(:get, "www.example.com?x[]=b&a[]=c"))
       end
-      
+
       it "should match for query params are the same as declared as string" do
        WebMock::RequestPattern.new(:get, "www.example.com", :query => "a[]=b&a[]=c").
           should match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))

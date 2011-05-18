@@ -19,7 +19,7 @@ if defined?(Curl)
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
               {:lib => :curb, :real_request => true}, request_signature,
-                webmock_response)   
+                webmock_response)
           end
           res
         else
@@ -54,15 +54,15 @@ if defined?(Curl)
       end
 
       def build_curb_response(webmock_response)
-        raise Curl::Err::TimeoutError if webmock_response.should_timeout        
+        raise Curl::Err::TimeoutError if webmock_response.should_timeout
         webmock_response.raise_error_if_any
-        
+
         @body_str = webmock_response.body
         @response_code = webmock_response.status[0]
 
         @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
         if webmock_response.headers
-          @header_str << webmock_response.headers.map do |k,v| 
+          @header_str << webmock_response.headers.map do |k,v|
             "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
           end.join("\r\n")
 
@@ -115,7 +115,7 @@ if defined?(Curl)
 
       ###
       ### Mocks of Curl::Easy methods below here.
-      ### 
+      ###
 
       def http_with_webmock(method)
         @webmock_method = method
@@ -163,11 +163,11 @@ if defined?(Curl)
         @webmock_method ||= :get
         curb_or_webmock do
           perform_without_webmock
-        end 
+        end
       end
       alias :perform_without_webmock :perform
       alias :perform :perform_with_webmock
-      
+
       def put_data_with_webmock= data
         @webmock_method = :put
         @put_data = data
@@ -175,7 +175,7 @@ if defined?(Curl)
       end
       alias_method :put_data_without_webmock=, :put_data=
       alias_method :put_data=, :put_data_with_webmock=
-      
+
       def post_body_with_webmock= data
         @webmock_method = :post
         self.post_body_without_webmock = data
@@ -261,7 +261,7 @@ if defined?(Curl)
           end
         METHOD
       end
-  
+
       module WebmockHelper
         # Borrowed from Patron:
         # http://github.com/toland/patron/blob/master/lib/patron/response.rb

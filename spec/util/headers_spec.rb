@@ -9,20 +9,19 @@ describe WebMock::Util::Headers do
   end
 
   describe "sorted_headers_string" do
-    
+
     it "should return nice string for hash with string values" do
       WebMock::Util::Headers.sorted_headers_string({"a" => "b"}).should == "{'A'=>'b'}"
     end
-    
+
     it "should return nice string for hash with array values" do
       WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"]}).should == "{'A'=>['b', 'c']}"
     end
-  
+
     it "should return nice string for hash with array values and string values" do
       WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"], "d" => "e"}).should == "{'A'=>['b', 'c'], 'D'=>'e'}"
     end
-    
-  
+
   end
 
 end
