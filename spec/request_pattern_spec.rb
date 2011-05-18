@@ -223,6 +223,11 @@ describe WebMock::RequestPattern do
            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'foo bar'))
           end
+          
+          it "should match when hash contains regex values" do
+           WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => /^\w{5}$/, :b => {:c => /^\d{3}$/}}).
+              should match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=abcde&b[c]=123'))
+          end
 
           it "should match when hash contains regex values" do
            WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => /^\w{5}$/, :b => {:c => /^\d{3}$/}}).

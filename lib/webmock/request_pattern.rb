@@ -161,6 +161,18 @@ module WebMock
     end
 
     private
+    
+    def matching_hashes?(h1, h2)
+      return false if h1.size != h2.size
+      h1.each do |k, v|
+        if v.is_a?(Hash) && h2[k].is_a?(Hash)
+          return false unless matching_hashes?(v, h2[k])
+        else
+          return false unless h2[k] === v
+        end
+      end
+      true
+    end
 
     # Compare two hashes for equality
     #
