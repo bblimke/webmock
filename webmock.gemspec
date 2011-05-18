@@ -16,14 +16,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'addressable', '~> 2.2', '> 2.2.5'
   s.add_dependency 'crack', '>=0.1.7'
-  s.add_development_dependency 'rspec', '>= 2.0.0'
-  s.add_development_dependency 'httpclient', '>= 2.1.5.2'
 
-  unless RUBY_PLATFORM =~ /java/
-    s.add_development_dependency 'patron', '>= 0.4.9'
-    s.add_development_dependency 'em-http-request', '>= 0.2.14'
-    s.add_development_dependency 'curb', '>= 0.7.8'
-  end
+  s.add_development_dependency 'rspec',           '>= 2.0.0'
+  s.add_development_dependency 'httpclient',      '>= 2.1.5.2'
+  s.add_development_dependency 'patron',          '>= 0.4.9'
+  s.add_development_dependency 'em-http-request', '>= 0.2.14'
+  s.add_development_dependency 'curb',            '>= 0.7.8'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
