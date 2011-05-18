@@ -21,12 +21,6 @@ module WebMock
     alias :request :a_request
   end
 
-  def self.version
-    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
-      f.read.strip
-    }
-  end
-
   def self.allow_net_connect!(options = {})
     Config.instance.allow_net_connect = true
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]

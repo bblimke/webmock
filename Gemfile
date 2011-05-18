@@ -1,4 +1,3 @@
-source "http://rubygems.org/"
-gemspec
+source 'http://rubygems.org/'
 
-gem 'jeweler'
+gemspec
