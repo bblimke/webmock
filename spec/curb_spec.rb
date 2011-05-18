@@ -132,55 +132,56 @@ unless RUBY_PLATFORM =~ /java/
 
         order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
       end
+    end
 
-      describe '#last_effective_url' do
-        context 'when not following redirects' do
-          before { @curl.follow_location = false }
+    describe '#last_effective_url' do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
 
-          it 'should be the same as #url even with a location header' do
-            stub_request(:any, 'example.com').
-              to_return(:body    => "abc",
-                        :status  => 302,
-                        :headers => { 'Location' => 'http://www.example.com' })
+      context 'when not following redirects' do
+        before { @curl.follow_location = false }
 
-            @curl.http_get
-            @curl.last_effective_url.should == 'http://example.com'
-          end
-        end
+        it 'should be the same as #url even with a location header' do
+          stub_request(:any, 'example.com').
+            to_return(:body    => "abc",
+                      :status  => 302,
+                      :headers => { 'Location' => 'http://www.example.com' })
 
-        context 'when following redirects' do
-          before { @curl.follow_location = true }
-
-          it 'should be the same as #url when no location header is present' do
-            stub_request(:any, "example.com")
-            @curl.http_get
-            @curl.last_effective_url.should == 'http://example.com'
-          end
-
-          it 'should be the value of the location header when present' do
-            stub_request(:any, 'example.com').
-              to_return(:headers => { 'Location' => 'http://www.example.com' })
-            stub_request(:any, 'www.example.com')
-
-            @curl.http_get
-            @curl.last_effective_url.should == 'http://www.example.com'
-          end
-
-          it 'should work with more than one redirect' do
-            stub_request(:any, 'example.com').
-              to_return(:headers => { 'Location' => 'http://www.example.com' })
-            stub_request(:any, 'www.example.com').
-              to_return(:headers => { 'Location' => 'http://blog.example.com' })
-            stub_request(:any, 'blog.example.com')
-
-            @curl.http_get
-            @curl.last_effective_url.should == 'http://blog.example.com'
-          end
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://example.com'
         end
       end
 
-      context "when following redirects" do
+      context 'when following redirects' do
         before { @curl.follow_location = true }
+
+        it 'should be the same as #url when no location header is present' do
+          stub_request(:any, "example.com")
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://example.com'
+        end
+
+        it 'should be the value of the location header when present' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com')
+
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://www.example.com'
+        end
+
+        it 'should work with more than one redirect' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com').
+            to_return(:headers => { 'Location' => 'http://blog.example.com' })
+          stub_request(:any, 'blog.example.com')
+
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://blog.example.com'
+        end
 
         it 'should maintain the original url' do
           stub_request(:any, 'example.com').
@@ -213,6 +214,40 @@ unless RUBY_PLATFORM =~ /java/
           @curl.http_get
           @curl.url.should == 'http://example.com'
           @curl.body_str.should == 'blog post'
+        end
+      end
+    end
+    
+    describe "#content_type" do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
+
+      context "when response includes Content-Type header" do
+        it "returns correct content_type" do
+          content_type = "application/json"
+
+          stub_request(:any, 'example.com').
+            to_return(:body     => "abc",
+                      :status   => 200,
+                      :headers  => { 'Content-Type' => content_type })
+
+          @curl.http_get
+          @curl.content_type.should == content_type
+        end
+      end
+
+      context "when response does not include Content-Type header" do
+        it "returns nil for content_type" do
+          content_type = "application/json"
+
+          stub_request(:any, 'example.com').
+            to_return(:body     => "abc",
+                      :status   => 200 )
+
+          @curl.http_get
+          @curl.content_type.should be_nil
         end
       end
     end
