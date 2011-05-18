@@ -45,7 +45,7 @@ end
 def setup_expectations_for_real_example_com_request(options = {})
   defaults = { :host => "www.example.com", :port => 80, :method => "GET",
     :path => "/",
-    :response_code => 302, :response_message => "Found",
+    :response_code => 302, :response_message => "Moved Temporarily",
     :response_body => "" }
   setup_expectations_for_real_request(defaults.merge(options))
 end

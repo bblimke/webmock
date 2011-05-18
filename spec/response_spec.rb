@@ -137,16 +137,16 @@ describe WebMock::Response do
 
       it "should read headers" do
         @response.headers.should == {
-          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-          "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"438",
-          "Connection"=>"Keep-Alive",
-          "Accept"=>"image/jpeg, image/png"
+            "Date" => "Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type" => "text/html; charset=UTF-8",
+            "Content-Length" => "419",
+            "Connection" => "Keep-Alive",
+            "Accept" => "image/jpeg, image/png"
           }
       end
 
       it "should read body" do
-        @response.body.size.should == 438
+        @response.body.size.should == 419
       end
 
       it "should close IO" do
@@ -169,20 +169,20 @@ describe WebMock::Response do
         @response.headers.should == {
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"438",
+          "Content-Length"=>"419",
           "Connection"=>"Keep-Alive",
           "Accept"=>"image/jpeg, image/png"
           }
       end
 
       it "should read body" do
-        @response.body.size.should == 438
+        @response.body.size.should == 419
       end
 
       it "should work with transfer-encoding set to chunked" do
-        @input.gsub!("Content-Length: 438", "Transfer-Encoding: chunked")
+        @input.gsub!("Content-Length: 419", "Transfer-Encoding: chunked")
         @response = WebMock::Response.new(@input)
-        @response.body.size.should == 438
+        @response.body.size.should == 419
       end
 
     end
@@ -249,14 +249,14 @@ describe WebMock::Response do
         describe "as a file" do
           it "should return response" do
             response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s] })
-            response.evaluate(@request_signature).body.size.should == 438
+            response.evaluate(@request_signature).body.size.should == 419
           end
         end
 
         describe "as a string" do
           it "should return response" do
             response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s].read })
-            response.evaluate(@request_signature).body.size.should == 438
+            response.evaluate(@request_signature).body.size.should == 419
           end
         end
       end

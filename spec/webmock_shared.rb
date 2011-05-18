@@ -617,16 +617,16 @@ shared_examples_for "WebMock" do
 
           it "should return recorded headers" do
             @response.headers.should == {
-              "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-              "Content-Type"=>"text/html; charset=UTF-8",
-              "Content-Length"=>"438",
-              "Connection"=>"Keep-Alive",
-              "Accept"=>"image/jpeg, image/png"
+                "Date" => "Sat, 23 Jan 2010 01:01:05 GMT",
+                "Content-Type" => "text/html; charset=UTF-8",
+                "Content-Length" => "419",
+                "Connection" => "Keep-Alive",
+                "Accept" => "image/jpeg, image/png"
               }
           end
 
           it "should return recorded body" do
-            @response.body.size.should == 438
+            @response.body.size.should == 419
           end
 
           it "should return recorded status" do
@@ -655,14 +655,14 @@ shared_examples_for "WebMock" do
             @response.headers.should == {
               "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
               "Content-Type"=>"text/html; charset=UTF-8",
-              "Content-Length"=>"438",
+              "Content-Length"=>"419",
               "Connection"=>"Keep-Alive",
               "Accept"=>"image/jpeg, image/png"
               }
           end
 
           it "should return recorded body" do
-            @response.body.size.should == 438
+            @response.body.size.should == 419
           end
 
           it "should return recorded status" do
@@ -683,12 +683,12 @@ shared_examples_for "WebMock" do
 
           it "should return response from evaluated file" do
             stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s] })
-            http_request(:get, "http://www.example.com/").body.size.should == 438
+            http_request(:get, "http://www.example.com/").body.size.should == 419
           end
 
           it "should return response from evaluated string" do
             stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s].read })
-            http_request(:get, "http://www.example.com/").body.size.should == 438
+            http_request(:get, "http://www.example.com/").body.size.should == 419
           end
 
         end
@@ -1486,7 +1486,7 @@ shared_examples_for "WebMock" do
 
           it "should pass response with status and message" do
             @response.status[0].should == 302
-            @response.status[1].should == "Found"
+            @response.status[1].should == "Moved Temporarily"
           end
 
           it "should pass response with headers" do
