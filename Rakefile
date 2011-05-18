@@ -3,9 +3,9 @@
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
-namespace :spec do
+namespace :rvm do
   desc 'Run specs against 1.8.6, REE, 1.8.7, 1.9.2 and jRuby'
-  task :rubies do
+  task :specs do
     # JCF: I'd love to be able to use RVM's `rvm {rubies} specs` command but
     # the require tests in spec/other_net_http_libs_spec.rb break when doing
     # so.
