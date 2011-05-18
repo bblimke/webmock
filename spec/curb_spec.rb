@@ -77,7 +77,7 @@ unless RUBY_PLATFORM =~ /java/
           test = data
         end
         @curl.http_get
-        test.should match /One: 1/
+        test.should match(/One: 1/)
       end
 
       it "should call on_complete when request is complete" do
