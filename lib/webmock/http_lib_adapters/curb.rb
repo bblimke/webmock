@@ -71,7 +71,8 @@ if defined?(Curl)
             @last_effective_url = location
             webmock_follow_location(location)
           end
-          location
+
+          @content_type = webmock_response.headers["Content-Type"]
         end
 
         @last_effective_url ||= self.url
@@ -219,6 +220,12 @@ if defined?(Curl)
       end
       alias :last_effective_url_without_webmock :last_effective_url
       alias :last_effective_url :last_effective_url_with_webmock
+
+      def content_type_with_webmock
+        @content_type || content_type_without_webmock
+      end
+      alias :content_type_without_webmock :content_type
+      alias :content_type :content_type_with_webmock
 
       %w[ success failure header body complete progress ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
