@@ -4,6 +4,7 @@ require 'addressable/uri'
 require 'crack'
 
 require 'webmock/deprecation'
+require 'webmock/version'
 
 require 'webmock/http_lib_adapters/net_http'
 require 'webmock/http_lib_adapters/httpclient'

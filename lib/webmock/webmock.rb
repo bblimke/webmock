@@ -22,9 +22,7 @@ module WebMock
   end
 
   def self.version
-    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
-      f.read.strip
-    }
+    VERSION
   end
 
   def self.allow_net_connect!(options = {})
