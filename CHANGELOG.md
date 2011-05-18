@@ -1,4 +1,26 @@
-#Changelog
+# Changelog
+
+## 1.6.3
+
+* Update the dependency on addressable to get around an issue in v2.2.5.
+  Thanks to [Peter Higgins](https://github.com/phiggins).
+
+* Add support for matching parameter values using a regular expression
+  as well as a string. Thanks to [Oleg M Prozorov](https://github.com/oleg).
+
+* Fix integration with httpclient as the internal API has changed.
+  Thanks to [Frank Prößdorf](https://github.com/endor).
+
+* Ensure Curl::Easy#content_type is always set. Thanks to [Peter
+  Higgins](https://github.com/phiggins).
+
+* Fix bug with em-http-request adapter stubbing responses that have a
+  chunked transfer encoding. Thanks to [Myron
+  Marston](https://github.com/myronmarston).
+
+* Fix a load of spec failures with Patron, httpclient, and specs that
+  depended on the behaviour of example.com. Thanks to [Alex
+  Grigorovich](https://github.com/grig).
 
 ## 1.6.2
 
