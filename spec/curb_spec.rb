@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'webmock_shared'
+require 'uri'
 
 unless RUBY_PLATFORM =~ /java/
   require 'curb_spec_helper'
@@ -289,6 +290,31 @@ unless RUBY_PLATFORM =~ /java/
         c.http_put
         c.response_code.should == 200
       end
+
+      it "should work with multiple arguments for post" do
+        data = { :name => "john", :address => "111 example ave" }
+        body = data.map{ |k,v| "#{k}=#{URI.encode(v)}"}.join('&')
+
+        stub_http_request(:post, "www.example.com").with(:body => body)
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http_post Curl::PostField.content('name', data[:name]),  Curl::PostField.content('address', data[:address])
+
+        c.response_code.should == 200
+      end
+
+      it "should work with multiple arguments for put" do
+        data = { :name => "john", :address => "111 example ave" }
+        body = data.map{ |k,v| "#{k}=#{URI.encode(v)}"}.join('&')
+
+        stub_http_request(:put, "www.example.com").with(:body => body)
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http_put Curl::PostField.content('name', data[:name]),  Curl::PostField.content('address', data[:address])
+
+        c.response_code.should == 200
+      end
+
     end
 
     describe "using #perform for requests" do
