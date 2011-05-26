@@ -365,7 +365,7 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
     WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
     WebMock.should have_requested(:get, "www.example.com").
-      with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json')
+      with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
 
 ### Different way of setting expectations in RSpec
 
@@ -380,7 +380,7 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
     a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
 
     a_request(:post, "www.example.com").
-      with(:body => {"a" => ["b", "c"]}, :headers => 'Content-Type' => 'application/json').should have_been_made
+      with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).should have_been_made
 
 ## Clearing stubs and request history
 
