@@ -6,7 +6,7 @@ if defined?(RSpec) && defined?(RSpec::Expectations)
 elsif defined?(Spec)
   RSPEC_NAMESPACE = Spec
   RSPEC_CONFIGURER = Spec::Runner
-else  
+else
   begin
     require 'rspec/core'
     require 'rspec/expectations'
@@ -19,7 +19,7 @@ else
 end
 
 require 'webmock/rspec/matchers'
-  
+
 RSPEC_CONFIGURER.configure { |config|
 
   config.include WebMock::API

@@ -28,7 +28,7 @@ describe "Webmock with HTTPClient" do
        :get, "http://www.example.com/",
        :headers => {"a" => ["c", "b"]}).status.should == "200"
    end
-  
+
 
   describe "async requests" do
 

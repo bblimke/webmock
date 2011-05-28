@@ -1,4 +1,4 @@
-# This code is entierly copied from VCR (http://github.com/myronmarston/vcr) by courtesy of Myron Marston  
+# This code is entierly copied from VCR (http://github.com/myronmarston/vcr) by courtesy of Myron Marston
 
 # A Net::HTTP response that has already been read raises an IOError when #read_body
 # is called with a destination string or block.

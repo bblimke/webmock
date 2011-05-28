@@ -24,12 +24,12 @@ module WebMock
     end
 
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e| 
+      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
         ResponseFactory.response_for(:exception => e)
       })
       self
     end
-    
+
     def to_timeout
       @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_timeout => true)])
       self

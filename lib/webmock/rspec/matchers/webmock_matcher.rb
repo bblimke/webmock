@@ -29,7 +29,7 @@ module WebMock
     def matches?(webmock)
       @request_execution_verifier.matches?
     end
-    
+
     def does_not_match?(webmock)
       @request_execution_verifier.does_not_match?
     end

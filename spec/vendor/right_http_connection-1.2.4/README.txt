@@ -1,6 +1,6 @@
 RightScale::HttpConnection
     by RightScale, Inc.
-    www.RightScale.com 
+    www.RightScale.com
 
 == DESCRIPTION:
 
@@ -12,7 +12,7 @@ algorithm for low-level network errors.
 - provides put/get streaming
 - does configurable retries on connect and read timeouts, DNS failures, etc.
 - HTTPS certificate checking
-  
+
 == SYNOPSIS:
 
 
@@ -20,7 +20,7 @@ algorithm for low-level network errors.
 
 - 2/11/08: If you use RightScale::HttpConnection in conjunction with attachment_fu, the
   HttpConnection gem must be included (using the require statement) AFTER
-  attachment_fu.  
+  attachment_fu.
   This is due to a conflict between the HttpConnection gem and another
   gem required by attachment_fu.
 
@@ -32,7 +32,7 @@ sudo gem install right_http_connection
 
 == LICENSE:
 
-Copyright (c) 2007-2008 RightScale, Inc. 
+Copyright (c) 2007-2008 RightScale, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

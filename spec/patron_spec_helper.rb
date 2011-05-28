@@ -11,7 +11,7 @@ module PatronSpecHelper
     sess.connect_timeout = 10
     sess.timeout = 10
     sess.max_redirects = 0
-   
+
     response = sess.request(method, "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", options[:headers] || {}, {
       :data => options[:body]
     })
@@ -19,7 +19,7 @@ module PatronSpecHelper
     if response.headers
       response.headers.each do |k,v|
         v = v.join(", ") if v.is_a?(Array)
-        headers[k] = v 
+        headers[k] = v
       end
     end
     OpenStruct.new({

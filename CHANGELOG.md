@@ -52,9 +52,9 @@ josevalim:
 
 * Simplified integration with Test::Unit, RSpec and Cucumber. Now only a single file has to be required i.e.
 
-		require 'webmock/test_unit'
-		require 'webmock/rspec'
-		require 'webmock/cucumber'
+                require 'webmock/test_unit'
+                require 'webmock/rspec'
+                require 'webmock/cucumber'
 
 * The error message on unstubbed request now contains code snippet which can be used to stub this request. Thanks to Martyn Loughran for suggesting this feature.
 
@@ -66,12 +66,12 @@ josevalim:
 
  This technique is borrowed from em-http-request native mocking module. It allows switching WebMock adapter on an off, and using it interchangeably with em-http-request native mocking i.e:
 
-		EventMachine::WebMockHttpRequest.activate!
-		EventMachine::WebMockHttpRequest.deactivate!
+                EventMachine::WebMockHttpRequest.activate!
+                EventMachine::WebMockHttpRequest.deactivate!
 
-	Thanks to Martyn Loughran for suggesting this feature.
-	
-* `WebMock.reset_webmock` is deprecated in favour of new `WebMock.reset!`	
+        Thanks to Martyn Loughran for suggesting this feature.
+
+* `WebMock.reset_webmock` is deprecated in favour of new `WebMock.reset!`
 
 * Fixed integration with Cucumber. Previously documented example didn't work with new versions of Cucumber.
 
@@ -88,12 +88,12 @@ josevalim:
 * Support for dynamically evaluated raw responses recorded with `curl -is` <br/>
   i.e.
 
-		`curl -is www.example.com > /tmp/www.example.com.txt`
-		stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
+                `curl -is www.example.com > /tmp/www.example.com.txt`
+                stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
 
 * `:net_http_connect_on_start` option can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` methods, i.e.
 
-		WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+                WebMock.allow_net_connect!(:net_http_connect_on_start => true)
 
   This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. Check 'Connecting on Net::HTTP.start' in README for more information.
 
@@ -112,7 +112,7 @@ josevalim:
 
 * `include WebMock` is now deprecated to avoid method and constant name conflicts. Please `include WebMock::API` instead.
 
-* `WebMock::API#request` is renamed to `WebMock::API#a_request` to prevent method name conflicts with i.e. Rails controller specs. 
+* `WebMock::API#request` is renamed to `WebMock::API#a_request` to prevent method name conflicts with i.e. Rails controller specs.
   WebMock.request is still available.
 
 * Deprecated `WebMock#request`, `WebMock#allow_net_connect!`, `WebMock#net_connect_allowed?`, `WebMock#registered_request?`, `WebMock#reset_callbacks`, `WebMock#after_request` instance methods. These methods are still available, but only as WebMock class methods.
@@ -135,11 +135,11 @@ josevalim:
 
   This feature was available before only for localhost with `:allow_localhost => true`
 
-		WebMock.disable_net_connect!(:allow => "www.example.org")
+                WebMock.disable_net_connect!(:allow => "www.example.org")
 
-		Net::HTTP.get('www.something.com', '/')   # ===> Failure
+                Net::HTTP.get('www.something.com', '/')   # ===> Failure
 
-		Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
+                Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
 
 * Fixed Net::HTTP adapter so that it preserves the original behavior of Net::HTTP.
 
@@ -169,53 +169,53 @@ josevalim:
 
 * Added support for [em-http-request](http://github.com/igrigorik/em-http-request)
 
-* Matching query params using a hash	 
+* Matching query params using a hash
 
-	 	 stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
-	 
-	 	 RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success
-	 	 
-	 	 request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made  # ===> Success
+                 stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+
+                 RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success
+
+                 request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made  # ===> Success
 
 * Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
 
   (Thanks to Steve Tooke for the idea and a solution for url-encoded bodies)
 
-		stub_http_request(:post, "www.example.com").
-			with(:body => {:data => {:a => '1', :b => 'five'}})
+                stub_http_request(:post, "www.example.com").
+                        with(:body => {:data => {:a => '1', :b => 'five'}})
 
-		RestClient.post('www.example.com', "data[a]=1&data[b]=five", 
-	  	:content_type => 'application/x-www-form-urlencoded')    # ===> Success
-	
-		RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}', 
-	  	:content_type => 'application/json')    # ===> Success
-	
-		RestClient.post('www.example.com', '<data a="1" b="five" />', 
-			:content_type => 'application/xml' )    # ===> Success
-			
-		request(:post, "www.example.com").
-    	with(:body => {:data => {:a => '1', :b => 'five'}},
-    	 :headers => 'Content-Type' => 'application/json').should have_been_made	 # ===> Success
+                RestClient.post('www.example.com', "data[a]=1&data[b]=five",
+                :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+
+                RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}',
+                :content_type => 'application/json')    # ===> Success
+
+                RestClient.post('www.example.com', '<data a="1" b="five" />',
+                        :content_type => 'application/xml' )    # ===> Success
+
+                request(:post, "www.example.com").
+        with(:body => {:data => {:a => '1', :b => 'five'}},
+         :headers => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
 
 * Request callbacks (Thanks to Myron Marston for all suggestions)
 
     WebMock can now invoke callbacks for stubbed or real requests:
 
-		WebMock.after_request do |request_signature, response|
-		  puts "Request #{request_signature} was made and #{response} was returned"
-		end
-    
+                WebMock.after_request do |request_signature, response|
+                  puts "Request #{request_signature} was made and #{response} was returned"
+                end
+
     invoke callbacks for real requests only and except requests made with Patron client
 
-		WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
-		  puts "Request #{request_signature} was made and #{response} was returned"
-		end
+                WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
+                  puts "Request #{request_signature} was made and #{response} was returned"
+                end
 
 * `to_raise()` now accepts an exception instance or a string as argument in addition to an exception class
 
-		stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
-    
-		stub_request(:any, 'www.example.net').to_raise("some error")
+                stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
+
+                stub_request(:any, 'www.example.net').to_raise("some error")
 
 * Matching requests based on a URI is 30% faster
 
@@ -231,7 +231,7 @@ josevalim:
 
 * Fixed gemspec file. Thanks to Razic
 
-## 1.2.0 
+## 1.2.0
 
 * RSpec 2 compatibility. Thanks to Sam Phillips!
 
@@ -243,14 +243,14 @@ josevalim:
 ## 1.1.0
 
 * [VCR](http://github.com/myronmarston/vcr/) compatibility. Many thanks to Myron Marston for all suggestions.
-	
-* Support for stubbing requests and returning responses with multiple headers with the same name. i.e multiple Accept headers.	
 
-		stub_http_request(:get, 'www.example.com').
-		  with(:headers => {'Accept' => ['image/png', 'image/jpeg']}).
-		  to_return(:body => 'abc')
-		RestClient.get('www.example.com',
-		 {"Accept" => ['image/png', 'image/jpeg']}) # ===> "abc\n"	
+* Support for stubbing requests and returning responses with multiple headers with the same name. i.e multiple Accept headers.
+
+                stub_http_request(:get, 'www.example.com').
+                  with(:headers => {'Accept' => ['image/png', 'image/jpeg']}).
+                  to_return(:body => 'abc')
+                RestClient.get('www.example.com',
+                 {"Accept" => ['image/png', 'image/jpeg']}) # ===> "abc\n"
 
 * When real net connections are disabled and unstubbed request is made, WebMock throws WebMock::NetConnectNotAllowedError instead of assertion error or StandardError.
 
@@ -263,38 +263,38 @@ josevalim:
 
 * Responses dynamically evaluated from block (idea and implementation by Tom Ward)
 
-		stub_request(:any, 'www.example.net').
-		     to_return { |request| {:body => request.body} }
+                stub_request(:any, 'www.example.net').
+                     to_return { |request| {:body => request.body} }
 
-		RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
+                RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
 
 * Responses dynamically evaluated from lambda (idea and implementation by Tom Ward)
 
-    	stub_request(:any, 'www.example.net').
-	      to_return(lambda { |request| {:body => request.body} })
+        stub_request(:any, 'www.example.net').
+              to_return(lambda { |request| {:body => request.body} })
 
-	    RestClient.post('www.example.net', 'abc')    # ===> "abc\n"	       
+            RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
 
-* Response with custom status message 
+* Response with custom status message
 
-		stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
+                stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
 
-		req = Net::HTTP::Get.new("/")
-		Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
+                req = Net::HTTP::Get.new("/")
+                Net::HTTP.start("www.example.com") { |http| http.request(req) }.message # ===> "Internal Server Error"
 
 * Raising timeout errors (suggested by Jeffrey Jones) (compatibility with Ruby 1.8.6 by Mack Earnhardt)
 
-		stub_request(:any, 'www.example.net').to_timeout
+                stub_request(:any, 'www.example.net').to_timeout
 
-		RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
+                RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
 
 * External requests can be disabled while allowing localhost (idea and implementation by Mack Earnhardt)
 
-		WebMock.disable_net_connect!(:allow_localhost => true)
+                WebMock.disable_net_connect!(:allow_localhost => true)
 
-		Net::HTTP.get('www.something.com', '/')   # ===> Failure
+                Net::HTTP.get('www.something.com', '/')   # ===> Failure
 
-		Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
+                Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
 
 
 ### Bug fixes
@@ -307,82 +307,82 @@ josevalim:
 * Fixed issue where response status code was not read from raw (curl -is) responses
 
 ## 0.9.0
-  
+
 * Matching requests against provided block (by Sergio Gil)
 
-		stub_request(:post, "www.example.com").with { |request| request.body == "abc" }.to_return(:body => "def")
-		RestClient.post('www.example.com', 'abc')    # ===> "def\n"
-		request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made	
-		#or 
-		assert_requested(:post, "www.example.com") { |req| req.body == "abc" }
+                stub_request(:post, "www.example.com").with { |request| request.body == "abc" }.to_return(:body => "def")
+                RestClient.post('www.example.com', 'abc')    # ===> "def\n"
+                request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+                #or
+                assert_requested(:post, "www.example.com") { |req| req.body == "abc" }
 
 * Matching request body against regular expressions (suggested by Ben Pickles)
 
-		stub_request(:post, "www.example.com").with(:body => /^.*world$/).to_return(:body => "abc")
-		RestClient.post('www.example.com', 'hello world')    # ===> "abc\n"
-	
+                stub_request(:post, "www.example.com").with(:body => /^.*world$/).to_return(:body => "abc")
+                RestClient.post('www.example.com', 'hello world')    # ===> "abc\n"
+
 * Matching request headers against regular expressions (suggested by Ben Pickles)
 
-		stub_request(:post, "www.example.com").with(:headers => {"Content-Type" => /image\/.+/}).to_return(:body => "abc")
-		RestClient.post('www.example.com', '', {'Content-Type' => 'image/png'})    # ===> "abc\n"
+                stub_request(:post, "www.example.com").with(:headers => {"Content-Type" => /image\/.+/}).to_return(:body => "abc")
+                RestClient.post('www.example.com', '', {'Content-Type' => 'image/png'})    # ===> "abc\n"
 
 * Replaying raw responses recorded with `curl -is`
 
-		`curl -is www.example.com > /tmp/example_curl_-is_output.txt`
-		raw_response_file = File.new("/tmp/example_curl_-is_output.txt")
-	
-	from file
-	
-		stub_request(:get, "www.example.com").to_return(raw_response_file)
+                `curl -is www.example.com > /tmp/example_curl_-is_output.txt`
+                raw_response_file = File.new("/tmp/example_curl_-is_output.txt")
 
-	or string
-	
-		stub_request(:get, "www.example.com").to_return(raw_response_file.read)
+        from file
+
+                stub_request(:get, "www.example.com").to_return(raw_response_file)
+
+        or string
+
+                stub_request(:get, "www.example.com").to_return(raw_response_file.read)
 
 * Multiple responses for repeated requests
 
-		stub_request(:get, "www.example.com").to_return({:body => "abc"}, {:body => "def"})
-		Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
-		Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+                stub_request(:get, "www.example.com").to_return({:body => "abc"}, {:body => "def"})
+                Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+                Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
 
 * Multiple responses using chained `to_return()` or `to_raise()` declarations
 
-		stub_request(:get, "www.example.com").
-			to_return({:body => "abc"}).then.  #then() just is a syntactic sugar
-			to_return({:body => "def"}).then.
-			to_raise(MyException)
-		Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
-		Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
-		Net::HTTP.get('www.example.com', '/')    # ===> MyException raised
-	
+                stub_request(:get, "www.example.com").
+                        to_return({:body => "abc"}).then.  #then() just is a syntactic sugar
+                        to_return({:body => "def"}).then.
+                        to_raise(MyException)
+                Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+                Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+                Net::HTTP.get('www.example.com', '/')    # ===> MyException raised
+
 * Specifying number of times given response should be returned
 
-		stub_request(:get, "www.example.com").
-			to_return({:body => "abc"}).times(2).then.
-			to_return({:body => "def"})
-	
-		Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
-		Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
-		Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
-	
+                stub_request(:get, "www.example.com").
+                        to_return({:body => "abc"}).times(2).then.
+                        to_return({:body => "def"})
+
+                Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+                Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
+                Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+
 * Added support for `Net::HTTP::Post#body_stream`
 
-	This fixes compatibility with new versions of RestClient
-	
+        This fixes compatibility with new versions of RestClient
+
 * WebMock doesn't suppress default request headers added by http clients anymore.
 
-	i.e. Net::HTTP adds `'Accept'=>'*/*'` to all requests by default
-	
-	
-	
+        i.e. Net::HTTP adds `'Accept'=>'*/*'` to all requests by default
+
+
+
 ## 0.8.2
-  
+
   * Fixed issue where WebMock was not closing IO object passed as response body after reading it.
   * Ruby 1.9.2 compat: Use `File#expand_path` for require path because "." is not be included in LOAD_PATH since Ruby 1.9.2
 
 
 ## 0.8.1
-  
+
   * Fixed HTTPClient adapter compatibility with Ruby 1.8.6 (reported by Piotr Usewicz)
   * Net:HTTP adapter now handles request body assigned as Net::HTTP::Post#body attribute (fixed by Mack Earnhardt)
   * Fixed issue where requests were not matching stubs with Accept header set.(reported by Piotr Usewicz)
@@ -394,8 +394,8 @@ josevalim:
 ## 0.8.0
 
   * Support for HTTPClient (sync and async requests)
-  * Support for dynamic responses. Response body and headers can be now declared as lambda. 
-	(Thanks to Ivan Vega ( @ivanyv ) for suggesting this feature)
+  * Support for dynamic responses. Response body and headers can be now declared as lambda.
+        (Thanks to Ivan Vega ( @ivanyv ) for suggesting this feature)
   * Support for stubbing and expecting requests with empty body
   * Executing non-stubbed request leads to failed expectation instead of error
 

@@ -50,12 +50,12 @@ module WebMock
     WebMock::RequestRegistry.instance.reset!
     WebMock::StubRegistry.instance.reset!
   end
-  
+
   def self.reset_webmock
     WebMock::Deprecation.warning("WebMock.reset_webmock is deprecated. Please use WebMock.reset! method instead")
     reset!
   end
-  
+
   def self.reset_callbacks
     WebMock::CallbackRegistry.reset
   end

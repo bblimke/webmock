@@ -1,5 +1,5 @@
 module WebMock
-  
+
   class ResponsesSequence
 
     attr_accessor :times_to_repeat
@@ -36,5 +36,5 @@ module WebMock
     end
 
   end
-  
+
 end

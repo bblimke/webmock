@@ -6,7 +6,7 @@ unless RUBY_PLATFORM =~ /java/
 
   shared_examples_for "Curb" do
     include CurbSpecHelper
-    
+
     it_should_behave_like "WebMock"
 
     describe "when doing PUTs" do
@@ -35,7 +35,7 @@ unless RUBY_PLATFORM =~ /java/
         stub_request(:any, "example.com").to_return(:body => body)
 
         test = nil
-        @curl.on_success do |c| 
+        @curl.on_success do |c|
           test = c.body_str
         end
         @curl.http_get
@@ -48,7 +48,7 @@ unless RUBY_PLATFORM =~ /java/
           to_return(:status => [response_code, "Server On Fire"])
 
         test = nil
-        @curl.on_failure do |c, code| 
+        @curl.on_failure do |c, code|
           test = code
         end
         @curl.http_get
@@ -61,19 +61,19 @@ unless RUBY_PLATFORM =~ /java/
           to_return(:body => body)
 
         test = nil
-        @curl.on_body do |data| 
+        @curl.on_body do |data|
           test = data
         end
         @curl.http_get
         test.should == body
       end
-      
+
       it "should call on_header when response headers are read" do
         stub_request(:any, "example.com").
           to_return(:headers => {:one => 1})
 
         test = nil
-        @curl.on_header do |data| 
+        @curl.on_header do |data|
           test = data
         end
         @curl.http_get
@@ -217,7 +217,7 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
     end
-    
+
     describe "#content_type" do
       before(:each) do
         @curl = Curl::Easy.new

@@ -2,7 +2,7 @@ module HTTPClientSpecHelper
   class << self
     attr_accessor :async_mode
   end
-  
+
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
     c = HTTPClient.new
@@ -17,7 +17,7 @@ module HTTPClientSpecHelper
     else
       response = c.request(*params, &block)
     end
-    headers = response.header.all.inject({}) do |headers, header| 
+    headers = response.header.all.inject({}) do |headers, header|
       if !headers.has_key?(header[0])
         headers[header[0]] = header[1]
       else
@@ -75,7 +75,7 @@ module HTTPClientSpecHelper
     socket.stub!(:eof?).and_return(true)
     socket.stub!(:close).and_return(true)
   end
-  
+
   def http_library
     :http_client
   end
