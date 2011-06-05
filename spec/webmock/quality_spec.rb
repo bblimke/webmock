@@ -1,4 +1,4 @@
-require "spec_helper"
+require 'spec_helper'
 
 # Borrowed from Bundler
 # https://github.com/carlhuda/bundler/blob/1-0-stable/spec/quality_spec.rb
