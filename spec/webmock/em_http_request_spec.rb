@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'webmock_shared'
 require 'ostruct'
 
 unless RUBY_PLATFORM =~ /java/

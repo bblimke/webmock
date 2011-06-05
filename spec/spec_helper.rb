@@ -6,34 +6,28 @@ unless RUBY_PLATFORM =~ /java/
   require 'em-http'
 end
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
-require 'rspec'
 
+require 'rspec'
 require 'webmock/rspec'
 
-require 'network_connection'
+Dir[File.expand_path('../support/**/*.rb', __FILE__)].each { |f| require f }
 
 RSpec.configure do |config|
   config.include WebMock::API
+  config.include FixtureHelper
+
   unless NetworkConnection.is_network_available?
-    warn("No network connectivity. Only examples which do not make real network connections will run.")
+    warn 'No network connectivity. Only examples which do not make real network connections will run.'
     no_network_connection = true
   end
+
   if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
   end
 
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
-end
-
-def fail()
-  raise_error(RSpec::Expectations::ExpectationNotMetError)
-end
-
-def fail_with(message)
-  raise_error(RSpec::Expectations::ExpectationNotMetError, message)
 end
 
 class Proc
@@ -49,4 +43,3 @@ def setup_expectations_for_real_example_com_request(options = {})
     :response_body => "" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
-

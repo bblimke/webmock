@@ -126,7 +126,7 @@ describe WebMock::Response do
 
     describe "when input is IO" do
       before(:each) do
-        @file = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+        @file = fixture("example_curl_output.txt")
         @response = WebMock::Response.new(@file)
       end
 
@@ -157,7 +157,7 @@ describe WebMock::Response do
 
     describe "when input is String" do
       before(:each) do
-        @input = File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt").read
+        @input = fixture('example_curl_output.txt').read
         @response = WebMock::Response.new(@input)
       end
 
@@ -241,7 +241,7 @@ describe WebMock::Response do
       describe "when raw response is evaluated" do
         before(:each) do
           @files = {
-            "www.example.com" => File.new(File.expand_path(File.dirname(__FILE__)) + "/example_curl_output.txt")
+            "www.example.com" => fixture('example_curl_output.txt')
           }
           @request_signature = WebMock::RequestSignature.new(:get, "www.example.com")
         end

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'webmock_shared'
 require 'ostruct'
 require File.expand_path('../net_http_spec_helper', __FILE__)
 

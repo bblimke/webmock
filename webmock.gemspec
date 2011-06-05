@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'addressable', '~> 2.2', '> 2.2.5'
   s.add_dependency 'crack', '>=0.1.7'
+  s.add_dependency 'mixology', '~> 0.2.0'
 
   s.add_development_dependency 'rspec',           '>= 2.0.0'
   s.add_development_dependency 'httpclient',      '>= 2.1.5.2'
