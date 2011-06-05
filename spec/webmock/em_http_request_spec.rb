@@ -3,7 +3,7 @@ require 'webmock_shared'
 require 'ostruct'
 
 unless RUBY_PLATFORM =~ /java/
-  require 'em_http_request_spec_helper'
+  require File.expand_path('../em_http_request_spec_helper', __FILE__)
 
   describe "Webmock with EM::HttpRequest" do
     include EMHttpRequestSpecHelper

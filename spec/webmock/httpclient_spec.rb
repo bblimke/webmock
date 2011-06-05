@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'webmock_shared'
 require 'ostruct'
 
-require 'httpclient_spec_helper'
+require File.expand_path('../httpclient_spec_helper', __FILE__)
 
 describe "Webmock with HTTPClient" do
   include HTTPClientSpecHelper

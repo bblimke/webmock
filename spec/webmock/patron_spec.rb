@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'webmock_shared'
 
 unless RUBY_PLATFORM =~ /java/
-  require 'patron_spec_helper'
+  require File.expand_path('../patron_spec_helper', __FILE__)
   require 'tmpdir'
   require 'fileutils'
 
