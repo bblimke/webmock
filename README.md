@@ -1,6 +1,12 @@
 WebMock
 =======
 
+## Unstable v2.0 branch!
+
+    Don't use this branch, use the master branch. This is where I'm
+    doing a lot a refactoring and trying out some new features that
+    won't be ready for a while.
+
 Library for stubbing and setting expectations on HTTP requests in Ruby.
 
 WebMock is looking for a maintainer
