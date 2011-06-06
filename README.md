@@ -351,7 +351,7 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
     assert_requested :get, "http://www.example.com"    # ===> Success
 
 
-### Setting expectations in RSpec
+### Setting expectations in RSpec on `WebMock` module
  This style is borrowed from [fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher)
 
     require 'webmock/rspec'
@@ -367,7 +367,7 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
     WebMock.should have_requested(:get, "www.example.com").
       with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
 
-### Different way of setting expectations in RSpec
+### Setting expectations in RSpec with `a_request`
 
     a_request(:post, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
 
@@ -381,6 +381,12 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
 
     a_request(:post, "www.example.com").
       with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).should have_been_made
+
+### Setting expectations in RSpec on the stub
+
+    stub = stub_request(:get, "www.example.com")
+    # ... make requests ...
+    stub.should have_been_requested
 
 ## Clearing stubs and request history
 

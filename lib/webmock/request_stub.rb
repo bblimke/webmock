@@ -60,5 +60,9 @@ module WebMock
       self
     end
 
+    def matches?(request_signature)
+      # TODO fix failure message
+      self.request_pattern.matches?(request_signature)
+    end
   end
 end
