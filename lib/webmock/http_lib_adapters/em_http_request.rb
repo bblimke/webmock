@@ -1,59 +1,48 @@
-if defined?(EventMachine::HttpRequest)
+if defined?(EventMachine::HttpClient)
 
   module EventMachine
-    OriginalHttpRequest = HttpRequest unless const_defined?(:OriginalHttpRequest)
+    OriginalHttpClient = HttpClient unless const_defined?(:OriginalHttpClient)
 
-    class WebMockHttpRequest < EventMachine::HttpRequest
 
+    class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
 
-      class WebMockHttpClient < EventMachine::HttpClient
-
-        def setup(response, uri, error = nil)
-          @last_effective_url = @uri = uri
-          if error
-            on_error(error)
-            fail(self)
-          else
-            EM.next_tick do
-              receive_data(response)
-              succeed(self)
-            end
+      def setup(response, uri, error = nil)
+        @last_effective_url = @uri = uri
+        if error
+          on_error(error)
+          fail(self)
+        else
+          EM.next_tick do
+            @conn.receive_data(response)
+            succeed(self)
           end
-        end
-
-        def unbind
-        end
-
-        def close_connection
         end
       end
 
-      def send_request_with_webmock(&block)
+      def send_request_with_webmock(head, body)
         request_signature = build_request_signature
 
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if WebMock::StubRegistry.instance.registered_request?(request_signature)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-          WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :em_http_request}, request_signature, webmock_response)
-          client = WebMockHttpClient.new(nil)
-          client.on_error("WebMock timeout error") if webmock_response.should_timeout
-          client.setup(make_raw_response(webmock_response), @uri,
-            webmock_response.should_timeout ? "WebMock timeout error" : nil)
-          client
+          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
+          on_error("WebMock timeout error") if webmock_response.should_timeout
+          setup(make_raw_response(webmock_response), @uri,
+                webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          http = send_request_without_webmock(&block)
-          http.callback {
+          send_request_without_webmock(head, body)
+          @conn.conn.callback {
             if WebMock::CallbackRegistry.any_callbacks?
-              webmock_response = build_webmock_response(http)
+              webmock_response = build_webmock_response(self)
               WebMock::CallbackRegistry.invoke_callbacks(
                 {:lib => :em_http_request, :real_request => true}, request_signature,
                 webmock_response)
             end
           }
-          http
+          self
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
@@ -74,31 +63,31 @@ if defined?(EventMachine::HttpRequest)
       end
 
       def build_request_signature
-        if @req
-          options = @req.options
-          method = @req.method
-          uri = @req.uri
-        else
-          options = @options
-          method = @method
-          uri = @uri
-        end
+        method = @req.method
+        uri = @req.uri
+        auth = @req.proxy[:authorization]
+        query = @req.query
+        headers = @req.headers
+        body = @req.body
 
-        if options[:authorization] || options['authorization']
-          auth = (options[:authorization] || options['authorization'])
+        if auth
           userinfo = auth.join(':')
           userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
-          options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
+          if @req
+            @req.proxy.reject! {|k,v| t.to_s == 'authorization' }
+          else
+            options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
+          end
           uri.userinfo = userinfo
         end
 
-        uri.query = encode_query(@req.uri, options[:query]).slice(/\?(.*)/, 1)
+        uri.query = encode_query(@req.uri, query).slice(/\?(.*)/, 1)
 
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
-          :body => (options[:body] || options['body']),
-          :headers => (options[:head] || options['head'])
+          :body => body,
+          :headers => headers
         )
       end
 
@@ -128,17 +117,17 @@ if defined?(EventMachine::HttpRequest)
       end
 
       def self.activate!
-        EventMachine.send(:remove_const, :HttpRequest)
-        EventMachine.send(:const_set, :HttpRequest, WebMockHttpRequest)
+        EventMachine.send(:remove_const, :HttpClient)
+        EventMachine.send(:const_set, :HttpClient, WebMockHttpClient)
       end
 
       def self.deactivate!
-        EventMachine.send(:remove_const, :HttpRequest)
-        EventMachine.send(:const_set, :HttpRequest, OriginalHttpRequest)
+        EventMachine.send(:remove_const, :HttpClient)
+        EventMachine.send(:const_set, :HttpClient, OriginalHttpClient)
       end
     end
   end
 
-  EventMachine::WebMockHttpRequest.activate!
+  EventMachine::WebMockHttpClient.activate!
 
 end
