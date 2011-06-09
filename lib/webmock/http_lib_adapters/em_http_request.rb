@@ -3,7 +3,6 @@ if defined?(EventMachine::HttpClient)
   module EventMachine
     OriginalHttpClient = HttpClient unless const_defined?(:OriginalHttpClient)
 
-
     class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
 
@@ -13,10 +12,8 @@ if defined?(EventMachine::HttpClient)
           on_error(error)
           fail(self)
         else
-          EM.next_tick do
-            @conn.receive_data(response)
-            succeed(self)
-          end
+          @conn.receive_data(response)
+          succeed(self)
         end
       end
 
@@ -29,16 +26,21 @@ if defined?(EventMachine::HttpClient)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
           on_error("WebMock timeout error") if webmock_response.should_timeout
+          self.response = webmock_response.body
+          webmock_response.headers.each do |k, v|
+            self.response_header[k.upcase.gsub('-','_')] = v
+          end if webmock_response.headers
           setup(make_raw_response(webmock_response), @uri,
                 webmock_response.should_timeout ? "WebMock timeout error" : nil)
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           send_request_without_webmock(head, body)
-          @conn.conn.callback {
+          callback {
             if WebMock::CallbackRegistry.any_callbacks?
-              webmock_response = build_webmock_response(self)
+              webmock_response = build_webmock_response
               WebMock::CallbackRegistry.invoke_callbacks(
-                {:lib => :em_http_request, :real_request => true}, request_signature,
+                {:lib => :em_http_request, :real_request => true},
+                request_signature,
                 webmock_response)
             end
           }
@@ -54,11 +56,11 @@ if defined?(EventMachine::HttpClient)
 
       private
 
-      def build_webmock_response(http)
+      def build_webmock_response
         webmock_response = WebMock::Response.new
-        webmock_response.status = [http.response_header.status, http.response_header.http_reason]
-        webmock_response.headers = http.response_header
-        webmock_response.body = http.response
+        webmock_response.status = [response_header.status, response_header.http_reason]
+        webmock_response.headers = response_header
+        webmock_response.body = response
         webmock_response
       end
 
