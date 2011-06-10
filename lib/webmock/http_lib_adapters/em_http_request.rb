@@ -3,6 +3,26 @@ if defined?(EventMachine::HttpClient)
   module EventMachine
     OriginalHttpClient = HttpClient unless const_defined?(:OriginalHttpClient)
 
+    if defined?(Synchrony)
+      # have to make the callbacks fire on the next tick in order
+      # to avoid the dreaded "double resume" exception
+      module HTTPMethods
+        %w[get head post delete put].each do |type|
+          class_eval %[
+            def #{type}(options = {}, &blk)
+              f = Fiber.current
+
+               conn = setup_request(:#{type}, options, &blk)
+               conn.callback { EM.next_tick { f.resume(conn) } }
+               conn.errback  { EM.next_tick { f.resume(conn) } }
+
+               Fiber.yield
+            end
+          ]
+        end
+      end
+    end
+
     class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
 
