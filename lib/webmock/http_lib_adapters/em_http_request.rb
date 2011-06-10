@@ -6,6 +6,10 @@ if defined?(EventMachine::HttpClient)
     class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
 
+      def uri
+        @req.uri
+      end
+
       def setup(response, uri, error = nil)
         @last_effective_url = @uri = uri
         if error
@@ -26,10 +30,6 @@ if defined?(EventMachine::HttpClient)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
           on_error("WebMock timeout error") if webmock_response.should_timeout
-          self.response = webmock_response.body
-          webmock_response.headers.each do |k, v|
-            self.response_header[k.upcase.gsub('-','_')] = v
-          end if webmock_response.headers
           setup(make_raw_response(webmock_response), @uri,
                 webmock_response.should_timeout ? "WebMock timeout error" : nil)
           self
@@ -98,10 +98,12 @@ if defined?(EventMachine::HttpClient)
         response.raise_error_if_any
 
         status, headers, body = response.status, response.headers, response.body
+        headers ||= {}
 
         response_string = []
         response_string << "HTTP/1.1 #{status[0]} #{status[1]}"
 
+        headers["Content-Length"] = body.length unless headers["Content-Length"]
         headers.each do |header, value|
           value = value.join(", ") if value.is_a?(Array)
 
@@ -131,5 +133,4 @@ if defined?(EventMachine::HttpClient)
   end
 
   EventMachine::WebMockHttpClient.activate!
-
 end

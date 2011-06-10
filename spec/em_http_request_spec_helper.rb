@@ -6,6 +6,7 @@ module EMHttpRequestSpecHelper
   end
 
   def http_request(method, uri, options = {}, &block)
+    @http = nil
     response = nil
     error = nil
     uri = Addressable::URI.heuristic_parse(uri)
@@ -34,6 +35,7 @@ module EMHttpRequestSpecHelper
         })
         EventMachine.stop
       }
+      @http = http
     }
     raise error if error
     response
