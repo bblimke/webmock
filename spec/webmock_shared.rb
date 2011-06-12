@@ -1523,7 +1523,7 @@ shared_examples_for "WebMock" do
 
           it "should pass response with status and message" do
             @response.status[0].should == 302
-            @response.status[1].should == "Found"
+            ["Moved Temporarily", "Found"].should include @response.status[1]
           end
 
           it "should pass response with headers" do
