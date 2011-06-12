@@ -1,6 +1,8 @@
 require 'spec_helper'
 
 SCRIPT = <<-CODE
+require "rubygems"
+gem "minitest"
 require "minitest/autorun"
 require "webmock/minitest"
 
@@ -26,7 +28,7 @@ describe "MiniTest and WebMock" do
     # borrowed from: http://stackoverflow.com/questions/213368
     ruby = File.join(Config::CONFIG.values_at('bindir', 'ruby_install_name')).
       sub(/.*\s.*/m, '"\&"')
-    
+
     # This value makes it so the tests run in the order defined.
     seed = 9001
 
@@ -34,7 +36,7 @@ describe "MiniTest and WebMock" do
   end
 
   it "has access to WebMock::API's methods" do
-    re = /^MiniTestWebMockTest#test_that_passes: [0-9]\.[0-9]+ s: \.$/
+    re = /^MiniTestWebMockTest#test_that_passes = [0-9]\.[0-9]+ s = \.$/
     run_test.should match re
   end
 
