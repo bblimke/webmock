@@ -1403,7 +1403,7 @@ shared_examples_for "WebMock" do
                   stub = stub_request(:get, "http://www.example.com")
                   http_request(:get, "http://www.example.com/")
                   stub.should_not have_been_requested
-                }.should fail #_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+                }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
               end
               
               it "should verify if non expected request executed and block evaluated to true" do
@@ -1411,7 +1411,7 @@ shared_examples_for "WebMock" do
                    stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
                    http_request(:post, "http://www.example.com/", :body => "wadus")
                    stub.should_not have_been_requested
-                 }.should fail #_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+                 }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
                end
                
               it "should verify if request was executed and block evaluated to true" do
