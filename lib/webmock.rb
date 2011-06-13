@@ -24,6 +24,7 @@ require 'webmock/request_signature'
 require 'webmock/responses_sequence'
 require 'webmock/request_stub'
 require 'webmock/response'
+require 'webmock/rack_response'
 
 require 'webmock/stub_request_snippet'
 

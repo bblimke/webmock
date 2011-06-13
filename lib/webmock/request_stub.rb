@@ -23,6 +23,10 @@ module WebMock
       self
     end
 
+    def to_rack(app, options={})
+      @responses_sequences << ResponsesSequence.new([RackResponse.new(app)])
+    end
+
     def to_raise(*exceptions)
       @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
         ResponseFactory.response_for(:exception => e)
