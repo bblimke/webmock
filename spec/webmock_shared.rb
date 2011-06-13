@@ -1419,16 +1419,6 @@ shared_examples_for "WebMock" do
                 http_request(:post, "http://www.example.com/", :body => "wadus")
                 stub.should have_been_requested
               end
-              
-              it "should verify if request was executed and block evaluated to false" do
-                pending "fails with NetConnectNotAllowedError, instead of expected execution error"
-                
-                lambda {
-                  stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
-                  http_request(:post, "http://www.example.com/", :body => "abc")
-                  stub.should have_been_requested
-                }.should fail #_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
-              end
             end
             
             
