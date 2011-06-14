@@ -7,17 +7,18 @@ module EMHttpRequestSpecHelper
 
   def http_request(method, uri, options = {}, &block)
     @http = nil
+    head = options[:headers] || {}
     response = nil
     error = nil
     uri = Addressable::URI.heuristic_parse(uri)
     EventMachine.run {
-      request = EventMachine::HttpRequest.new("#{uri.omit(:userinfo).normalize.to_s}")
-      http = request.send(:setup_request, method, {
+      request = EventMachine::HttpRequest.new("#{uri.normalize.to_s}")
+      http = request.send(method, {
         :timeout => 10,
         :body => options[:body],
         :query => options[:query],
-        'authorization' => [uri.user, uri.password],
-        :head => options[:headers]}, &block)
+        :head => head.merge('authorization' => [uri.user, uri.password])
+      }, &block)
       http.errback {
         error = if http.respond_to?(:errors)
           http.errors

@@ -2,6 +2,7 @@ if defined?(EventMachine::HttpClient)
 
   module EventMachine
     OriginalHttpClient = HttpClient unless const_defined?(:OriginalHttpClient)
+    OriginalHttpConnection = HttpConnection unless const_defined?(:OriginalHttpConnection)
 
     if defined?(Synchrony)
       # have to make the callbacks fire on the next tick in order
@@ -23,6 +24,33 @@ if defined?(EventMachine::HttpClient)
       end
     end
 
+    class WebMockHttpConnection < HttpConnection
+      def webmock_activate_connection(client)
+        request_signature = client.request_signature
+
+        if WebMock::StubRegistry.instance.registered_request?(request_signature)
+          conn = HttpStubConnection.new rand(10000)
+          post_init
+
+          @deferred = false
+          @conn = conn
+
+          conn.parent = self
+          conn.pending_connect_timeout = @connopts.connect_timeout
+          conn.comm_inactivity_timeout = @connopts.inactivity_timeout
+
+          finalize_request(client)
+          @conn.set_deferred_status :succeeded
+        elsif WebMock.net_connect_allowed?(request_signature.uri)
+          real_activate_connection(client)
+        else
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        end
+      end
+      alias_method :real_activate_connection, :activate_connection
+      alias_method :activate_connection, :webmock_activate_connection
+    end
+
     class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
 
@@ -42,16 +70,16 @@ if defined?(EventMachine::HttpClient)
       end
 
       def send_request_with_webmock(head, body)
-        request_signature = build_request_signature
-
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if WebMock::StubRegistry.instance.registered_request?(request_signature)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
           on_error("WebMock timeout error") if webmock_response.should_timeout
-          setup(make_raw_response(webmock_response), @uri,
-                webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
+          EM.next_tick {
+            setup(make_raw_response(webmock_response), @uri,
+                  webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          }
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           send_request_without_webmock(head, body)
@@ -73,6 +101,9 @@ if defined?(EventMachine::HttpClient)
       alias_method :send_request_without_webmock, :send_request
       alias_method :send_request, :send_request_with_webmock
 
+      def request_signature
+        @request_signature ||= build_request_signature
+      end
 
       private
 
@@ -141,11 +172,15 @@ if defined?(EventMachine::HttpClient)
       end
 
       def self.activate!
+        EventMachine.send(:remove_const, :HttpConnection)
+        EventMachine.send(:const_set, :HttpConnection, WebMockHttpConnection)
         EventMachine.send(:remove_const, :HttpClient)
         EventMachine.send(:const_set, :HttpClient, WebMockHttpClient)
       end
 
       def self.deactivate!
+        EventMachine.send(:remove_const, :HttpConnection)
+        EventMachine.send(:const_set, :HttpConnection, OriginalHttpConnection)
         EventMachine.send(:remove_const, :HttpClient)
         EventMachine.send(:const_set, :HttpClient, OriginalHttpClient)
       end
