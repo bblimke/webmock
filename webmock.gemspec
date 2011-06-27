@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec',           '>= 2.0.0'
   s.add_development_dependency 'httpclient',      '>= 2.1.5.2'
-  s.add_development_dependency 'patron',          '>= 0.4.9'
+  s.add_development_dependency 'patron',          '>= 0.4.9', '< 0.4.12'
   s.add_development_dependency 'em-http-request', '>= 0.2.14'
   s.add_development_dependency 'curb',            '>= 0.7.8'
 
