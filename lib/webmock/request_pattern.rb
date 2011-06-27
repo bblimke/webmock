@@ -3,6 +3,8 @@ module WebMock
   class RequestPattern
 
     def initialize(method, uri, options = {})
+      @body_pattern, @headers_pattern, @with_block = nil
+
       @method_pattern = MethodPattern.new(method)
       @uri_pattern = create_uri_pattern(uri)
       assign_options(options)
@@ -74,6 +76,10 @@ module WebMock
   end
 
   class URIRegexpPattern  < URIPattern
+    def initialize(*args)
+      super
+      @query_params = nil
+    end
 
     def matches?(uri)
       WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
@@ -89,7 +95,6 @@ module WebMock
     def add_query_params(query_params)
       @query_params = query_params.is_a?(Hash) ? query_params : Addressable::URI.parse('?' + query_params).query_values
     end
-
   end
 
   class URIStringPattern < URIPattern

@@ -33,7 +33,7 @@ unless RUBY_PLATFORM =~ /java/
         it "should work with get_file" do
           stub_http_request(:get, "www.example.com").to_return(:body => "abc")
           @sess.get_file("/", @file_path)
-          File.read(@file_path).should == "abc"
+          File.read(@file_path).should be == "abc"
         end
 
         it "should raise same error as Patron if file is not readable for get request" do

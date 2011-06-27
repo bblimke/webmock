@@ -16,8 +16,8 @@ class TestWebMock < Test::Unit::TestCase
     req.basic_auth uri.user, uri.password if uri.user
     http = ::Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true if uri.scheme == "https"
-    response = http.start {|http|
-      http.request(req, options[:body])
+    response = http.start {|h|
+      h.request(req, options[:body])
     }
     OpenStruct.new({
       :body => response.body,

@@ -103,10 +103,10 @@ if defined?(::HTTPClient)
     auth = www_auth.basic_auth
     auth.challenge(req.header.request_uri, nil)
 
-    headers = req.header.all.inject({}) do |headers, header|
-      headers[header[0]] ||= [];
-      headers[header[0]] << header[1]
-      headers
+    headers = req.header.all.inject({}) do |hash, header|
+      hash[header[0]] ||= [];
+      hash[header[0]] << header[1]
+      hash
     end
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'

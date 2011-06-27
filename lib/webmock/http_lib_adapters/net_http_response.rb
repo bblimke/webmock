@@ -15,7 +15,7 @@ module WebMock
   module Net
     module HTTPResponse
       def read_body(dest = nil, &block)
-        return super if @__read_body_previously_called
+        return super if defined?(@__read_body_previously_called)
         return @body if dest.nil? && block.nil?
         raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
         return nil if @body.nil?

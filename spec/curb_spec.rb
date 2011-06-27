@@ -13,7 +13,7 @@ unless RUBY_PLATFORM =~ /java/
       it "should stub them" do
         stub_http_request(:put, "www.example.com").with(:body => "01234")
         http_request(:put, "http://www.example.com", :body => "01234").
-          status.should == "200"
+          status.should be == "200"
       end
     end
   end
@@ -39,7 +39,7 @@ unless RUBY_PLATFORM =~ /java/
           test = c.body_str
         end
         @curl.http_get
-        test.should == body
+        test.should be == body
       end
 
       it "should call on_failure with 5xx response" do
@@ -52,7 +52,7 @@ unless RUBY_PLATFORM =~ /java/
           test = code
         end
         @curl.http_get
-        test.should == response_code
+        test.should be == response_code
       end
 
       it "should call on_body when response body is read" do
@@ -65,7 +65,7 @@ unless RUBY_PLATFORM =~ /java/
           test = data
         end
         @curl.http_get
-        test.should == body
+        test.should be == body
       end
 
       it "should call on_header when response headers are read" do
@@ -89,7 +89,7 @@ unless RUBY_PLATFORM =~ /java/
           test = curl.body_str
         end
         @curl.http_get
-        test.should == body
+        test.should be == body
       end
 
       it "should call on_progress when portion of response body is read" do
@@ -97,12 +97,12 @@ unless RUBY_PLATFORM =~ /java/
 
         test = nil
         @curl.on_progress do |*args|
-          args.length.should == 4
-          args.each {|arg| arg.is_a?(Float).should == true }
+          args.length.should be == 4
+          args.each {|arg| arg.is_a?(Float).should be == true }
           test = true
         end
         @curl.http_get
-        test.should == true
+        test.should be == true
       end
 
       it "should call callbacks in correct order on successful request" do
@@ -116,7 +116,7 @@ unless RUBY_PLATFORM =~ /java/
         @curl.on_progress {|*args| order << :on_progress }
         @curl.http_get
 
-        order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_success]
+        order.should be == [:on_progress,:on_header,:on_body,:on_complete,:on_success]
       end
 
       it "should call callbacks in correct order on successful request" do
@@ -130,7 +130,7 @@ unless RUBY_PLATFORM =~ /java/
         @curl.on_progress {|*args| order << :on_progress }
         @curl.http_get
 
-        order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
+        order.should be == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
       end
     end
 
@@ -150,7 +150,7 @@ unless RUBY_PLATFORM =~ /java/
                       :headers => { 'Location' => 'http://www.example.com' })
 
           @curl.http_get
-          @curl.last_effective_url.should == 'http://example.com'
+          @curl.last_effective_url.should be == 'http://example.com'
         end
       end
 
@@ -160,7 +160,7 @@ unless RUBY_PLATFORM =~ /java/
         it 'should be the same as #url when no location header is present' do
           stub_request(:any, "example.com")
           @curl.http_get
-          @curl.last_effective_url.should == 'http://example.com'
+          @curl.last_effective_url.should be == 'http://example.com'
         end
 
         it 'should be the value of the location header when present' do
@@ -169,7 +169,7 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, 'www.example.com')
 
           @curl.http_get
-          @curl.last_effective_url.should == 'http://www.example.com'
+          @curl.last_effective_url.should be == 'http://www.example.com'
         end
 
         it 'should work with more than one redirect' do
@@ -180,7 +180,7 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, 'blog.example.com')
 
           @curl.http_get
-          @curl.last_effective_url.should == 'http://blog.example.com'
+          @curl.last_effective_url.should be == 'http://blog.example.com'
         end
 
         it 'should maintain the original url' do
@@ -189,7 +189,7 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, 'www.example.com')
 
           @curl.http_get
-          @curl.url.should == 'http://example.com'
+          @curl.url.should be == 'http://example.com'
         end
 
         it 'should have the redirected-to attrs (body, response code)' do
@@ -200,8 +200,8 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, 'www.example.com').to_return(:body => 'request B')
 
           @curl.http_get
-          @curl.body_str.should == 'request B'
-          @curl.response_code.should == 200
+          @curl.body_str.should be == 'request B'
+          @curl.response_code.should be == 200
         end
 
         it 'should follow more than one redirect' do
@@ -212,8 +212,8 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, 'blog.example.com').to_return(:body => 'blog post')
 
           @curl.http_get
-          @curl.url.should == 'http://example.com'
-          @curl.body_str.should == 'blog post'
+          @curl.url.should be == 'http://example.com'
+          @curl.body_str.should be == 'blog post'
         end
       end
     end
@@ -234,7 +234,7 @@ unless RUBY_PLATFORM =~ /java/
                       :headers  => { 'Content-Type' => content_type })
 
           @curl.http_get
-          @curl.content_type.should == content_type
+          @curl.content_type.should be == content_type
         end
       end
 
@@ -264,7 +264,7 @@ unless RUBY_PLATFORM =~ /java/
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.http(:GET)
-        c.body_str.should == "abc"
+        c.body_str.should be == "abc"
       end
     end
 
@@ -278,7 +278,7 @@ unless RUBY_PLATFORM =~ /java/
         c.url = "http://www.example.com"
         c.post_body = "01234"
         c.http_post
-        c.response_code.should == 200
+        c.response_code.should be == 200
       end
 
       it "should work with blank arguments for put" do
@@ -287,7 +287,7 @@ unless RUBY_PLATFORM =~ /java/
         c.url = "http://www.example.com"
         c.put_data = "01234"
         c.http_put
-        c.response_code.should == 200
+        c.response_code.should be == 200
       end
     end
 
