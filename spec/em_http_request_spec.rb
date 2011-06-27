@@ -17,22 +17,22 @@ unless RUBY_PLATFORM =~ /java/
         http = EventMachine::HttpRequest.new('http://www.example.com/').get
         http.stream { |chunk| response = chunk; EM.stop  }
       }
-      response.should == "abc"
+      response.should be == "abc"
     end
 
     it "should work with responses that use chunked transfer encoding" do
       stub_http_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
-      http_request(:get, "http://www.example.com").body.should == "abc"
+      http_request(:get, "http://www.example.com").body.should be == "abc"
     end
 
     it "should work with optional query params" do
       stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"
+      http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should be == "abc"
     end
 
     it "should work with optional query params declared as string" do
       stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
+      http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should be == "abc"
     end
 
     describe "mocking EM::HttpClient API" do
@@ -48,11 +48,11 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it 'should support #uri' do
-        subject.uri.should == Addressable::URI.parse('http://www.example.com/')
+        subject.uri.should be == Addressable::URI.parse('http://www.example.com/')
       end
 
       it 'should support #last_effective_url' do
-        subject.last_effective_url.should == Addressable::URI.parse('http://www.example.com/')
+        subject.last_effective_url.should be == Addressable::URI.parse('http://www.example.com/')
       end
     end
 

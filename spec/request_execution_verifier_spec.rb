@@ -17,7 +17,7 @@ describe WebMock::RequestExecutionVerifier do
       @verifier.expected_times_executed = 2
       expected_text = "The request www.example.com was expected to execute 2 times but it executed 0 times"
       expected_text << @executed_requests_info
-      @verifier.failure_message.should == expected_text
+      @verifier.failure_message.should be == expected_text
     end
 
     it "should report failure message correctly when executed times is one" do
@@ -25,7 +25,7 @@ describe WebMock::RequestExecutionVerifier do
       @verifier.expected_times_executed = 1
       expected_text = "The request www.example.com was expected to execute 1 time but it executed 1 time"
       expected_text << @executed_requests_info
-      @verifier.failure_message.should == expected_text
+      @verifier.failure_message.should be == expected_text
     end
 
   end
@@ -37,14 +37,14 @@ describe WebMock::RequestExecutionVerifier do
       @verifier.expected_times_executed = 2
       expected_text = "The request www.example.com was not expected to execute 2 times but it executed 2 times"
       expected_text << @executed_requests_info
-      @verifier.negative_failure_message.should == expected_text
+      @verifier.negative_failure_message.should be == expected_text
     end
 
     it "should report failure message when not expected request but it executed" do
       @verifier.times_executed = 1
       expected_text = "The request www.example.com was expected to execute 0 times but it executed 1 time"
       expected_text << @executed_requests_info
-      @verifier.negative_failure_message.should == expected_text
+      @verifier.negative_failure_message.should be == expected_text
     end
 
   end

@@ -8,13 +8,13 @@ module NetHTTPSpecHelper
     response = nil
     clazz = Net::HTTP.const_get("#{method.to_s.capitalize}")
     req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", nil)
-    options[:headers].each do |k,v|
-      if v.is_a?(Array)
-        v.each_with_index do |v,i|
-          i == 0 ? (req[k] = v) : req.add_field(k, v)
+    options[:headers].each do |key,val|
+      if val.is_a?(Array)
+        val.each_with_index do |v,i|
+          i == 0 ? (req[key] = v) : req.add_field(key, v)
         end
       else
-        req[k] = v
+        req[key] = val
       end
     end if options[:headers]
 
@@ -26,8 +26,8 @@ module NetHTTPSpecHelper
       http.ssl_timeout = 10 unless RUBY_VERSION == "1.9.1"
     end
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    response = http.start {|http|
-      http.request(req, options[:body], &block)
+    response = http.start {|h|
+      h.request(req, options[:body], &block)
     }
     headers = {}
     response.each_header {|name, value| headers[name] = value}

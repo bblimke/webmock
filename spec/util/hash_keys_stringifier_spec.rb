@@ -21,7 +21,7 @@ describe WebMock::Util::HashKeysStringifier do
         ]
       }
     }
-    WebMock::Util::HashKeysStringifier.stringify_keys!(hash).should == stringified
+    WebMock::Util::HashKeysStringifier.stringify_keys!(hash).should be == stringified
   end
 
 end

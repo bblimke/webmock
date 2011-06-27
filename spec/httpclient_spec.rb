@@ -19,14 +19,14 @@ describe "Webmock with HTTPClient" do
     http_request(:get, "http://www.example.com/") do |body|
       response_body = body
     end
-    response_body.should == "abc"
+    response_body.should be == "abc"
   end
 
    it "should match requests if headers are the same  but in different order" do
      stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
      http_request(
        :get, "http://www.example.com/",
-       :headers => {"a" => ["c", "b"]}).status.should == "200"
+       :headers => {"a" => ["c", "b"]}).status.should be == "200"
    end
 
 

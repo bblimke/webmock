@@ -7,30 +7,30 @@ describe WebMock::RequestSignature do
     it "should have assigned normalized uri" do
       WebMock::Util::URI.should_receive(:normalize_uri).and_return("www.example.kom")
       signature = WebMock::RequestSignature.new(:get, "www.example.com")
-      signature.uri.should == "www.example.kom"
+      signature.uri.should be == "www.example.kom"
     end
 
     it "should have assigned uri without normalization if uri is URI" do
       WebMock::Util::URI.should_not_receive(:normalize_uri)
       uri = Addressable::URI.parse("www.example.com")
       signature = WebMock::RequestSignature.new(:get, uri)
-      signature.uri.should == uri
+      signature.uri.should be == uri
     end
 
     it "should have assigned normalized headers" do
       WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
-      WebMock::RequestSignature.new(:get, "www.example.com", :headers => {'A' => 'a'}).headers.should == {'B' => 'b'}
+      WebMock::RequestSignature.new(:get, "www.example.com", :headers => {'A' => 'a'}).headers.should be == {'B' => 'b'}
     end
 
     it "should have assigned body" do
-      WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc").body.should == "abc"
+      WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc").body.should be == "abc"
     end
 
   end
 
   it "should report string describing itself" do
     WebMock::RequestSignature.new(:get, "www.example.com",
-      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s.should ==
+      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s.should be ==
     "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
   end
 
@@ -40,7 +40,7 @@ describe WebMock::RequestSignature do
         :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
       signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
         :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
-      signature1.hash.should == signature2.hash
+      signature1.hash.should be == signature2.hash
     end
 
     it "should report different hash for two signatures with different method" do

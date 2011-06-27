@@ -17,13 +17,13 @@ module HTTPClientSpecHelper
     else
       response = c.request(*params, &block)
     end
-    headers = response.header.all.inject({}) do |headers, header|
-      if !headers.has_key?(header[0])
-        headers[header[0]] = header[1]
+    headers = response.header.all.inject({}) do |hash, header|
+      if !hash.has_key?(header[0])
+        hash[header[0]] = header[1]
       else
-        headers[header[0]] = [headers[header[0]], header[1]].join(', ')
+        hash[header[0]] = [hash[header[0]], header[1]].join(', ')
       end
-      headers
+      hash
     end
     OpenStruct.new({
       :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,

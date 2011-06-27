@@ -14,9 +14,9 @@ describe WebMock::RequestRegistry do
     end
 
     it "should clean list of executed requests" do
-      WebMock::RequestRegistry.instance.times_executed(@request_pattern).should == 1
+      WebMock::RequestRegistry.instance.times_executed(@request_pattern).should be == 1
       WebMock::RequestRegistry.instance.reset!
-      WebMock::RequestRegistry.instance.times_executed(@request_pattern).should == 0
+      WebMock::RequestRegistry.instance.times_executed(@request_pattern).should be == 0
     end
 
   end
@@ -33,15 +33,15 @@ describe WebMock::RequestRegistry do
     end
 
     it "should report 0 if no request matching pattern was requested" do
-      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, "www.example.net")).should == 0
+      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, "www.example.net")).should be == 0
     end
 
     it "should report number of times matching pattern was requested" do
-      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, "www.example.com")).should == 2
+      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, "www.example.com")).should be == 2
     end
 
     it "should report number of times all matching pattern were requested" do
-      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, /.*example.*/)).should == 3
+      WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, /.*example.*/)).should be == 3
     end
   end
 
@@ -50,7 +50,7 @@ describe WebMock::RequestRegistry do
       WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
       WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
       WebMock::RequestRegistry.instance.requested_signatures.
-        get(WebMock::RequestSignature.new(:get, "www.example.com")).should == 2
+        get(WebMock::RequestSignature.new(:get, "www.example.com")).should be == 2
     end
   end
 
@@ -63,12 +63,12 @@ describe WebMock::RequestRegistry do
       ].each do |s|
         WebMock::RequestRegistry.instance.requested_signatures.put(s)
       end
-      WebMock::RequestRegistry.instance.to_s.should ==
+      WebMock::RequestRegistry.instance.to_s.should be ==
       "GET http://www.example.com/ was made 2 times\nPUT http://www.example.org/ was made 1 time\n"
     end
 
     it "should output info if no requests were executed" do
-      WebMock::RequestRegistry.instance.to_s.should == "No requests were made."
+      WebMock::RequestRegistry.instance.to_s.should be == "No requests were made."
     end
   end
 

@@ -7,7 +7,7 @@ describe WebMock::RequestStub do
   end
 
   it "should have request pattern with method and uri" do
-    @request_stub.request_pattern.to_s.should == "GET http://www.example.com/"
+    @request_stub.request_pattern.to_s.should be == "GET http://www.example.com/"
   end
 
   it "should have response" do
@@ -18,12 +18,12 @@ describe WebMock::RequestStub do
 
     it "should assign body to request pattern" do
       @request_stub.with(:body => "abc")
-      @request_stub.request_pattern.to_s.should == WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
+      @request_stub.request_pattern.to_s.should be == WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
     end
 
     it "should assign normalized headers to request pattern" do
       @request_stub.with(:headers => {'A' => 'a'})
-      @request_stub.request_pattern.to_s.should ==
+      @request_stub.request_pattern.to_s.should be ==
         WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
@@ -38,20 +38,20 @@ describe WebMock::RequestStub do
 
     it "should assign response with provided options" do
       @request_stub.to_return(:body => "abc", :status => 500)
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.status.should == [500, ""]
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.status.should be == [500, ""]
     end
 
     it "should assign responses with provided options" do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
-      [@request_stub.response.body, @request_stub.response.body].should == ["abc", "def"]
+      [@request_stub.response.body, @request_stub.response.body].should be == ["abc", "def"]
     end
 
   end
 
   describe "then" do
     it "should return stub without any modifications, acting as syntactic sugar" do
-      @request_stub.then.should == @request_stub
+      @request_stub.then.should be == @request_stub
     end
   end
 
@@ -59,27 +59,27 @@ describe WebMock::RequestStub do
 
     it "should return responses in a sequence passed as array" do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
     end
 
     it "should repeat returning last response" do
       @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
       @request_stub.response
       @request_stub.response
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "def"
     end
 
     it "should return responses in a sequence passed as comma separated params" do
       @request_stub.to_return({:body => "abc"}, {:body => "def"})
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
     end
 
     it "should return responses declared in multiple to_return declarations" do
       @request_stub.to_return({:body => "abc"}).to_return({:body => "def"})
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
     end
 
   end
@@ -95,7 +95,7 @@ describe WebMock::RequestStub do
 
     it "should assign sequence of responses with response with exception to be thrown" do
       @request_stub.to_return(:body => "abc").then.to_raise(ArgumentError)
-      @request_stub.response.body.should == "abc"
+      @request_stub.response.body.should be == "abc"
       lambda {
         @request_stub.response.raise_error_if_any
       }.should raise_error(ArgumentError, "Exception from WebMock")
@@ -132,7 +132,7 @@ describe WebMock::RequestStub do
 
      it "should assign sequence of responses with response with timeout" do
        @request_stub.to_return(:body => "abc").then.to_timeout
-       @request_stub.response.body.should == "abc"
+       @request_stub.response.body.should be == "abc"
        @request_stub.response.should_timeout.should be_true
      end
 
@@ -140,7 +140,7 @@ describe WebMock::RequestStub do
        @request_stub.to_timeout.then.to_timeout.then.to_return(:body => "abc")
        @request_stub.response.should_timeout.should be_true
        @request_stub.response.should_timeout.should be_true
-       @request_stub.response.body.should == "abc"
+       @request_stub.response.body.should be == "abc"
      end
 
    end
@@ -156,29 +156,29 @@ describe WebMock::RequestStub do
 
     it "should repeat returning last declared response declared number of times" do
       @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
     end
 
     it "should repeat raising last declared exception declared number of times" do
       @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
     end
 
     it "should repeat returning last declared sequence of responses declared number of times" do
       @request_stub.to_return({:body => "abc"}, {:body => "def"}).times(2).then.to_return({:body => "ghj"})
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
-      @request_stub.response.body.should == "abc"
-      @request_stub.response.body.should == "def"
-      @request_stub.response.body.should == "ghj"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
+      @request_stub.response.body.should be == "abc"
+      @request_stub.response.body.should be == "def"
+      @request_stub.response.body.should be == "ghj"
     end
 
     it "should return self" do
-      @request_stub.to_return({:body => "abc"}).times(1).should == @request_stub
+      @request_stub.to_return({:body => "abc"}).times(1).should be == @request_stub
     end
 
     it "should raise error if argument is not integer" do

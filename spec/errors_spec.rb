@@ -10,7 +10,7 @@ describe "errors" do
         expected =  "Real HTTP connections are disabled. Unregistered request: aaa" +
                "\n\nYou can stub this request with the following snippet:\n\n" +
                "bbb\n\n============================================================"
-        WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
+        WebMock::NetConnectNotAllowedError.new(request_signature).message.should be == expected
       end
     end
   end

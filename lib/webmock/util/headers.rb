@@ -24,7 +24,7 @@ module WebMock
         str << headers.map do |k,v|
           v = case v
             when Regexp then v.inspect
-            when Array then "["+v.map{|v| "'#{v.to_s}'"}.join(", ")+"]"
+            when Array then "["+v.map{|s| "'#{s.to_s}'"}.join(", ")+"]"
             else "'#{v.to_s}'"
           end
           "'#{k}'=>#{v}"

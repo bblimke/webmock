@@ -4,18 +4,18 @@ describe WebMock::RequestPattern do
 
   it "should report string describing itself" do
     WebMock::RequestPattern.new(:get, "www.example.com",
-      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s.should ==
+      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s.should be ==
     "GET http://www.example.com/ with body \"abc\" with headers {'A'=>'a', 'B'=>'b'}"
   end
 
   it "should report string describing itself with block" do
     WebMock::RequestPattern.new(:get, "www.example.com",
-      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should ==
+      :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should be ==
     "GET http://www.example.com/ with body \"abc\" with headers {'A'=>'a', 'B'=>'b'} with given block"
   end
 
   it "should report string describing itself with query params" do
-    WebMock::RequestPattern.new(:get, /.*example.*/, :query => {'a' => ['b', 'c']}).to_s.should ==
+    WebMock::RequestPattern.new(:get, /.*example.*/, :query => {'a' => ['b', 'c']}).to_s.should be ==
     "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
   end
 
@@ -26,12 +26,12 @@ describe WebMock::RequestPattern do
 
     it "should have assigned body pattern" do
       @request_pattern.with(:body => "abc")
-      @request_pattern.to_s.should ==WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
+      @request_pattern.to_s.should be ==WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s
     end
 
     it "should have assigned normalized headers pattern" do
       @request_pattern.with(:headers => {'A' => 'a'})
-      @request_pattern.to_s.should ==WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
+      @request_pattern.to_s.should be ==WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
   end
