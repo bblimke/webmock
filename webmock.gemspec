@@ -17,11 +17,26 @@ Gem::Specification.new do |s|
   s.add_dependency 'crack', '>=0.1.7'
   s.add_dependency 'mixology', '~> 0.2.0'
 
-  s.add_development_dependency 'rspec',           '>= 2.0.0'
-  s.add_development_dependency 'httpclient',      '>= 2.1.5.2'
-  s.add_development_dependency 'patron',          '>= 0.4.9'
-  s.add_development_dependency 'em-http-request', '>= 0.2.14'
-  s.add_development_dependency 'curb',            '>= 0.7.8'
+  {
+    'bundler'         => '~> 1.0.7',
+    'rake'            => '~> 0.9.2',
+
+    'patron'          => '0.4.9',
+    'em-http-request' => '~> 0.3.0',
+    'curb'            => '0.7.8',
+    'httpclient'      => '>= 2.1.5.2',
+    'typhoeus'        => '~> 0.2.1',
+
+    'rspec'           => '~> 2.6',
+    'cucumber'        => '~> 1.0',
+    'aruba'           => '~> 0.4',
+
+    'timecop'         => '~> 0.3.5',
+    'rack'            => '1.1.0',
+    'sinatra'         => '~> 1.1.0'
+  }.each do |lib, version|
+    s.add_development_dependency lib, version
+  end
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
