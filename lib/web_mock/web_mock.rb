@@ -72,6 +72,11 @@ module WebMock
     puts WebMock::RequestExecutionVerifier.executed_requests_message
   end
 
+  def self.warn(message)
+    $stderr.puts message
+    $stderr.puts caller.join("\n") if $VERBOSE
+  end
+
   %w(
     allow_net_connect!
     disable_net_connect!

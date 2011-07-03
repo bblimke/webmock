@@ -1,3 +1,5 @@
+require 'web_mock/web_mock'
+
 if defined?(Curl)
 
   module Curl

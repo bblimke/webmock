@@ -11,6 +11,8 @@
 # after it has aleady been read.  This attemps to preserve the behavior of
 # #read_body, acting just as if it had never been read.
 
+require 'web_mock/web_mock'
+
 module WebMock
   module Net
     module HTTPResponse

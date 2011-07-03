@@ -1,5 +1,5 @@
 require 'test/unit'
-require 'webmock'
+require 'web_mock'
 
 module Test
   module Unit

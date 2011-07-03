@@ -1,6 +1,6 @@
-require 'webmock'
-require 'webmock/rspec/matchers/request_pattern_matcher'
-require 'webmock/rspec/matchers/webmock_matcher'
+require 'web_mock'
+require 'web_mock/rspec/matchers/request_pattern_matcher'
+require 'web_mock/rspec/matchers/webmock_matcher'
 
 module WebMock
   module Matchers

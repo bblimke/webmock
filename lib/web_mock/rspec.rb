@@ -1,4 +1,4 @@
-require 'webmock'
+require 'web_mock'
 
 # RSpec 1.x and 2.x compatibility
 if defined?(RSpec) && defined?(RSpec::Expectations)
@@ -18,7 +18,7 @@ else
   end
 end
 
-require 'webmock/rspec/matchers'
+require 'web_mock/rspec/matchers'
 
 RSPEC_CONFIGURER.configure { |config|
 

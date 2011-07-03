@@ -1,5 +1,5 @@
-require 'webmock'
-require 'webmock/rspec/matchers'
+require 'web_mock'
+require 'web_mock/rspec/matchers'
 
 World(WebMock::API, WebMock::Matchers)
 

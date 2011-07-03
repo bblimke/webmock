@@ -1,3 +1,5 @@
+require 'web_mock/web_mock'
+
 require 'net/http'
 require 'net/https'
 require 'stringio'
