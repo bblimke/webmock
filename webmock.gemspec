@@ -3,16 +3,15 @@ $:.push File.expand_path('../lib', __FILE__)
 require 'web_mock/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'web_mock'
+  s.name        = 'webmock'
   s.version     = WebMock::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ['Bartosz Blimke']
-  s.email       = ['bartosz.blimke@gmail.com']
+  s.authors     = ['Bartosz Blimke', 'James Conroy-Finn']
+  s.email       = ['bartosz.blimke@gmail.com', 'james@logi.cl']
+  # TODO JCF: Change homepage to http://webmock.github.com
   s.homepage    = 'http://github.com/bblimke/webmock'
   s.summary     = %q{Library for stubbing HTTP requests in Ruby.}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
-
-  s.rubyforge_project = 'webmock'
 
   s.add_dependency 'addressable', '~> 2.2', '> 2.2.5'
   s.add_dependency 'crack', '>=0.1.7'
