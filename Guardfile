@@ -1,6 +1,4 @@
-# A sample Guardfile
-# More info at https://github.com/guard/guard#readme
-
+# vim: syn=ruby
 # rubies = %w[
 #   1.8.6
 #   1.8.7
@@ -21,4 +19,24 @@ guard 'rspec', rspec_options do
   watch(%r{^spec/.+_spec\.rb})
   watch(%r{^lib/(.+)\.rb})     { |m| "spec/lib/#{m[1]}_spec.rb" }
   watch('spec/spec_helper.rb') { "spec" }
+end
+
+cucumber_options = {
+  :cli => <<-CLI.gsub("\n", '')
+    --no-profile
+    --color
+    --format pretty
+    --strict
+    --require features/support
+    --require features/step_definitions
+    --tags ~@wip
+  CLI
+}
+
+guard 'cucumber', cucumber_options do
+  watch(%r{^features/.+\.feature$})
+  watch(%r{^features/support/.+$})          { 'features' }
+  watch(%r{^features/step_definitions/(.+)_steps\.rb$}) do |m|
+    Dir[File.join("**/#{m[1]}.feature")][0] || 'features'
+  end
 end
