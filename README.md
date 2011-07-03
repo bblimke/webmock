@@ -1,12 +1,20 @@
 # WebMock ![travis-ci](http://travis-ci.org/webmock/webmock.png)
 
-## Unstable v2.0 branch!
+**WebMock 2.0** is the next major version of WebMock. Check out the
+[ROADMAP](https://github.com/webmock/webmock/blob/master/ROADMAP.md) to
+get an idea of some of what we're going to add to the library as part of
+this release.
 
-    Don't use this branch, use the master branch. This is where I'm
-    doing a lot a refactoring and trying out some new features that
-    won't be ready for a while.
+Until we release 2.0 you should continue to use 1.6.4, which can be
+found at [bblimke/webmock](https://github.com/bblimke/webmock).
 
-Library for stubbing and setting expectations on HTTP requests in Ruby.
+## Useful Links
+
+- [Homepage](http://webmock.github.com)
+- [Source](http://github.com/webmock/webmock)
+- [Documentation](http://relishapp.com/webmock/webmock)
+
+### Library for stubbing and setting expectations on HTTP requests in Ruby.
 
 Features
 --------
