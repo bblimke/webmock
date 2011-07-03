@@ -485,17 +485,17 @@ shared_examples_for "WebMock" do
 
     it "should raise timeout exception if declared in a stubbed response" do
       stub_http_request(:get, "www.example.com").to_timeout
-      lambda {
+      expect {
         http_request(:get, "http://www.example.com/")
-      }.should raise_error(client_timeout_exception_class)
+      }.to raise_error(client_timeout_exception_class)
     end
 
     it "should raise exception if declared in a stubbed response after returning declared response" do
       stub_http_request(:get, "www.example.com").to_return(:body => "abc").then.to_timeout
       http_request(:get, "http://www.example.com/").body.should == "abc"
-      lambda {
+      expect {
         http_request(:get, "http://www.example.com/")
-      }.should raise_error(client_timeout_exception_class)
+      }.to raise_error(client_timeout_exception_class)
     end
 
   end

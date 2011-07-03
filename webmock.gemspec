@@ -3,7 +3,7 @@ $:.push File.expand_path('../lib', __FILE__)
 require 'web_mock/version'
 
 Gem::Specification.new do |s|
-  s.name        = 'webmock'
+  s.name        = 'web_mock'
   s.version     = WebMock::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Bartosz Blimke']
