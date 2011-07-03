@@ -28,14 +28,3 @@ Rake::TestTask.new(:test) do |test|
 end
 
 task :default => [:spec, :test]
-
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  $:.push File.expand_path('../lib', __FILE__)
-  require 'webmock/version'
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "webmock #{WebMock::VERSION}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/webmock/webmock.rb')
-end
