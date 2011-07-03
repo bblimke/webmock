@@ -1,4 +1,4 @@
-Feature: Stubbing requests using only a URI
+Feature: Stubbing requests
 
   WebMock can stub requests using only a URI
 
