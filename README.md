@@ -1,5 +1,4 @@
-WebMock
-=======
+# WebMock ![travis-ci](http://travis-ci.org/webmock/webmock.png)
 
 ## Unstable v2.0 branch!
 
