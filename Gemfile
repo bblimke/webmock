@@ -8,6 +8,7 @@ group :development do
   gem 'guard-rspec'
   gem 'rb-fsevent'
   gem 'yard'
+  gem 'rdiscount'
 end
 
 platforms :jruby do
