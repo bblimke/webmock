@@ -10,6 +10,52 @@ unless RUBY_PLATFORM =~ /java/
 
     it_should_behave_like "WebMock"
 
+    it "should work with request middleware" do
+      stub_http_request(:get, "www.example.com").with(:body => 'bar')
+
+      middleware = Class.new do
+        def request(client, head, body)
+          [{}, 'bar']
+        end
+      end
+
+      EM.run do
+        conn = EventMachine::HttpRequest.new('http://www.example.com/')
+
+        conn.use middleware
+
+        http = conn.get(:body => 'foo')
+
+        http.callback do
+          WebMock.should have_requested(:get, "www.example.com").with(:body => 'bar')
+          EM.stop
+        end
+      end
+    end
+
+    it "should work with response middleware" do
+      stub_http_request(:get, "www.example.com").to_return(:body => 'foo')
+
+      middleware = Class.new do
+        def response(resp)
+          resp.response = 'bar'
+        end
+      end
+
+      EM.run do
+        conn = EventMachine::HttpRequest.new('http://www.example.com/')
+
+        conn.use middleware
+
+        http = conn.get
+
+        http.callback do
+          http.response.should be == 'bar'
+          EM.stop
+        end
+      end
+    end
+
     it "should work with streaming" do
       stub_http_request(:get, "www.example.com").to_return(:body => "abc")
       response = ""

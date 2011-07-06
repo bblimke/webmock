@@ -116,12 +116,16 @@ if defined?(EventMachine::HttpClient)
       end
 
       def build_request_signature
+        headers, body = @req.headers, @req.body
+
+        @conn.middleware.select {|m| m.respond_to?(:request) }.each do |m|
+          headers, body = m.request(self, headers, body)
+        end
+
         method = @req.method
         uri = @req.uri
         auth = @req.proxy[:authorization]
         query = @req.query
-        headers = @req.headers
-        body = @req.body
 
         if auth
           userinfo = auth.join(':')
@@ -143,7 +147,6 @@ if defined?(EventMachine::HttpClient)
           :headers => headers
         )
       end
-
 
       def make_raw_response(response)
         response.raise_error_if_any
