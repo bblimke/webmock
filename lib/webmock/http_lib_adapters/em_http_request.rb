@@ -12,8 +12,10 @@ if defined?(EventMachine::HttpRequest)
         def setup(response, uri, error = nil)
           @last_effective_url = @uri = uri
           if error
-            on_error(error)
-            fail(self)
+            EM.next_tick do
+              on_error(error)
+              fail(self)
+            end
           else
             EM.next_tick do
               receive_data(response)
