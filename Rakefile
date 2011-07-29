@@ -29,8 +29,8 @@ end
 
 task :default => [:spec, :test]
 
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
+require 'rdoc/task'
+RDoc::Task.new do |rdoc|
   $:.push File.expand_path('../lib', __FILE__)
   require 'webmock/version'
 
