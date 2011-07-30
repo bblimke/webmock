@@ -63,7 +63,7 @@ module WebMock
     def matches?(request_signature)
       self.request_pattern.matches?(request_signature)
     end
-    
+
     def to_s
       self.request_pattern.to_s
     end
