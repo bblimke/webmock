@@ -27,7 +27,13 @@ Rake::TestTask.new(:test) do |test|
   test.warning = false
 end
 
-task :default => [:spec, :test]
+Rake::TestTask.new(:minitest) do |test|
+  test.test_files = FileList["minitest/**/*.rb"].exclude("test/test_helper.rb")
+  test.verbose = false
+  test.warning = false
+end
+
+task :default => [:spec, :test, :minitest]
 
 require 'rdoc/task'
 RDoc::Task.new do |rdoc|
