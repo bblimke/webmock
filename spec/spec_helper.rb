@@ -13,7 +13,9 @@ require 'rspec'
 require 'webmock/rspec'
 
 require 'network_connection'
-require "support/webmock_server"
+require 'support/webmock_server'
+require 'my_rack_app'
+
 
 RSpec.configure do |config|
   config.include WebMock::API

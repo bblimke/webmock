@@ -741,11 +741,19 @@ shared_examples_for "WebMock" do
             stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s].read })
             http_request(:get, "http://www.example.com/").body.size.should == 419
           end
+        end
 
+        describe "rack responses" do
+          before(:each) do
+            stub_request(:any, "http://www.example.com/greet").to_rack(MyRackApp)
+          end
+
+          it "should return response returned by rack app" do
+            http_request(:post, 'http://www.example.com/greet', :body => 'name=Jimmy').body.should == 'Good to meet you, Jimmy!'
+          end
         end
 
         describe "sequences of responses" do
-
           it "should return responses one by one if declared in array" do
             stub_http_request(:get, "www.example.com").to_return([ {:body => "1"}, {:body => "2"}, {:body => "3"} ])
             http_request(:get, "http://www.example.com/").body.should == "1"

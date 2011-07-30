@@ -9,7 +9,7 @@ group :development do
 end
 
 group :test do
-  gem 'sinatra' # for testing rack delegation
+  gem 'rack'
 end
 
 platforms :jruby do

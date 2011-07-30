@@ -1,5 +1,4 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require File.expand_path(File.dirname(__FILE__) + '/../test/my_rack_app')
 
 describe WebMock::RackResponse do
   before :each do
