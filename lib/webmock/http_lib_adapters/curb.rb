@@ -148,11 +148,11 @@ if defined?(Curl)
       alias_method :http_put_without_webmock, :http_put
       alias_method :http_put, :http_put_with_webmock
 
-      def http_post_with_webmock data = nil
+      def http_post_with_webmock *data
         @webmock_method = :post
-        @post_body = data if data
+        @post_body = data.join('&') if data && !data.empty?
         curb_or_webmock do
-          http_post_without_webmock(data)
+          http_post_without_webmock(*data)
         end
       end
       alias_method :http_post_without_webmock, :http_post
@@ -250,17 +250,23 @@ if defined?(Curl)
         METHOD
       end
 
-      %w[ put post ].each do |verb|
-        class_eval <<-METHOD, __FILE__, __LINE__
-          def self.http_#{verb}(url, data, &block)
-            c = new
-            c.url = url
-            block.call(c) if block
-            c.send("http_#{verb}", data)
-            c
-          end
-        METHOD
-      end
+      class_eval <<-METHOD, __FILE__, __LINE__
+        def self.http_put(url, data, &block)
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send(:http_put, data)
+          c
+        end
+
+        def self.http_post(url, *data, &block)
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send(:http_post, *data)
+          c
+        end
+      METHOD
 
       module WebmockHelper
         # Borrowed from Patron:
