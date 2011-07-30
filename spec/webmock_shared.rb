@@ -1405,8 +1405,54 @@ shared_examples_for "WebMock" do
                  end
               end
             end
-
-
+            
+            
+            describe "using matchers on the RequestStub" do
+              
+              it "should verify expected requests occured" do
+                stub = stub_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.once
+              end
+              
+              it "should verify subsequent requests" do
+                stub = stub_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.once
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.twice
+              end
+              
+              it "should verify expected requests occured" do
+                stub = stub_request(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'})
+                http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
+                stub.should have_been_requested.once
+              end
+              
+              it "should verify that non expected requests didn't occur" do
+                lambda {
+                  stub = stub_request(:get, "http://www.example.com")
+                  http_request(:get, "http://www.example.com/")
+                  stub.should_not have_been_requested
+                }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+              end
+              
+              it "should verify if non expected request executed and block evaluated to true" do
+                 lambda {
+                   stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
+                   http_request(:post, "http://www.example.com/", :body => "wadus")
+                   stub.should_not have_been_requested
+                 }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+               end
+               
+              it "should verify if request was executed and block evaluated to true" do
+                stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
+                http_request(:post, "http://www.example.com/", :body => "wadus")
+                stub.should have_been_requested
+              end
+            end
+            
+            
             describe "when net connect allowed", :net_connect => true do
               before(:each) do
                 WebMock.allow_net_connect!
