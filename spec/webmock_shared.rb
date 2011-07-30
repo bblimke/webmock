@@ -565,7 +565,7 @@ shared_examples_for "WebMock" do
           stub_http_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
           response = http_request(:get, "http://www.example.com/")
           # not supported by em-http-request, it always returns "unknown" for http_reason
-          unless @http.is_a?(EventMachine::WebMockHttpClient)
+          unless http_library == :em_http_request
             response.message.should == "Internal Server Error"
           end
         end
@@ -579,7 +579,7 @@ shared_examples_for "WebMock" do
           stub_http_request(:get, "www.example.com")
           response = http_request(:get, "http://www.example.com/")
           # not supported by em-http-request, it always returns "unknown" for http_reason
-          unless @http.is_a?(EventMachine::WebMockHttpClient)
+          unless http_library == :em_http_request
             response.message.should == ""
           end
         end
@@ -680,7 +680,7 @@ shared_examples_for "WebMock" do
 
           it "should return recorded status message" do
             # not supported by em-http-request, it always returns "unknown" for http_reason
-            unless @http.is_a?(EventMachine::WebMockHttpClient)
+            unless http_library == :em_http_request
               @response.message.should == "OK"
             end
           end
@@ -719,7 +719,7 @@ shared_examples_for "WebMock" do
 
           it "should return recorded status message" do
             # not supported by em-http-request, it always returns "unknown" for http_reason
-            unless @http.is_a?(EventMachine::WebMockHttpClient)
+            unless http_library == :em_http_request
               @response.message.should == "OK"
             end
           end
@@ -1591,7 +1591,7 @@ shared_examples_for "WebMock" do
 
           it "should pass response with status and message" do
             # not supported by em-http-request, it always returns "unknown" for http_reason
-            unless @http.is_a?(EventMachine::WebMockHttpClient)
+            unless http_library == :em_http_request
               @response.status[0].should == 302
               @response.status[1].should == "Found"
             end
