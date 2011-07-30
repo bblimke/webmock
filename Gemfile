@@ -3,7 +3,7 @@ source 'http://rubygems.org/'
 gemspec
 
 group :development do
-  gem 'rake', '~> 0.8.0'
+  gem 'rake'
   gem 'guard-rspec'
   gem 'rb-fsevent'
 end
