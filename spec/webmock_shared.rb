@@ -563,7 +563,11 @@ shared_examples_for "WebMock" do
 
         it "should return declared status message" do
           stub_http_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
-          http_request(:get, "http://www.example.com/").message.should == "Internal Server Error"
+          response = http_request(:get, "http://www.example.com/")
+          # not supported by em-http-request, it always returns "unknown" for http_reason
+          unless @http.is_a?(EventMachine::WebMockHttpClient)
+            response.message.should == "Internal Server Error"
+          end
         end
 
         it "should return default status code" do
@@ -573,7 +577,11 @@ shared_examples_for "WebMock" do
 
         it "should return default empty message" do
           stub_http_request(:get, "www.example.com")
-          http_request(:get, "http://www.example.com/").message.should == ""
+          response = http_request(:get, "http://www.example.com/")
+          # not supported by em-http-request, it always returns "unknown" for http_reason
+          unless @http.is_a?(EventMachine::WebMockHttpClient)
+            response.message.should == ""
+          end
         end
 
         it "should return body declared as IO" do
@@ -671,7 +679,10 @@ shared_examples_for "WebMock" do
           end
 
           it "should return recorded status message" do
-            @response.message.should == "OK"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless @http.is_a?(EventMachine::WebMockHttpClient)
+              @response.message.should == "OK"
+            end
           end
 
           it "should ensure file is closed" do
@@ -707,7 +718,10 @@ shared_examples_for "WebMock" do
           end
 
           it "should return recorded status message" do
-            @response.message.should == "OK"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless @http.is_a?(EventMachine::WebMockHttpClient)
+              @response.message.should == "OK"
+            end
           end
         end
 
@@ -1576,8 +1590,11 @@ shared_examples_for "WebMock" do
           end
 
           it "should pass response with status and message" do
-            @response.status[0].should == 302
-            @response.status[1].should == "Found"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless @http.is_a?(EventMachine::WebMockHttpClient)
+              @response.status[0].should == 302
+              @response.status[1].should == "Found"
+            end
           end
 
           it "should pass response with headers" do
