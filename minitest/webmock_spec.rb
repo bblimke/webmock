@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/test_helper')
-  
+
   describe "Webmock" do
     include HttpRequestTestHelper
-    
+
     before do
       stub_http_request(:any, "http://www.example.com")
       stub_http_request(:any, "https://www.example.com")
@@ -27,4 +27,4 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
     end
 
   end
-  
+
