@@ -219,6 +219,18 @@ You can also use WebMock outside a test framework:
 
     RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
 
+### Rack responses
+
+    class MyRackApp
+      def self.call(env)
+        [200, {}, ["Hello"]]
+      end
+    end
+
+    stub_request(:get, "www.example.com").to_rack(MyRackApp)
+
+    RestClient.post('www.example.com')    # ===> "Hello"
+
 ### Raising errors
 
 #### Exception declared by class
