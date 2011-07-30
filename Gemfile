@@ -5,6 +5,7 @@ gemspec
 group :development do
   gem 'guard-rspec'
   gem 'rb-fsevent'
+  gem 'em-synchrony', '0.3.0.beta.1', :require => false
 end
 
 platforms :jruby do
