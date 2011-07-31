@@ -9,15 +9,25 @@ class WebMockServer
     "localhost:#{port}"
   end
 
+  def concurrent
+    unless RUBY_PLATFORM =~ /java/
+      @pid = Process.fork do
+        yield
+      end
+    else
+      Thread.new { yield }
+    end
+  end
+
   def start
     server = WEBrick::GenericServer.new(:Port => 0, :Logger => Logger.new("/dev/null"))
     server.logger.level = 0
     @port = server.config[:Port]
 
-    @pid = fork do
-      server.logger.level = 0
-      trap("INT"){ server.shutdown }
-
+    concurrent do
+      ['TERM', 'INT'].each do |signal|
+        trap(signal){ server.shutdown }
+      end
       server.start do |socket|
         socket.puts <<-EOT.gsub(/^\s+\|/, '')
           |HTTP/1.0 200 OK
@@ -29,6 +39,7 @@ class WebMockServer
         EOT
       end
     end
+
 
     loop do
       begin
@@ -42,6 +53,8 @@ class WebMockServer
   end
 
   def stop
-    Process.kill("INT", @pid) if @pid
+    if @pid
+      Process.kill('INT', @pid)
+    end
   end
 end
