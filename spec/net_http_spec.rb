@@ -2,12 +2,14 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'webmock_shared'
 require 'ostruct'
 require 'net_http_spec_helper'
+require 'net_http_shared'
 
 include NetHTTPSpecHelper
 
 describe "Webmock with Net:HTTP" do
-
   it_should_behave_like "WebMock"
+
+  let(:port){ WebMockServer.instance.port }
 
   it "should work with block provided" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
@@ -52,38 +54,18 @@ describe "Webmock with Net:HTTP" do
     }.should raise_error("both of body argument and HTTPRequest#body set")
   end
 
-  it "should handle real requests with readable body", :net_connect => true do
-    WebMock.allow_net_connect!
-    req = Net::HTTP::Post.new("/")
-    Net::HTTP.start("www.example.com") {|http|
-      http.request(req, StringIO.new("my_params"))
-    }.body.should =~ /^$/
-  end
-
-  it "should handle requests with block passed to read_body", :net_connect => true do
-    body = ""
-    WebMock.allow_net_connect!
-    req = Net::HTTP::Get.new("/")
-    Net::HTTP.start("www.example.com") do |http|
-      http.request(req) do |res|
-        res.read_body do |str|
-          body << str
-        end
-      end
-    end
-    body.should =~ /^$/
-  end
-
   it "should return a Net::ReadAdapter from response.body when a stubbed request is made with a block and #read_body" do
     WebMock.stub_request(:get, 'http://example.com/').to_return(:body => "the body")
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
     response.body.should be_a(Net::ReadAdapter)
   end
 
-  it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body", :net_connect => true do
+  it "should have request 1 time executed in registry after 1 real request", :net_connect => true do
     WebMock.allow_net_connect!
-    response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
-    response.body.should be_a(Net::ReadAdapter)
+    http = Net::HTTP.new('localhost', port)
+    http.get('/') {}
+    WebMock::RequestRegistry.instance.requested_signatures.hash.size.should == 1
+    WebMock::RequestRegistry.instance.requested_signatures.hash.values.first.should == 1
   end
 
   describe "connecting on Net::HTTP.start" do
@@ -107,6 +89,7 @@ describe "Webmock with Net:HTTP" do
           cert.should be_a(OpenSSL::X509::Certificate)
         }
       end
+
     end
 
     describe "when net http is disabled and allowed only for some hosts" do
@@ -127,8 +110,22 @@ describe "Webmock with Net:HTTP" do
     end
   end
 
+  describe "when net_http_connect_on_start is true" do
+    before(:each) do
+      WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+    end
+    it_should_behave_like "Net::HTTP"
+  end
+
+  describe "when net_http_connect_on_start is false" do
+    before(:each) do
+      WebMock.allow_net_connect!(:net_http_connect_on_start => false)
+    end
+    it_should_behave_like "Net::HTTP"
+  end
+
   describe 'after_request callback support', :net_connect => true do
-    let(:expected_body_regex) { /^$/ }
+    let(:expected_body_regex) { /hello world/ }
 
     before(:each) do
       WebMock.allow_net_connect!
@@ -144,14 +141,14 @@ describe "Webmock with Net:HTTP" do
     end
 
     def perform_get_with_returning_block
-      http_request(:get, "http://www.example.com/") do |response|
+      http_request(:get, "http://localhost:#{port}/") do |response|
         return response.body
       end
     end
 
     it "should support the after_request callback on an request with block and read_body" do
       response_body = ''
-      http_request(:get, "http://www.example.com/") do |response|
+      http_request(:get, "http://localhost:#{port}/") do |response|
         response.read_body { |fragment| response_body << fragment }
       end
       response_body.should =~ expected_body_regex
@@ -167,9 +164,8 @@ describe "Webmock with Net:HTTP" do
     end
 
     it "should only invoke the after_request callback once, even for a recursive post request" do
-      Net::HTTP.new('example.com', 80).post('/', nil)
+      Net::HTTP.new('localhost', port).post('/', nil)
       @callback_invocation_count.should == 1
     end
   end
-
 end

@@ -1,5 +1,7 @@
 require 'webrick'
 require 'logger'
+require 'singleton'
+
 class WebMockServer
   include Singleton
 

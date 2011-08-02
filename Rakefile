@@ -15,9 +15,14 @@ namespace :rvm do
 end
 
 require "rspec/core/rake_task"
-RSpec::Core::RakeTask.new do |t|
+RSpec::Core::RakeTask.new(:spec) do |t|
   t.rspec_opts = ["-c", "-f progress", "-r ./spec/spec_helper.rb"]
   t.pattern = 'spec/**/*_spec.rb'
+end
+
+RSpec::Core::RakeTask.new(:spec_http_without_webmock) do |t|
+  t.rspec_opts = ["-c", "-f progress", "-r ./spec/real_net_http_spec.rb"]
+  t.pattern = 'spec/real_net_http_spec.rb'
 end
 
 require 'rake/testtask'
@@ -33,7 +38,7 @@ Rake::TestTask.new(:minitest) do |test|
   test.warning = false
 end
 
-task :default => [:spec, :test, :minitest]
+task :default => [:spec, :spec_http_without_webmock, :test, :minitest]
 
 require 'rdoc/task'
 RDoc::Task.new do |rdoc|

@@ -27,6 +27,8 @@ RSpec.configure do |config|
     config.filter_run_excluding :net_connect => true
   end
 
+  config.filter_run_excluding :without_webmock => true
+
   config.before(:all) do
     WebMockServer.instance.start
   end
