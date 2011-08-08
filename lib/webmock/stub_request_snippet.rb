@@ -11,11 +11,12 @@ module WebMock
       with = ""
 
       if (@request_signature.body.to_s != '')
-        with << ":body => #{@request_signature.body.inspect}"
+        body = use_body_hash? ? body_hash : @request_signature.body
+        with << ":body => #{body.inspect}"
       end
 
       if (@request_signature.headers && !@request_signature.headers.empty?)
-        with << ", \n       " unless with.empty?
+        with << ",\n       " unless with.empty?
 
         with << ":headers => #{WebMock::Util::Headers.sorted_headers_string(@request_signature.headers)}"
       end
@@ -23,5 +24,14 @@ module WebMock
       string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
       string
     end
+
+    def body_hash
+      Addressable::URI.parse('?' + @request_signature.body).query_values
+    end
+
+    def use_body_hash?
+      @request_signature.headers['Content-Type'] == 'application/x-www-form-urlencoded'
+    end
+
   end
 end
