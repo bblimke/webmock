@@ -300,6 +300,14 @@ shared_examples_for "WebMock" do
               :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
           end
 
+          it "should match if hash contains date string" do #Crack creates date object
+            WebMock.reset!
+            stub_http_request(:post, "www.example.com").
+              with(:body => {"foo" => "2010-01-01"})
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"foo\":\"2010-01-01\"}").status.should == "200"
+          end
         end
 
         describe "for request with xml body and content type is set to xml" do
@@ -319,6 +327,15 @@ shared_examples_for "WebMock" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
               :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
+          end
+
+          it "should match if hash contains date string" do #Crack creates date object
+            WebMock.reset!
+            stub_http_request(:post, "www.example.com").
+              with(:body => {"opt" => {"foo" => "2010-01-01"}})
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+              :body => "<opt foo=\"2010-01-01\">\n</opt>\n").status.should == "200"
           end
 
         end
@@ -1141,6 +1158,13 @@ shared_examples_for "WebMock" do
                     }.should_not raise_error
                   end
 
+                 it "should succeed if json body contains date string" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+                        :body => "{\"foo\":\"2010-01-01\"}")
+                      a_request(:post, "www.example.com").with(:body => {"foo" => "2010-01-01"}).should have_been_made
+                    }.should_not raise_error
+                 end
                 end
 
 
@@ -1160,6 +1184,14 @@ shared_examples_for "WebMock" do
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                         :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+                    }.should_not raise_error
+                  end
+
+                  it "should succeed if xml body contains date string" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+                        :body => "<opt foo=\"2010-01-01\">\n</opt>\n")
+                      a_request(:post, "www.example.com").with(:body => {"opt" => {"foo" => "2010-01-01"}}).should have_been_made
                     }.should_not raise_error
                   end
 

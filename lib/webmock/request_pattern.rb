@@ -143,7 +143,7 @@ module WebMock
 
         case BODY_FORMATS[content_type]
         when :json then
-          matching_hashes?(Crack::JSON.parse(body), @pattern)
+          matching_hashes?(WebMock::Util::JSON.parse(body), @pattern)
         when :xml then
           matching_hashes?(Crack::XML.parse(body), @pattern)
         else
