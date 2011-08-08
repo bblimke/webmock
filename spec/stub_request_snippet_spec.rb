@@ -47,7 +47,7 @@ describe WebMock::StubRequestSnippet do
     end
 
     describe "POST" do
-      let(:form_body) { 'user%5bfirst_name%5d=Bartosz&user%5blast_name%5d=Blimke' }
+      let(:form_body) { 'user%5bfirst_name%5d=Bartosz' }
       let(:multipart_form_body) { 'complicated stuff--ABC123--goes here' }
       it "should print stub request snippet with body as a hash using rails conventions on form posts" do
         @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
@@ -56,7 +56,7 @@ describe WebMock::StubRequestSnippet do
 
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
-  with(:body => {"user"=>{"last_name"=>"Blimke", "first_name"=>"Bartosz"}},
+  with(:body => {"user"=>{"first_name"=>"Bartosz"}},
        :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
   to_return(:status => 200, :body => \"\", :headers => {})
         STUB
