@@ -1,16 +1,16 @@
 shared_examples_for "Net::HTTP" do
   describe "when making real requests", :net_connect => true do
     let(:port){ WebMockServer.instance.port }
-    
+
     before(:each) do
       @http = Net::HTTP.new("localhost", port)
     end
-    
+
     it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body", :net_connect => true do
       response = Net::HTTP.new("localhost", port).request_get('/') { |r| r.read_body { } }
       response.body.should be_a(Net::ReadAdapter)
     end
-    
+
     if RUBY_VERSION < '1.9' #looks like StringIO doesn't respons to bytesize in ruby 1.9 - weird
       it "should handle real requests with readable body", :net_connect => true do
         req = Net::HTTP::Post.new("/")
@@ -32,7 +32,7 @@ shared_examples_for "Net::HTTP" do
       end
       body.should =~ /hello world/
     end
-    
+
     it "should connect only once when connected on start", :net_connect => true do
       @http = Net::HTTP.new('localhost', port)
       socket_id_before_request = socket_id_after_request = nil
@@ -44,7 +44,7 @@ shared_examples_for "Net::HTTP" do
       socket_id_after_request.should_not be_nil
       socket_id_after_request.should == socket_id_before_request
     end
-  
+
     describe "without start" do
       it "should close connection after a real request" do
         @http.get('/') { }
@@ -64,7 +64,7 @@ shared_examples_for "Net::HTTP" do
         }
         socket_id.should_not be_nil
       end
-    
+
       it "should be started during a real request" do
         started = nil
         @http.get('/') {
@@ -74,7 +74,7 @@ shared_examples_for "Net::HTTP" do
         @http.started?.should == false
       end
     end
-  
+
     describe "with start" do
       it "should close connection after a real request" do
         @http.start {|conn| conn.get('/') { } }
@@ -89,7 +89,7 @@ shared_examples_for "Net::HTTP" do
 
       it "should have socket open during a real request" do
         socket_id = nil
-        @http.start {|conn| conn.get('/') { 
+        @http.start {|conn| conn.get('/') {
             socket_id = conn.instance_variable_get(:@socket).object_id
           }
         }
@@ -106,7 +106,7 @@ shared_examples_for "Net::HTTP" do
         @http.started?.should == false
       end
     end
-    
+
     describe "with start without request block" do
       it "should close connection after a real request" do
         @http.start {|conn| conn.get('/') }

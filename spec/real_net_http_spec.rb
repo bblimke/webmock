@@ -15,6 +15,6 @@ describe "Real Net:HTTP without webmock", :without_webmock => true do
   after(:all) do
     WebMockServer.instance.stop
   end
-  
+
   it_should_behave_like "Net::HTTP"
 end
