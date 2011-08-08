@@ -153,6 +153,14 @@ shared_examples_for "WebMock" do
           http_request(:get, "http://#{host_with_port}/").status.should == "200"
         end
       end
+
+      context "when the host is allowed but not port" do
+        it "should allow a real request to allowed host", :net_connect => true do
+          lambda {
+            http_request(:get, "http://localhost:123/")
+          }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://localhost:123/))
+        end
+      end
     end
   end
 
