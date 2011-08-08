@@ -51,6 +51,12 @@ Add the following code to `spec/spec_helper`:
 
     require 'webmock/rspec'
 
+### MiniTest
+
+Add the following code to `test/test_helper`:
+
+    require 'webmock/minitest'
+
 ### Cucumber
 
 Add the following code to `features/support/env.rb`
