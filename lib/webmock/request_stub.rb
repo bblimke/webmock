@@ -50,6 +50,10 @@ module WebMock
       end
     end
 
+    def has_responses?
+      !@responses_sequences.empty?
+    end
+
     def then
       self
     end

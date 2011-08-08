@@ -49,6 +49,13 @@ describe WebMock::StubRequestSnippet do
         @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
+
+      it "should not print to_return part if there are responses available" do
+        expected = 'stub_request(:get, "http://www.example.com/").'+
+        "\n  with(:body => \"abcdef\")"
+        stub = WebMock::RequestStub.new(:get, "www.example.com").with(:body => "abcdef").to_return(:body => "hello")
+        WebMock::StubRequestSnippet.new(stub).to_s.should == expected 
+      end
     end
 
     describe "POST" do

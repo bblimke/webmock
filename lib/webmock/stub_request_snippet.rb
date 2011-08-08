@@ -21,7 +21,9 @@ module WebMock
         with << ":headers => #{request_pattern.headers_pattern.to_s}"
       end
       string << ".\n  with(#{with})" unless with.empty?
-      string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
+      unless @request_stub.has_responses?
+        string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
+      end
       string
     end
   end
