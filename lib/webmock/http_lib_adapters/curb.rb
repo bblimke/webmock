@@ -1,3 +1,9 @@
+begin
+  require 'curb'
+rescue LoadError
+  # curb not found
+end
+
 if defined?(Curl)
 
   module Curl

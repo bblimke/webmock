@@ -1,3 +1,9 @@
+begin
+  require 'patron'
+rescue LoadError
+  # patron not found
+end
+
 if defined?(Patron)
 
   module Patron

@@ -1,3 +1,9 @@
+begin
+  require 'httpclient'
+rescue LoadError
+  # httpclient not found
+end
+
 if defined?(::HTTPClient)
 
   class ::HTTPClient
