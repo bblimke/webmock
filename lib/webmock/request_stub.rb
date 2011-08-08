@@ -71,5 +71,23 @@ module WebMock
     def to_s
       self.request_pattern.to_s
     end
+
+    def self.from_request_signature(signature)
+      stub = self.new(signature.method.to_sym, signature.uri.to_s)
+
+      if signature.body.to_s != ''
+        body = if signature.url_encoded?
+          Addressable::URI.parse('?' + signature.body).query_values
+        else
+          signature.body
+        end
+        stub.with(:body => body)
+      end
+
+      if (signature.headers && !signature.headers.empty?)
+        stub.with(:headers => signature.headers)
+      end
+      stub
+    end
   end
 end

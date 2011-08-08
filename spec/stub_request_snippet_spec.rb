@@ -9,7 +9,8 @@ describe WebMock::StubRequestSnippet do
 
       it "should print stub request snippet with url with params and method and empty successful response" do
         expected = %Q(stub_request(:get, "http://www.example.com/?a=b&c=d").\n  to_return(:status => 200, :body => "", :headers => {}))
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
 
       it "should print stub request snippet with body if available" do
@@ -17,7 +18,8 @@ describe WebMock::StubRequestSnippet do
         expected = %Q(stub_request(:get, "http://www.example.com/?a=b&c=d").)+
         "\n  with(:body => \"abcdef\")." +
         "\n  to_return(:status => 200, :body => \"\", :headers => {})"
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
 
       it "should print stub request snippet with multiline body" do
@@ -25,7 +27,8 @@ describe WebMock::StubRequestSnippet do
         expected = %Q(stub_request(:get, "http://www.example.com/?a=b&c=d").)+
         "\n  with(:body => \"abc\\ndef\")." +
         "\n  to_return(:status => 200, :body => \"\", :headers => {})"
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
 
       it "should print stub request snippet with headers if any" do
@@ -33,7 +36,8 @@ describe WebMock::StubRequestSnippet do
         expected = 'stub_request(:get, "http://www.example.com/?a=b&c=d").'+
         "\n  with(:headers => {\'A\'=>\'a\', \'B\'=>\'b\'})." +
         "\n  to_return(:status => 200, :body => \"\", :headers => {})"
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
 
       it "should print stub request snippet with body and headers" do
@@ -42,7 +46,8 @@ describe WebMock::StubRequestSnippet do
         expected = 'stub_request(:get, "http://www.example.com/?a=b&c=d").'+
         "\n  with(:body => \"abcdef\",\n       :headers => {\'A\'=>\'a\', \'B\'=>\'b\'})." +
         "\n  to_return(:status => 200, :body => \"\", :headers => {})"
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected
       end
     end
 
@@ -53,28 +58,28 @@ describe WebMock::StubRequestSnippet do
         @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
                    :headers => {'Content-Type' => 'application/x-www-form-urlencoded'},
                    :body => form_body)
-
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
   with(:body => {"user"=>{"first_name"=>"Bartosz"}},
        :headers => {'Content-Type'=>'application/x-www-form-urlencoded'}).
   to_return(:status => 200, :body => \"\", :headers => {})
         STUB
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected.strip
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected.strip
       end
 
       it "should print stub request snippet leaving body as string when not a urlencoded form" do
         @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
                    :headers => {'Content-Type' => 'multipart/form-data; boundary=ABC123'},
                    :body => multipart_form_body)
-
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
   with(:body => "#{multipart_form_body}",
        :headers => {'Content-Type'=>'multipart/form-data; boundary=ABC123'}).
   to_return(:status => 200, :body => \"\", :headers => {})
         STUB
-        WebMock::StubRequestSnippet.new(@request_signature).to_s.should == expected.strip
+        WebMock::StubRequestSnippet.new(@request_stub).to_s.should == expected.strip
       end
     end
 

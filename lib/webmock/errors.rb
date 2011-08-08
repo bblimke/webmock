@@ -10,9 +10,10 @@ module WebMock
     private
 
     def stubbing_instructions(request_signature)
+      request_stub = RequestStub.from_request_signature(request_signature)
       text = "\n\n"
       text << "You can stub this request with the following snippet:\n\n"
-      text << WebMock::StubRequestSnippet.new(request_signature).to_s
+      text << WebMock::StubRequestSnippet.new(request_stub).to_s
       text << "\n\n" + "="*60
       text
     end
