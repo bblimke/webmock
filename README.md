@@ -3,12 +3,6 @@ WebMock
 
 Library for stubbing and setting expectations on HTTP requests in Ruby.
 
-WebMock is looking for a maintainer
-===================================
-
-I'm not able to maintain WebMock until end of June 2011.
-If anyone is interested in maintaining it in the meantime (at least handling pull requests and creating patch releases), please get in touch.
-
 Features
 --------
 
