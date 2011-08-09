@@ -33,6 +33,10 @@ module WebMock
       self.to_s == other.to_s
     end
 
+    def url_encoded?
+      headers && headers['Content-Type'] == 'application/x-www-form-urlencoded'
+    end
+
     private
 
     def assign_options(options)

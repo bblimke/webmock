@@ -171,7 +171,7 @@ describe WebMock::Util::URI do
       uri = 'http://www.example.com:80/path?a[]=b&a[]=c'
       lambda { WebMock::Util::URI.normalize_uri(uri) }.should_not raise_error(ArgumentError)
     end
-    
+
   end
 
   describe "stripping default port" do

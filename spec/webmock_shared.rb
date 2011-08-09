@@ -4,19 +4,10 @@ unless defined? SAMPLE_HEADERS
   SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%20c&z=%27Stop%21%27%20said%20Fred"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
-  WWW_EXAMPLE_COM_CONTENT_LENGTH = 596
+  WWW_EXAMPLE_COM_CONTENT_LENGTH = 0
 end
 
 class MyException < StandardError; end;
-
-describe "WebMock version" do
-  
-  it "should report version" do
-    WebMock.version.should == open(File.join(File.dirname(__FILE__), "..", "VERSION")).read.strip
-  end
-  
-end
-
 
 shared_examples_for "WebMock" do
   before(:each) do
@@ -33,8 +24,7 @@ shared_examples_for "WebMock" do
 
       it "should make a real web request if request is not stubbed" do
         setup_expectations_for_real_example_com_request
-        http_request(:get, "http://www.example.com/").
-          body.should =~ /.*example.*/
+        http_request(:get, "http://www.example.com/").status.should == "302"
       end
 
       it "should make a real https request if request is not stubbed" do
@@ -42,6 +32,8 @@ shared_examples_for "WebMock" do
          :host => "www.paypal.com",
          :port => 443,
          :path => "/uk/cgi-bin/webscr",
+         :response_code => 200,
+         :response_message => "OK",
          :response_body => "hello paypal"
         )
         http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
@@ -63,7 +55,7 @@ shared_examples_for "WebMock" do
         stub_http_request(:get, "www.example.com").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/").body.should == "abc"
       end
-      
+
       it "should return stubbed response if request with path was stubbed" do
         stub_http_request(:get, "www.example.com/hello_world").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/hello_world").body.should == "abc"
@@ -110,25 +102,66 @@ shared_examples_for "WebMock" do
           }.should raise_error(connection_refused_exception_class)
         end
     end
-    
+
    describe "is not allowed with exception for allowed domains" do
+     let(:host_with_port){ WebMockServer.instance.host_with_port }
+
       before(:each) do
-        WebMock.disable_net_connect!(:allow => ["www.example.org"])
+        WebMock.disable_net_connect!(:allow => ["www.example.org", host_with_port])
       end
 
-      it "should return stubbed response if request was stubbed" do
-        stub_http_request(:get, "www.example.com").to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/").body.should == "abc"
+      context "when the host is not allowed" do
+        it "should return stubbed response if request was stubbed" do
+          stub_http_request(:get, "www.example.com").to_return(:body => "abc")
+          http_request(:get, "http://www.example.com/").body.should == "abc"
+        end
+
+        it "should raise exception if request was not stubbed" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+          }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+        end
       end
 
-      it "should raise exception if request was not stubbed" do
-        lambda {
-          http_request(:get, "http://www.example.com/")
-        }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+      context "when the host with port is not allowed" do
+        it "should return stubbed response if request was stubbed" do
+          stub_http_request(:get, "http://localhost:2345").to_return(:body => "abc")
+          http_request(:get, "http://localhost:2345/").body.should == "abc"
+        end
+
+        it "should raise exception if request was not stubbed" do
+          lambda {
+            http_request(:get, "http://localhost:2345/")
+          }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://localhost:2345/))
+        end
       end
 
-      it "should allow a real request to allowed host", :net_connect => true do
-        http_request(:get, "http://www.example.org/").status.should == "200"
+      context "when the host is allowed" do
+        it "should raise exception if request was not stubbed" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+          }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+        end
+
+        it "should allow a real request to allowed host", :net_connect => true do
+          http_request(:get, "http://www.example.org/").status.should == "302"
+        end
+      end
+
+      context "when the host with port is allowed" do
+        it "should allow a real request to allowed host", :net_connect => true do
+          unless ENV['TRAVIS'] && http_library == :patron #this spec works everywhere but not on travis
+            http_request(:get, "http://#{host_with_port}/").status.should == "200"
+          end
+        end
+      end
+
+      context "when the host is allowed but not port" do
+        it "should allow a real request to allowed host", :net_connect => true do
+          lambda {
+            http_request(:get, "http://localhost:123/")
+          }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://localhost:123/))
+        end
       end
     end
   end
@@ -151,26 +184,26 @@ shared_examples_for "WebMock" do
         stub_http_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/hello/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
-        
+
     end
 
     describe "on query params" do
-      
+
       it "should match the request by query params declared as a hash" do
         stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
       end
-      
+
       it "should match the request by query declared as a string" do
         stub_http_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
       end
-      
+
       it "should match the request by query params declared both in uri and query option" do
         stub_http_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c").body.should == "abc"
       end
-    
+
     end
 
     describe "on method" do
@@ -231,27 +264,27 @@ shared_examples_for "WebMock" do
         end
 
       end
-      
-      describe "when body is declared as a hash" do        
+
+      describe "when body is declared as a hash" do
         before(:each) do
           stub_http_request(:post, "www.example.com").
             with(:body => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} })
         end
-      
+
         describe "for request with url encoded body" do
-      
+
           it "should match request if hash matches body" do
             http_request(
               :post, "http://www.example.com/",
               :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
           end
-        
+
           it "should match request if hash matches body in different order of params" do
             http_request(
               :post, "http://www.example.com/",
               :body => 'a=1&c[d][]=e&b=five&c[d][]=f').status.should == "200"
           end
-        
+
           it "should not match if hash doesn't match url encoded body" do
             lambda {
               http_request(
@@ -259,47 +292,64 @@ shared_examples_for "WebMock" do
                 :body => 'c[d][]=f&a=1&c[d][]=e').status.should == "200"
             }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'c\[d\]\[\]=f&a=1&c\[d\]\[\]=e'))
           end
-        
+
         end
-        
-        
+
+
         describe "for request with json body and content type is set to json" do
-          
+
           it "should match if hash matches body" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
               :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
           end
-        
+
           it "should match if hash matches body in different form" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
               :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
           end
-        
+
+          it "should match if hash contains date string" do #Crack creates date object
+            WebMock.reset!
+            stub_http_request(:post, "www.example.com").
+              with(:body => {"foo" => "2010-01-01"})
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"foo\":\"2010-01-01\"}").status.should == "200"
+          end
         end
-        
+
         describe "for request with xml body and content type is set to xml" do
           before(:each) do
             WebMock.reset!
             stub_http_request(:post, "www.example.com").
               with(:body => { "opt" => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} }})
           end
-        
+
           it "should match if hash matches body" do
             http_request(
-              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'}, 
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
               :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
           end
-        
+
           it "should match if hash matches body in different form" do
             http_request(
-              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'}, 
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
               :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status.should == "200"
           end
-        
+
+          it "should match if hash contains date string" do #Crack creates date object
+            WebMock.reset!
+            stub_http_request(:post, "www.example.com").
+              with(:body => {"opt" => {"foo" => "2010-01-01"}})
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+              :body => "<opt foo=\"2010-01-01\">\n</opt>\n").status.should == "200"
+          end
+
         end
-      
+
       end
 
     end
@@ -312,30 +362,30 @@ shared_examples_for "WebMock" do
           :get, "http://www.example.com/",
           :headers => SAMPLE_HEADERS).status.should == "200"
       end
-      
+
       it "should match requests if headers are the same and declared as array" do
         stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b"]} )
         http_request(
           :get, "http://www.example.com/",
           :headers => {"a" => "b"}).status.should == "200"
       end
-      
+
       describe "when multiple headers with the same key are used" do
-      
+
         it "should match requests if headers are the same" do
           stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
           http_request(
             :get, "http://www.example.com/",
             :headers => {"a" => ["b", "c"]}).status.should == "200"
         end
-      
+
         it "should match requests if headers are the same  but in different order" do
           stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
           http_request(
             :get, "http://www.example.com/",
             :headers => {"a" => ["c", "b"]}).status.should == "200"
         end
-        
+
         it "should not match requests if headers are different" do
           stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]})
 
@@ -345,7 +395,7 @@ shared_examples_for "WebMock" do
             :headers => {"a" => ["b", "d"]})
           }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers))
         end
-      
+
       end
 
       it "should match requests if request headers are not stubbed" do
@@ -463,14 +513,14 @@ shared_examples_for "WebMock" do
           http_request(:get, "http://www.example.com/")
         }.should raise_error(MyException, "Exception from WebMock")
       end
-      
+
       it "should raise exception if declared in a stubbed response as exception instance" do
         stub_http_request(:get, "www.example.com").to_raise(MyException.new("hello world"))
         lambda {
           http_request(:get, "http://www.example.com/")
         }.should raise_error(MyException, "hello world")
       end
-      
+
       it "should raise exception if declared in a stubbed response as exception instance" do
         stub_http_request(:get, "www.example.com").to_raise("hello world")
         lambda {
@@ -490,7 +540,7 @@ shared_examples_for "WebMock" do
 
 
    describe "raising timeout errors" do
-          
+
         it "should raise timeout exception if declared in a stubbed response" do
           stub_http_request(:get, "www.example.com").to_timeout
           lambda {
@@ -520,7 +570,7 @@ shared_examples_for "WebMock" do
           response = http_request(:get, "http://www.example.com/")
           response.headers["Content-Length"].should == "8888"
         end
-        
+
         it "should return declared headers when there are multiple headers with the same key" do
           stub_http_request(:get, "www.example.com").to_return(:headers => {"a" => ["b", "c"]})
           response = http_request(:get, "http://www.example.com/")
@@ -531,21 +581,29 @@ shared_examples_for "WebMock" do
           stub_http_request(:get, "www.example.com").to_return(:status => 500)
           http_request(:get, "http://www.example.com/").status.should == "500"
         end
-        
+
         it "should return declared status message" do
           stub_http_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
-          http_request(:get, "http://www.example.com/").message.should == "Internal Server Error"
+          response = http_request(:get, "http://www.example.com/")
+          # not supported by em-http-request, it always returns "unknown" for http_reason
+          unless http_library == :em_http_request
+            response.message.should == "Internal Server Error"
+          end
         end
-        
+
         it "should return default status code" do
           stub_http_request(:get, "www.example.com")
           http_request(:get, "http://www.example.com/").status.should == "200"
         end
-        
+
         it "should return default empty message" do
           stub_http_request(:get, "www.example.com")
-          http_request(:get, "http://www.example.com/").message.should == ""
-        end      
+          response = http_request(:get, "http://www.example.com/")
+          # not supported by em-http-request, it always returns "unknown" for http_reason
+          unless http_library == :em_http_request
+            response.message.should == ""
+          end
+        end
 
         it "should return body declared as IO" do
           stub_http_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
@@ -627,22 +685,25 @@ shared_examples_for "WebMock" do
             @response.headers.should == {
               "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
               "Content-Type"=>"text/html; charset=UTF-8",
-              "Content-Length"=>"438",
+              "Content-Length"=>"419",
               "Connection"=>"Keep-Alive",
               "Accept"=>"image/jpeg, image/png"
               }
           end
 
           it "should return recorded body" do
-            @response.body.size.should == 438
+            @response.body.size.should == 419
           end
 
           it "should return recorded status" do
             @response.status.should == "202"
           end
-          
+
           it "should return recorded status message" do
-            @response.message.should == "OK"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless http_library == :em_http_request
+              @response.message.should == "OK"
+            end
           end
 
           it "should ensure file is closed" do
@@ -663,22 +724,25 @@ shared_examples_for "WebMock" do
             @response.headers.should == {
               "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
               "Content-Type"=>"text/html; charset=UTF-8",
-              "Content-Length"=>"438",
+              "Content-Length"=>"419",
               "Connection"=>"Keep-Alive",
               "Accept"=>"image/jpeg, image/png"
               }
           end
 
           it "should return recorded body" do
-            @response.body.size.should == 438
+            @response.body.size.should == 419
           end
 
           it "should return recorded status" do
             @response.status.should == "202"
           end
-          
+
           it "should return recorded status message" do
-            @response.message.should == "OK"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless http_library == :em_http_request
+              @response.message.should == "OK"
+            end
           end
         end
 
@@ -691,18 +755,26 @@ shared_examples_for "WebMock" do
 
           it "should return response from evaluated file" do
             stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s] })
-            http_request(:get, "http://www.example.com/").body.size.should == 438
+            http_request(:get, "http://www.example.com/").body.size.should == 419
           end
 
           it "should return response from evaluated string" do
             stub_http_request(:get, "www.example.com").to_return(lambda {|request| @files[request.uri.host.to_s].read })
-            http_request(:get, "http://www.example.com/").body.size.should == 438
+            http_request(:get, "http://www.example.com/").body.size.should == 419
+          end
+        end
+
+        describe "rack responses" do
+          before(:each) do
+            stub_request(:any, "http://www.example.com/greet").to_rack(MyRackApp)
           end
 
+          it "should return response returned by rack app" do
+            http_request(:post, 'http://www.example.com/greet', :body => 'name=Jimmy').body.should == 'Good to meet you, Jimmy!'
+          end
         end
 
         describe "sequences of responses" do
-
           it "should return responses one by one if declared in array" do
             stub_http_request(:get, "www.example.com").to_return([ {:body => "1"}, {:body => "2"}, {:body => "3"} ])
             http_request(:get, "http://www.example.com/").body.should == "1"
@@ -872,7 +944,7 @@ shared_examples_for "WebMock" do
                   a_request(:get, "http://www.example.com").should_not have_been_made
                 }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
               end
-              
+
               it "should fail with message with executed requests listed" do
                 lambda {
                   http_request(:get, "http://www.example.com/")
@@ -962,14 +1034,14 @@ shared_examples_for "WebMock" do
                     a_request(:get, /.*example.*/).should have_been_made
                   }.should_not raise_error
                 end
-                
+
               end
 
               describe "when matching requests with query params" do
                 before(:each) do
                   stub_http_request(:any, /.*example.*/)
                 end
-              
+
                 it "should pass if the request was executed with query params declared in a hash in query option" do
                   lambda {
                     http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
@@ -990,7 +1062,7 @@ shared_examples_for "WebMock" do
                     a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
                   }.should_not raise_error
                 end
-              
+
               end
 
               it "should fail if requested more times than expected" do
@@ -1046,22 +1118,22 @@ shared_examples_for "WebMock" do
                     with(:body => /^xabc/).should have_been_made
                   }.should fail_with(%r(The request GET http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
                 end
-              
+
               end
-              
+
               describe "when expected body is declared as a hash" do
                 let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
                 let(:fail_message) {%r(The request POST http://www.example.com/ with body \{"a"=>"1", "b"=>"five", "c"=>\{"d"=>\["e", "f"\]\}\} was expected to execute 1 time but it executed 0 times)}
 
                 describe "when request is executed with url encoded body matching hash" do
-                
+
                   it "should succeed" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
-                  
+
                   it "should succeed if url encoded params have different order" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&b=five&c[d][]=f')
@@ -1075,7 +1147,7 @@ shared_examples_for "WebMock" do
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should fail_with(fail_message)
                   end
-                
+
                 end
 
                 describe "when request is executed with json body matching hash and content type is set to json" do
@@ -1087,7 +1159,7 @@ shared_examples_for "WebMock" do
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
-                  
+
                   it "should succeed if json body is in different form" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
@@ -1095,13 +1167,20 @@ shared_examples_for "WebMock" do
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
-                
+
+                 it "should succeed if json body contains date string" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+                        :body => "{\"foo\":\"2010-01-01\"}")
+                      a_request(:post, "www.example.com").with(:body => {"foo" => "2010-01-01"}).should have_been_made
+                    }.should_not raise_error
+                 end
                 end
 
 
                 describe "when request is executed with xml body matching hash and content type is set to xml" do
                   let(:body_hash) { { "opt" => {:a => "1", :b => 'five', 'c' => {'d' => ['e', 'f']}} }}
-                  
+
                   it "should succeed" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
@@ -1109,7 +1188,7 @@ shared_examples_for "WebMock" do
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
-                
+
                   it "should succeed if xml body is in different form" do
                     lambda {
                       http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
@@ -1117,9 +1196,17 @@ shared_examples_for "WebMock" do
                       a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
                     }.should_not raise_error
                   end
-              
+
+                  it "should succeed if xml body contains date string" do
+                    lambda {
+                      http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
+                        :body => "<opt foo=\"2010-01-01\">\n</opt>\n")
+                      a_request(:post, "www.example.com").with(:body => {"opt" => {"foo" => "2010-01-01"}}).should have_been_made
+                    }.should_not raise_error
+                  end
+
                 end
-                
+
               end
 
               it "should succeed if request was executed with the same headers" do
@@ -1129,7 +1216,7 @@ shared_examples_for "WebMock" do
                   with(:headers => SAMPLE_HEADERS).should have_been_made
                 }.should_not raise_error
               end
-              
+
                it "should succeed if request was executed with the same headers with value declared as array" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => "b"})
@@ -1137,9 +1224,9 @@ shared_examples_for "WebMock" do
                     with(:headers => {"a" => ["b"]}).should have_been_made
                   }.should_not raise_error
                 end
-              
+
               describe "when multiple headers with the same key are passed" do
-                
+
                 it "should succeed if request was executed with the same headers" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
@@ -1147,7 +1234,7 @@ shared_examples_for "WebMock" do
                     with(:headers =>  {"a" => ["b", "c"]}).should have_been_made
                   }.should_not raise_error
                 end
-                
+
                 it "should succeed if request was executed with the same headers but different order" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
@@ -1155,7 +1242,7 @@ shared_examples_for "WebMock" do
                     with(:headers =>  {"a" => ["c", "b"]}).should have_been_made
                   }.should_not raise_error
                 end
-                
+
                 it "should fail if request was executed with different headers" do
                   lambda {
                     http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
@@ -1163,7 +1250,7 @@ shared_examples_for "WebMock" do
                     with(:headers => {"a" => ["b", "d"]}).should have_been_made
                   }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>\['b', 'd'\]\} was expected to execute 1 time but it executed 0 times))
                 end
-                
+
               end
 
               it "should fail if request was executed with different headers" do
@@ -1378,6 +1465,60 @@ shared_examples_for "WebMock" do
             end
 
 
+            describe "using matchers on the RequestStub" do
+
+              it "should verify expected requests occured" do
+                stub = stub_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.once
+              end
+
+              it "should verify subsequent requests" do
+                stub = stub_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.once
+                http_request(:get, "http://www.example.com/")
+                stub.should have_been_requested.twice
+              end
+
+              it "should verify expected requests occured" do
+                stub = stub_request(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'})
+                http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
+                stub.should have_been_requested.once
+              end
+
+              it "should verify that non expected requests didn't occur" do
+                lambda {
+                  stub = stub_request(:get, "http://www.example.com")
+                  http_request(:get, "http://www.example.com/")
+                  stub.should_not have_been_requested
+                }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+              end
+
+              it "should verify if non expected request executed and block evaluated to true" do
+                 lambda {
+                   stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
+                   http_request(:post, "http://www.example.com/", :body => "wadus")
+                   stub.should_not have_been_requested
+                 }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+               end
+
+              it "should verify if request was executed and block evaluated to true" do
+                stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
+                http_request(:post, "http://www.example.com/", :body => "wadus")
+                stub.should have_been_requested
+              end
+
+              it "should verify if request was executed and block evaluated to false" do
+                lambda {
+                  stub_request(:any, /.+/) #stub any request
+                  stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
+                  http_request(:post, "http://www.example.com/", :body => "abc")
+                  stub.should have_been_requested
+                }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
+              end
+            end
+
             describe "when net connect allowed", :net_connect => true do
               before(:each) do
                 WebMock.allow_net_connect!
@@ -1403,20 +1544,20 @@ shared_examples_for "WebMock" do
 
 
   describe "callbacks" do
-    
+
     describe "after_request" do
       before(:each) do
         WebMock.reset_callbacks
         stub_request(:get, "http://www.example.com")
       end
-  
+
       it "should not invoke callback unless request is made" do
         WebMock.after_request {
           @called = true
         }
         @called.should == nil
       end
-  
+
       it "should invoke a callback after request is made" do
         WebMock.after_request {
           @called = true
@@ -1424,7 +1565,7 @@ shared_examples_for "WebMock" do
         http_request(:get, "http://www.example.com/")
         @called.should == true
       end
-    
+
       it "should not invoke a callback if specific http library should be ignored" do
         WebMock.after_request(:except => [http_library()]) {
           @called = true
@@ -1432,7 +1573,7 @@ shared_examples_for "WebMock" do
         http_request(:get, "http://www.example.com/")
         @called.should == nil
       end
-  
+
       it "should invoke a callback even if other http libraries should be ignored" do
         WebMock.after_request(:except => [:other_lib]) {
           @called = true
@@ -1440,7 +1581,7 @@ shared_examples_for "WebMock" do
         http_request(:get, "http://www.example.com/")
         @called.should == true
       end
-  
+
       it "should pass request signature to the callback" do
         WebMock.after_request(:except => [:other_lib])  do |request_signature, _|
           @request_signature = request_signature
@@ -1448,7 +1589,7 @@ shared_examples_for "WebMock" do
         http_request(:get, "http://www.example.com/")
         @request_signature.uri.to_s.should == "http://www.example.com:80/"
       end
-      
+
       describe "passing response to callback" do
 
         describe "for stubbed requests" do
@@ -1465,23 +1606,23 @@ shared_examples_for "WebMock" do
             http_request(:get, "http://www.example.com/")
           end
 
-          it "should pass response with status and message" do            
+          it "should pass response with status and message" do
             @response.status.should == ["200", "hello"]
           end
-        
+
           it "should pass response with headers" do
             @response.headers.should == {
-              'Content-Length' => '666', 
+              'Content-Length' => '666',
               'Hello' => 'World'
             }
           end
-        
+
           it "should pass response with body" do
             @response.body.should == "foo bar"
           end
-      
+
         end
-        
+
         describe "for real requests", :net_connect => true do
           before(:each) do
             WebMock.reset!
@@ -1493,29 +1634,32 @@ shared_examples_for "WebMock" do
           end
 
           it "should pass response with status and message" do
-            @response.status[0].should == 200
-            @response.status[1].should == "OK"
+            # not supported by em-http-request, it always returns "unknown" for http_reason
+            unless http_library == :em_http_request
+              @response.status[0].should == 302
+              @response.status[1].should == "Found"
+            end
           end
-        
+
           it "should pass response with headers" do
             @response.headers["Content-Length"].should == "#{WWW_EXAMPLE_COM_CONTENT_LENGTH}"
           end
-        
+
           it "should pass response with body" do
             @response.body.size.should == WWW_EXAMPLE_COM_CONTENT_LENGTH
           end
-      
+
         end
-      
+
       end
-  
+
       it "should invoke multiple callbacks in order of their declarations" do
         WebMock.after_request { @called = 1 }
         WebMock.after_request { @called += 1 }
         http_request(:get, "http://www.example.com/")
         @called.should == 2
       end
-      
+
       it "should invoke callbacks only for real requests if requested", :net_connect => true do
         WebMock.after_request(:real_requests_only => true) { @called = true }
         http_request(:get, "http://www.example.com/")
@@ -1524,17 +1668,17 @@ shared_examples_for "WebMock" do
         http_request(:get, "http://www.example.net/")
         @called.should == true
       end
-      
+
       it "should clear all declared callbacks on reset callbacks" do
         WebMock.after_request { @called = 1 }
         WebMock.reset_callbacks
-        stub_request(:get, "http://www.example.com")        
+        stub_request(:get, "http://www.example.com")
         http_request(:get, "http://www.example.com/")
         @called.should == nil
       end
-      
+
     end
-  
+
   end
 
 end

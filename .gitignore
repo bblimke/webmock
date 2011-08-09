@@ -11,7 +11,7 @@ tmtags
 .\#*
 
 ## VIM
-*.swp
+.*.sw[a-z]
 
 ## PROJECT::GENERAL
 coverage
@@ -19,3 +19,9 @@ rdoc
 pkg
 
 ## PROJECT::SPECIFIC
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
+tmp/*
+*.rbc

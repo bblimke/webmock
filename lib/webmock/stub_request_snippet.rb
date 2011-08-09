@@ -1,26 +1,29 @@
 module WebMock
   class StubRequestSnippet
-    def initialize(request_signature)
-      @request_signature = request_signature
+    def initialize(request_stub)
+      @request_stub = request_stub
     end
 
-    def to_s
-      string = "stub_request(:#{@request_signature.method},"
-      string << " \"#{WebMock::Util::URI.strip_default_port_from_uri_string(@request_signature.uri.to_s)}\")"
+    def to_s(with_response = true)
+      request_pattern = @request_stub.request_pattern
+      string = "stub_request(:#{request_pattern.method_pattern.to_s},"
+      string << " \"#{request_pattern.uri_pattern.to_s}\")"
 
       with = ""
 
-      if (@request_signature.body.to_s != '')
-        with << ":body => #{@request_signature.body.inspect}"
+      if (request_pattern.body_pattern)
+        with << ":body => #{request_pattern.body_pattern.to_s}"
       end
 
-      if (@request_signature.headers && !@request_signature.headers.empty?)
-        with << ", \n       " unless with.empty?
+      if (request_pattern.headers_pattern)
+        with << ",\n       " unless with.empty?
 
-        with << ":headers => #{WebMock::Util::Headers.sorted_headers_string(@request_signature.headers)}"
+        with << ":headers => #{request_pattern.headers_pattern.to_s}"
       end
       string << ".\n  with(#{with})" unless with.empty?
-      string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
+      if with_response
+        string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
+      end
       string
     end
   end

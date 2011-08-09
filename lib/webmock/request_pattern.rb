@@ -2,6 +2,8 @@ module WebMock
 
   class RequestPattern
 
+    attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern
+
     def initialize(method, uri, options = {})
       @method_pattern = MethodPattern.new(method)
       @uri_pattern = create_uri_pattern(uri)
@@ -40,7 +42,7 @@ module WebMock
       @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
       @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
     end
-    
+
     def create_uri_pattern(uri)
       if uri.is_a?(Regexp)
         URIRegexpPattern.new(uri)
@@ -143,11 +145,11 @@ module WebMock
 
         case BODY_FORMATS[content_type]
         when :json then
-          Crack::JSON.parse(body) == @pattern
+          matching_hashes?(WebMock::Util::JSON.parse(body), @pattern)
         when :xml then
-          Crack::XML.parse(body) == @pattern
+          matching_hashes?(Crack::XML.parse(body), @pattern)
         else
-          Addressable::URI.parse('?' + body).query_values == @pattern
+          matching_hashes?(Addressable::URI.parse('?' + body).query_values, @pattern)
         end
       else
         empty_string?(@pattern) && empty_string?(body) ||
@@ -161,6 +163,43 @@ module WebMock
     end
 
     private
+
+    # Compare two hashes for equality
+    #
+    # For two hashes to match they must have the same length and all
+    # values must match when compared using `#===`.
+    #
+    # The following hashes are examples of matches:
+    #
+    #     {a: /\d+/} and {a: '123'}
+    #
+    #     {a: '123'} and {a: '123'}
+    #
+    #     {a: {b: /\d+/}} and {a: {b: '123'}}
+    #
+    #     {a: {b: 'wow'}} and {a: {b: 'wow'}}
+    #
+    # @param [Hash] query_parameters typically the result of parsing
+    #   JSON, XML or URL encoded parameters.
+    #
+    # @param [Hash] pattern which contains keys with a string, hash or
+    #   regular expression value to use for comparison.
+    #
+    # @return [Boolean] true if the paramaters match the comparison
+    #   hash, false if not.
+    def matching_hashes?(query_parameters, pattern)
+      return false unless query_parameters.size == pattern.size
+      query_parameters.each do |key, actual|
+        expected = pattern[key]
+
+        if actual.is_a?(Hash) && expected.is_a?(Hash)
+          return false unless matching_hashes?(actual, expected)
+        else
+          return false unless expected === actual
+        end
+      end
+      true
+    end
 
     def empty_string?(string)
       string.nil? || string == ""

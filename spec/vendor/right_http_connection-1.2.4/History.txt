@@ -26,8 +26,8 @@ Initial public release
 == 1.2.0 2007-10-05
 
 * r1867, konstantin, 2007-10-05 06:19:45
-  * # 220, (re)open connection to server if none exists or connection params 
-    have changed 
+  * # 220, (re)open connection to server if none exists or connection params
+    have changed
 
 == 1.2.1
 
@@ -37,7 +37,7 @@ Initial public release
 
 * r2764, konstantin, 02-08-08 00:05:00 +03:00
   * "RightAws: incompatible Net::HTTP monkey-patch" exception is raised if our net_fix
-    patch was overriden (by attachment_fu for example, to avoid this load attachment_fu 
+    patch was overriden (by attachment_fu for example, to avoid this load attachment_fu
     before loading the right_http_connection gem).
 
 == 1.2.2
@@ -51,7 +51,7 @@ Initial public release
 - Improve handling of data streams during upload: if there is a failure and a retry, reset
   the seek pointer for the subsequent re-request
 
-== 1.2.4 
+== 1.2.4
 
 *  r4984, konstantin, 2008-08-11 14:49:18 +0400
   * fixed a bug: <NoMethodError: You have a nil object when you didn't expect it!

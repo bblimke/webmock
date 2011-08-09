@@ -1,7 +1,7 @@
 module WebMock
   module API
     extend self
-    
+
     def stub_request(method, uri)
       WebMock::StubRegistry.instance.register_request_stub(WebMock::RequestStub.new(method, uri))
     end
@@ -11,7 +11,7 @@ module WebMock
     def a_request(method, uri)
       WebMock::RequestPattern.new(method, uri)
     end
-    
+
     class << self
       alias :request :a_request
     end

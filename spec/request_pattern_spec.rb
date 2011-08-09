@@ -13,7 +13,7 @@ describe WebMock::RequestPattern do
       :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).with {|req| true}.to_s.should ==
     "GET http://www.example.com/ with body \"abc\" with headers {'A'=>'a', 'B'=>'b'} with given block"
   end
-  
+
   it "should report string describing itself with query params" do
     WebMock::RequestPattern.new(:get, /.*example.*/, :query => {'a' => ['b', 'c']}).to_s.should ==
     "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
@@ -140,7 +140,7 @@ describe WebMock::RequestPattern do
        WebMock::RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
           should match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
       end
-      
+
       it "should not match for query params are different than the declared in hash" do
        WebMock::RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).
           should_not match(WebMock::RequestSignature.new(:get, "www.example.com?x[]=b&a[]=c"))
@@ -224,6 +224,15 @@ describe WebMock::RequestPattern do
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'foo bar'))
           end
 
+          it "should match when hash contains regex values" do
+           WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => /^\w{5}$/, :b => {:c => /^\d{3}$/}}).
+              should match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=abcde&b[c]=123'))
+          end
+
+          it "should not match when hash does not contains regex values" do
+           WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => /^\d+$/, :b => {:c => /^\d{3}$/}}).
+              should_not match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=abcde&b[c]=123'))
+          end
         end
 
         describe "for request with json body and content type is set to json" do

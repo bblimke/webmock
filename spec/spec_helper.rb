@@ -2,7 +2,7 @@ require 'rubygems'
 require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
   require 'curb'
-  require 'patron' 
+  require 'patron'
   require 'em-http'
   require 'typhoeus'
 end
@@ -14,6 +14,8 @@ require 'rspec'
 require 'webmock/rspec'
 
 require 'network_connection'
+require 'support/webmock_server'
+require 'my_rack_app'
 
 RSpec.configure do |config|
   unless NetworkConnection.is_network_available?
@@ -23,6 +25,19 @@ RSpec.configure do |config|
   if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
   end
+
+  config.filter_run_excluding :without_webmock => true
+
+  config.before(:all) do
+    WebMockServer.instance.start
+  end
+
+  config.after(:all) do
+    WebMockServer.instance.stop
+  end
+
+  config.filter_run :focus => true
+  config.run_all_when_everything_filtered = true
 end
 
 def fail()
@@ -42,8 +57,8 @@ end
 def setup_expectations_for_real_example_com_request(options = {})
   defaults = { :host => "www.example.com", :port => 80, :method => "GET",
     :path => "/",
-    :response_code => 200, :response_message => "OK",
-    :response_body => "<title>example</title>" }
+    :response_code => 302, :response_message => "Found",
+    :response_body => "" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
 

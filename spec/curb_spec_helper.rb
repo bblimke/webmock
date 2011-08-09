@@ -17,7 +17,7 @@
 
   def setup_request(uri, curl, options={})
     curl          ||= Curl::Easy.new
-    curl.url      = uri.omit(:userinfo).to_s 
+    curl.url      = uri.omit(:userinfo).to_s
     curl.username = uri.user
     curl.password = uri.password
     curl.timeout  = 10
@@ -54,7 +54,7 @@
         curl.post_body = body
       when :put
         curl.put_data = body
-      end  
+      end
 
       curl.http(method)
       curl

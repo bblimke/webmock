@@ -1,3 +1,9 @@
+begin
+  require 'curb'
+rescue LoadError
+  # curb not found
+end
+
 if defined?(Curl)
 
   module Curl
@@ -19,7 +25,7 @@ if defined?(Curl)
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
               {:lib => :curb, :real_request => true}, request_signature,
-                webmock_response)   
+                webmock_response)
           end
           res
         else
@@ -54,18 +60,39 @@ if defined?(Curl)
       end
 
       def build_curb_response(webmock_response)
-        raise Curl::Err::TimeoutError if webmock_response.should_timeout        
+        raise Curl::Err::TimeoutError if webmock_response.should_timeout
         webmock_response.raise_error_if_any
-        
+
         @body_str = webmock_response.body
         @response_code = webmock_response.status[0]
 
         @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
         if webmock_response.headers
-          @header_str << webmock_response.headers.map do |k,v| 
+          @header_str << webmock_response.headers.map do |k,v|
             "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
           end.join("\r\n")
+
+          location = webmock_response.headers['Location']
+          if self.follow_location? && location
+            @last_effective_url = location
+            webmock_follow_location(location)
+          end
+
+          @content_type = webmock_response.headers["Content-Type"]
         end
+
+        @last_effective_url ||= self.url
+      end
+
+      def webmock_follow_location(location)
+        first_url = self.url
+        self.url = location
+
+        curb_or_webmock do
+          send( "http_#{@webmock_method}_without_webmock" )
+        end
+
+        self.url = first_url
       end
 
       def invoke_curb_callbacks
@@ -94,7 +121,7 @@ if defined?(Curl)
 
       ###
       ### Mocks of Curl::Easy methods below here.
-      ### 
+      ###
 
       def http_with_webmock(method)
         @webmock_method = method
@@ -117,9 +144,9 @@ if defined?(Curl)
         alias_method "http_#{verb}", "http_#{verb}_with_webmock"
       end
 
-      def http_put_with_webmock data
+      def http_put_with_webmock data = nil
         @webmock_method = :put
-        @put_data = data
+        @put_data = data if data
         curb_or_webmock do
           http_put_without_webmock(data)
         end
@@ -127,11 +154,11 @@ if defined?(Curl)
       alias_method :http_put_without_webmock, :http_put
       alias_method :http_put, :http_put_with_webmock
 
-      def http_post_with_webmock data
+      def http_post_with_webmock *data
         @webmock_method = :post
-        @post_body = data
+        @post_body = data.join('&') if data && !data.empty?
         curb_or_webmock do
-          http_post_without_webmock(data)
+          http_post_without_webmock(*data)
         end
       end
       alias_method :http_post_without_webmock, :http_post
@@ -142,11 +169,11 @@ if defined?(Curl)
         @webmock_method ||= :get
         curb_or_webmock do
           perform_without_webmock
-        end 
+        end
       end
       alias :perform_without_webmock :perform
       alias :perform :perform_with_webmock
-      
+
       def put_data_with_webmock= data
         @webmock_method = :put
         @put_data = data
@@ -154,7 +181,7 @@ if defined?(Curl)
       end
       alias_method :put_data_without_webmock=, :put_data=
       alias_method :put_data=, :put_data_with_webmock=
-      
+
       def post_body_with_webmock= data
         @webmock_method = :post
         self.post_body_without_webmock = data
@@ -194,6 +221,18 @@ if defined?(Curl)
       alias :header_str_without_webmock :header_str
       alias :header_str :header_str_with_webmock
 
+      def last_effective_url_with_webmock
+        @last_effective_url || last_effective_url_without_webmock
+      end
+      alias :last_effective_url_without_webmock :last_effective_url
+      alias :last_effective_url :last_effective_url_with_webmock
+
+      def content_type_with_webmock
+        @content_type || content_type_without_webmock
+      end
+      alias :content_type_without_webmock :content_type
+      alias :content_type :content_type_with_webmock
+
       %w[ success failure header body complete progress ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
           def on_#{callback}_with_webmock &block
@@ -217,18 +256,24 @@ if defined?(Curl)
         METHOD
       end
 
-      %w[ put post ].each do |verb|
-        class_eval <<-METHOD, __FILE__, __LINE__
-          def self.http_#{verb}(url, data, &block)
-            c = new
-            c.url = url
-            block.call(c) if block
-            c.send("http_#{verb}", data)
-            c
-          end
-        METHOD
-      end
-  
+      class_eval <<-METHOD, __FILE__, __LINE__
+        def self.http_put(url, data, &block)
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send(:http_put, data)
+          c
+        end
+
+        def self.http_post(url, *data, &block)
+          c = new
+          c.url = url
+          block.call(c) if block
+          c.send(:http_post, *data)
+          c
+        end
+      METHOD
+
       module WebmockHelper
         # Borrowed from Patron:
         # http://github.com/toland/patron/blob/master/lib/patron/response.rb

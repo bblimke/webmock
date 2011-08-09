@@ -1,3 +1,9 @@
+begin
+  require 'patron'
+rescue LoadError
+  # patron not found
+end
+
 if defined?(Patron)
 
   module Patron
@@ -21,7 +27,7 @@ if defined?(Patron)
             webmock_response = build_webmock_response(res)
             WebMock::CallbackRegistry.invoke_callbacks(
               {:lib => :patron, :real_request => true}, request_signature,
-                webmock_response)   
+                webmock_response)
           end
           res
         else
@@ -75,7 +81,7 @@ if defined?(Patron)
       end
 
       def build_patron_response(webmock_response)
-        raise Patron::TimeoutError if webmock_response.should_timeout        
+        raise Patron::TimeoutError if webmock_response.should_timeout
         webmock_response.raise_error_if_any
         res = Patron::Response.new
         res.instance_variable_set(:@body, webmock_response.body)
@@ -84,7 +90,7 @@ if defined?(Patron)
         res.instance_variable_set(:@headers, webmock_response.headers)
         res
       end
-      
+
       def build_webmock_response(patron_response)
         webmock_response = WebMock::Response.new
         reason = patron_response.status_line.scan(%r(\AHTTP/(\d+\.\d+)\s+(\d\d\d)\s*([^\r\n]+)?\r?\z))[0][2]

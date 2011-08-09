@@ -2,7 +2,7 @@ module HTTPClientSpecHelper
   class << self
     attr_accessor :async_mode
   end
-  
+
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
     c = HTTPClient.new
@@ -17,7 +17,7 @@ module HTTPClientSpecHelper
     else
       response = c.request(*params, &block)
     end
-    headers = response.header.all.inject({}) do |headers, header| 
+    headers = response.header.all.inject({}) do |headers, header|
       if !headers.has_key?(header[0])
         headers[header[0]] = header[1]
       else
@@ -64,14 +64,18 @@ module HTTPClientSpecHelper
 
     socket.stub!(:sync=).with(true)
 
-    socket.should_receive(:gets).with("\n").once.and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\nContent-Length: #{options[:response_body].length}\n\n#{options[:response_body]}")
+    socket.should_receive(:gets).with("\n").
+      and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\r\n",
+                 "Content-Length: #{options[:response_body].length}\r\n",
+                 "\r\n")
+    socket.stub(:readpartial) do |size, buf|
+      buf << options[:response_body]
+    end
 
     socket.stub!(:eof?).and_return(true)
     socket.stub!(:close).and_return(true)
-
-    socket.should_receive(:readpartial).any_number_of_times.and_raise(EOFError)
   end
-  
+
   def http_library
     :http_client
   end

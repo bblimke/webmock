@@ -23,13 +23,17 @@ module WebMock
       self
     end
 
+    def to_rack(app, options={})
+      @responses_sequences << ResponsesSequence.new([RackResponse.new(app)])
+    end
+
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e| 
+      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
         ResponseFactory.response_for(:exception => e)
       })
       self
     end
-    
+
     def to_timeout
       @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_timeout => true)])
       self
@@ -46,6 +50,10 @@ module WebMock
       end
     end
 
+    def has_responses?
+      !@responses_sequences.empty?
+    end
+
     def then
       self
     end
@@ -60,5 +68,30 @@ module WebMock
       self
     end
 
+    def matches?(request_signature)
+      self.request_pattern.matches?(request_signature)
+    end
+
+    def to_s
+      self.request_pattern.to_s
+    end
+
+    def self.from_request_signature(signature)
+      stub = self.new(signature.method.to_sym, signature.uri.to_s)
+
+      if signature.body.to_s != ''
+        body = if signature.url_encoded?
+          Addressable::URI.parse('?' + signature.body).query_values
+        else
+          signature.body
+        end
+        stub.with(:body => body)
+      end
+
+      if (signature.headers && !signature.headers.empty?)
+        stub.with(:headers => signature.headers)
+      end
+      stub
+    end
   end
 end

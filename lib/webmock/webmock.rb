@@ -22,9 +22,7 @@ module WebMock
   end
 
   def self.version
-    open(File.join(File.dirname(__FILE__), '../../VERSION')) { |f|
-      f.read.strip
-    }
+    VERSION
   end
 
   def self.allow_net_connect!(options = {})
@@ -45,19 +43,19 @@ module WebMock
     end
     Config.instance.allow_net_connect ||
       (Config.instance.allow_localhost && WebMock::Util::URI.is_uri_localhost?(uri)) ||
-      Config.instance.allow && Config.instance.allow.include?(uri.host)
+      Config.instance.allow && (Config.instance.allow.include?(uri.host) || Config.instance.allow.include?("#{uri.host}:#{uri.port}"))
   end
 
   def self.reset!
     WebMock::RequestRegistry.instance.reset!
     WebMock::StubRegistry.instance.reset!
   end
-  
+
   def self.reset_webmock
     WebMock::Deprecation.warning("WebMock.reset_webmock is deprecated. Please use WebMock.reset! method instead")
     reset!
   end
-  
+
   def self.reset_callbacks
     WebMock::CallbackRegistry.reset
   end

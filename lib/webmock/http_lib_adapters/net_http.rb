@@ -58,16 +58,27 @@ module Net  #:nodoc: all
           {:lib => :net_http}, request_signature, webmock_response)
         build_net_http_response(webmock_response, &block)
       elsif WebMock.net_connect_allowed?(request_signature.uri)
-        connect_without_webmock
-        response = request_without_webmock(request, nil)
-        if WebMock::CallbackRegistry.any_callbacks? && started?
-          webmock_response = build_webmock_response(response)
-          WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
+        check_right_http_connection
+        after_request = lambda do |response|
+          if WebMock::CallbackRegistry.any_callbacks?
+            webmock_response = build_webmock_response(response)
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
+          end
+          response.extend WebMock::Net::HTTPResponse
+          block.call response if block
+          response
         end
-        response.extend WebMock::Net::HTTPResponse
-        yield response if block_given?
-        response
+        response = if (started? && !WebMock::Config.instance.net_http_connect_on_start) || !started?
+          @started = false #otherwise start_with_connect wouldn't execute and connect
+          start_with_connect {
+            response = request_without_webmock(request, nil)
+            after_request.call(response)
+          }
+        else
+          response = request_without_webmock(request, nil)
+          after_request.call(response)
+        end
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
@@ -75,29 +86,39 @@ module Net  #:nodoc: all
     alias_method :request_without_webmock, :request
     alias_method :request, :request_with_webmock
 
-
-    def connect_with_webmock
-      unless @@alredy_checked_for_right_http_connection ||= false
-        WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
-        @@alredy_checked_for_right_http_connection = true
+    def start_without_connect
+      raise IOError, 'HTTP session already opened' if @started
+      if block_given?
+        begin
+          @started = true
+          return yield(self)
+        ensure
+          do_finish
+        end
       end
-      if WebMock::Config.instance.net_http_connect_on_start
-        return connect_without_webmock
-      end
-      nil
+      @started = true
+      self
     end
-    alias_method :connect_without_webmock, :connect
-    alias_method :connect, :connect_with_webmock
+
+    def start_with_conditional_connect(&block)
+      if WebMock::Config.instance.net_http_connect_on_start
+        start_with_connect(&block)
+      else
+        start_without_connect(&block)
+      end
+    end
+    alias_method :start_with_connect, :start
+    alias_method :start, :start_with_conditional_connect
 
     def build_net_http_response(webmock_response, &block)
       response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
       response.instance_variable_set(:@body, webmock_response.body)
-      webmock_response.headers.to_a.each do |name, values| 
+      webmock_response.headers.to_a.each do |name, values|
         values = [values] unless values.is_a?(Array)
         values.each do |value|
           response.add_field(name, value)
         end
-      end  
+      end
 
       response.instance_variable_set(:@read, true)
 
@@ -111,17 +132,24 @@ module Net  #:nodoc: all
 
       response
     end
-    
+
     def build_webmock_response(net_http_response)
       webmock_response = WebMock::Response.new
       webmock_response.status = [
          net_http_response.code.to_i,
          net_http_response.message]
       webmock_response.headers = net_http_response.to_hash
-      webmock_response.body = net_http_response.body   
+      webmock_response.body = net_http_response.body
       webmock_response
     end
 
+
+    def check_right_http_connection
+      unless @@alredy_checked_for_right_http_connection ||= false
+        WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
+        @@alredy_checked_for_right_http_connection = true
+      end
+    end
   end
 
 end

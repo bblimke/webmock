@@ -6,7 +6,7 @@ unless RUBY_PLATFORM =~ /java/
 
   shared_examples_for "Curb" do
     include CurbSpecHelper
-    
+
     it_should_behave_like "WebMock"
 
     describe "when doing PUTs" do
@@ -35,7 +35,7 @@ unless RUBY_PLATFORM =~ /java/
         stub_request(:any, "example.com").to_return(:body => body)
 
         test = nil
-        @curl.on_success do |c| 
+        @curl.on_success do |c|
           test = c.body_str
         end
         @curl.http_get
@@ -48,7 +48,7 @@ unless RUBY_PLATFORM =~ /java/
           to_return(:status => [response_code, "Server On Fire"])
 
         test = nil
-        @curl.on_failure do |c, code| 
+        @curl.on_failure do |c, code|
           test = code
         end
         @curl.http_get
@@ -61,23 +61,23 @@ unless RUBY_PLATFORM =~ /java/
           to_return(:body => body)
 
         test = nil
-        @curl.on_body do |data| 
+        @curl.on_body do |data|
           test = data
         end
         @curl.http_get
         test.should == body
       end
-      
+
       it "should call on_header when response headers are read" do
         stub_request(:any, "example.com").
           to_return(:headers => {:one => 1})
 
         test = nil
-        @curl.on_header do |data| 
+        @curl.on_header do |data|
           test = data
         end
         @curl.http_get
-        test.should match /One: 1/
+        test.should match(/One: 1/)
       end
 
       it "should call on_complete when request is complete" do
@@ -133,6 +133,124 @@ unless RUBY_PLATFORM =~ /java/
         order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
       end
     end
+
+    describe '#last_effective_url' do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
+
+      context 'when not following redirects' do
+        before { @curl.follow_location = false }
+
+        it 'should be the same as #url even with a location header' do
+          stub_request(:any, 'example.com').
+            to_return(:body    => "abc",
+                      :status  => 302,
+                      :headers => { 'Location' => 'http://www.example.com' })
+
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://example.com'
+        end
+      end
+
+      context 'when following redirects' do
+        before { @curl.follow_location = true }
+
+        it 'should be the same as #url when no location header is present' do
+          stub_request(:any, "example.com")
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://example.com'
+        end
+
+        it 'should be the value of the location header when present' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com')
+
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://www.example.com'
+        end
+
+        it 'should work with more than one redirect' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com').
+            to_return(:headers => { 'Location' => 'http://blog.example.com' })
+          stub_request(:any, 'blog.example.com')
+
+          @curl.http_get
+          @curl.last_effective_url.should == 'http://blog.example.com'
+        end
+
+        it 'should maintain the original url' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com')
+
+          @curl.http_get
+          @curl.url.should == 'http://example.com'
+        end
+
+        it 'should have the redirected-to attrs (body, response code)' do
+          stub_request(:any, 'example.com').
+            to_return(:body => 'request A',
+                      :status => 302,
+                      :headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com').to_return(:body => 'request B')
+
+          @curl.http_get
+          @curl.body_str.should == 'request B'
+          @curl.response_code.should == 200
+        end
+
+        it 'should follow more than one redirect' do
+          stub_request(:any, 'example.com').
+            to_return(:headers => { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com').
+            to_return(:headers => { 'Location' => 'http://blog.example.com' })
+          stub_request(:any, 'blog.example.com').to_return(:body => 'blog post')
+
+          @curl.http_get
+          @curl.url.should == 'http://example.com'
+          @curl.body_str.should == 'blog post'
+        end
+      end
+    end
+
+    describe "#content_type" do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
+
+      context "when response includes Content-Type header" do
+        it "returns correct content_type" do
+          content_type = "application/json"
+
+          stub_request(:any, 'example.com').
+            to_return(:body     => "abc",
+                      :status   => 200,
+                      :headers  => { 'Content-Type' => content_type })
+
+          @curl.http_get
+          @curl.content_type.should == content_type
+        end
+      end
+
+      context "when response does not include Content-Type header" do
+        it "returns nil for content_type" do
+          content_type = "application/json"
+
+          stub_request(:any, 'example.com').
+            to_return(:body     => "abc",
+                      :status   => 200 )
+
+          @curl.http_get
+          @curl.content_type.should be_nil
+        end
+      end
+    end
   end
 
   describe "Webmock with Curb" do
@@ -153,6 +271,42 @@ unless RUBY_PLATFORM =~ /java/
     describe "using #http_* methods for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
+
+      it "should work with blank arguments for post" do
+        stub_http_request(:post, "www.example.com").with(:body => "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.post_body = "01234"
+        c.http_post
+        c.response_code.should == 200
+      end
+
+      it "should work with several body arguments for post using the class method" do
+        stub_http_request(:post, "www.example.com").with(:user => {:first_name=>'Bartosz', :last_name=>'Blimke'})
+        c = Curl::Easy.http_post "http://www.example.com", 'user[first_name]=Bartosz', 'user[last_name]=Blimke'
+        c.response_code.should == 200
+      end
+
+      it "should work with blank arguments for put" do
+        stub_http_request(:put, "www.example.com").with(:body => "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.put_data = "01234"
+        c.http_put
+        c.response_code.should == 200
+      end
+
+      it "should work with multiple arguments for post" do
+        data = { :name => "john", :address => "111 example ave" }
+
+        stub_http_request(:post, "www.example.com").with(:body => data)
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http_post Curl::PostField.content('name', data[:name]),  Curl::PostField.content('address', data[:address])
+
+        c.response_code.should == 200
+      end
+
     end
 
     describe "using #perform for requests" do
