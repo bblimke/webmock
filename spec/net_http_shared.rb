@@ -11,15 +11,6 @@ shared_examples_for "Net::HTTP" do
       response.body.should be_a(Net::ReadAdapter)
     end
 
-    if RUBY_VERSION < '1.9' #looks like StringIO doesn't respons to bytesize in ruby 1.9 - weird
-      it "should handle real requests with readable body", :net_connect => true do
-        req = Net::HTTP::Post.new("/")
-        Net::HTTP.start("localhost", port) {|http|
-          http.request(req, StringIO.new("my_params"))
-        }.body.should =~ /hello world/
-      end
-    end
-
     it "should handle requests with block passed to read_body", :net_connect => true do
       body = ""
       req = Net::HTTP::Get.new("/")
