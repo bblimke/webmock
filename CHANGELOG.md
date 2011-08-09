@@ -1,5 +1,56 @@
 # Changelog
 
+## 1.7.0.pre
+
+* Fixed Net::HTTP adapter to not break normal Net::HTTP behaviour when network connections are allowed. This fixes selenium-webdriver compatibility!!!
+
+* Added support for em-http-request 1.0.x and em-synchrony. Thanks to [Steve Hull](https://github.com/sdhull)
+
+* Added support for setting expectations to on a stub itself i.e.
+
+        stub = stub_request(:get, "www.example.com")
+        # ... make requests ...
+        stub.should have_been_requested
+
+  Thanks to [Aidan Feldman](https://github.com/afeld)
+
+* Minitest support! Thanks to [Peter Higgins](https://github.com/phiggins)
+
+* Added support for `Curb::Easy#http_post` and `Curb::Easy#http_post` with multiple arguments. Thanks to [Salvador Fuentes Jr](https://github.com/fuentesjr) and [Alex Rothenberg](https://github.com/alexrothenberg)
+
+* Rack support. Requests can be stubbed to respond with a Rack app i.e.
+
+        class MyRackApp
+          def self.call(env)
+            [200, {}, ["Hello"]]
+          end
+        end
+
+        stub_request(:get, "www.example.com").to_rack(MyRackApp)
+
+  Thanks to [Jay Adkisson](https://github.com/jayferd)
+
+* The error message on an unstubbed request shows a code snippet with body as a hash when it was in url encoded form. Thanks to [Alex Rothenberg](https://github.com/alexrothenberg)
+
+* The error message on an unstubbed request shows currently registered request stubs. Thanks to [Lin Jen-Shin](https://github.com/godfat) for suggesting this feature.
+
+* Fixed problem with matching requests with json body, when json strings have date format. Thanks to [Joakim Ekberg](https://github.com/kalasjocke) for reporting this issue.
+
+* WebMock now attempts to require each http library before monkey patching it. Thanks to [Myron Marston](https://github.com/myronmarston) for suggesting this change.
+
+* External requests can be disabled while allowing selected ports on selected hosts
+
+        WebMock.disable_net_connect!(:allow => "www.example.com:8080")
+        RestClient.get("www.example.com:80") # ===> Failure
+        RestClient.get("www.example.com:8080")  # ===> Allowed.
+
+  Thanks to [Zach Dennis](https://github.com/zdennis)
+
+* Fixed syntax error in README examples, showing the ways of setting request expectations. Thanks to [Nikita Fedyashev](https://github.com/nfedyashev)
+
+
+**Many thanks to WebMock co-maintainer [James Conroy-Finn](https://github.com/jcf) who maintained WebMock on his own for the last couple of months.**
+
 ## 1.6.4
 
 This is a quick slip release to regenerate the gemspec. Apparently
