@@ -23,6 +23,7 @@ Supported HTTP libraries
 * Patron
 * EM-HTTP-Request
 * Curb (currently only Curb::Easy)
+* Typhoeus (currently only Typhoeus::Hydra)
 
 Supported Ruby Interpreters
 ---------------------------

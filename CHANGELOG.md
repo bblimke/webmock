@@ -16,6 +16,8 @@
 
 * Minitest support! Thanks to [Peter Higgins](https://github.com/phiggins)
 
+* Added support for Typhoeus::Hydra
+
 * Added support for `Curb::Easy#http_post` and `Curb::Easy#http_post` with multiple arguments. Thanks to [Salvador Fuentes Jr](https://github.com/fuentesjr) and [Alex Rothenberg](https://github.com/alexrothenberg)
 
 * Rack support. Requests can be stubbed to respond with a Rack app i.e.
