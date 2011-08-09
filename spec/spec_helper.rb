@@ -61,16 +61,3 @@ def setup_expectations_for_real_example_com_request(options = {})
     :response_body => "" }
   setup_expectations_for_real_request(defaults.merge(options))
 end
-
-
-def join_array_values(hash)
-   joined = {}
-   if hash
-     hash.each do |k,v|
-       v = v.join(", ") if v.is_a?(Array)
-       joined[k] = v 
-     end
-   end
-   joined
- end
-

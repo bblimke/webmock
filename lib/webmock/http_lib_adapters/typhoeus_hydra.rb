@@ -14,7 +14,7 @@ if defined?(Typhoeus)
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
-          if req.username 
+          if req.username
             uri.user = req.username
             uri.password = req.password
           end
@@ -27,7 +27,7 @@ if defined?(Typhoeus)
           )
           request_signature
         end
-        
+
         def self.build_webmock_response(typhoeus_response)
           webmock_response = WebMock::Response.new
           webmock_response.status = [typhoeus_response.code, typhoeus_response.status_message]
@@ -35,7 +35,7 @@ if defined?(Typhoeus)
           webmock_response.headers = typhoeus_response.headers_hash
           webmock_response
         end
-        
+
         def self.stub_typhoeus(request_signature, webmock_response, typhoeus)
           response = if webmock_response.should_timeout
             ::Typhoeus::Response.new(
@@ -52,14 +52,14 @@ if defined?(Typhoeus)
               :headers_hash => webmock_response.headers
             )
           end
-          
-          
+
+
           typhoeus.stub(
             request_signature.method || :any,
             /.*/
           ).and_return(response)
         end
-        
+
         def self.request_hash(request_signature)
           hash = {}
 
@@ -107,14 +107,14 @@ if defined?(Typhoeus)
       ::WebMock::HttpLibAdapters::TyphoeusHydra.build_webmock_response(request.response)
     if request.response.mock?
       WebMock::CallbackRegistry.invoke_callbacks(
-        {:lib => :typhoeus}, 
-        request_signature, 
+        {:lib => :typhoeus},
+        request_signature,
         webmock_response
       )
     else
       WebMock::CallbackRegistry.invoke_callbacks(
-        {:lib => :typhoeus, :real_request => true}, 
-        request_signature, 
+        {:lib => :typhoeus, :real_request => true},
+        request_signature,
         webmock_response
       )
     end
