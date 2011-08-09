@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'patron',          '>= 0.4.9'
   s.add_development_dependency 'em-http-request', '>= 0.2.14'
   s.add_development_dependency 'curb',            '>= 0.7.8'
+  s.add_development_dependency 'typhoeus',        '>= 0.2.4'
   s.add_development_dependency 'minitest',        '>= 2.2.2'
   s.add_development_dependency 'rdoc',            ((RUBY_VERSION == '1.8.6') ? '<= 3.5.0' : '>3.5.0')
 
