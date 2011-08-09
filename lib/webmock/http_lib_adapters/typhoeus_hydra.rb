@@ -1,3 +1,9 @@
+begin
+  require 'typhoeus'
+rescue LoadError
+  # typhoeus not found
+end
+
 if defined?(Typhoeus)
 
   ::Typhoeus::Hydra.allow_net_connect = true
