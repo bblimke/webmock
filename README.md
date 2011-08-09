@@ -24,6 +24,15 @@ Supported HTTP libraries
 * EM-HTTP-Request
 * Curb (currently only Curb::Easy)
 
+Supported Ruby Interpreters
+---------------------------
+
+* MRI 1.8.6
+* MRI 1.8.7
+* MRI 1.9.1
+* MRI 1.9.2
+* REE 1.8.7
+* JRuby
 ##Installation
 
     gem install webmock --source http://gemcutter.org
