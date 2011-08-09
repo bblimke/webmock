@@ -10,7 +10,7 @@ describe WebMock::RackResponse do
     response = @rack_response.evaluate(request)
 
     response.status.first.should == 200
-    response.body.should include 'This is my root!'
+    response.body.should include('This is my root!')
   end
 
   it "should send along params" do
@@ -19,7 +19,7 @@ describe WebMock::RackResponse do
     response = @rack_response.evaluate(request)
 
     response.status.first.should == 200
-    response.body.should include 'Hello, Johnny'
+    response.body.should include('Hello, Johnny')
   end
 
   it "should send along POST params" do
@@ -28,6 +28,6 @@ describe WebMock::RackResponse do
     )
 
     response = @rack_response.evaluate(request)
-    response.body.should include 'Good to meet you, Jimmy!'
+    response.body.should include('Good to meet you, Jimmy!')
   end
 end
