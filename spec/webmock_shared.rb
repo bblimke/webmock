@@ -148,9 +148,9 @@ shared_examples_for "WebMock" do
         end
       end
 
-      unless ENV['TRAVIS'] && http_library == :patron #this spec works everywhere but not on travis
-        context "when the host with port is allowed" do
-          it "should allow a real request to allowed host", :net_connect => true do
+      context "when the host with port is allowed" do
+        it "should allow a real request to allowed host", :net_connect => true do
+          unless ENV['TRAVIS'] && http_library == :patron #this spec works everywhere but not on travis
             http_request(:get, "http://#{host_with_port}/").status.should == "200"
           end
         end
