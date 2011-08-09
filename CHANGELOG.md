@@ -49,7 +49,7 @@
 * Fixed syntax error in README examples, showing the ways of setting request expectations. Thanks to [Nikita Fedyashev](https://github.com/nfedyashev)
 
 
-**Many thanks to WebMock co-maintainer [James Conroy-Finn](https://github.com/jcf) who maintained WebMock on his own for the last couple of months.**
+**Many thanks to WebMock co-maintainer [James Conroy-Finn](https://github.com/jcf) who did a great job maintaining WebMock on his own for the last couple of months.**
 
 ## 1.6.4
 
