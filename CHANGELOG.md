@@ -28,11 +28,12 @@
 
         stub_request(:get, "www.example.com").to_rack(MyRackApp)
 
-  Thanks to [Jay Adkisson](https://github.com/jayferd)
+    Thanks to [Jay Adkisson](https://github.com/jayferd)
 
 * The error message on an unstubbed request shows a code snippet with body as a hash when it was in url encoded form. Thanks to [Alex Rothenberg](https://github.com/alexrothenberg)
 
-* The error message on an unstubbed request shows currently registered request stubs. Thanks to [Lin Jen-Shin](https://github.com/godfat) for suggesting this feature.
+* The error message on an unstubbed request shows currently registered request stubs.
+  Thanks to [Lin Jen-Shin](https://github.com/godfat) for suggesting this feature.
 
 * Fixed problem with matching requests with json body, when json strings have date format. Thanks to [Joakim Ekberg](https://github.com/kalasjocke) for reporting this issue.
 
@@ -44,7 +45,7 @@
         RestClient.get("www.example.com:80") # ===> Failure
         RestClient.get("www.example.com:8080")  # ===> Allowed.
 
-  Thanks to [Zach Dennis](https://github.com/zdennis)
+    Thanks to [Zach Dennis](https://github.com/zdennis)
 
 * Fixed syntax error in README examples, showing the ways of setting request expectations. Thanks to [Nikita Fedyashev](https://github.com/nfedyashev)
 
