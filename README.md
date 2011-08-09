@@ -617,6 +617,15 @@ People who submitted patches and new features or suggested improvements. Many th
 * Alastair Brunton
 * Sam Stokes
 * Eugene Bolshakov
+* James Conroy-Finn
+* Salvador Fuentes Jr
+* Alex Rothenberg
+* Aidan Feldman
+* Steve Hull
+* Jay Adkisson
+* Zach Dennis
+* Nikita Fedyashev
+* Lin Jen-Shin
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
