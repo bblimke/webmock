@@ -13,6 +13,7 @@ Features
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit
 * Support for RSpec 1.x and RSpec 2.x
+* Support for MiniTest
 
 Supported HTTP libraries
 ------------------------
