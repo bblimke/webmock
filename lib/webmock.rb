@@ -12,8 +12,6 @@ require 'webmock/http_lib_adapters/patron'
 require 'webmock/http_lib_adapters/curb'
 require 'webmock/http_lib_adapters/em_http_request'
 require 'webmock/http_lib_adapters/typhoeus_hydra'
-require 'webmock/http_lib_adapters/typhoeus_easy'
-
 
 require 'webmock/errors'
 
