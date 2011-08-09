@@ -23,8 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'em-http-request', '>= 0.2.14'
   s.add_development_dependency 'curb',            '>= 0.7.8'
   s.add_development_dependency 'minitest',        '>= 2.2.2'
-  s.add_development_dependency 'rdoc'
-
+  s.add_development_dependency 'rdoc',            ((RUBY_VERSION == '1.8.6') ? '<= 3.5.0' : '>3.5.0')
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
