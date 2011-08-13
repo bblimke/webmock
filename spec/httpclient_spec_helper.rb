@@ -41,43 +41,8 @@ module HTTPClientSpecHelper
     Errno::ECONNREFUSED
   end
 
-  def setup_expectations_for_real_request(options = {})
-    socket = mock("TCPSocket")
-    TCPSocket.should_receive(:new).
-      with(options[:host], options[:port]).at_least(:once).and_return(socket)
-
-    socket.stub!(:closed?).and_return(false)
-    socket.stub!(:close).and_return(true)
-
-    request_parts = ["#{options[:method]} #{options[:path]} HTTP/1.1", "Host: #{options[:host]}"]
-
-    if options[:port] == 443
-      OpenSSL::SSL::SSLSocket.should_receive(:new).
-        with(socket, instance_of(OpenSSL::SSL::SSLContext)).
-        at_least(:once).and_return(socket = mock("SSLSocket"))
-      socket.should_receive(:connect).at_least(:once).with()
-      socket.should_receive(:peer_cert).and_return(mock('peer cert', :extensions => []))
-      socket.should_receive(:write).with(/#{request_parts[0]}.*#{request_parts[1]}.*/m).and_return(100)
-    else
-      socket.should_receive(:<<).with(/#{request_parts[0]}.*#{request_parts[1]}.*/m).and_return(100)
-    end
-
-    socket.stub!(:sync=).with(true)
-
-    socket.should_receive(:gets).with("\n").
-      and_return("HTTP/1.1 #{options[:response_code]} #{options[:response_message]}\r\n",
-                 "Content-Length: #{options[:response_body].length}\r\n",
-                 "\r\n")
-    socket.stub(:readpartial) do |size, buf|
-      buf << options[:response_body]
-    end
-
-    socket.stub!(:eof?).and_return(true)
-    socket.stub!(:close).and_return(true)
-  end
-
   def http_library
-    :http_client
+    :httpclient
   end
 
 end

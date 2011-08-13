@@ -3,6 +3,36 @@ require 'net/https'
 require 'stringio'
 require File.join(File.dirname(__FILE__), 'net_http_response')
 
+
+module WebMock
+  module HttpLibAdapters
+    class NetHttpAdapter < HttpLibAdapter
+      adapter_for :net_http
+
+      OriginalNetHTTP = Net::HTTP unless const_defined?(:OriginalNetHTTP)
+      OriginalNetBufferedIO = Net::BufferedIO unless const_defined?(:OriginalNetBufferedIO)
+
+      def self.enable!
+        Net.send(:remove_const, :BufferedIO)
+        Net.send(:remove_const, :HTTP)
+        Net.send(:remove_const, :HTTPSession)
+        Net.send(:const_set, :HTTP, Net::WebMockNetHTTP)
+        Net.send(:const_set, :HTTPSession, Net::WebMockNetHTTP)
+        Net.send(:const_set, :BufferedIO, Net::WebMockNetBufferedIO)
+      end
+
+      def self.disable!
+        Net.send(:remove_const, :BufferedIO)
+        Net.send(:remove_const, :HTTP)
+        Net.send(:remove_const, :HTTPSession)
+        Net.send(:const_set, :HTTP, OriginalNetHTTP)
+        Net.send(:const_set, :HTTPSession, OriginalNetHTTP)
+        Net.send(:const_set, :BufferedIO, OriginalNetBufferedIO)
+      end
+    end
+  end
+end
+
 class StubSocket #:nodoc:
 
   def initialize(*args)
@@ -19,7 +49,7 @@ end
 
 module Net  #:nodoc: all
 
-  class BufferedIO
+  class WebMockNetBufferedIO < BufferedIO
     def initialize_with_webmock(io, debug_output = nil)
       @read_timeout = 60
       @rbuf = ''
@@ -37,7 +67,7 @@ module Net  #:nodoc: all
     alias_method :initialize, :initialize_with_webmock
   end
 
-  class HTTP
+  class WebMockNetHTTP < HTTP
     class << self
       def socket_type_with_webmock
         StubSocket
@@ -65,7 +95,7 @@ module Net  #:nodoc: all
             WebMock::CallbackRegistry.invoke_callbacks(
               {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
           end
-          response.extend WebMock::Net::HTTPResponse
+          response.extend Net::WebMockHTTPResponse
           block.call response if block
           response
         end
@@ -122,7 +152,7 @@ module Net  #:nodoc: all
 
       response.instance_variable_set(:@read, true)
 
-      response.extend WebMock::Net::HTTPResponse
+      response.extend Net::WebMockHTTPResponse
 
       raise Timeout::Error, "execution expired" if webmock_response.should_timeout
 
@@ -151,6 +181,7 @@ module Net  #:nodoc: all
       end
     end
   end
+  Net::WebMockNetHTTP.version_1_2
 
 end
 

@@ -11,7 +11,7 @@ module TyphoeusHydraSpecHelper
         :method  => method,
         :body    => options[:body],
         :headers => options[:headers],
-        :timeout => 2000 # milliseconds
+        :timeout => 5000 # milliseconds
       }
     )
     raise FakeTyphoeusHydraError.new if response.code.to_s == "0"
@@ -41,10 +41,6 @@ module TyphoeusHydraSpecHelper
 
   def connection_refused_exception_class
     FakeTyphoeusHydraError
-  end
-
-  def setup_expectations_for_real_request(options = {})
-    #TODO
   end
 
   def http_library

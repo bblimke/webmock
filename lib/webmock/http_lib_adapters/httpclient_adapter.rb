@@ -6,7 +6,28 @@ end
 
 if defined?(::HTTPClient)
 
-  class ::HTTPClient
+  module WebMock
+    module HttpLibAdapters
+      class HTTPClientAdapter < HttpLibAdapter
+        adapter_for :httpclient
+
+        OriginalHttpClient = ::HTTPClient unless const_defined?(:OriginalHttpClient)
+
+        def self.enable!
+          Object.send(:remove_const, :HTTPClient)
+          Object.send(:const_set, :HTTPClient, WebMockHTTPClient)
+        end
+
+        def self.disable!
+          Object.send(:remove_const, :HTTPClient)
+          Object.send(:const_set, :HTTPClient, OriginalHttpClient)
+        end
+      end
+    end
+  end
+
+
+  class WebMockHTTPClient < HTTPClient
 
     def do_get_block_with_webmock(req, proxy, conn, &block)
       do_get_with_webmock(req, proxy, conn, false, &block)
@@ -26,7 +47,7 @@ if defined?(::HTTPClient)
         response = build_httpclient_response(webmock_response, stream, &block)
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :http_client}, request_signature, webmock_response)
+          {:lib => :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         res = if stream
@@ -39,7 +60,7 @@ if defined?(::HTTPClient)
         if WebMock::CallbackRegistry.any_callbacks?
           webmock_response = build_webmock_response(res)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :http_client, :real_request => true}, request_signature,
+            {:lib => :httpclient, :real_request => true}, request_signature,
             webmock_response)
         end
         res

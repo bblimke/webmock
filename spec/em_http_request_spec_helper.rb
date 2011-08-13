@@ -50,9 +50,6 @@ module EMHttpRequestSpecHelper
     ""
   end
 
-  def setup_expectations_for_real_request(options = {})
-  end
-
   def http_library
     :em_http_request
   end

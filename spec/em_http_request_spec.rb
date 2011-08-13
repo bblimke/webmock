@@ -67,11 +67,12 @@ unless RUBY_PLATFORM =~ /java/
 
         before(:each) do
           # need to reload the webmock em-http adapter after we require synchrony
-          EM::WebMockHttpClient.deactivate!
+          WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
           $".delete webmock_em_http
+          $".delete File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
           require 'em-synchrony'
           require 'em-synchrony/em-http'
-          require webmock_em_http
+          require File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
         end
 
         it "should work" do
@@ -90,11 +91,12 @@ unless RUBY_PLATFORM =~ /java/
         after(:each) do
           EM.send(:remove_const, :Synchrony)
           EM.send(:remove_const, :HTTPMethods)
-          EM::WebMockHttpClient.deactivate!
+          WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
           $".reject! {|path| path.include? "em-http-request"}
           $".delete webmock_em_http
+          $".delete File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
           require 'em-http-request'
-          require webmock_em_http
+          require File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
         end
       end
     end
@@ -125,7 +127,10 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     describe "mocking EM::HttpClient API" do
-      before { stub_http_request(:get, "www.example.com/") }
+      before do
+        stub_http_request(:get, "www.example.com/")
+        WebMock::HttpLibAdapters::EmHttpRequestAdapter.enable!
+      end
       subject do
         client = nil
         EM.run do

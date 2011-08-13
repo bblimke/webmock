@@ -1,8 +1,26 @@
 if defined?(EventMachine::HttpRequest)
+  module WebMock
+    module HttpLibAdapters
+      class EmHttpRequestAdapter < HttpLibAdapter
+        adapter_for :em_http_request
+
+        OriginalHttpRequest = EventMachine::HttpRequest unless const_defined?(:OriginalHttpRequest)
+
+        def self.enable!
+          EventMachine.send(:remove_const, :HttpRequest)
+          EventMachine.send(:const_set, :HttpRequest, EventMachine::WebMockHttpRequest)
+        end
+
+        def self.disable!
+          EventMachine.send(:remove_const, :HttpRequest)
+          EventMachine.send(:const_set, :HttpRequest, OriginalHttpRequest)
+        end
+      end
+    end
+  end
+
 
   module EventMachine
-    OriginalHttpRequest = HttpRequest unless const_defined?(:OriginalHttpRequest)
-
     class WebMockHttpRequest < EventMachine::HttpRequest
 
       include HttpEncoding
@@ -126,19 +144,6 @@ if defined?(EventMachine::HttpRequest)
         response_string << "" << body
         response_string.join("\n")
       end
-
-      def self.activate!
-        EventMachine.send(:remove_const, :HttpRequest)
-        EventMachine.send(:const_set, :HttpRequest, WebMockHttpRequest)
-      end
-
-      def self.deactivate!
-        EventMachine.send(:remove_const, :HttpRequest)
-        EventMachine.send(:const_set, :HttpRequest, OriginalHttpRequest)
-      end
     end
   end
-
-  EventMachine::WebMockHttpRequest.activate!
-
 end

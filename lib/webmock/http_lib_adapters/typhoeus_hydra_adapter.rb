@@ -6,11 +6,41 @@ end
 
 if defined?(Typhoeus)
 
-  ::Typhoeus::Hydra.allow_net_connect = true
-
   module WebMock
     module HttpLibAdapters
-      class TyphoeusHydra
+      class TyphoeusAdapter < HttpLibAdapter
+        adapter_for :typhoeus
+
+        def self.enable!
+          @disabled = false
+          add_after_request_callback
+          ::Typhoeus::Hydra.allow_net_connect = true
+        end
+
+        def self.disable!
+          @disabled = true
+          remove_after_request_callback
+          ::Typhoeus::Hydra.allow_net_connect = true
+        end
+
+        def self.disabled?
+          !!@disabled
+        end
+
+        def self.add_after_request_callback
+          unless Typhoeus::Hydra.
+            global_hooks[:after_request_before_on_complete].
+              include?(AFTER_REQUEST_CALLBACK)
+            Typhoeus::Hydra.
+              global_hooks[:after_request_before_on_complete] << AFTER_REQUEST_CALLBACK
+          end
+        end
+
+        def self.remove_after_request_callback
+          Typhoeus::Hydra.global_hooks[:after_request_before_on_complete].
+            delete_if {|v| v == AFTER_REQUEST_CALLBACK }
+        end
+
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
@@ -56,7 +86,8 @@ if defined?(Typhoeus)
 
           typhoeus.stub(
             request_signature.method || :any,
-            /.*/
+            /.*/,
+            :webmock_stub => true
           ).and_return(response)
         end
 
@@ -68,6 +99,28 @@ if defined?(Typhoeus)
 
           hash
         end
+
+        AFTER_REQUEST_CALLBACK = Proc.new do |request|
+          request_signature =
+            ::WebMock::HttpLibAdapters::TyphoeusAdapter.
+              build_request_signature(request)
+          webmock_response =
+            ::WebMock::HttpLibAdapters::TyphoeusAdapter.
+              build_webmock_response(request.response)
+          if request.response.mock?
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :typhoeus},
+              request_signature,
+              webmock_response
+            )
+          else
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :typhoeus, :real_request => true},
+              request_signature,
+              webmock_response
+            )
+          end
+        end
       end
     end
   end
@@ -76,16 +129,21 @@ if defined?(Typhoeus)
   module Typhoeus
     class Hydra
       def queue_with_webmock(request)
-        self.clear_stubs
+        self.clear_webmock_stubs
+
+        if WebMock::HttpLibAdapters::TyphoeusAdapter.disabled?
+          return queue_without_webmock(request)
+        end
+
         request_signature =
-         ::WebMock::HttpLibAdapters::TyphoeusHydra.build_request_signature(request)
+         ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request)
 
         ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if ::WebMock::StubRegistry.instance.registered_request?(request_signature)
           webmock_response =
             ::WebMock::StubRegistry.instance.response_for_request(request_signature)
-          ::WebMock::HttpLibAdapters::TyphoeusHydra.
+          ::WebMock::HttpLibAdapters::TyphoeusAdapter.
             stub_typhoeus(request_signature, webmock_response, self)
           webmock_response.raise_error_if_any
         elsif !WebMock.net_connect_allowed?(request_signature.uri)
@@ -96,29 +154,13 @@ if defined?(Typhoeus)
 
       alias_method :queue_without_webmock, :queue
       alias_method :queue, :queue_with_webmock
+
+      def clear_webmock_stubs
+        self.stubs = [] unless self.stubs
+        self.stubs.delete_if {|s|
+          s.instance_variable_get(:@options)[:webmock_stub]
+        }
+      end
     end
   end
-
-
-  Typhoeus::Hydra.after_request_before_on_complete do |request|
-    request_signature =
-      ::WebMock::HttpLibAdapters::TyphoeusHydra.build_request_signature(request)
-    webmock_response =
-      ::WebMock::HttpLibAdapters::TyphoeusHydra.build_webmock_response(request.response)
-    if request.response.mock?
-      WebMock::CallbackRegistry.invoke_callbacks(
-        {:lib => :typhoeus},
-        request_signature,
-        webmock_response
-      )
-    else
-      WebMock::CallbackRegistry.invoke_callbacks(
-        {:lib => :typhoeus, :real_request => true},
-        request_signature,
-        webmock_response
-      )
-    end
-  end
-
-
 end

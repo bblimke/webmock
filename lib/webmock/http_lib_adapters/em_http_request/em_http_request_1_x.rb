@@ -1,8 +1,31 @@
 if defined?(EventMachine::HttpClient)
+  module WebMock
+    module HttpLibAdapters
+      class EmHttpRequestAdapter < HttpLibAdapter
+        adapter_for :em_http_request
+
+        OriginalHttpClient = EventMachine::HttpClient unless const_defined?(:OriginalHttpClient)
+        OriginalHttpConnection = EventMachine::HttpConnection unless const_defined?(:OriginalHttpConnection)
+
+
+        def self.enable!
+          EventMachine.send(:remove_const, :HttpConnection)
+          EventMachine.send(:const_set, :HttpConnection, EventMachine::WebMockHttpConnection)
+          EventMachine.send(:remove_const, :HttpClient)
+          EventMachine.send(:const_set, :HttpClient, EventMachine::WebMockHttpClient)
+        end
+
+        def self.disable!
+          EventMachine.send(:remove_const, :HttpConnection)
+          EventMachine.send(:const_set, :HttpConnection, OriginalHttpConnection)
+          EventMachine.send(:remove_const, :HttpClient)
+          EventMachine.send(:const_set, :HttpClient, OriginalHttpClient)
+        end
+      end
+    end
+  end
 
   module EventMachine
-    OriginalHttpClient = HttpClient unless const_defined?(:OriginalHttpClient)
-    OriginalHttpConnection = HttpConnection unless const_defined?(:OriginalHttpConnection)
 
     if defined?(Synchrony)
       # have to make the callbacks fire on the next tick in order
@@ -173,22 +196,6 @@ if defined?(EventMachine::HttpClient)
         response_string << "" << body
         response_string.join("\n")
       end
-
-      def self.activate!
-        EventMachine.send(:remove_const, :HttpConnection)
-        EventMachine.send(:const_set, :HttpConnection, WebMockHttpConnection)
-        EventMachine.send(:remove_const, :HttpClient)
-        EventMachine.send(:const_set, :HttpClient, WebMockHttpClient)
-      end
-
-      def self.deactivate!
-        EventMachine.send(:remove_const, :HttpConnection)
-        EventMachine.send(:const_set, :HttpConnection, OriginalHttpConnection)
-        EventMachine.send(:remove_const, :HttpClient)
-        EventMachine.send(:const_set, :HttpClient, OriginalHttpClient)
-      end
     end
   end
-
-  EventMachine::WebMockHttpClient.activate!
 end

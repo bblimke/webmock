@@ -32,6 +32,13 @@
 
     Thanks to [Jay Adkisson](https://github.com/jayferd)
 
+* Added support for selective disabling and enabling of http client adapters
+
+        WebMock.disable!                         #disable WebMock (all adapters)
+        WebMock.disable!(:except => [:net_http]) #disable all adapters except Net::HTTP
+        WebMock.enable!                          #enable WebMock (all adapters)
+        WebMock.enable!(:except => [:patron])    #enable all adapters except Patron
+
 * The error message on an unstubbed request shows a code snippet with body as a hash when it was in url encoded form. Thanks to [Alex Rothenberg](https://github.com/alexrothenberg)
 
 * The error message on an unstubbed request shows currently registered request stubs.
