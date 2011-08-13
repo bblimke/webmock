@@ -47,7 +47,7 @@ if defined?(::HTTPClient)
         response = build_httpclient_response(webmock_response, stream, &block)
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :http_client}, request_signature, webmock_response)
+          {:lib => :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         res = if stream
@@ -60,7 +60,7 @@ if defined?(::HTTPClient)
         if WebMock::CallbackRegistry.any_callbacks?
           webmock_response = build_webmock_response(res)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :http_client, :real_request => true}, request_signature,
+            {:lib => :httpclient, :real_request => true}, request_signature,
             webmock_response)
         end
         res

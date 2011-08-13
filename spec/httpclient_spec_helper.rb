@@ -42,7 +42,7 @@ module HTTPClientSpecHelper
   end
 
   def http_library
-    :http_client
+    :httpclient
   end
 
 end
