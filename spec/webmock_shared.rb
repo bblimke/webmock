@@ -1674,6 +1674,9 @@ shared_examples_for "WebMock" do
       before(:each) do
         WebMock.disable!
       end
+      after(:each) do
+        WebMock.enable!
+      end
       it_should_behave_like "disabled WebMock"
     end
 
@@ -1683,6 +1686,27 @@ shared_examples_for "WebMock" do
         WebMock.enable!
       end
       it_should_behave_like "enabled WebMock"
+    end
+
+    describe "when webmock is disabled except this lib" do
+      before(:each) do
+        WebMock.disable!(:except => [http_library])
+      end
+      after(:each) do
+        WebMock.enable!
+      end
+      it_should_behave_like "enabled WebMock"
+    end
+
+    describe "when webmock is enabled except this lib" do
+      before(:each) do
+        WebMock.disable!
+        WebMock.enable!(:except => [http_library])
+      end
+      after(:each) do
+        WebMock.enable!
+      end
+      it_should_behave_like "disabled WebMock"
     end
   end
 end

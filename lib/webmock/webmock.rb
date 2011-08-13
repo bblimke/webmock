@@ -25,12 +25,20 @@ module WebMock
     VERSION
   end
 
-  def self.disable!
-    HttpLibAdapterRegistry.instance.each_adapter(&:disable!)
+  def self.disable!(options = {})
+    except = [options[:except]].flatten.compact
+    HttpLibAdapterRegistry.instance.each_adapter do |name, adapter|
+      adapter.enable!
+      adapter.disable! unless except.include?(name)
+    end
   end
 
-  def self.enable!
-    HttpLibAdapterRegistry.instance.each_adapter(&:enable!)
+  def self.enable!(options = {})
+    except = [options[:except]].flatten.compact
+    HttpLibAdapterRegistry.instance.each_adapter do |name, adapter|
+      adapter.disable!
+      adapter.enable! unless except.include?(name)
+    end
   end
 
   def self.allow_net_connect!(options = {})
