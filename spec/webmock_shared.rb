@@ -1696,7 +1696,7 @@ shared_examples_for "WebMock" do
 end
 
 shared_examples_for "disabled WebMock" do
-  let(:url) { "http://#{WebMockServer.instance.host_with_port}"}
+  let(:url) { "http://#{WebMockServer.instance.host_with_port}/"}
 
   it "should not register executed requests" do
     http_request(:get, url)

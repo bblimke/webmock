@@ -11,22 +11,22 @@
 # after it has aleady been read.  This attemps to preserve the behavior of
 # #read_body, acting just as if it had never been read.
 
-module WebMock
-  module Net
-    module HTTPResponse
-      def read_body(dest = nil, &block)
-        return super if @__read_body_previously_called
-        return @body if dest.nil? && block.nil?
-        raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
-        return nil if @body.nil?
 
-        dest ||= ::Net::ReadAdapter.new(block)
-        dest << @body
-        @body = dest
-      ensure
-        # allow subsequent calls to #read_body to proceed as normal, without our hack...
-        @__read_body_previously_called = true
-      end
+module Net
+  module WebMockHTTPResponse
+    def read_body(dest = nil, &block)
+      return super if @__read_body_previously_called
+      return @body if dest.nil? && block.nil?
+      raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
+      return nil if @body.nil?
+
+      dest ||= ::Net::ReadAdapter.new(block)
+      dest << @body
+      @body = dest
+    ensure
+      # allow subsequent calls to #read_body to proceed as normal, without our hack...
+      @__read_body_previously_called = true
     end
   end
 end
+
