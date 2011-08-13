@@ -56,7 +56,8 @@ if defined?(Typhoeus)
 
           typhoeus.stub(
             request_signature.method || :any,
-            /.*/
+            /.*/,
+            :webmock_stub => true
           ).and_return(response)
         end
 
@@ -76,7 +77,7 @@ if defined?(Typhoeus)
   module Typhoeus
     class Hydra
       def queue_with_webmock(request)
-        self.clear_stubs
+        self.clear_webmock_stubs
         request_signature =
          ::WebMock::HttpLibAdapters::TyphoeusHydra.build_request_signature(request)
 
@@ -96,6 +97,12 @@ if defined?(Typhoeus)
 
       alias_method :queue_without_webmock, :queue
       alias_method :queue, :queue_with_webmock
+
+      def clear_webmock_stubs
+        self.stubs.delete_if {|s|
+          s.instance_variable_get(:@options)[:webmock_stub]
+        }
+      end
     end
   end
 
