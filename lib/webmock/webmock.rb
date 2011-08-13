@@ -26,15 +26,11 @@ module WebMock
   end
 
   def self.disable!
-    Config.instance.disabled = true
+    HttpLibAdapterRegistry.instance.each_adapter(&:disable!)
   end
 
   def self.enable!
-    Config.instance.disabled = false
-  end
-
-  def self.disabled?
-    !!Config.instance.disabled
+    HttpLibAdapterRegistry.instance.each_adapter(&:enable!)
   end
 
   def self.allow_net_connect!(options = {})
@@ -101,4 +97,5 @@ module WebMock
     ))
   end
 
+  self.enable!
 end

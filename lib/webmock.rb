@@ -6,6 +6,8 @@ require 'crack'
 require 'webmock/deprecation'
 require 'webmock/version'
 
+require 'webmock/http_lib_adapters/http_lib_adapter_registry'
+require 'webmock/http_lib_adapters/http_lib_adapter'
 require 'webmock/http_lib_adapters/net_http'
 require 'webmock/http_lib_adapters/httpclient'
 require 'webmock/http_lib_adapters/patron'
