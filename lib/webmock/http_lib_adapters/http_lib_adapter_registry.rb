@@ -13,7 +13,7 @@ module WebMock
     end
 
     def each_adapter(&block)
-      @http_lib_adapters.values.each(&block)
+      @http_lib_adapters.each(&block)
     end
   end
 end
