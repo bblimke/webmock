@@ -11,10 +11,14 @@ module TyphoeusHydraSpecHelper
         :method  => method,
         :body    => options[:body],
         :headers => options[:headers],
-        :timeout => 10000 # milliseconds
+        :timeout => 15000 # milliseconds
       }
     )
-    raise FakeTyphoeusHydraError.new if response.code.to_s == "0"
+    if response.code.to_s == "0"
+      p uri
+      p response.curl_error_message
+      raise FakeTyphoeusHydraError.new
+    end
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
