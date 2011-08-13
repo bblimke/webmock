@@ -6,7 +6,28 @@ end
 
 if defined?(::HTTPClient)
 
-  class ::HTTPClient
+  module WebMock
+    module HttpLibAdapters
+      class HTTPClientAdapter < HttpLibAdapter
+        adapter_for :httpclient
+
+        OriginalHttpClient = ::HTTPClient unless const_defined?(:OriginalHttpClient)
+
+        def self.enable!
+          Object.send(:remove_const, :HTTPClient)
+          Object.send(:const_set, :HTTPClient, WebMockHTTPClient)
+        end
+
+        def self.disable!
+          Object.send(:remove_const, :HTTPClient)
+          Object.send(:const_set, :HTTPClient, OriginalHttpClient)
+        end
+      end
+    end
+  end
+
+
+  class WebMockHTTPClient < HTTPClient
 
     def do_get_block_with_webmock(req, proxy, conn, &block)
       do_get_with_webmock(req, proxy, conn, false, &block)
