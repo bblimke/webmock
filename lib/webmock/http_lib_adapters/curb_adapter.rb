@@ -5,9 +5,53 @@ rescue LoadError
 end
 
 if defined?(Curl)
+  module WebMock
+    module HttpLibAdapters
+      class CurbAdapter < HttpLibAdapter
+        adapter_for :curb
+
+        OriginalCurlEasy = Curl::Easy unless const_defined?(:OriginalCurlEasy)
+
+        def self.enable!
+          Curl.send(:remove_const, :Easy)
+          Curl.send(:const_set, :Easy, Curl::WebMockCurlEasy)
+        end
+
+        def self.disable!
+          Curl.send(:remove_const, :Easy)
+          Curl.send(:const_set, :Easy, OriginalCurlEasy)
+        end
+
+        # Borrowed from Patron:
+        # http://github.com/toland/patron/blob/master/lib/patron/response.rb
+        def self.parse_header_string(header_string)
+          status, headers = nil, {}
+
+          header_string.split(/\r\n/).each do |header|
+            if header =~ %r|^HTTP/1.[01] \d\d\d (.*)|
+              status = $1
+            else
+              parts = header.split(':', 2)
+              unless parts.empty?
+                parts[1].strip! unless parts[1].nil?
+                if headers.has_key?(parts[0])
+                  headers[parts[0]] = [headers[parts[0]]] unless headers[parts[0]].kind_of? Array
+                  headers[parts[0]] << parts[1]
+                else
+                  headers[parts[0]] = parts[1]
+                end
+              end
+            end
+          end
+
+          return status, headers
+        end
+      end
+    end
+  end
 
   module Curl
-    class Easy
+    class WebMockCurlEasy < Curl::Easy
       def curb_or_webmock
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -110,7 +154,8 @@ if defined?(Curl)
       end
 
       def build_webmock_response
-        status, headers = WebmockHelper.parse_header_string(self.header_str)
+        status, headers =
+         WebMock::HttpLibAdapters::CurbAdapter.parse_header_string(self.header_str)
 
         webmock_response = WebMock::Response.new
         webmock_response.status = [self.response_code, status]
@@ -273,33 +318,6 @@ if defined?(Curl)
           c
         end
       METHOD
-
-      module WebmockHelper
-        # Borrowed from Patron:
-        # http://github.com/toland/patron/blob/master/lib/patron/response.rb
-        def self.parse_header_string(header_string)
-          status, headers = nil, {}
-
-          header_string.split(/\r\n/).each do |header|
-            if header =~ %r|^HTTP/1.[01] \d\d\d (.*)|
-              status = $1
-            else
-              parts = header.split(':', 2)
-              unless parts.empty?
-                parts[1].strip! unless parts[1].nil?
-                if headers.has_key?(parts[0])
-                  headers[parts[0]] = [headers[parts[0]]] unless headers[parts[0]].kind_of? Array
-                  headers[parts[0]] << parts[1]
-                else
-                  headers[parts[0]] = parts[1]
-                end
-              end
-            end
-          end
-
-          return status, headers
-        end
-      end
     end
   end
 end

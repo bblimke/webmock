@@ -1,11 +1,14 @@
-  module CurbSpecHelper
+require 'ostruct'
+
+module CurbSpecHelper
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
     body = options[:body]
 
     curl = curb_http_request(uri, method, body, options)
 
-    status, response_headers = Curl::Easy::WebmockHelper.parse_header_string(curl.header_str)
+    status, response_headers =
+     WebMock::HttpLibAdapters::CurbAdapter.parse_header_string(curl.header_str)
 
     OpenStruct.new(
       :body => curl.body_str,
