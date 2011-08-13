@@ -23,19 +23,10 @@ shared_examples_for "WebMock" do
       end
 
       it "should make a real web request if request is not stubbed" do
-        setup_expectations_for_real_example_com_request
         http_request(:get, webmock_server_url).status.should == "200"
       end
 
       it "should make a real https request if request is not stubbed" do
-        setup_expectations_for_real_example_com_request(
-         :host => "www.paypal.com",
-         :port => 443,
-         :path => "/uk/cgi-bin/webscr",
-         :response_code => 200,
-         :response_message => "OK",
-         :response_body => "hello paypal"
-        )
         http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
           body.should =~ /.*paypal.*/
       end
@@ -1523,7 +1514,6 @@ shared_examples_for "WebMock" do
               end
 
               it "should verify expected requests occured" do
-                setup_expectations_for_real_example_com_request
                 lambda {
                   http_request(:get, "http://www.example.com/")
                   a_request(:get, "http://www.example.com").should have_been_made

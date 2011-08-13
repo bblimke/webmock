@@ -39,10 +39,6 @@ module PatronSpecHelper
     Patron::ConnectionFailed
   end
 
-  def setup_expectations_for_real_request(options = {})
-    #TODO
-  end
-
   def http_library
     :patron
   end

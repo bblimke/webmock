@@ -41,9 +41,6 @@ module CurbSpecHelper
     Curl::Err::ConnectionFailedError
   end
 
-  def setup_expectations_for_real_request(options = {})
-  end
-
   def http_library
     :curb
   end

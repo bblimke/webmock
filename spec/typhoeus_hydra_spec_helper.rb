@@ -43,10 +43,6 @@ module TyphoeusHydraSpecHelper
     FakeTyphoeusHydraError
   end
 
-  def setup_expectations_for_real_request(options = {})
-    #TODO
-  end
-
   def http_library
     :typhoeus
   end
