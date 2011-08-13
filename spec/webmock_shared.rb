@@ -150,9 +150,7 @@ shared_examples_for "WebMock" do
 
       context "when the host with port is allowed" do
         it "should allow a real request to allowed host", :net_connect => true do
-          unless ENV['TRAVIS'] && http_library == :patron #this spec works everywhere but not on travis
-            http_request(:get, "http://#{host_with_port}/").status.should == "200"
-          end
+          http_request(:get, "http://#{host_with_port}/").status.should == "200"
         end
       end
 
@@ -1679,66 +1677,6 @@ shared_examples_for "WebMock" do
     end
   end
 
-  shared_examples_for "disabled WebMock" do
-    let(:url) { "http://#{WebMockServer.instance.host_with_port}"}
-
-    it "should not register executed requests" do
-      http_request(:get, url)
-      a_request(:get, url).should_not have_been_made
-    end
-
-    it "should not block unstubbed requests" do
-      lambda {
-        http_request(:get, url)
-      }.should_not raise_error
-    end
-
-    it "should return real response even if there are stubs" do
-      stub_request(:get, /.*/).to_return(:body => "x")
-      http_request(:get, url).
-        body.should == "hello world"
-    end
-
-    it "should not invoke any callbacks" do
-      WebMock.reset_callbacks
-      stub_request(:get, "http://www.example.com")
-      @called = nil
-      WebMock.after_request { @called = 1 }
-      http_request(:get, url)
-      @called.should == nil
-    end
-  end
-
-  shared_examples_for "enabled WebMock" do
-    let(:url) { "http://#{WebMockServer.instance.host_with_port}"}
-
-    it "should register executed requests" do
-      WebMock.allow_net_connect!
-      http_request(:get, url)
-      a_request(:get, url).should have_been_made
-    end
-
-    it "should block unstubbed requests" do
-      lambda {
-        http_request(:get, url)
-      }.should raise_error(WebMock::NetConnectNotAllowedError)
-    end
-
-    it "should return stubbed response" do
-      stub_request(:get, /.*/).to_return(:body => "x")
-      http_request(:get, url).body.should == "x"
-    end
-
-    it "should invoke callbacks" do
-      WebMock.allow_net_connect!
-      WebMock.reset_callbacks
-      @called = nil
-      WebMock.after_request { @called = 1 }
-      http_request(:get, url)
-      @called.should == 1
-    end
-  end
-
   describe "enabling and disabling webmock" do
     describe "when webmock is disabled" do
       before(:each) do
@@ -1755,5 +1693,65 @@ shared_examples_for "WebMock" do
       it_should_behave_like "enabled WebMock"
     end
   end
-
 end
+
+shared_examples_for "disabled WebMock" do
+  let(:url) { "http://#{WebMockServer.instance.host_with_port}"}
+
+  it "should not register executed requests" do
+    http_request(:get, url)
+    a_request(:get, url).should_not have_been_made
+  end
+
+  it "should not block unstubbed requests" do
+    lambda {
+      http_request(:get, url)
+    }.should_not raise_error
+  end
+
+  it "should return real response even if there are stubs" do
+    stub_request(:get, /.*/).to_return(:body => "x")
+    http_request(:get, url).
+      body.should == "hello world"
+  end
+
+  it "should not invoke any callbacks" do
+    WebMock.reset_callbacks
+    stub_request(:get, "http://www.example.com")
+    @called = nil
+    WebMock.after_request { @called = 1 }
+    http_request(:get, url)
+    @called.should == nil
+  end
+end
+
+shared_examples_for "enabled WebMock" do
+  let(:url) { "http://#{WebMockServer.instance.host_with_port}/"}
+
+  it "should register executed requests" do
+    WebMock.allow_net_connect!
+    http_request(:get, url)
+    a_request(:get, url).should have_been_made
+  end
+
+  it "should block unstubbed requests" do
+    lambda {
+      http_request(:get, url)
+    }.should raise_error(WebMock::NetConnectNotAllowedError)
+  end
+
+  it "should return stubbed response" do
+    stub_request(:get, /.*/).to_return(:body => "x")
+    http_request(:get, url).body.should == "x"
+  end
+
+  it "should invoke callbacks" do
+    WebMock.allow_net_connect!
+    WebMock.reset_callbacks
+    @called = nil
+    WebMock.after_request { @called = 1 }
+    http_request(:get, url)
+    @called.should == 1
+  end
+end
+

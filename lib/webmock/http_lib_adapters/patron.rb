@@ -10,6 +10,10 @@ if defined?(Patron)
     class Session
 
       def handle_request_with_webmock(req)
+        if WebMock.disabled?
+          return handle_request_without_webmock(req)
+        end
+
         request_signature = build_request_signature(req)
 
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
