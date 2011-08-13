@@ -4,12 +4,12 @@ unless defined? SAMPLE_HEADERS
   SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%20c&z=%27Stop%21%27%20said%20Fred"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
-  WWW_EXAMPLE_COM_CONTENT_LENGTH = 0
 end
 
 class MyException < StandardError; end;
 
 shared_examples_for "WebMock" do
+  let(:webmock_server_url) {"http://#{WebMockServer.instance.host_with_port}/"}
   before(:each) do
     WebMock.disable_net_connect!
     WebMock.reset!
@@ -24,7 +24,7 @@ shared_examples_for "WebMock" do
 
       it "should make a real web request if request is not stubbed" do
         setup_expectations_for_real_example_com_request
-        http_request(:get, "http://www.example.com/").status.should == "302"
+        http_request(:get, webmock_server_url).status.should == "200"
       end
 
       it "should make a real https request if request is not stubbed" do
@@ -1628,23 +1628,23 @@ shared_examples_for "WebMock" do
             WebMock.after_request(:except => [:other_lib])  do |_, response|
               @response = response
             end
-            http_request(:get, "http://www.example.com/")
+            http_request(:get, webmock_server_url)
           end
 
           it "should pass response with status and message" do
             # not supported by em-http-request, it always returns "unknown" for http_reason
             unless http_library == :em_http_request
-              @response.status[0].should == 302
-              @response.status[1].should == "Found"
+              @response.status[0].should == 200
+              @response.status[1].should == "OK"
             end
           end
 
           it "should pass response with headers" do
-            @response.headers["Content-Length"].should == "#{WWW_EXAMPLE_COM_CONTENT_LENGTH}"
+            @response.headers["Content-Length"].should == "11"
           end
 
           it "should pass response with body" do
-            @response.body.size.should == WWW_EXAMPLE_COM_CONTENT_LENGTH
+            @response.body.size.should == 11
           end
 
         end
