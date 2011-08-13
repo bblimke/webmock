@@ -25,6 +25,18 @@ module WebMock
     VERSION
   end
 
+  def self.disable!
+    Config.instance.disabled = true
+  end
+
+  def self.enable!
+    Config.instance.disabled = false
+  end
+
+  def self.disabled?
+    !!Config.instance.disabled
+  end
+
   def self.allow_net_connect!(options = {})
     Config.instance.allow_net_connect = true
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]

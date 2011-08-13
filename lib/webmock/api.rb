@@ -3,7 +3,8 @@ module WebMock
     extend self
 
     def stub_request(method, uri)
-      WebMock::StubRegistry.instance.register_request_stub(WebMock::RequestStub.new(method, uri))
+      WebMock::StubRegistry.instance.
+        register_request_stub(WebMock::RequestStub.new(method, uri))
     end
 
     alias_method :stub_http_request, :stub_request
