@@ -11,7 +11,9 @@ describe WebMock::HttpLibAdapterRegistry do
       WebMock::HttpLibAdapterRegistry.instance.each_adapter {|n,a|
         adapters << [n, a]
       }
-      adapters.should == [[:my_lib, MyAdapter]]
+      adapters.should include([:my_lib, MyAdapter])
+      WebMock::HttpLibAdapterRegistry.instance.
+        http_lib_adapters.delete(:my_lib)
     end
   end
 end
