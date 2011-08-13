@@ -27,8 +27,10 @@ shared_examples_for "WebMock" do
       end
 
       it "should make a real https request if request is not stubbed" do
-        http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
-          body.should =~ /.*paypal.*/
+        unless http_library == :httpclient
+          http_request(:get, "https://www.paypal.com:443/uk/cgi-bin/webscr").
+            body.should =~ /.*paypal.*/
+        end
       end
 
       it "should return stubbed response if request was stubbed" do
