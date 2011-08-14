@@ -1741,23 +1741,21 @@ shared_examples_for "disabled WebMock" do
 end
 
 shared_examples_for "enabled WebMock" do
-  let(:url) { "http://#{WebMockServer.instance.host_with_port}/"}
-
   it "should register executed requests" do
     WebMock.allow_net_connect!
-    http_request(:get, url)
-    a_request(:get, url).should have_been_made
+    http_request(:get, "http://www.example.com/")
+    a_request(:get, "http://www.example.com/").should have_been_made
   end
 
   it "should block unstubbed requests" do
     lambda {
-      http_request(:get, url)
+      http_request(:get, "http://www.example.com/")
     }.should raise_error(WebMock::NetConnectNotAllowedError)
   end
 
   it "should return stubbed response" do
     stub_request(:get, /.*/).to_return(:body => "x")
-    http_request(:get, url).body.should == "x"
+    http_request(:get, "http://www.example.com/").body.should == "x"
   end
 
   it "should invoke callbacks" do
@@ -1765,7 +1763,7 @@ shared_examples_for "enabled WebMock" do
     WebMock.reset_callbacks
     @called = nil
     WebMock.after_request { @called = 1 }
-    http_request(:get, url)
+    http_request(:get, "http://www.example.com/")
     @called.should == 1
   end
 end
