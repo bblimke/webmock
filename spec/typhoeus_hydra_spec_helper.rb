@@ -14,11 +14,7 @@ module TyphoeusHydraSpecHelper
         :timeout => 15000 # milliseconds
       }
     )
-    if response.code.to_s == "0"
-      p uri
-      p response.curl_error_message
-      raise FakeTyphoeusHydraError.new
-    end
+    raise FakeTyphoeusHydraError.new if response.code.to_s == "0"
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
