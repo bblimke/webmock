@@ -31,7 +31,7 @@ class WebMockServer
         trap(signal){ server.shutdown }
       end
       server.start do |socket|
-        socket.puts <<-EOT.gsub(/^\s+\|/, '').gsub("\n","\r\n")
+        socket.puts <<-EOT.gsub(/^\s+\|/, '')
           |HTTP/1.1 200 OK
           |Date: Fri, 31 Dec 1999 23:59:59 GMT
           |Content-Type: text/html

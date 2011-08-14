@@ -1620,23 +1620,23 @@ shared_examples_for "WebMock" do
             WebMock.after_request(:except => [:other_lib])  do |_, response|
               @response = response
             end
-            http_request(:get, webmock_server_url)
+            http_request(:get, "http://www.example.com/")
           end
 
           it "should pass response with status and message" do
             # not supported by em-http-request, it always returns "unknown" for http_reason
             unless http_library == :em_http_request
-              @response.status[0].should == 200
-              @response.status[1].should == "OK"
+              @response.status[0].should == 302
+              @response.status[1].should == "Found"
             end
           end
 
           it "should pass response with headers" do
-            @response.headers["Content-Length"].should == "11"
+            @response.headers["Content-Length"].should == "0"
           end
 
           it "should pass response with body" do
-            @response.body.size.should == 11
+            @response.body.size.should == 0
           end
 
         end
@@ -1662,7 +1662,7 @@ shared_examples_for "WebMock" do
       it "should clear all declared callbacks on reset callbacks" do
         WebMock.after_request { @called = 1 }
         WebMock.reset_callbacks
-        stub_request(:get, "http://www.example.com")
+        stub_request(:get, "http://www.example.com/")
         http_request(:get, "http://www.example.com/")
         @called.should == nil
       end
@@ -1712,31 +1712,30 @@ shared_examples_for "WebMock" do
 end
 
 shared_examples_for "disabled WebMock" do
-  let(:url) { "http://#{WebMockServer.instance.host_with_port}/"}
 
   it "should not register executed requests" do
-    http_request(:get, url)
-    a_request(:get, url).should_not have_been_made
+    http_request(:get, "http://www.example.com/")
+    a_request(:get, "http://www.example.com/").should_not have_been_made
   end
 
   it "should not block unstubbed requests" do
     lambda {
-      http_request(:get, url)
+      http_request(:get, "http://www.example.com/")
     }.should_not raise_error
   end
 
   it "should return real response even if there are stubs" do
     stub_request(:get, /.*/).to_return(:body => "x")
-    http_request(:get, url).
-      body.should == "hello world"
+    http_request(:get, "http://www.example.com/").
+      status.should == "302"
   end
 
   it "should not invoke any callbacks" do
     WebMock.reset_callbacks
-    stub_request(:get, "http://www.example.com")
+    stub_request(:get, "http://www.example.com/")
     @called = nil
     WebMock.after_request { @called = 1 }
-    http_request(:get, url)
+    http_request(:get, "http://www.example.com/")
     @called.should == nil
   end
 end
