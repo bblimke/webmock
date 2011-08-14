@@ -432,9 +432,9 @@ If you want to reset all current stubs and history of requests use `WebMock.rese
 ## Disabling and enabling WebMock or only some http client adapters
 
     WebMock.disable!                         #disable WebMock (all adapters)
-    WebMock.disable!(:except => [:net_http]) #disable all adapters except Net::HTTP
+    WebMock.disable!(:except => [:net_http]) #disable WebMock for all libs except Net::HTTP
     WebMock.enable!                          #enable WebMock (all adapters)
-    WebMock.enable!(:except => [:patron])    #enable all adapters except Patron
+    WebMock.enable!(:except => [:patron])    #enable WebMock for all libs except Patron
 
 
 ## Matching requests

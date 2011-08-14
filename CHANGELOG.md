@@ -2,9 +2,9 @@
 
 ## 1.7.0.pre
 
-* Fixed Net::HTTP adapter to not break normal Net::HTTP behaviour when network connections are allowed. This fixes selenium-webdriver compatibility!!!
+* Fixed Net::HTTP adapter to not break normal Net::HTTP behaviour when network connections are allowed. This fixes **selenium-webdriver compatibility**!!!
 
-* Added support for em-http-request 1.0.x and em-synchrony. Thanks to [Steve Hull](https://github.com/sdhull)
+* Added support for EM-HTTP-Request 1.0.x and EM-Synchrony. Thanks to [Steve Hull](https://github.com/sdhull)
 
 * Added support for setting expectations to on a stub itself i.e.
 
@@ -30,23 +30,55 @@
 
         stub_request(:get, "www.example.com").to_rack(MyRackApp)
 
+        RestClient.get("www.example.com") # ===> "Hello"
+
+
     Thanks to [Jay Adkisson](https://github.com/jayferd)
 
-* Added support for selective disabling and enabling of http client adapters
+* Added support for selective disabling and enabling of http lib adapters
 
         WebMock.disable!                         #disable WebMock (all adapters)
-        WebMock.disable!(:except => [:net_http]) #disable all adapters except Net::HTTP
+        WebMock.disable!(:except => [:net_http]) #disable WebMock for all libs except Net::HTTP
         WebMock.enable!                          #enable WebMock (all adapters)
-        WebMock.enable!(:except => [:patron])    #enable all adapters except Patron
+        WebMock.enable!(:except => [:patron])    #enable WebMock for all libs except Patron
 
-* The error message on an unstubbed request shows a code snippet with body as a hash when it was in url encoded form. Thanks to [Alex Rothenberg](https://github.com/alexrothenberg)
+* The error message on an unstubbed request shows a code snippet with body as a hash when it was in url encoded form.
+
+        > RestClient.post('www.example.com', "data[a]=1&data[b]=2", :content_type => 'application/x-www-form-urlencoded')
+
+        WebMock::NetConnectNotAllowedError: Real HTTP connections are disabled....
+
+        You can stub this request with the following snippet:
+
+        stub_request(:post, "http://www.example.com/").
+          with(:body => {"data"=>{"a"=>"1", "b"=>"2"}},
+               :headers => { 'Content-Type'=>'application/x-www-form-urlencoded' }).
+          to_return(:status => 200, :body => "", :headers => {})
+
+    Thanks to [Alex Rothenberg](https://github.com/alexrothenberg)
 
 * The error message on an unstubbed request shows currently registered request stubs.
-  Thanks to [Lin Jen-Shin](https://github.com/godfat) for suggesting this feature.
+
+        > stub_request(:get, "www.example.net")
+        > stub_request(:get, "www.example.org")
+        > RestClient.get("www.example.com")
+        WebMock::NetConnectNotAllowedError: Real HTTP connections are disabled....
+
+        You can stub this request with the following snippet:
+
+        stub_request(:get, "http://www.example.com/").
+          to_return(:status => 200, :body => "", :headers => {})
+
+        registered request stubs:
+
+        stub_request(:get, "http://www.example.net/")
+        stub_request(:get, "http://www.example.org/")
+
+    Thanks to [Lin Jen-Shin](https://github.com/godfat) for suggesting this feature.
 
 * Fixed problem with matching requests with json body, when json strings have date format. Thanks to [Joakim Ekberg](https://github.com/kalasjocke) for reporting this issue.
 
-* WebMock now attempts to require each http library before monkey patching it. Thanks to [Myron Marston](https://github.com/myronmarston) for suggesting this change.
+* WebMock now attempts to require each http library before monkey patching it. This is to avoid problem when http library is required after WebMock is required. Thanks to [Myron Marston](https://github.com/myronmarston) for suggesting this change.
 
 * External requests can be disabled while allowing selected ports on selected hosts
 
