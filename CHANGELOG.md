@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1
+
+* Redefined `const_defined?` on the replaced `Net::HTTP` so that it returns true if constant is defined on the original `Net::HTTP`. This fixes problems with `"Net::HTTP::Get".constantize`.
+
+   Thanks to [Cássio Marques](https://github.com/cassiomarques) for reporting the issue and to [Myron Marston](https://github.com/myronmarston) for help with the solution.
+
 ## 1.7.0
 
 * Fixed Net::HTTP adapter to not break normal Net::HTTP behaviour when network connections are allowed. This fixes **selenium-webdriver compatibility**!!!
