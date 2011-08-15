@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.7.0.pre
+## 1.7.0
 
 * Fixed Net::HTTP adapter to not break normal Net::HTTP behaviour when network connections are allowed. This fixes **selenium-webdriver compatibility**!!!
 
