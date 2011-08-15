@@ -74,6 +74,12 @@ module Net  #:nodoc: all
       end
       alias_method :socket_type_without_webmock, :socket_type
       alias_method :socket_type, :socket_type_with_webmock
+
+      if ::RUBY_VERSION =~ /1.8/
+        def const_defined?(name)
+          super || self.superclass.const_defined?(name)
+        end
+      end
     end
 
     def request_with_webmock(request, body = nil, &block)

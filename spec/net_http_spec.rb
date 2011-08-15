@@ -11,6 +11,10 @@ describe "Webmock with Net:HTTP" do
 
   let(:port){ WebMockServer.instance.port }
 
+  it "should still have const Get defined on replaced Net::HTTP" do
+    Object.const_get("Net").const_get("HTTP").const_defined?("Get").should be_true
+  end
+
   it "should work with block provided" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
     Net::HTTP.start("www.example.com") { |query| query.get("/") }.body.should == "abc"*100000
