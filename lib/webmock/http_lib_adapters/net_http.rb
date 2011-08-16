@@ -75,9 +75,27 @@ module Net  #:nodoc: all
       alias_method :socket_type_without_webmock, :socket_type
       alias_method :socket_type, :socket_type_with_webmock
 
-      if ::RUBY_VERSION =~ /1.8/
+      if Module.method(:const_defined?).arity == 1
         def const_defined?(name)
           super || self.superclass.const_defined?(name)
+        end
+      else
+        def const_defined?(name, inherit=true)
+          super || self.superclass.const_defined?(name, inherit)
+        end
+      end
+
+      if Module.method(:const_get).arity != 1
+        def const_get(name, inherit=true)
+          super
+        rescue NameError
+          self.superclass.const_get(name, inherit)
+        end
+      end
+
+      if Module.method(:constants).arity != 0
+        def constants(inherit=true)
+          super + self.superclass.constants(inherit)
         end
       end
     end

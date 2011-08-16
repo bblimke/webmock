@@ -11,8 +11,36 @@ describe "Webmock with Net:HTTP" do
 
   let(:port){ WebMockServer.instance.port }
 
-  it "should still have const Get defined on replaced Net::HTTP" do
-    Object.const_get("Net").const_get("HTTP").const_defined?("Get").should be_true
+  describe "constants" do
+    it "should still have const Get defined on replaced Net::HTTP" do
+      Object.const_get("Net").const_get("HTTP").const_defined?("Get").should be_true
+    end
+
+    it "should still have const Get within constants on replaced Net::HTTP" do
+      Object.const_get("Net").const_get("HTTP").constants.map(&:to_s).should include("Get")
+    end
+
+    it "should still have const Get within constants on replaced Net::HTTP" do
+      Object.const_get("Net").const_get("HTTP").const_get("Get").should_not be_nil
+    end
+
+    if Module.method(:const_defined?).arity != 1
+      it "should still have const Get defined (and not inherited) on replaced Net::HTTP" do
+        Object.const_get("Net").const_get("HTTP").const_defined?("Get", false).should be_true
+      end
+    end
+
+    if Module.method(:const_get).arity != 1
+      it "should still be able to get non inherited constant Get on replaced Net::HTTP" do
+        Object.const_get("Net").const_get("HTTP").const_get("Get", false).should_not be_nil
+      end
+    end
+
+    if Module.method(:constants).arity != 0
+      it "should still Get within non inherited constants on replaced Net::HTTP" do
+        Object.const_get("Net").const_get("HTTP").constants(false).map(&:to_s).should include("Get")
+      end
+    end
   end
 
   it "should work with block provided" do
