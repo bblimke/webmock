@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.2
+
+* Redefined `const_get` and `constants` methods on the replaced `Net::HTTP` to return same values as original `Net::HTTP`
+
 ## 1.7.1
 
 * Redefined `const_defined?` on the replaced `Net::HTTP` so that it returns true if constant is defined on the original `Net::HTTP`. This fixes problems with `"Net::HTTP::Get".constantize`.
