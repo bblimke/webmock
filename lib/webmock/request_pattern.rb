@@ -149,7 +149,8 @@ module WebMock
         when :xml then
           matching_hashes?(Crack::XML.parse(body), @pattern)
         else
-          matching_hashes?(Addressable::URI.parse('?' + body).query_values, @pattern)
+          body_hash = body.is_a?(Hash) ? normalize_hash(body) : Addressable::URI.parse('?' + body).query_values
+          matching_hashes?(body_hash, @pattern)
         end
       else
         empty_string?(@pattern) && empty_string?(body) ||
