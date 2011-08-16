@@ -235,6 +235,18 @@ describe WebMock::RequestPattern do
           end
         end
 
+        describe "for request with body as a hash (a la EM::HttpRequest)" do
+          it "should match when hash matches body" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
+              should match(WebMock::RequestSignature.new(:post, "www.example.com", :body => body_hash))
+          end
+
+          it "should not match when hash does not match body" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
+              should_not match(WebMock::RequestSignature.new(:post, "www.example.com", :body => body_hash.merge(:x => "y")))
+          end
+        end
+
         describe "for request with json body and content type is set to json" do
           it "should match when hash matches body" do
            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).

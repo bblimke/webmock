@@ -126,6 +126,15 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
     end
 
+    it "should work with POST body params declared as a Hash" do
+      stub_http_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
+      http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body.should == "ok"
+
+      expect {
+        http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2", :c => "3"})
+      }.to raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
     describe "mocking EM::HttpClient API" do
       before do
         stub_http_request(:get, "www.example.com/")
