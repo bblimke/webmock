@@ -112,10 +112,13 @@ if defined?(EventMachine::HttpRequest)
 
         uri.query = encode_query(@req.uri, options[:query]).slice(/\?(.*)/, 1)
 
+        body = options[:body] || options['body']
+        body = form_encode_body(body) if body.is_a?(Hash)
+
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
-          :body => (options[:body] || options['body']),
+          :body => body,
           :headers => (options[:head] || options['head'])
         )
       end
