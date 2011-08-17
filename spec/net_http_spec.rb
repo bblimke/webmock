@@ -11,6 +11,51 @@ describe "Webmock with Net:HTTP" do
 
   let(:port){ WebMockServer.instance.port }
 
+  describe "marshalling" do
+    class TestMarshalingInWebMockNetHTTP
+      attr_accessor :r
+    end
+    before(:each) do
+      @b = TestMarshalingInWebMockNetHTTP.new
+    end
+    after(:each) do
+      WebMock.enable!
+    end
+    it "should be possible to load object marshalled when webmock was disabled" do
+      WebMock.disable!
+      original_constants = [
+        Net::HTTP::Get,
+        Net::HTTP::Post,
+        Net::HTTP::Put,
+        Net::HTTP::Delete,
+        Net::HTTP::Head,
+        Net::HTTP::Options
+      ]
+      @b.r = original_constants
+      original_serialized = Marshal.dump(@b)
+      Marshal.load(original_serialized)
+      WebMock.enable!
+      Marshal.load(original_serialized)
+    end
+
+    it "should be possible to load object marshalled when webmock was enabled"  do
+      WebMock.enable!
+      new_constants = [
+        Net::HTTP::Get,
+        Net::HTTP::Post,
+        Net::HTTP::Put,
+        Net::HTTP::Delete,
+        Net::HTTP::Head,
+        Net::HTTP::Options
+      ]
+      @b.r = new_constants
+      new_serialized = Marshal.dump(@b)
+      Marshal.load(new_serialized)
+      WebMock.disable!
+      Marshal.load(new_serialized)
+    end
+  end
+
   describe "constants" do
     it "should still have const Get defined on replaced Net::HTTP" do
       Object.const_get("Net").const_get("HTTP").const_defined?("Get").should be_true
