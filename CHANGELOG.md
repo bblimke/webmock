@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.3
+
+* Added `Get`, `Post`, `Delete`, `Put`, `Head`, `Option` constants to replaced `Net::HTTP` to make it possible to marshal objects with these constants assigned to properties. This fixed problem with `tvdb_party` gem which serializes HTTParty responses.
+
+  Thanks to [Klaus Hartl](https://github.com/carhartl) for reporting this issue.
+
 ## 1.7.2
 
 * Redefined `const_get` and `constants` methods on the replaced `Net::HTTP` to return same values as original `Net::HTTP`
