@@ -163,6 +163,8 @@ if defined?(EventMachine::HttpClient)
 
         uri.query = encode_query(@req.uri, query).slice(/\?(.*)/, 1)
 
+        body = form_encode_body(body) if body.is_a?(Hash)
+
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
