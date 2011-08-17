@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.4
+
+* Added support for matching EM-HTTP-Request requests with body declared as a Hash
+
+   Thanks to [David Yeu](https://github.com/daveyeu)
+
 ## 1.7.3
 
 * Added `Get`, `Post`, `Delete`, `Put`, `Head`, `Option` constants to replaced `Net::HTTP` to make it possible to marshal objects with these constants assigned to properties. This fixed problem with `tvdb_party` gem which serializes HTTParty responses.
