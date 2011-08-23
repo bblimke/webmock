@@ -25,6 +25,11 @@ RSpec::Core::RakeTask.new(:spec_http_without_webmock) do |t|
   t.pattern = 'spec/real_net_http_spec.rb'
 end
 
+
+task :em_http_request_1_x_spec do
+  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
+end
+
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.test_files = FileList["test/**/*.rb"].exclude("test/test_helper.rb")
@@ -37,6 +42,7 @@ Rake::TestTask.new(:minitest) do |test|
   test.verbose = false
   test.warning = false
 end
+
 
 task :default => [:spec, :spec_http_without_webmock, :test, :minitest]
 

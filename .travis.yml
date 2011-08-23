@@ -4,3 +4,5 @@ rvm:
   - 1.9.3
   - ree
   - jruby
+
+script: "bundle exec rake && rake em_http_request_1_x_spec"
