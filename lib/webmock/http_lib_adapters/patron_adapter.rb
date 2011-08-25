@@ -101,12 +101,18 @@ if defined?(::Patron)
         def self.build_patron_response(webmock_response)
           raise ::Patron::TimeoutError if webmock_response.should_timeout
           webmock_response.raise_error_if_any
-          res = ::Patron::Response.new
-          res.instance_variable_set(:@body, webmock_response.body)
-          res.instance_variable_set(:@status, webmock_response.status[0])
-          res.instance_variable_set(:@status_line, webmock_response.status[1])
-          res.instance_variable_set(:@headers, webmock_response.headers)
-          res
+          
+          header_fields = (webmock_response.headers || []).map { |(k, vs)| Array(vs).map { |v| "#{k}: #{v}" } }.flatten
+          status_line   = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}"
+          header_data   = ([status_line] + header_fields).join("\r\n")
+
+          ::Patron::Response.new(
+            "",
+            webmock_response.status[0],
+            0,
+            header_data,
+            webmock_response.body
+          )
         end
 
         def self.build_webmock_response(patron_response)
