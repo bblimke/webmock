@@ -23,11 +23,15 @@ module PatronSpecHelper
         headers[k] = v
       end
     end
+
+    status_line_pattern = %r(\AHTTP/(\d+\.\d+)\s+(\d\d\d)\s*([^\r\n]+)?)
+    message = response.status_line.match(status_line_pattern)[3] || ""
+
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(headers),
       :status => response.status.to_s,
-      :message => response.status_line
+      :message => message
     })
   end
 
