@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'webmock_shared'
 
@@ -83,6 +85,42 @@ unless RUBY_PLATFORM =~ /java/
       it "should work with WebDAV copy request" do
         stub_http_request(:copy, "www.example.com/abc").with(:headers => {'Destination' => "/def"})
         @sess.copy("/abc", "/def")
+      end
+
+      if /^1\.9/ === RUBY_VERSION
+        describe "handling encoding same way as patron" do
+          around(:each) do |example|
+            @encoding = Encoding.default_internal
+            Encoding.default_internal = "UTF-8"
+            example.run
+            Encoding.default_internal = @encoding
+          end
+
+          it "should encode body based on charset in headers" do
+            stub_request(:get, "www.example.com").
+              to_return(:headers => {'Content-Type' => 'text/html; charset=iso-8859-1'},
+                        :body => "Øl".encode("iso-8859-1"))
+
+            @sess.get("").body.encoding.should == Encoding.default_internal
+          end
+
+          it "should encode body based on encoding-attribute in body" do
+            stub_request(:get, "www.example.com").
+              to_return(:body => "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
+
+
+            @sess.get("").body.encoding.should == Encoding.default_internal
+          end
+
+          it "should encode body based on Session#default_response_charset" do
+            stub_request(:get, "www.example.com").
+              to_return(:body => "Øl".encode("iso-8859-1"))
+
+            @sess.default_response_charset = "iso-8859-1"
+
+            @sess.get("").body.encoding.should == Encoding.default_internal
+          end
+        end
       end
     end
   end
