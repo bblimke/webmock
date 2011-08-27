@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.5
+
+* Added support for Patron 0.4.15. This change is not backward compatible so please upgrade Patron to version >= 0.4.15 if you want to use it with WebMock.
+
+   Thanks to [Andreas Garnæs](https://github.com/andreas)
+
 ## 1.7.4
 
 * Added support for matching EM-HTTP-Request requests with body declared as a Hash

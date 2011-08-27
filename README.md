@@ -647,6 +647,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Nikita Fedyashev
 * Lin Jen-Shin
 * David Yeu
+* Andreas Garnæs
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
