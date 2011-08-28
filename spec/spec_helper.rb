@@ -13,9 +13,11 @@ require 'rspec'
 
 require 'webmock/rspec'
 
-require 'network_connection'
+require 'support/network_connection'
 require 'support/webmock_server'
-require 'my_rack_app'
+require 'support/my_rack_app'
+
+CURL_EXAMPLE_OUTPUT_PATH = File.expand_path(File.dirname(__FILE__)) + "/support/example_curl_output.txt" unless defined? CURL_EXAMPLE_OUTPUT_PATH
 
 RSpec.configure do |config|
   unless NetworkConnection.is_network_available?
