@@ -1,6 +1,3 @@
-require 'spec_helper'
-
-
 shared_examples_for "enabled and disabled webmock" do
   describe "enabling and disabling webmock" do
     describe "when webmock is disabled" do
