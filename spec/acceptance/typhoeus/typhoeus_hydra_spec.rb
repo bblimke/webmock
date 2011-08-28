@@ -4,10 +4,10 @@ require 'acceptance/webmock_shared'
 unless RUBY_PLATFORM =~ /java/
   require 'acceptance/typhoeus/typhoeus_hydra_spec_helper'
 
-  describe "Webmock with Typhoeus::Hydra" do
+  describe "Typhoeus::Hydra" do
     include TyphoeusHydraSpecHelper
 
-    it_should_behave_like "WebMock"
+    include_context "with WebMock"
 
     describe "Typhoeus::Hydra features" do
       before(:each) do

@@ -1,5 +1,5 @@
-shared_examples_for "callbacks" do
-  describe "after_request" do
+shared_context "callbacks" do
+  describe "when after_request callback is declared" do
     before(:each) do
       WebMock.reset_callbacks
       stub_request(:get, "http://www.example.com")
@@ -20,7 +20,7 @@ shared_examples_for "callbacks" do
       @called.should == true
     end
 
-    it "should not invoke a callback if specific http library should be ignored" do
+    it "should not invoke a callback if this http library should be ignored" do
       WebMock.after_request(:except => [http_library()]) {
         @called = true
       }
@@ -44,8 +44,8 @@ shared_examples_for "callbacks" do
       @request_signature.uri.to_s.should == "http://www.example.com:80/"
     end
 
-    describe "passing response to callback" do
-      describe "for stubbed requests" do
+    context "passing response to callback" do
+      context "when request is stubbed" do
         before(:each) do
           stub_request(:get, "http://www.example.com").
           to_return(
@@ -59,23 +59,23 @@ shared_examples_for "callbacks" do
           http_request(:get, "http://www.example.com/")
         end
 
-        it "should pass response with status and message" do
+        it "should pass response to callback with the status and message" do
           @response.status.should == ["200", "hello"]
         end
 
-        it "should pass response with headers" do
+        it "should pass response to callback with headers" do
           @response.headers.should == {
             'Content-Length' => '666',
             'Hello' => 'World'
           }
         end
 
-        it "should pass response with body" do
+        it "should pass response to callback with body" do
           @response.body.should == "foo bar"
         end
       end
 
-      describe "for real requests", :net_connect => true do
+      describe "when request is not stubbed", :net_connect => true do
         before(:each) do
           WebMock.reset!
           WebMock.allow_net_connect!
@@ -85,7 +85,7 @@ shared_examples_for "callbacks" do
           http_request(:get, "http://www.example.com/")
         end
 
-        it "should pass response with status and message" do
+        it "should pass real response to callback with status and message" do
           # not supported by em-http-request, it always returns "unknown" for http_reason
           unless http_library == :em_http_request
             @response.status[0].should == 302
@@ -93,11 +93,11 @@ shared_examples_for "callbacks" do
           end
         end
 
-        it "should pass response with headers" do
+        it "should pass real response to callback with headers" do
           @response.headers["Content-Length"].should == "0"
         end
 
-        it "should pass response with body" do
+        it "should pass response to callback with body" do
           @response.body.size.should == 0
         end
       end
@@ -119,7 +119,7 @@ shared_examples_for "callbacks" do
       @called.should == true
     end
 
-    it "should clear all declared callbacks on reset callbacks" do
+    it "should not invoke any callbacks after callbacks were reset" do
       WebMock.after_request { @called = 1 }
       WebMock.reset_callbacks
       stub_request(:get, "http://www.example.com/")

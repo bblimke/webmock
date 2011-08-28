@@ -13,24 +13,26 @@ unless defined? SAMPLE_HEADERS
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred&x=ab c"
 end
 
-shared_examples_for "WebMock" do
-  let(:webmock_server_url) {"http://#{WebMockServer.instance.host_with_port}/"}
-  before(:each) do
-    WebMock.disable_net_connect!
-    WebMock.reset!
+shared_examples "with WebMock" do
+  describe "with WebMock" do
+    let(:webmock_server_url) {"http://#{WebMockServer.instance.host_with_port}/"}
+    before(:each) do
+      WebMock.disable_net_connect!
+      WebMock.reset!
+    end
+
+    include_context "allowing and disabling net connect"
+
+    include_context "stubbing requests"
+
+    include_context "declared responses"
+
+    include_context "precedence of stubs"
+
+    include_context "request expectations"
+
+    include_context "callbacks"
+
+    include_context "enabled and disabled webmock"
   end
-
-  it_should_behave_like "allowing and disabling net connect"
-
-  it_should_behave_like "stubbing requests"
-
-  it_should_behave_like "returning declared responses"
-
-  it_should_behave_like "precedence of stubs"
-
-  it_should_behave_like "verifying request expectations"
-
-  it_should_behave_like "callbacks"
-
-  it_should_behave_like "enabled and disabled webmock"
 end

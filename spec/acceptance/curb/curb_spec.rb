@@ -7,11 +7,11 @@ unless RUBY_PLATFORM =~ /java/
   shared_examples_for "Curb" do
     include CurbSpecHelper
 
-    it_should_behave_like "WebMock"
+    include_examples "with WebMock"
 
     describe "when doing PUTs" do
       it "should stub them" do
-        stub_http_request(:put, "www.example.com").with(:body => "01234")
+        stub_request(:put, "www.example.com").with(:body => "01234")
         http_request(:put, "http://www.example.com", :body => "01234").
           status.should == "200"
       end
@@ -273,7 +273,7 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::NamedHttp
 
       it "should work with blank arguments for post" do
-        stub_http_request(:post, "www.example.com").with(:body => "01234")
+        stub_request(:post, "www.example.com").with(:body => "01234")
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.post_body = "01234"
@@ -282,13 +282,13 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should work with several body arguments for post using the class method" do
-        stub_http_request(:post, "www.example.com").with(:user => {:first_name=>'Bartosz', :last_name=>'Blimke'})
+        stub_request(:post, "www.example.com").with(:user => {:first_name=>'Bartosz', :last_name=>'Blimke'})
         c = Curl::Easy.http_post "http://www.example.com", 'user[first_name]=Bartosz', 'user[last_name]=Blimke'
         c.response_code.should == 200
       end
 
       it "should work with blank arguments for put" do
-        stub_http_request(:put, "www.example.com").with(:body => "01234")
+        stub_request(:put, "www.example.com").with(:body => "01234")
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.put_data = "01234"
@@ -299,7 +299,7 @@ unless RUBY_PLATFORM =~ /java/
       it "should work with multiple arguments for post" do
         data = { :name => "john", :address => "111 example ave" }
 
-        stub_http_request(:post, "www.example.com").with(:body => data)
+        stub_request(:post, "www.example.com").with(:body => data)
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.http_post Curl::PostField.content('name', data[:name]),  Curl::PostField.content('address', data[:address])

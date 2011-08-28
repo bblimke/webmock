@@ -5,17 +5,17 @@ require 'ostruct'
 unless RUBY_PLATFORM =~ /java/
   require 'acceptance/em_http_request/em_http_request_spec_helper'
 
-  describe "Webmock with EM::HttpRequest" do
+  describe "EM::HttpRequest" do
     include EMHttpRequestSpecHelper
 
-    it_should_behave_like "WebMock"
+    include_examples "with WebMock"
 
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)
       describe "with middleware" do
 
         it "should work with request middleware" do
-          stub_http_request(:get, "www.example.com").with(:body => 'bar')
+          stub_request(:get, "www.example.com").with(:body => 'bar')
 
           middleware = Class.new do
             def request(client, head, body)
@@ -38,7 +38,7 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         it "should work with response middleware" do
-          stub_http_request(:get, "www.example.com").to_return(:body => 'foo')
+          stub_request(:get, "www.example.com").to_return(:body => 'foo')
 
           middleware = Class.new do
             def response(resp)
@@ -102,7 +102,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with streaming" do
-      stub_http_request(:get, "www.example.com").to_return(:body => "abc")
+      stub_request(:get, "www.example.com").to_return(:body => "abc")
       response = ""
       EM.run {
         http = EventMachine::HttpRequest.new('http://www.example.com/').get
@@ -112,28 +112,28 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with responses that use chunked transfer encoding" do
-      stub_http_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
+      stub_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
       http_request(:get, "http://www.example.com").body.should == "abc"
     end
 
     it "should work with optional query params" do
-      stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
+      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
       http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"
     end
 
     it "should work with optional query params declared as string" do
-      stub_http_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
+      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
       http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
     end
 
     it "should work when the body is passed as a Hash" do
-      stub_http_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
+      stub_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
       http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body.should == "ok"
     end
 
     describe "mocking EM::HttpClient API" do
       before do
-        stub_http_request(:get, "www.example.com/")
+        stub_request(:get, "www.example.com/")
         WebMock::HttpLibAdapters::EmHttpRequestAdapter.enable!
       end
       subject do

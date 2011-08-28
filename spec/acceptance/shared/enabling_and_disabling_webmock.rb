@@ -1,47 +1,45 @@
-shared_examples_for "enabled and disabled webmock" do
-  describe "enabling and disabling webmock" do
-    describe "when webmock is disabled" do
-      before(:each) do
-        WebMock.disable!
-      end
-      after(:each) do
-        WebMock.enable!
-      end
-      it_should_behave_like "disabled WebMock"
+shared_context "enabled and disabled webmock" do
+  describe "when webmock is disabled" do
+    before(:each) do
+      WebMock.disable!
     end
+    after(:each) do
+      WebMock.enable!
+    end
+    include_context "disabled WebMock"
+  end
 
-    describe "when webmock is enabled again" do
-      before(:each) do
-        WebMock.disable!
-        WebMock.enable!
-      end
-      it_should_behave_like "enabled WebMock"
+  describe "when webmock is enabled again" do
+    before(:each) do
+      WebMock.disable!
+      WebMock.enable!
     end
+    include_context "enabled WebMock"
+  end
 
-    describe "when webmock is disabled except this lib" do
-      before(:each) do
-        WebMock.disable!(:except => [http_library])
-      end
-      after(:each) do
-        WebMock.enable!
-      end
-      it_should_behave_like "enabled WebMock"
+  describe "when webmock is disabled except this lib" do
+    before(:each) do
+      WebMock.disable!(:except => [http_library])
     end
+    after(:each) do
+      WebMock.enable!
+    end
+    include_context "enabled WebMock"
+  end
 
-    describe "when webmock is enabled except this lib" do
-      before(:each) do
-        WebMock.disable!
-        WebMock.enable!(:except => [http_library])
-      end
-      after(:each) do
-        WebMock.enable!
-      end
-      it_should_behave_like "disabled WebMock"
+  describe "when webmock is enabled except this lib" do
+    before(:each) do
+      WebMock.disable!
+      WebMock.enable!(:except => [http_library])
     end
+    after(:each) do
+      WebMock.enable!
+    end
+    include_context "disabled WebMock"
   end
 end
 
-shared_examples_for "disabled WebMock" do
+shared_context "disabled WebMock" do
   it "should not register executed requests" do
     http_request(:get, "http://www.example.com/")
     a_request(:get, "http://www.example.com/").should_not have_been_made
@@ -69,7 +67,7 @@ shared_examples_for "disabled WebMock" do
   end
 end
 
-shared_examples_for "enabled WebMock" do
+shared_context "enabled WebMock" do
   it "should register executed requests" do
     WebMock.allow_net_connect!
     http_request(:get, "http://www.example.com/")

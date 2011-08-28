@@ -4,17 +4,17 @@ require 'ostruct'
 
 require 'acceptance/httpclient/httpclient_spec_helper'
 
-describe "Webmock with HTTPClient" do
+describe "HTTPClient" do
   include HTTPClientSpecHelper
 
   before(:each) do
     HTTPClientSpecHelper.async_mode = false
   end
 
-  it_should_behave_like "WebMock"
+  include_examples "with WebMock"
 
   it "should yield block on response if block provided" do
-    stub_http_request(:get, "www.example.com").to_return(:body => "abc")
+    stub_request(:get, "www.example.com").to_return(:body => "abc")
     response_body = ""
     http_request(:get, "http://www.example.com/") do |body|
       response_body = body
@@ -22,22 +22,18 @@ describe "Webmock with HTTPClient" do
     response_body.should == "abc"
   end
 
-   it "should match requests if headers are the same  but in different order" do
-     stub_http_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
-     http_request(
-       :get, "http://www.example.com/",
-       :headers => {"a" => ["c", "b"]}).status.should == "200"
-   end
+  it "should match requests if headers are the same  but in different order" do
+    stub_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
+    http_request(
+      :get, "http://www.example.com/",
+    :headers => {"a" => ["c", "b"]}).status.should == "200"
+  end
 
-
-  describe "async requests" do
-
+  describe "when using async requests" do
     before(:each) do
       HTTPClientSpecHelper.async_mode = true
     end
 
-    it_should_behave_like "WebMock"
-
+    include_examples "with WebMock"
   end
-
 end
