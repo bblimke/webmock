@@ -45,6 +45,9 @@ if defined?(::HTTPClient)
       if WebMock::StubRegistry.instance.registered_request?(request_signature)
         webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
         response = build_httpclient_response(webmock_response, stream, &block)
+        @request_filter.each do |filter|
+          filter.filter_response(req, response)
+        end
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :httpclient}, request_signature, webmock_response)
@@ -130,10 +133,14 @@ if defined?(::HTTPClient)
     auth = www_auth.basic_auth
     auth.challenge(req.header.request_uri, nil)
 
-    headers = req.header.all.inject({}) do |headers, header|
-      headers[header[0]] ||= [];
-      headers[header[0]] << header[1]
-      headers
+    @request_filter.each do |filter|
+      filter.filter_request(req)
+    end
+
+    headers = req.header.all.inject({}) do |hdrs, header|
+      hdrs[header[0]] ||= []
+      hdrs[header[0]] << header[1]
+      hdrs
     end
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
