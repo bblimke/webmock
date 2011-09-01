@@ -47,21 +47,21 @@ describe "HTTPClient" do
         response.header.set('X-Powered-By', 'webmock')
       end
     end
-  end
 
-  before do
-    @client = HTTPClient.new
-    @client.request_filter << Filter.new
-    stub_request(:get, 'www.example.com').with(:headers => {'Authorization' => 'Bearer 0123456789'})
-  end
+    before do
+      @client = HTTPClient.new
+      @client.request_filter << Filter.new
+      stub_request(:get, 'www.example.com').with(:headers => {'Authorization' => 'Bearer 0123456789'})
+    end
 
-  it "supports request filters" do
-    @client.request(:get, 'http://www.example.com/').status.should == 200
-  end
+    it "supports request filters" do
+      @client.request(:get, 'http://www.example.com/').status.should == 200
+    end
 
-  it "supports response filters" do
-    res = @client.request(:get, 'http://www.example.com/')
-    res.header['X-Powered-By'].first.should == 'webmock'
+    it "supports response filters" do
+      res = @client.request(:get, 'http://www.example.com/')
+      res.header['X-Powered-By'].first.should == 'webmock'
+    end
   end
 
 end
