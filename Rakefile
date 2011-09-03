@@ -27,7 +27,7 @@ end
 
 
 task :em_http_request_1_x_spec do
-  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
+  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/acceptance/net_http/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
 end
 
 require 'rake/testtask'
