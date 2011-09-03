@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.6
+
+* Support for the HTTPClient's request_filter feature
+
+   Thanks to [Roman Shterenzon](https://github.com/romanbsd)
+
 ## 1.7.5
 
 * Added support for Patron 0.4.15. This change is not backward compatible so please upgrade Patron to version >= 0.4.15 if you want to use it with WebMock.
