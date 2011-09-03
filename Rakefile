@@ -21,13 +21,13 @@ RSpec::Core::RakeTask.new(:spec) do |t|
 end
 
 RSpec::Core::RakeTask.new(:spec_http_without_webmock) do |t|
-  t.rspec_opts = ["-c", "-f progress", "-r ./spec/real_net_http_spec.rb"]
-  t.pattern = 'spec/real_net_http_spec.rb'
+  t.rspec_opts = ["-c", "-f progress", "-r ./spec/acceptance/net_http/real_net_http_spec.rb"]
+  t.pattern = 'spec/acceptance/net_http/real_net_http_spec.rb'
 end
 
 
 task :em_http_request_1_x_spec do
-  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/acceptance/net_http/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
+  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/acceptance/em_http_request/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
 end
 
 require 'rake/testtask'
