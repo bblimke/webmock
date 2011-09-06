@@ -103,7 +103,7 @@ if defined?(::HTTPClient)
       raise HTTPClient::TimeoutError if webmock_response.should_timeout
       webmock_response.raise_error_if_any
 
-      block.call(nil, body) if block
+      block.call(webmock_response, body) if block
 
       response
     end

@@ -37,6 +37,13 @@ describe "HTTPClient" do
     include_examples "with WebMock"
   end
 
+  it "should work with get_content" do
+    stub_request(:get, 'www.example.com').to_return(:status => 200, :body => 'test', :headers => {})
+    HTTPClient.get_content('www.example.com') do |content|
+      content.should == 'test'
+    end
+  end
+
   context "Filters" do
     class Filter
       def filter_request(request)
