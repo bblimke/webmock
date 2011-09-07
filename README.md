@@ -377,6 +377,16 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
 
     assert_requested :get, "http://www.example.com"    # ===> Success
 
+### Setting expectations in Test::Unit on the stub
+
+    stub_get = stub_request(:get, "www.example.com")
+    stub_post = stub_request(:post, "www.example.com")
+
+    Net::HTTP.get('www.example.com', '/')
+
+    assert_stub_requested(stub_get)
+    assert_stub_not_requested(stub_post)
+
 
 ### Setting expectations in RSpec on `WebMock` module
  This style is borrowed from [fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher)
