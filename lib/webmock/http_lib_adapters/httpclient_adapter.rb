@@ -150,7 +150,7 @@ if defined?(::HTTPClient)
       uri.userinfo = userinfo
     end
 
-    request_signature = WebMock::RequestSignature.new(
+    WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
       uri.to_s,
       :body => req.content,
