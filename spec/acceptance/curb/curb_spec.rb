@@ -42,6 +42,19 @@ unless RUBY_PLATFORM =~ /java/
         test.should == body
       end
 
+      it "should call on_failure with 4xx response" do
+        response_code = 403
+        stub_request(:any, "example.com").
+          to_return(:status => [response_code, "None shall pass"])
+
+        test = nil
+        @curl.on_failure do |c, code|
+          test = code
+        end
+        @curl.http_get
+        test.should == response_code
+      end
+
       it "should call on_failure with 5xx response" do
         response_code = 599
         stub_request(:any, "example.com").
