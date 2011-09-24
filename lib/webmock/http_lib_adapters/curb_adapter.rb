@@ -148,7 +148,7 @@ if defined?(Curl)
         case response_code
         when 200..299
           @on_success.call(self) if @on_success
-        when 500..599
+        when 400..599
           @on_failure.call(self, self.response_code) if @on_failure
         end
       end
