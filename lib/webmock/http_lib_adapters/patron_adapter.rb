@@ -1,6 +1,8 @@
 begin
   require 'patron'
 rescue LoadError
+  puts $!
+  puts $!.backtrace
   # patron not found
 end
 
