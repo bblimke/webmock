@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.7.7 - RuPy 2011 release
+
+* Passing response object to a block passed to `HTTPClient#do_get_block`. This fixes `HTTPClient.get_content` failures. [issue 130](https://github.com/bblimke/webmock/pull/130)
+
+    Thanks to [Chris McGrath](https://github.com/chrismcg)
+
+* Cleaned up ruby warnings when running WebMock code with `-w`.
+
+    Thanks to [Stephen Celis](https://github.com/stephencelis)
+
+* Curb adapter now correctly calls on_failure for 4xx response codes.
+
+    Thanks to [Eugene Pimenov](https://github.com/libc)
+
 ## 1.7.6
 
 * Support for the HTTPClient's request_filter feature
