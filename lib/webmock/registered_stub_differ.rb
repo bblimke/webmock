@@ -2,7 +2,7 @@ module WebMock
   class RegisteredStubDiffer
     def initialize body
       if body
-        Dir.mkdir_p stub_directory
+        FileUtils.mkdir_p stub_directory
 
         save_attempted_file body
 
