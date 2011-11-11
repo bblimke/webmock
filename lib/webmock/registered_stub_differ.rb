@@ -16,7 +16,7 @@ module WebMock
     private
 
     def diff registered
-      `#{diff_tool} #{registered} #{attempted_file}`
+      `#{diff_tool} #{registered} #{attempted_file} &`
     end
 
     def attempted_file
