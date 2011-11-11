@@ -1,7 +1,8 @@
 module WebMock
-
   class NetConnectNotAllowedError < StandardError
     def initialize(request_signature)
+      RegisteredStubDiffer.new(request_signature.body) if ENV['show_visual_diffs_for_webmock']
+
       text = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
       text << "\n\n"
       text << stubbing_instructions(request_signature)
@@ -29,5 +30,4 @@ module WebMock
       text
     end
   end
-
 end
