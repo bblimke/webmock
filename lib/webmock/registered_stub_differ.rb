@@ -20,7 +20,7 @@ module WebMock
     end
 
     def attempted_file
-      attempted = File.join stub_directory, "attempted_stub.txt"
+      File.join stub_directory, "attempted_stub.txt"
     end
 
     def stub_directory
@@ -28,11 +28,11 @@ module WebMock
     end
 
     def cleanup files
-      File.delete attempted, *files
+      File.delete attempted_file, *files
     end
 
     def save_attempted_file body
-      File.open(attempted, "w") { |f| f << body }
+      File.open(attempted_file, "w") { |f| f << body }
     end
 
     def save_registered_stubs
