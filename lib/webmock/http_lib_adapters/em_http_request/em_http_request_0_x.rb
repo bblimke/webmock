@@ -52,8 +52,7 @@ if defined?(EventMachine::HttpRequest)
 
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-        if WebMock::StubRegistry.instance.registered_request?(request_signature)
-          webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+        if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :em_http_request}, request_signature, webmock_response)
           client = WebMockHttpClient.new(nil)

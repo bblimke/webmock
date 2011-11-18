@@ -140,9 +140,7 @@ if defined?(Typhoeus)
 
         ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-        if ::WebMock::StubRegistry.instance.registered_request?(request_signature)
-          webmock_response =
-            ::WebMock::StubRegistry.instance.response_for_request(request_signature)
+        if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
           ::WebMock::HttpLibAdapters::TyphoeusAdapter.
             stub_typhoeus(request_signature, webmock_response, self)
           webmock_response.raise_error_if_any

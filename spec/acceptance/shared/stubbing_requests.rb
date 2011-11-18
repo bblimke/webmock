@@ -287,6 +287,56 @@ shared_examples_for "stubbing requests" do
       end
     end
 
+    describe "when stubbing request with a global hook" do
+      after(:each) do
+        WebMock::StubRegistry.instance.global_stub = nil
+      end
+
+      it 'returns the response returned by the hook' do
+        WebMock.globally_stub_request do |request|
+          { :body => "global stub body" }
+        end
+
+        http_request(:get, "http://www.example.com/").body.should == "global stub body"
+      end
+
+      it 'does not get cleared when a user calls WebMock.reset!' do
+        WebMock.globally_stub_request do |request|
+          { :body => "global stub body" }
+        end
+        WebMock.reset!
+        http_request(:get, "http://www.example.com/").body.should == "global stub body"
+      end
+
+      it "does not stub the request if the hook does not return anything" do
+        WebMock.globally_stub_request { |r| }
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+      end
+
+      it "passes the request to the block" do
+        passed_request = nil
+        WebMock.globally_stub_request do |request|
+          passed_request = request
+          { :body => "global stub body" }
+        end
+
+        http_request(:get, "http://www.example.com:456/bar")
+        passed_request.uri.to_s.should == "http://www.example.com:456/bar"
+      end
+
+      it "should call the block only once per request" do
+        call_count = 0
+        WebMock.globally_stub_request do |request|
+          call_count += 1
+          { :body => "global stub body" }
+        end
+        http_request(:get, "http://www.example.com/")
+        call_count.should == 1
+      end
+    end
+
     describe "when stubbing request with a block evaluated on request" do
       it "should match if block returns true" do
         stub_request(:get, "www.example.com").with { |request| true }
@@ -308,6 +358,13 @@ shared_examples_for "stubbing requests" do
         lambda {
           http_request(:post, "http://www.example.com/", :body => "jander")
         }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'))
+      end
+
+      it "should call the block only once per request" do
+        call_count = 0
+        stub_request(:get, "www.example.com").with { |request| call_count += 1; true }
+        http_request(:get, "http://www.example.com/").status.should == "200"
+        call_count.should == 1
       end
     end
   end
