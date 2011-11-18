@@ -309,6 +309,13 @@ shared_examples_for "stubbing requests" do
           http_request(:post, "http://www.example.com/", :body => "jander")
         }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'))
       end
+
+      it "should call the block only once per request" do
+        call_count = 0
+        stub_request(:get, "www.example.com").with { |request| call_count += 1; true }
+        http_request(:get, "http://www.example.com/").status.should == "200"
+        call_count.should == 1
+      end
     end
   end
 end

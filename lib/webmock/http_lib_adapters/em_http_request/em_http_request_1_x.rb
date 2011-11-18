@@ -51,7 +51,7 @@ if defined?(EventMachine::HttpClient)
       def webmock_activate_connection(client)
         request_signature = client.request_signature
 
-        if WebMock::StubRegistry.instance.registered_request?(request_signature)
+        if client.stubbed_webmock_response
           conn = HttpStubConnection.new rand(10000)
           post_init
 
@@ -95,13 +95,12 @@ if defined?(EventMachine::HttpClient)
       def send_request_with_webmock(head, body)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-        if WebMock::StubRegistry.instance.registered_request?(request_signature)
-          webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-          on_error("WebMock timeout error") if webmock_response.should_timeout
-          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, webmock_response)
+        if stubbed_webmock_response
+          on_error("WebMock timeout error") if stubbed_webmock_response.should_timeout
+          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, stubbed_webmock_response)
           EM.next_tick {
-            setup(make_raw_response(webmock_response), @uri,
-                  webmock_response.should_timeout ? "WebMock timeout error" : nil)
+            setup(make_raw_response(stubbed_webmock_response), @uri,
+                  stubbed_webmock_response.should_timeout ? "WebMock timeout error" : nil)
           }
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
@@ -126,6 +125,14 @@ if defined?(EventMachine::HttpClient)
 
       def request_signature
         @request_signature ||= build_request_signature
+      end
+
+      def stubbed_webmock_response
+        unless defined?(@stubbed_webmock_response)
+          @stubbed_webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+        end
+
+        @stubbed_webmock_response
       end
 
       private
