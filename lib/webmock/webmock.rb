@@ -88,6 +88,10 @@ module WebMock
     puts WebMock::RequestExecutionVerifier.executed_requests_message
   end
 
+  def self.globally_stub_request(&block)
+    WebMock::StubRegistry.instance.global_stub_block = block
+  end
+
   %w(
     allow_net_connect!
     disable_net_connect!
