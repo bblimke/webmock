@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.8
+
+* Fix each adapter so that it calls a `stub.with` block only once per
+  request. Previously, the block would be called two or three times per
+  request [Myron Marston](https://github.com/myronmarston).
+
 ## 1.7.7 - RuPy 2011 release
 
 * Passing response object to a block passed to `HTTPClient#do_get_block`. This fixes `HTTPClient.get_content` failures. [issue 130](https://github.com/bblimke/webmock/pull/130)
