@@ -16,6 +16,7 @@ require 'webmock/http_lib_adapters/em_http_request_adapter'
 require 'webmock/http_lib_adapters/typhoeus_hydra_adapter'
 
 require 'webmock/errors'
+require 'webmock/registered_stub_differ'
 
 require 'webmock/util/uri'
 require 'webmock/util/headers'
