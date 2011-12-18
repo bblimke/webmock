@@ -15,6 +15,18 @@ unless RUBY_PLATFORM =~ /java/
         WebMock.reset!
       end
 
+      describe "when params are used" do
+        it "should take into account params for POST request" do
+          stub_request(:post, "www.example.com").with(:body => {:hello => 'world'})
+          Typhoeus::Request.post("www.example.com", :params => {:hello => 'world'})
+        end
+
+        it "should take into account params for GET request" do
+          stub_request(:get, "http://www.example.com/?hello=world")
+          Typhoeus::Request.get("www.example.com", :params => {:hello => 'world'})
+        end
+      end
+
       describe "callbacks" do
         before(:each) do
           @hydra = Typhoeus::Hydra.new
@@ -46,7 +58,6 @@ unless RUBY_PLATFORM =~ /java/
           @hydra.run
           test.should == response_code
         end
-
       end
     end
   end

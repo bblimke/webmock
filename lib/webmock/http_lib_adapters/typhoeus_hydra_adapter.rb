@@ -49,13 +49,26 @@ if defined?(Typhoeus)
             uri.password = req.password
           end
 
+          body = req.body
+
+          if req.params && req.method == :post
+            body = request_body_for_post_request_with_params(req)
+          end
+
           request_signature = WebMock::RequestSignature.new(
             req.method,
             uri.to_s,
-            :body => req.body,
+            :body => body,
             :headers => req.headers
           )
           request_signature
+        end
+
+        def self.request_body_for_post_request_with_params(req)
+          params = req.params
+          form = Typhoeus::Form.new(params)
+          form.process!
+          form.to_s
         end
 
         def self.build_webmock_response(typhoeus_response)
