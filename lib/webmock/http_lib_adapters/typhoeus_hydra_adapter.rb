@@ -85,7 +85,8 @@ if defined?(Typhoeus)
               :code         => 0,
               :status_message => "",
               :body         => "",
-              :headers_hash => {}
+              :headers_hash => {},
+              :curl_return_code => 28
             )
           else
             ::Typhoeus::Response.new(
