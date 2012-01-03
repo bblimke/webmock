@@ -27,6 +27,16 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe "timeouts" do
+        it "should support native typhoeus timeouts" do
+          stub_request(:any, "example.com").to_timeout
+
+          response = Typhoeus::Request.get("http://example.com")
+
+          response.should be_timed_out
+        end
+      end
+
       describe "callbacks" do
         before(:each) do
           @hydra = Typhoeus::Hydra.new
