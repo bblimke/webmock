@@ -3,7 +3,7 @@ require 'webmock'
 # RSpec 1.x and 2.x compatibility
 if defined?(RSpec) && defined?(RSpec::Expectations)
   RSPEC_NAMESPACE = RSPEC_CONFIGURER = RSpec
-elsif defined?(Spec)
+elsif defined?(Spec) && defined?(Spec.configure)
   RSPEC_NAMESPACE = Spec
   RSPEC_CONFIGURER = Spec::Runner
 else
