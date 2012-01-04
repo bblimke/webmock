@@ -652,6 +652,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Chris McGrath
 * Stephen Celis
 * Eugene Pimenov
+* Albert Llop
+* Christopher Pickslay
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

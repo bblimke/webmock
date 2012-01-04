@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.7.9
+
+* Fixed support for native Typhoeus timeouts.
+
+    Thanks to [Albert Llop](https://github.com/mrsimo)
+
+* Fixed problem with WebMock and RSpec compatibility on TeamCity servers. See [this article](http://www.coding4streetcred.com/blog/post/Issue-RubyMine-31-Webmock-162-and-%E2%80%9CSpecconfigure%E2%80%9D-curse.aspx) for more details.
+
+    Thanks to [Christopher Pickslay](https://github.com/chrispix) from [Two Bit Labs](https://github.com/twobitlabs)
+
+
 ## 1.7.8
 
 * Fix each adapter so that it calls a `stub.with` block only once per
