@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.10
+
+* Yanked 1.7.9 and rebuilt gem on 1.8.7 to deal with syck/psych incompatibilties in gemspec.
+
 ## 1.7.9
 
 * Fixed support for native Typhoeus timeouts.

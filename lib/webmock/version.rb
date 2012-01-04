@@ -1,3 +1,3 @@
 module WebMock
-  VERSION = '1.7.9' unless defined?(::WebMock::VERSION)
+  VERSION = '1.7.10' unless defined?(::WebMock::VERSION)
 end
