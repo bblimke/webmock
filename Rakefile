@@ -56,3 +56,10 @@ RDoc::Task.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/webmock/webmock.rb')
 end
+
+
+task :require_ruby_18 do
+  raise "This must be run on Ruby 1.8" unless RUBY_VERSION =~ /^1\.8/
+end
+
+task :release => [:require_ruby_18]
