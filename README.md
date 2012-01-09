@@ -38,7 +38,7 @@ Supported Ruby Interpreters
 
 ##Installation
 
-    gem install webmock --source http://gemcutter.org
+    gem install webmock
 
 ### or to install the latest development version from github master
 
