@@ -10,10 +10,16 @@ module WebMock
       status, headers, response = @app.call(env)
 
       Response.new(
-        :body => response.join,
+        :body => body_from_rack_response(response),
         :headers => headers,
         :status => status
       )
+    end
+
+    def body_from_rack_response(response)
+      body = ""
+      response.each { |line| body << line }
+      return body
     end
 
     def build_rack_env(request)
