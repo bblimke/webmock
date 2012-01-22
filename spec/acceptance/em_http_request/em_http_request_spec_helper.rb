@@ -10,6 +10,7 @@ module EMHttpRequestSpecHelper
     head = options[:headers] || {}
     response = nil
     error = nil
+    error_set = false
     uri = Addressable::URI.heuristic_parse(uri)
     EventMachine.run {
       request = EventMachine::HttpRequest.new("#{uri.normalize.to_s}")
@@ -20,6 +21,7 @@ module EMHttpRequestSpecHelper
         :head => head.merge('authorization' => [uri.user, uri.password])
       }, &block)
       http.errback {
+        error_set = true
         error = if http.respond_to?(:errors)
           http.errors
         else
@@ -38,7 +40,7 @@ module EMHttpRequestSpecHelper
       }
       @http = http
     }
-    raise error if error
+    raise error.to_s if error_set
     response
   end
 
