@@ -8,8 +8,8 @@ module PatronSpecHelper
     sess.username = uri.user
     sess.password = uri.password
 
-    sess.connect_timeout = 10
-    sess.timeout = 10
+    sess.connect_timeout = 30
+    sess.timeout = 30
     sess.max_redirects = 0
     uri = "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}"
     uri.gsub!(' ','+')

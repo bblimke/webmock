@@ -11,7 +11,7 @@ module TyphoeusHydraSpecHelper
         :method  => method,
         :body    => options[:body],
         :headers => options[:headers],
-        :timeout => 15000 # milliseconds
+        :timeout => 25000 # milliseconds
       }
     )
     raise FakeTyphoeusHydraError.new if response.code.to_s == "0"

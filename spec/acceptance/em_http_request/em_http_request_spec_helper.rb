@@ -15,7 +15,7 @@ module EMHttpRequestSpecHelper
     EventMachine.run {
       request = EventMachine::HttpRequest.new("#{uri.normalize.to_s}")
       http = request.send(method, {
-        :timeout => 10,
+        :timeout => 30,
         :body => options[:body],
         :query => options[:query],
         :head => head.merge('authorization' => [uri.user, uri.password])

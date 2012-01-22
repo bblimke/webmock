@@ -23,7 +23,7 @@ module NetHTTPSpecHelper
     if uri.scheme == "https"
       http.use_ssl = true
       #1.9.1 has a bug with ssl_timeout
-      http.ssl_timeout = 10 unless RUBY_VERSION == "1.9.1"
+      http.ssl_timeout = 20 unless RUBY_VERSION == "1.9.1"
     end
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     response = http.start {|http|
