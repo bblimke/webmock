@@ -53,6 +53,7 @@ if defined?(Curl)
   module Curl
     class WebMockCurlEasy < Curl::Easy
       def curb_or_webmock
+
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -169,9 +170,7 @@ if defined?(Curl)
 
       def http_with_webmock(method)
         @webmock_method = method
-        curb_or_webmock do
           http_without_webmock(method)
-        end
       end
       alias_method :http_without_webmock, :http
       alias_method :http, :http_with_webmock
@@ -179,9 +178,7 @@ if defined?(Curl)
       %w[ get head delete ].each do |verb|
         define_method "http_#{verb}_with_webmock" do
           @webmock_method = verb
-          curb_or_webmock do
-            send( "http_#{verb}_without_webmock" )
-          end
+          send( "http_#{verb}_without_webmock" )
         end
 
         alias_method "http_#{verb}_without_webmock", "http_#{verb}"
@@ -191,9 +188,7 @@ if defined?(Curl)
       def http_put_with_webmock data = nil
         @webmock_method = :put
         @put_data = data if data
-        curb_or_webmock do
-          http_put_without_webmock(data)
-        end
+        http_put_without_webmock(data)
       end
       alias_method :http_put_without_webmock, :http_put
       alias_method :http_put, :http_put_with_webmock
@@ -201,9 +196,7 @@ if defined?(Curl)
       def http_post_with_webmock *data
         @webmock_method = :post
         @post_body = data.join('&') if data && !data.empty?
-        curb_or_webmock do
-          http_post_without_webmock(*data)
-        end
+        http_post_without_webmock(*data)
       end
       alias_method :http_post_without_webmock, :http_post
       alias_method :http_post, :http_post_with_webmock
@@ -287,36 +280,6 @@ if defined?(Curl)
         alias_method "on_#{callback}_without_webmock", "on_#{callback}"
         alias_method "on_#{callback}", "on_#{callback}_with_webmock"
       end
-
-      %w[ http_get http_head http_delete perform ].each do |method|
-        class_eval <<-METHOD, __FILE__, __LINE__
-          def self.#{method}(url, &block)
-            c = new
-            c.url = url
-            block.call(c) if block
-            c.send("#{method}")
-            c
-          end
-        METHOD
-      end
-
-      class_eval <<-METHOD, __FILE__, __LINE__
-        def self.http_put(url, data, &block)
-          c = new
-          c.url = url
-          block.call(c) if block
-          c.send(:http_put, data)
-          c
-        end
-
-        def self.http_post(url, *data, &block)
-          c = new
-          c.url = url
-          block.call(c) if block
-          c.send(:http_post, *data)
-          c
-        end
-      METHOD
     end
   end
 end
