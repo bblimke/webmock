@@ -6,4 +6,4 @@ rvm:
   - jruby
 
 
-script: "bundle exec rake JRUBY_OPTS='–server -Dnative.enabled=true' && rake em_http_request_0_x_spec"
+script: "bundle exec rake && rake em_http_request_0_x_spec"
