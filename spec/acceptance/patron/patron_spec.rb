@@ -96,7 +96,14 @@ unless RUBY_PLATFORM =~ /java/
             Encoding.default_internal = @encoding
           end
 
-          it "should encode body based on charset in headers" do
+          it "should encode body with default encoding" do
+            stub_request(:get, "www.example.com").
+              to_return(:body => "Øl")
+
+            @sess.get("").body.encoding.should == Encoding::UTF_8
+          end
+
+          it "should encode body to default internal" do
             stub_request(:get, "www.example.com").
               to_return(:headers => {'Content-Type' => 'text/html; charset=iso-8859-1'},
                         :body => "Øl".encode("iso-8859-1"))
@@ -109,8 +116,9 @@ unless RUBY_PLATFORM =~ /java/
               to_return(:body => "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
 
 
-            @sess.get("").body.encoding.should == Encoding.default_internal
+            @sess.get("").body.encoding.should == Encoding::ISO_8859_1
           end
+
 
           it "should encode body based on Session#default_response_charset" do
             stub_request(:get, "www.example.com").
@@ -118,8 +126,9 @@ unless RUBY_PLATFORM =~ /java/
 
             @sess.default_response_charset = "iso-8859-1"
 
-            @sess.get("").body.encoding.should == Encoding.default_internal
+            @sess.get("").body.encoding.should == Encoding::ISO_8859_1
           end
+
         end
       end
     end
