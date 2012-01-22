@@ -209,7 +209,7 @@ module WebMock
     end
 
     def normalize_hash(hash)
-      WebMock::Util::HashKeysStringifier.stringify_keys!(hash)
+      Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash).sort]
     end
 
   end
