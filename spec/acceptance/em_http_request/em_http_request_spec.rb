@@ -62,41 +62,43 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       # not pretty, but it works
-      describe "with synchrony" do
-        let(:webmock_em_http) { File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request/em_http_request_1_x.rb")) }
+      if defined?(EventMachine::Synchrony)
+        describe "with synchrony" do
+          let(:webmock_em_http) { File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request/em_http_request_1_x.rb")) }
 
-        before(:each) do
-          # need to reload the webmock em-http adapter after we require synchrony
-          WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
-          $".delete webmock_em_http
-          $".delete File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
-          require 'em-synchrony'
-          require 'em-synchrony/em-http'
-          require File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
-        end
+          before(:each) do
+            # need to reload the webmock em-http adapter after we require synchrony
+            WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
+            $".delete webmock_em_http
+            $".delete File.expand_path(File.join(File.dirname(__FILE__), "../../../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
+            require 'em-synchrony'
+            require 'em-synchrony/em-http'
+            require File.expand_path(File.join(File.dirname(__FILE__), "../../../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
+          end
 
-        it "should work" do
-          stub_request(:post, /.*.testserver.com*/).to_return(:status => 200, :body => 'ok')
-          lambda {
-            EM.run do
-              fiber = Fiber.new do
-                http = EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
-                EM.stop
+          it "should work" do
+            stub_request(:post, /.*.testserver.com*/).to_return(:status => 200, :body => 'ok')
+            lambda {
+              EM.run do
+                fiber = Fiber.new do
+                  http = EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
+                  EM.stop
+                end
+                fiber.resume
               end
-              fiber.resume
-            end
-          }.should_not raise_error
-        end
+            }.should_not raise_error
+          end
 
-        after(:each) do
-          EM.send(:remove_const, :Synchrony)
-          EM.send(:remove_const, :HTTPMethods)
-          WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
-          $".reject! {|path| path.include? "em-http-request"}
-          $".delete webmock_em_http
-          $".delete File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
-          require 'em-http-request'
-          require File.expand_path(File.join(File.dirname(__FILE__), "../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
+          after(:each) do
+            EM.send(:remove_const, :Synchrony)
+            EM.send(:remove_const, :HTTPMethods)
+            WebMock::HttpLibAdapters::EmHttpRequestAdapter.disable!
+            $".reject! {|path| path.include? "em-http-request"}
+            $".delete webmock_em_http
+            $".delete File.expand_path(File.join(File.dirname(__FILE__), "../../../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
+            require 'em-http-request'
+            require File.expand_path(File.join(File.dirname(__FILE__), "../../../lib/webmock/http_lib_adapters/em_http_request_adapter.rb"))
+          end
         end
       end
     end

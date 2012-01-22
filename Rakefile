@@ -26,8 +26,8 @@ RSpec::Core::RakeTask.new(:spec_http_without_webmock) do |t|
 end
 
 
-task :em_http_request_1_x_spec do
-  sh "EM_HTTP_REQUEST_1_X=true bundle install && bundle exec rspec spec/acceptance/em_http_request/em_http_request_spec.rb" if RUBY_VERSION >= "1.9.2"
+task :em_http_request_0_x_spec do
+  sh "EM_HTTP_REQUEST_0_X=true bundle install && bundle exec rspec spec/acceptance/em_http_request/em_http_request_spec.rb" if RUBY_VERSION <= "1.8.7"
 end
 
 require 'rake/testtask'

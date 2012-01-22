@@ -1,9 +1,8 @@
 source 'http://rubygems.org/'
 
 gemspec
-if ENV["EM_HTTP_REQUEST_1_X"]
-  gem 'em-http-request', '>= 1.0.0'
-  gem 'em-synchrony', '>= 1.0.0'
+if ENV["EM_HTTP_REQUEST_0_X"]
+  gem 'em-http-request', '~> 0.3.0'
 end
 
 
