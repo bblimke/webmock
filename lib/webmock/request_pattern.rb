@@ -79,6 +79,10 @@ module WebMock
   end
 
   class URIRegexpPattern  < URIPattern
+    def initialize *args, &block
+      @query_params = nil
+      super
+    end
 
     def matches?(uri)
       WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
