@@ -21,11 +21,22 @@ class MyRackApp
         [200, {}, ["Hello, #{name}"]]
       when ['GET', '/non_array_response']
         [200, {}, NonArrayResponse.new]
+      when ['GET', '/locked']
+        [200, {}, ["Single threaded response."]]
       when ['POST', '/greet']
         name = env["rack.input"].read[/name=([^&]*)/, 1] || "World"
         [200, {}, ["Good to meet you, #{name}!"]]
       else
         [404, {}, ['']]
     end
+  end
+end
+
+class MyLockedRackApp
+  MUTEX = Mutex.new
+
+  def self.call(env)
+    lock = Rack::Lock.new(MyRackApp, MUTEX)
+    lock.call(env)
   end
 end
