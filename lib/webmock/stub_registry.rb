@@ -48,7 +48,7 @@ module WebMock
     private
 
     def request_stub_for(request_signature)
-      (request_stubs + global_stubs).detect { |registered_request_stub|
+      (global_stubs + request_stubs).detect { |registered_request_stub|
         registered_request_stub.request_pattern.matches?(request_signature)
       }
     end
