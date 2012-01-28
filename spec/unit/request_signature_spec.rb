@@ -71,40 +71,42 @@ describe WebMock::RequestSignature do
   end
 
 
-  describe "eql?" do
-    it "should be true for two signatures with the same values" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
-      signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+  [:==, :eql?].each do |method|
+    describe method do
+      it "should be true for two signatures with the same values" do
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
+          :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+        signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
+          :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
 
-      signature1.should eql(signature2)
-    end
+        signature1.send(method, signature2).should be_true
+      end
 
-    it "should be false for two signatures with different method" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com")
-      signature2 = WebMock::RequestSignature.new(:put, "www.example.com")
-      signature1.should_not eql(signature2)
-    end
+      it "should be false for two signatures with different method" do
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com")
+        signature2 = WebMock::RequestSignature.new(:put, "www.example.com")
+        signature1.send(method, signature2).should be_false
+      end
 
-    it "should be false for two signatures with different uri" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com")
-      signature2 = WebMock::RequestSignature.new(:get, "www.example.org")
-      signature1.should_not eql(signature2)
-    end
+      it "should be false for two signatures with different uri" do
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com")
+        signature2 = WebMock::RequestSignature.new(:get, "www.example.org")
+        signature1.send(method, signature2).should be_false
+      end
 
-    it "should be false for two signatures with different body" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc")
-      signature2 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "def")
-      signature1.should_not eql(signature2)
-    end
+      it "should be false for two signatures with different body" do
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc")
+        signature2 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "def")
+        signature1.send(method, signature2).should be_false
+      end
 
-    it "should be false for two signatures with different headers" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :headers => {'A' => 'a'})
-      signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :headers => {'A' => 'A'})
-      signature1.should_not eql(signature2)
+      it "should be false for two signatures with different headers" do
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
+          :headers => {'A' => 'a'})
+        signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
+          :headers => {'A' => 'A'})
+        signature1.send(method, signature2).should be_false
+      end
     end
   end
 
