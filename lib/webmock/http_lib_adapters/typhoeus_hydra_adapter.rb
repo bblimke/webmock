@@ -61,6 +61,9 @@ if defined?(Typhoeus)
             :body => body,
             :headers => req.headers
           )
+
+          req.instance_variable_set(:@__webmock_request_signature, request_signature)
+
           request_signature
         end
 
@@ -115,9 +118,7 @@ if defined?(Typhoeus)
         end
 
         AFTER_REQUEST_CALLBACK = Proc.new do |request|
-          request_signature =
-            ::WebMock::HttpLibAdapters::TyphoeusAdapter.
-              build_request_signature(request)
+          request_signature = request.instance_variable_get(:@__webmock_request_signature)
           webmock_response =
             ::WebMock::HttpLibAdapters::TyphoeusAdapter.
               build_webmock_response(request.response)
