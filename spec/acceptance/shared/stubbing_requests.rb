@@ -289,7 +289,7 @@ shared_examples_for "stubbing requests" do
 
     describe "when stubbing request with a global hook" do
       after(:each) do
-        WebMock::StubRegistry.instance.global_stub = nil
+        WebMock::StubRegistry.instance.global_stubs.clear
       end
 
       it 'returns the response returned by the hook' do
@@ -334,6 +334,22 @@ shared_examples_for "stubbing requests" do
         end
         http_request(:get, "http://www.example.com/")
         call_count.should == 1
+      end
+
+      it 'supports multiple global stubs; the first registered one that returns a non-nil value determines the stub' do
+        stub_invocation_order = []
+        WebMock.globally_stub_request do |request|
+          stub_invocation_order << :nil_stub
+          nil
+        end
+
+        WebMock.globally_stub_request do |request|
+          stub_invocation_order << :hash_stub
+          { :body => "global stub body" }
+        end
+
+        http_request(:get, "http://www.example.com/").body.should == "global stub body"
+        stub_invocation_order.should eq([:nil_stub, :hash_stub])
       end
     end
 
