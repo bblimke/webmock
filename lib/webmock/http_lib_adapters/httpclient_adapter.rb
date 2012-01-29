@@ -158,7 +158,7 @@ if defined?(::HTTPClient)
     )
 
     # reuse a previous identical signature object if we stored one for later use
-    if reuse_existing && previous_signature = webmock_request_signatures.delete(signature)
+    if reuse_existing && previous_signature = previous_signature_for(signature)
       return previous_signature
     end
 
@@ -173,6 +173,11 @@ if defined?(::HTTPClient)
 
   def webmock_request_signatures
     @webmock_request_signatures ||= []
+  end
+
+  def previous_signature_for(signature)
+    return nil unless index = webmock_request_signatures.index(signature)
+    webmock_request_signatures.delete_at(index)
   end
 
 end
