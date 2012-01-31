@@ -106,11 +106,30 @@ module WebMock
       end
     end
 
-    def add_query_params(query_params)
-      if !query_params.is_a?(Hash)
-        query_params = Addressable::URI.parse('?' + query_params).query_values
+    # Someone might want to look at URIRegexpPattern and see if this should
+    # be used there, too.
+    def convert_hash_to_array(query_params)
+      query_params.inject([]) do |memo, pair|
+        key, value = *pair
+        if value.kind_of?(Array)
+          value.each do |val|
+            memo << [key + '[]', val]
+          end
+        else
+          memo << [key + '[]', value]
+        end
+        memo
       end
-      @pattern.query_values = (@pattern.query_values || {}).merge(query_params)
+    end
+
+    def add_query_params(query_params)
+      query_params = convert_hash_to_array(query_params) if query_params.is_a?(Hash)
+
+      if !query_params.is_a?(Array)
+        query_params = Addressable::URI.parse('?' + query_params).query_values(:notation => :flat_array)
+      end
+      qv = (@pattern.query_values(:notation => :flat_array) || []) + query_params  #(@pattern.query_values || {}).merge(query_params)
+      @pattern.query_values = qv.sort
     end
 
     def to_s
