@@ -319,7 +319,7 @@ You can also use WebMock outside a test framework:
 
     Net::HTTP.get('localhost:9887', '/')      # ===> Allowed. Perhaps to Selenium?
 
-### External requests can be disabled while allowing any hostname or port
+### External requests can be disabled while allowing any hostname or port or parts thereof
 
     WebMock.disable_net_connect!(:allow => "www.example.org:8080")
 
@@ -328,6 +328,10 @@ You can also use WebMock outside a test framework:
     RestClient.get('www.example.org', '/')     # ===> Failure.
 
     RestClient.get('www.example.org:8080', '/')     # ===> Allowed
+
+    WebMock.disable_net_connect!(:allow => /ample.org/)
+
+    RestClient.get('www.example.org', '/')   # ===> Allowed
 
 ## Connecting on Net::HTTP.start
 
