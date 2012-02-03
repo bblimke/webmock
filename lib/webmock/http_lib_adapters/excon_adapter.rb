@@ -22,9 +22,26 @@ if defined?(Excon)
           Excon.send(:const_set, :Connection, ExconConnection.superclass)
         end
 
+
+        def self.to_query(hash)
+          string = ""
+          for key, values in hash
+            if values.nil?
+              string << key.to_s << '&'
+            else
+              for value in [*values]
+                string << key.to_s << '=' << CGI.escape(value.to_s) << '&'
+              end
+            end
+          end
+          string.chop! # remove trailing '&'
+        end
+
         def self.build_request(params)
+          params = params.dup
+          method  = (params.delete(:method) || :get).to_s.downcase.to_sym
+          params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
           uri     = Addressable::URI.new(params).to_s
-          method  = (params[:method] || :get).to_s.downcase.to_sym
           WebMock::RequestSignature.new method, uri, :body => params[:body], :headers => params[:headers]
         end
 
