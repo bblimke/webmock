@@ -87,7 +87,8 @@ shared_context "callbacks" do
 
         it "should pass real response to callback with status and message" do
           # not supported by em-http-request, it always returns "unknown" for http_reason
-          unless http_library == :em_http_request
+          # not supported by excon, it only returns a status code
+          unless [:em_http_request, :excon].include?(http_library)
             @response.status[0].should == 302
             @response.status[1].should == "Found"
           end

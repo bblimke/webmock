@@ -412,6 +412,7 @@ shared_context "request expectations" do
 
       describe "with authentication" do
         before(:each) do
+          pending "Excon does not accept basic auth user-info in URLs" if http_library == :excon
           stub_request(:any, "http://user:pass@www.example.com")
           stub_request(:any, "http://user:pazz@www.example.com")
         end
