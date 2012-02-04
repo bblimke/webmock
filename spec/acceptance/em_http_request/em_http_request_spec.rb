@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'acceptance/webmock_shared'
 require 'ostruct'
@@ -131,6 +132,12 @@ unless RUBY_PLATFORM =~ /java/
     it "should work when the body is passed as a Hash" do
       stub_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
       http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body.should == "ok"
+    end
+
+    it "should work with UTF-8 strings" do
+      body = "Привет, Мир!"
+      stub_request(:post, "www.example.com").to_return(:body => body)
+      http_request(:post, "http://www.example.com").body.bytesize.should == body.bytesize
     end
 
     describe "mocking EM::HttpClient API" do
