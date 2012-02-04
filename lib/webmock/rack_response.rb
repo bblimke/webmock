@@ -19,6 +19,7 @@ module WebMock
     def body_from_rack_response(response)
       body = ""
       response.each { |line| body << line }
+      response.close if response.respond_to?(:close)
       return body
     end
 
