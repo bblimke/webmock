@@ -184,7 +184,14 @@ describe "Net:HTTP" do
           cert.should be_a(OpenSSL::X509::Certificate)
         }
       end
+
+      it "should connect to the server if the URI matches an regex", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => /google.com/)
+        response = Net::HTTP.get('www.google.com','/')
+      end
+
     end
+
   end
 
   describe "when net_http_connect_on_start is true" do
