@@ -30,11 +30,11 @@ RSpec.configure do |config|
 
   config.filter_run_excluding :without_webmock => true
 
-  config.before(:all) do
-    WebMockServer.instance.start
+  config.before(:suite) do
+    WebMockServer.instance.start unless WebMockServer.instance.started
   end
 
-  config.after(:all) do
+  config.after(:suite) do
     WebMockServer.instance.stop
   end
 

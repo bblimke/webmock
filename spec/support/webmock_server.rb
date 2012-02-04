@@ -5,7 +5,7 @@ require 'singleton'
 class WebMockServer
   include Singleton
 
-  attr_reader :port
+  attr_reader :port, :started
 
   def host_with_port
     "localhost:#{port}"
@@ -22,6 +22,7 @@ class WebMockServer
   end
 
   def start
+    @started = true
     server = WEBrick::GenericServer.new(:Port => 0, :Logger => Logger.new("/dev/null"))
     server.logger.level = 0
     @port = server.config[:Port]
