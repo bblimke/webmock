@@ -209,7 +209,7 @@ shared_context "request expectations" do
 
       describe "when expected reqest body is declared as a hash" do
         let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
-        let(:fail_message) {%r(The request POST http://www.example.com/ with body \{"a"=>"1", "b"=>"five", "c"=>\{"d"=>\["e", "f"\]\}\} was expected to execute 1 time but it executed 0 times)}
+        let(:fail_message) {%r(The request POST http://www.example.com/ with body .* was expected to execute 1 time but it executed 0 times)}
 
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
