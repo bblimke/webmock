@@ -293,7 +293,7 @@ shared_examples_for "stubbing requests" do
 
     describe "when stubbing request with a global hook" do
       after(:each) do
-        WebMock::StubRegistry.instance.global_stub = nil
+        WebMock::StubRegistry.instance.global_stubs.clear
       end
 
       it 'returns the response returned by the hook' do
@@ -338,6 +338,46 @@ shared_examples_for "stubbing requests" do
         end
         http_request(:get, "http://www.example.com/")
         call_count.should == 1
+      end
+
+      it 'supports multiple global stubs; the first registered one that returns a non-nil value determines the stub' do
+        stub_invocation_order = []
+        WebMock.globally_stub_request do |request|
+          stub_invocation_order << :nil_stub
+          nil
+        end
+
+        WebMock.globally_stub_request do |request|
+          stub_invocation_order << :hash_stub
+          { :body => "global stub body" }
+        end
+
+        http_request(:get, "http://www.example.com/").body.should == "global stub body"
+        stub_invocation_order.should eq([:nil_stub, :hash_stub])
+      end
+
+      [:before, :after].each do |before_or_after|
+        context "when there is also a non-global registered stub #{before_or_after} the global stub" do
+          def stub_non_globally
+            stub_request(:get, "www.example.com").to_return(:body => 'non-global stub body')
+          end
+
+          define_method :register_stubs do |block|
+            stub_non_globally if before_or_after == :before
+            WebMock.globally_stub_request(&block)
+            stub_non_globally if before_or_after == :after
+          end
+
+          it 'uses the response from the global stub if the block returns a non-nil value' do
+            register_stubs(lambda { |req| { :body => 'global stub body' } })
+            http_request(:get, "http://www.example.com/").body.should == "global stub body"
+          end
+
+          it 'uses the response from the non-global stub if the block returns a nil value' do
+            register_stubs(lambda { |req| nil })
+            http_request(:get, "http://www.example.com/").body.should == "non-global stub body"
+          end
+        end
       end
     end
 

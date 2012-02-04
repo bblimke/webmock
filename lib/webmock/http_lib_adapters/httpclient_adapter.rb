@@ -38,7 +38,7 @@ if defined?(::HTTPClient)
     end
 
     def do_get_with_webmock(req, proxy, conn, stream = false, &block)
-      request_signature = build_request_signature(req)
+      request_signature = build_request_signature(req, :reuse_existing)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -75,6 +75,7 @@ if defined?(::HTTPClient)
     def do_request_async_with_webmock(method, uri, query, body, extheader)
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
+      webmock_request_signatures << request_signature
 
       if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
         do_request_async_without_webmock(method, uri, query, body, extheader)
@@ -123,7 +124,7 @@ if defined?(::HTTPClient)
     webmock_response
   end
 
-  def build_request_signature(req)
+  def build_request_signature(req, reuse_existing = false)
     uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
     uri.query_values = req.header.request_query if req.header.request_query
     uri.port = req.header.request_uri.port
@@ -149,18 +150,34 @@ if defined?(::HTTPClient)
       uri.userinfo = userinfo
     end
 
-    WebMock::RequestSignature.new(
+    signature = WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
       uri.to_s,
       :body => req.content,
       :headers => headers
     )
+
+    # reuse a previous identical signature object if we stored one for later use
+    if reuse_existing && previous_signature = previous_signature_for(signature)
+      return previous_signature
+    end
+
+    signature
   end
 
   def webmock_responses
     @webmock_responses ||= Hash.new do |hash, request_signature|
       hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
     end
+  end
+
+  def webmock_request_signatures
+    @webmock_request_signatures ||= []
+  end
+
+  def previous_signature_for(signature)
+    return nil unless index = webmock_request_signatures.index(signature)
+    webmock_request_signatures.delete_at(index)
   end
 
 end

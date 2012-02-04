@@ -32,6 +32,7 @@ module WebMock
     def eql?(other)
       self.to_s == other.to_s
     end
+    alias == eql?
 
     def url_encoded?
       headers && headers['Content-Type'] == 'application/x-www-form-urlencoded'

@@ -4,30 +4,31 @@ module WebMock
     include Singleton
 
     attr_accessor :request_stubs
-    attr_accessor :global_stub
 
     def initialize
       reset!
     end
 
-    def reset!
-      self.request_stubs = global_stub ? [global_stub] : []
+    def global_stubs
+      @global_stubs ||= []
     end
 
-    def global_stub_block=(block)
-      self.global_stub = ::WebMock::RequestStub.new(:any, /.*/)
+    def reset!
+      self.request_stubs = []
+    end
 
+    def register_global_stub(&block)
       # This hash contains the responses returned by the block,
       # keyed by the exact request (using the object_id).
       # That way, there's no race condition in case #to_return
       # doesn't run immediately after stub.with.
       responses = {}
 
-      self.global_stub.with { |request|
+      stub = ::WebMock::RequestStub.new(:any, /.*/).with { |request|
         responses[request.object_id] = block.call(request)
       }.to_return(lambda { |request| responses.delete(request.object_id) })
 
-      register_request_stub(self.global_stub)
+      global_stubs.push stub
     end
 
     def register_request_stub(stub)
@@ -47,7 +48,7 @@ module WebMock
     private
 
     def request_stub_for(request_signature)
-      request_stubs.detect { |registered_request_stub|
+      (global_stubs + request_stubs).detect { |registered_request_stub|
         registered_request_stub.request_pattern.matches?(request_signature)
       }
     end
