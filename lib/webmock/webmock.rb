@@ -92,7 +92,7 @@ module WebMock
   end
 
   def self.globally_stub_request(&block)
-    WebMock::StubRegistry.instance.global_stub_block = block
+    WebMock::StubRegistry.instance.register_global_stub(&block)
   end
 
   %w(

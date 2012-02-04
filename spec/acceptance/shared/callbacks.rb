@@ -44,6 +44,25 @@ shared_context "callbacks" do
       @request_signature.uri.to_s.should == "http://www.example.com:80/"
     end
 
+    after(:each) do
+      WebMock::StubRegistry.instance.global_stubs.clear
+    end
+
+    it 'passes the same request signature instance to the callback that was passed to the global stub callback' do
+      global_stub_request_sig = after_request_request_sig = nil
+      WebMock.globally_stub_request do |request_sig|
+        global_stub_request_sig = request_sig
+        nil
+      end
+
+      WebMock.after_request do |request_sig, _|
+        after_request_request_sig = request_sig
+      end
+
+      http_request(:get, "http://www.example.com/")
+      global_stub_request_sig.should be(after_request_request_sig)
+    end
+
     context "passing response to callback" do
       context "when request is stubbed" do
         before(:each) do
