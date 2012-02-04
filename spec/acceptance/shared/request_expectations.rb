@@ -542,13 +542,13 @@ shared_context "request expectations" do
         end
       end
 
-      describe "when expectation is declared using assert_stub_requested" do
+      describe "when expectation is declared using assert_requested" do
         it "should satisfy expectation if requests was made" do
           stub_http = stub_http_request(:get, "http://www.example.com")
           lambda {
             http_request(:get, "http://www.example.com/")
-            assert_stub_requested(stub_http, :times => 1)
-            assert_stub_requested(stub_http)
+            assert_requested(stub_http, :times => 1)
+            assert_requested(stub_http)
           }.should_not raise_error
         end
 
@@ -556,7 +556,7 @@ shared_context "request expectations" do
           stub_http = stub_http_request(:get, "http://www.example.com")
           lambda {
             http_request(:get, "http://www.example.com/")
-            assert_stub_not_requested(stub_http)
+            assert_not_requested(stub_http)
           }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
         end
       end

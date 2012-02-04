@@ -384,8 +384,8 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
 
     Net::HTTP.get('www.example.com', '/')
 
-    assert_stub_requested(stub_get)
-    assert_stub_not_requested(stub_post)
+    assert_requested(stub_get)
+    assert_not_requested(stub_post)
 
 
 ### Setting expectations in RSpec on `WebMock` module

@@ -17,27 +17,35 @@ module WebMock
       alias :request :a_request
     end
 
-    def assert_requested(method, uri, options = {}, &block)
-      expected_times_executed = options.delete(:times) || 1
-      request = WebMock::RequestPattern.new(method, uri, options).with(&block)
-      verifier = WebMock::RequestExecutionVerifier.new(request, expected_times_executed)
+
+    def assert_requested(*args, &block)
+      if not args[0].is_a?(WebMock::RequestStub)
+        args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+      end
+      assert_request_requested(*args, &block)
+    end
+
+    def assert_not_requested(*args, &block)
+      if not args[0].is_a?(WebMock::RequestStub)
+        args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+      end
+      assert_request_not_requested(*args, &block)
+    end
+
+    private
+
+    def convert_uri_method_and_options_to_request_and_options(*args, &block)
+      request = WebMock::RequestPattern.new(*args).with(&block)
+      [request, args[2] || {}]
+    end
+
+    def assert_request_requested(request, options = {})
+      verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times) || 1)
       WebMock::AssertionFailure.failure(verifier.failure_message) unless verifier.matches?
     end
 
-    def assert_not_requested(method, uri, options = {}, &block)
-      request = WebMock::RequestPattern.new(method, uri, options).with(&block)
+    def assert_request_not_requested(request, options = {})
       verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times))
-      WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
-    end
-
-    def assert_stub_requested(stub, options = {})
-      expected_times_executed = options.delete(:times) || 1
-      verifier = WebMock::RequestExecutionVerifier.new(stub, expected_times_executed)
-      WebMock::AssertionFailure.failure(verifier.failure_message) unless verifier.matches?
-    end
-
-    def assert_stub_not_requested(stub, options = {})
-      verifier = WebMock::RequestExecutionVerifier.new(stub, options.delete(:times))
       WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
     end
 
