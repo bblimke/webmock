@@ -297,11 +297,11 @@ josevalim:
 
   This feature was available before only for localhost with `:allow_localhost => true`
 
-                WebMock.disable_net_connect!(:allow => "www.example.org")
+        WebMock.disable_net_connect!(:allow => "www.example.org")
 
-                Net::HTTP.get('www.something.com', '/')   # ===> Failure
+        Net::HTTP.get('www.something.com', '/')   # ===> Failure
 
-                Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
+        Net::HTTP.get('www.example.org', '/')      # ===> Allowed.
 
 * Fixed Net::HTTP adapter so that it preserves the original behavior of Net::HTTP.
 
@@ -333,51 +333,51 @@ josevalim:
 
 * Matching query params using a hash
 
-                 stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+        stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
-                 RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success
+        RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success
 
-                 request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made  # ===> Success
+        request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made  # ===> Success
 
 * Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
 
   (Thanks to Steve Tooke for the idea and a solution for url-encoded bodies)
 
-                stub_http_request(:post, "www.example.com").
-                        with(:body => {:data => {:a => '1', :b => 'five'}})
+        stub_http_request(:post, "www.example.com").
+                with(:body => {:data => {:a => '1', :b => 'five'}})
 
-                RestClient.post('www.example.com', "data[a]=1&data[b]=five",
-                :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+        RestClient.post('www.example.com', "data[a]=1&data[b]=five",
+        :content_type => 'application/x-www-form-urlencoded')    # ===> Success
 
-                RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}',
-                :content_type => 'application/json')    # ===> Success
+        RestClient.post('www.example.com', '{"data":{"a":"1","b":"five"}}',
+        :content_type => 'application/json')    # ===> Success
 
-                RestClient.post('www.example.com', '<data a="1" b="five" />',
-                        :content_type => 'application/xml' )    # ===> Success
+        RestClient.post('www.example.com', '<data a="1" b="five" />',
+                :content_type => 'application/xml' )    # ===> Success
 
-                request(:post, "www.example.com").
-        with(:body => {:data => {:a => '1', :b => 'five'}},
-         :headers => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
+        request(:post, "www.example.com").
+        dy => {:data => {:a => '1', :b => 'five'}},
+        s => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
 
 * Request callbacks (Thanks to Myron Marston for all suggestions)
 
     WebMock can now invoke callbacks for stubbed or real requests:
 
-                WebMock.after_request do |request_signature, response|
-                  puts "Request #{request_signature} was made and #{response} was returned"
-                end
+        WebMock.after_request do |request_signature, response|
+          puts "Request #{request_signature} was made and #{response} was returned"
+        end
 
     invoke callbacks for real requests only and except requests made with Patron client
 
-                WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
-                  puts "Request #{request_signature} was made and #{response} was returned"
-                end
+        WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
+            puts "Request #{request_signature} was made and #{response} was returned"
+        end
 
 * `to_raise()` now accepts an exception instance or a string as argument in addition to an exception class
 
-                stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
+        stub_request(:any, 'www.example.net').to_raise(StandardError.new("some error"))
 
-                stub_request(:any, 'www.example.net').to_raise("some error")
+        stub_request(:any, 'www.example.net').to_raise("some error")
 
 * Matching requests based on a URI is 30% faster
 
