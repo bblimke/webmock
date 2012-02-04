@@ -14,6 +14,7 @@ require 'webmock/http_lib_adapters/patron_adapter'
 require 'webmock/http_lib_adapters/curb_adapter'
 require 'webmock/http_lib_adapters/em_http_request_adapter'
 require 'webmock/http_lib_adapters/typhoeus_hydra_adapter'
+require 'webmock/http_lib_adapters/excon_adapter'
 
 require 'webmock/errors'
 

@@ -76,7 +76,8 @@ shared_context "declared responses" do
       stub_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
       response = http_request(:get, "http://www.example.com/")
       # not supported by em-http-request, it always returns "unknown" for http_reason
-      unless http_library == :em_http_request
+      # not supported by excon, it only returns a status code
+      unless [:em_http_request, :excon].include?(http_library)
         response.message.should == "Internal Server Error"
       end
     end
@@ -90,7 +91,8 @@ shared_context "declared responses" do
       stub_request(:get, "www.example.com")
       response = http_request(:get, "http://www.example.com/")
       # not supported by em-http-request, it always returns "unknown" for http_reason
-      unless http_library == :em_http_request
+      # not supported by excon, it only returns a status code
+      unless [:em_http_request, :excon].include?(http_library)
         response.message.should == ""
       end
     end
@@ -188,7 +190,8 @@ shared_context "declared responses" do
 
       it "should return recorded status message" do
         # not supported by em-http-request, it always returns "unknown" for http_reason
-        unless http_library == :em_http_request
+        # not supported by excon, it only returns a status code
+        unless [:em_http_request, :excon].include?(http_library)
           @response.message.should == "OK"
         end
       end
@@ -225,7 +228,8 @@ shared_context "declared responses" do
 
       it "should return recorded status message" do
         # not supported by em-http-request, it always returns "unknown" for http_reason
-        unless http_library == :em_http_request
+        # not supported by excon, it only returns a status code
+        unless [:em_http_request, :excon].include?(http_library)
           @response.message.should == "OK"
         end
       end
