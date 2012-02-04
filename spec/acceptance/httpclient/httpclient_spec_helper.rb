@@ -9,7 +9,7 @@ module HTTPClientSpecHelper
     c.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
     c.set_basic_auth(nil, uri.user, uri.password) if uri.user
     params = [method, "#{uri.omit(:userinfo, :query).normalize.to_s}",
-      uri.query_values, options[:body], options[:headers] || {}]
+      uri.query_values(:notation => :flat_array), options[:body], options[:headers] || {}]
     if HTTPClientSpecHelper.async_mode
       connection = c.request_async(*params)
       connection.join

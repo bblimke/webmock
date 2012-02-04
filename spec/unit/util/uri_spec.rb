@@ -172,6 +172,29 @@ describe WebMock::Util::URI do
       lambda { WebMock::Util::URI.normalize_uri(uri) }.should_not raise_error(ArgumentError)
     end
 
+    context "with array parameters" do
+
+      it "should successfully handle array parameters" do
+        uri = 'http://www.example.com:80/path?a[]=b&a[]=c'
+        lambda { WebMock::Util::URI.normalize_uri(uri) }.should_not raise_error(ArgumentError)
+      end
+
+      context "in various formats" do
+        it "should be able to turn array parameters into a query string of the format ?a[]=b&a[]=c" do
+          uri_string = 'http://www.example.com:80/path?a[]=b&a[]=c'
+          uri = WebMock::Util::URI.normalize_uri(uri_string)
+          Addressable::URI.unencode(uri.query).should == "a[]=b&a[]=c"
+        end
+
+        it "should be able to turn array parameters into a query string of the format ?a=b&a=c" do
+          uri_string = 'http://www.example.com:80/path?a=b&a=c'
+          uri = WebMock::Util::URI.normalize_uri(uri_string)
+          Addressable::URI.unencode(uri.query).should == "a=b&a=c"
+        end
+      end
+
+    end
+
   end
 
   describe "stripping default port" do
