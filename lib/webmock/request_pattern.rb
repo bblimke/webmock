@@ -166,6 +166,9 @@ module WebMock
     end
 
     def to_s
+      if (@pattern).is_a?(Hash)
+        @pattern = Hash[@pattern.sort.reverse]
+      end
       @pattern.inspect
     end
 
