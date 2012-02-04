@@ -541,6 +541,25 @@ shared_context "request expectations" do
           }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
       end
+
+      describe "when expectation is declared using assert_stub_requested" do
+        it "should satisfy expectation if requests was made" do
+          stub_http = stub_http_request(:get, "http://www.example.com")
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            assert_stub_requested(stub_http, :times => 1)
+            assert_stub_requested(stub_http)
+          }.should_not raise_error
+        end
+
+        it "should fail if request expected not to be made was not wade" do
+          stub_http = stub_http_request(:get, "http://www.example.com")
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            assert_stub_not_requested(stub_http)
+          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+        end
+      end
     end
 
 

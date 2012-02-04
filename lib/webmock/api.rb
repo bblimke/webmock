@@ -29,5 +29,17 @@ module WebMock
       verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times))
       WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
     end
+
+    def assert_stub_requested(stub, options = {})
+      expected_times_executed = options.delete(:times) || 1
+      verifier = WebMock::RequestExecutionVerifier.new(stub, expected_times_executed)
+      WebMock::AssertionFailure.failure(verifier.failure_message) unless verifier.matches?
+    end
+
+    def assert_stub_not_requested(stub, options = {})
+      verifier = WebMock::RequestExecutionVerifier.new(stub, options.delete(:times))
+      WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
+    end
+
   end
 end
