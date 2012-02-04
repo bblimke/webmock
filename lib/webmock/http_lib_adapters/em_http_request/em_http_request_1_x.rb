@@ -189,7 +189,7 @@ if defined?(EventMachine::HttpClient)
         response_string = []
         response_string << "HTTP/1.1 #{status[0]} #{status[1]}"
 
-        headers["Content-Length"] = body.length unless headers["Content-Length"]
+        headers["Content-Length"] = body.bytesize unless headers["Content-Length"]
         headers.each do |header, value|
           value = value.join(", ") if value.is_a?(Array)
 
