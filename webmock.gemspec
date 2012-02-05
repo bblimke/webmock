@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'addressable', '~> 2.2', '> 2.2.5'
   s.add_dependency 'crack', '>=0.1.7'
 
-  s.add_development_dependency 'rspec',           '>= 2.0.0'
+  s.add_development_dependency 'rspec',           '~> 2.8'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
   s.add_development_dependency 'patron',          '>= 0.4.17' unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'em-http-request', '>= 1.0.0'
