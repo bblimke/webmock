@@ -24,6 +24,7 @@ Supported HTTP libraries
 * EM-HTTP-Request
 * Curb (currently only Curb::Easy)
 * Typhoeus (currently only Typhoeus::Hydra)
+* Excon
 
 Supported Ruby Interpreters
 ---------------------------
@@ -32,7 +33,7 @@ Supported Ruby Interpreters
 * MRI 1.8.7
 * MRI 1.9.1
 * MRI 1.9.2
-* MRI 1.9.3-preview1
+* MRI 1.9.3
 * REE 1.8.7
 * JRuby
 
@@ -686,6 +687,13 @@ People who submitted patches and new features or suggested improvements. Many th
 * Eugene Pimenov
 * Albert Llop
 * Christopher Pickslay
+* Tammer Saleh
+* Nicolas Fouché
+* Joe Van Dyk
+* Mark Abramov
+* Frank Schumacher
+* Dimitrij Denissenko
+* Marnen Laibow-Koser
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

@@ -1,5 +1,69 @@
 # Changelog
 
+## Master
+
+* Matching request body against partial hash.
+
+        stub_http_request(:post, "www.example.com").
+                with(:body => hash_including({:data => {:a => '1', :b => 'five'}}))
+
+        RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
+        :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+
+        request(:post, "www.example.com").
+        with(:body => hash_including({:data => {:a => '1', :b => 'five'}}),
+        :headers => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
+
+    Thanks to [Marnen Laibow-Koser](https://github.com/marnen) for help with this solution
+
+* Matching request query params against partial hash.
+
+        stub_http_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+
+        RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1") # ===> Success
+
+        request(:get, "www.example.com").
+          with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made  # ===> Success
+
+* Added support for Excon.
+
+    Thanks to [Dimitrij Denissenko](https://github.com/dim)
+
+* Added support for setting expectations on the request stub with `assert_requested`
+
+        stub_get = stub_request(:get, "www.example.com")
+        stub_post = stub_request(:post, "www.example.com")
+
+        Net::HTTP.get('www.example.com', '/')
+
+        assert_requested(stub_get)
+        assert_not_requested(stub_post)
+
+    Thanks to [Nicolas Fouché](https://github.com/nfo)
+
+* `WebMock.disable_net_connect!` accepts `RegExp` as `:allow` parameter
+
+    Thanks to [Frank Schumacher](https://github.com/thenoseman)
+
+* Fixed compatibility with Curb >= 0.7.16 This breaks compatibility with Curb < 0.7.16
+
+* Fix #to_rack to handle non-array response bodies.
+
+    Thanks to [Tammer Saleh](https://github.com/tsaleh)
+
+* Added `read_timeout` accessor to StubSocket which fixes compatibility with aws-sdk
+
+    Thanks to [Lin Jen-Shin](https://github.com/godfat)
+
+* Fix warning "instance variable @query_params not initialized"
+
+    Thanks to [Joe Van Dyk](https://github.com/joevandyk)
+
+* Using bytesize of message instead of its length for content-length header in em-http-request adapter.
+  This fixes a problem with messages getting truncated in Ruby >= 1.9
+
+    Thanks to [Mark Abramov](https://github.com/markiz)
+
 ## 1.7.10
 
 * Yanked 1.7.9 and rebuilt gem on 1.8.7 to deal with syck/psych incompatibilties in gemspec.
