@@ -40,19 +40,19 @@ module WebMock
     private
 
 
-    def assign_options(options)
-      @body_pattern = BodyPattern.new(options[:body]) if options.has_key?(:body)
-      @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
-      @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
-    end
-
-    def create_uri_pattern(uri)
-      if uri.is_a?(Regexp)
-        URIRegexpPattern.new(uri)
-      else
-        URIStringPattern.new(uri)
+      def assign_options(options)
+        @body_pattern = BodyPattern.new(options[:body]) if options.has_key?(:body)
+        @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
+        @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
       end
-    end
+
+      def create_uri_pattern(uri)
+        if uri.is_a?(Regexp)
+          URIRegexpPattern.new(uri)
+        else
+          URIStringPattern.new(uri)
+        end
+      end
 
   end
 
@@ -76,6 +76,25 @@ module WebMock
     def initialize(pattern)
       @pattern = pattern.is_a?(Addressable::URI) ? pattern : WebMock::Util::URI.normalize_uri(pattern)
     end
+
+    def add_query_params(query_params)
+      @query_params = case query_params
+      when Hash
+        query_params
+      when WebMock::Matchers::HashIncludingMatcher
+        query_params
+      when RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher
+        WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
+      else
+        Addressable::URI.parse('?' + query_params).query_values
+      end
+    end
+
+    def to_s
+      str = @pattern.inspect
+      str += " with query params #{@query_params.inspect}" if @query_params
+      str
+    end
   end
 
   class URIRegexpPattern  < URIPattern
@@ -94,33 +113,34 @@ module WebMock
       str += " with query params #{@query_params.inspect}" if @query_params
       str
     end
-
-    def add_query_params(query_params)
-      @query_params = query_params.is_a?(Hash) ? query_params : Addressable::URI.parse('?' + query_params).query_values
-    end
-
   end
 
   class URIStringPattern < URIPattern
     def matches?(uri)
       if @pattern.is_a?(Addressable::URI)
-        uri === @pattern
+        if @query_params
+          uri.omit(:query) === @pattern && (@query_params.nil? || @query_params == uri.query_values)
+        else
+          uri === @pattern
+        end
       else
         false
       end
     end
 
     def add_query_params(query_params)
-      if !query_params.is_a?(Hash)
-        query_params = Addressable::URI.parse('?' + query_params).query_values
+      super
+      if @query_params.is_a?(Hash) || @query_params.is_a?(String)
+        @pattern.query_values = (@pattern.query_values || {}).merge(@query_params)
+        @query_params = nil
       end
-      @pattern.query_values = (@pattern.query_values || {}).merge(query_params)
     end
 
     def to_s
-      WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
+      str = WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
+      str += " with query params #{@query_params.inspect}" if @query_params
+      str
     end
-
   end
 
 
@@ -171,50 +191,50 @@ module WebMock
 
     private
 
-    # Compare two hashes for equality
-    #
-    # For two hashes to match they must have the same length and all
-    # values must match when compared using `#===`.
-    #
-    # The following hashes are examples of matches:
-    #
-    #     {a: /\d+/} and {a: '123'}
-    #
-    #     {a: '123'} and {a: '123'}
-    #
-    #     {a: {b: /\d+/}} and {a: {b: '123'}}
-    #
-    #     {a: {b: 'wow'}} and {a: {b: 'wow'}}
-    #
-    # @param [Hash] query_parameters typically the result of parsing
-    #   JSON, XML or URL encoded parameters.
-    #
-    # @param [Hash] pattern which contains keys with a string, hash or
-    #   regular expression value to use for comparison.
-    #
-    # @return [Boolean] true if the paramaters match the comparison
-    #   hash, false if not.
-    def matching_hashes?(query_parameters, pattern)
-      return false unless query_parameters.size == pattern.size
-      query_parameters.each do |key, actual|
-        expected = pattern[key]
+      # Compare two hashes for equality
+      #
+      # For two hashes to match they must have the same length and all
+      # values must match when compared using `#===`.
+      #
+      # The following hashes are examples of matches:
+      #
+      #     {a: /\d+/} and {a: '123'}
+      #
+      #     {a: '123'} and {a: '123'}
+      #
+      #     {a: {b: /\d+/}} and {a: {b: '123'}}
+      #
+      #     {a: {b: 'wow'}} and {a: {b: 'wow'}}
+      #
+      # @param [Hash] query_parameters typically the result of parsing
+      #   JSON, XML or URL encoded parameters.
+      #
+      # @param [Hash] pattern which contains keys with a string, hash or
+      #   regular expression value to use for comparison.
+      #
+      # @return [Boolean] true if the paramaters match the comparison
+      #   hash, false if not.
+      def matching_hashes?(query_parameters, pattern)
+        return false unless query_parameters.size == pattern.size
+        query_parameters.each do |key, actual|
+          expected = pattern[key]
 
-        if actual.is_a?(Hash) && expected.is_a?(Hash)
-          return false unless matching_hashes?(actual, expected)
-        else
-          return false unless expected === actual
+          if actual.is_a?(Hash) && expected.is_a?(Hash)
+            return false unless matching_hashes?(actual, expected)
+          else
+            return false unless expected === actual
+          end
         end
+        true
       end
-      true
-    end
 
-    def empty_string?(string)
-      string.nil? || string == ""
-    end
+      def empty_string?(string)
+        string.nil? || string == ""
+      end
 
-    def normalize_hash(hash)
-      Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash).sort]
-    end
+      def normalize_hash(hash)
+        Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash).sort]
+      end
 
   end
 
@@ -241,9 +261,9 @@ module WebMock
 
     private
 
-    def empty_headers?(headers)
-      headers.nil? || headers == {}
-    end
+      def empty_headers?(headers)
+        headers.nil? || headers == {}
+      end
   end
 
 end

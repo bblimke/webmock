@@ -32,6 +32,11 @@ shared_examples_for "stubbing requests" do
         stub_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c").body.should == "abc"
       end
+
+      it "should return stubbed response when stub expects only part of query params" do
+        stub_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]})).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1").body.should == "abc"
+      end
     end
 
     describe "based on method" do

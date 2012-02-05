@@ -150,6 +150,13 @@ shared_context "request expectations" do
             a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
           }.should_not raise_error
         end
+
+        it "should satisfy expectation if the request was executed with only part query params declared as a hash in a query option" do
+          lambda {
+            http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1")
+            a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
+          }.should_not raise_error
+        end
       end
 
       it "should fail if request was made more times than expected" do

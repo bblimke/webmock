@@ -32,6 +32,14 @@ module WebMock
       assert_request_not_requested(*args, &block)
     end
 
+    def hash_including(expected)
+      if defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
+        RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
+      else
+        WebMock::Matchers::HashIncludingMatcher.new(expected)
+      end
+    end
+
     private
 
     def convert_uri_method_and_options_to_request_and_options(*args, &block)

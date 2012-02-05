@@ -172,6 +172,12 @@ You can also use WebMock outside a test framework:
 
      RestClient.get("http://www.example.com/?a[]=b&a[]=c") # ===> Success
 
+### Matching partial query params using hash
+
+    stub_http_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+
+    RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1") # ===> Success
+
 ### Stubbing with custom response
 
     stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 } )
@@ -405,6 +411,8 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
 
     WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
+    WebMock.should have_requested(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+
     WebMock.should have_requested(:get, "www.example.com").
       with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
 
@@ -419,6 +427,8 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
     a_request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
 
     a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+
+    a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
 
     a_request(:post, "www.example.com").
       with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).should have_been_made
