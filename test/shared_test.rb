@@ -51,6 +51,13 @@ module SharedTest
       :body => "abc", :headers => {'A' => 'a'})
   end
 
+  def test_verification_that_expected_request_occured_with_query_params
+    stub_request(:any, "http://www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+    http_request(:get, "http://www.example.com/?a[]=b&a[]=c&x=1")
+    assert_requested(:get, "http://www.example.com",
+      :query => hash_including({"a" => ["b", "c"]}))
+  end
+
   def test_verification_that_non_expected_request_didnt_occur
     expected_message = %r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time\n\nThe following requests were made:\n\nGET http://www.example.com/ with headers .+ was made 1 time\n\n============================================================)
     assert_fail(expected_message) do
