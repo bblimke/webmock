@@ -116,7 +116,7 @@ shared_examples_for "stubbing requests" do
             lambda {
               http_request(
                 :post, "http://www.example.com/",
-              :body => 'c[d][]=f&a=1&c[d][]=e').status.should == "200"
+              :body => 'c[d][]=f&a=1&c[d][]=e')
             }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'c\[d\]\[\]=f&a=1&c\[d\]\[\]=e'))
           end
         end
@@ -171,6 +171,37 @@ shared_examples_for "stubbing requests" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
             :body => "<opt foo=\"2010-01-01\">\n</opt>\n").status.should == "200"
+          end
+        end
+      end
+
+      describe "when body is declared as partial hash matcher" do
+        before(:each) do
+          stub_request(:post, "www.example.com").
+            with(:body => hash_including({:a => '1', 'c' => {'d' => ['e', 'f']} }))
+        end
+
+        describe "for request with url encoded body" do
+          it "should match request if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/",
+            :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
+          end
+
+          it "should not match if hash doesn't match url encoded body" do
+            lambda {
+              http_request(
+                :post, "http://www.example.com/",
+              :body => 'c[d][]=f&a=1&c[d][]=e').status
+            }.should raise_error
+          end
+        end
+
+        describe "for request with json body and content type is set to json" do
+          it "should match if hash matches body" do
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
           end
         end
       end

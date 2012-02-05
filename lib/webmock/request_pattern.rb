@@ -78,12 +78,11 @@ module WebMock
     end
 
     def add_query_params(query_params)
-      @query_params = case query_params
-      when Hash
+      @query_params = if query_params.is_a?(Hash)
         query_params
-      when WebMock::Matchers::HashIncludingMatcher
+      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher)
         query_params
-      when RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher
+      elsif defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher) && query_params.is_a?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
       else
         Addressable::URI.parse('?' + query_params).query_values
@@ -160,24 +159,21 @@ module WebMock
     }
 
     def initialize(pattern)
-      @pattern = pattern
-      if (@pattern).is_a?(Hash)
-        @pattern = normalize_hash(@pattern)
+      @pattern = if pattern.is_a?(Hash)
+        normalize_hash(pattern)
+      elsif defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher) && pattern.is_a?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
+        WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(pattern)
+      else
+        pattern
       end
     end
 
     def matches?(body, content_type = "")
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
-
-        case BODY_FORMATS[content_type]
-        when :json then
-          matching_hashes?(WebMock::Util::JSON.parse(body), @pattern)
-        when :xml then
-          matching_hashes?(Crack::XML.parse(body), @pattern)
-        else
-          matching_hashes?(Addressable::URI.parse('?' + body).query_values, @pattern)
-        end
+        matching_hashes?(body_as_hash(body, content_type), @pattern)
+      elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
+        @pattern == body_as_hash(body, content_type)
       else
         empty_string?(@pattern) && empty_string?(body) ||
           @pattern == body ||
@@ -190,6 +186,16 @@ module WebMock
     end
 
     private
+      def body_as_hash(body, content_type)
+        case BODY_FORMATS[content_type]
+        when :json then
+          WebMock::Util::JSON.parse(body)
+        when :xml then
+          Crack::XML.parse(body)
+        else
+          Addressable::URI.parse('?' + body).query_values
+        end
+      end
 
       # Compare two hashes for equality
       #

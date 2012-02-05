@@ -125,6 +125,14 @@ You can also use WebMock outside a test framework:
     RestClient.post('www.example.com', '<data a="1" b="five" />',
       :content_type => 'application/xml' )    # ===> Success
 
+### Matching request body against partial hash.
+
+    stub_http_request(:post, "www.example.com").
+            with(:body => hash_including({:data => {:a => '1', :b => 'five'}}))
+
+    RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
+    :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+
 ### Matching custom request headers
 
     stub_request(:any, "www.example.com").with(:headers=>{ 'Header-Name' => 'Header-Value' })

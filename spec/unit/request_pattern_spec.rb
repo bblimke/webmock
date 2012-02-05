@@ -20,10 +20,16 @@ describe WebMock::RequestPattern do
         "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
     end
 
-    it "should report string describing itself with query params as hash including maycher" do
+    it "should report string describing itself with query params as hash including matcher" do
       WebMock::RequestPattern.new(:get, /.*example.*/,
       :query => WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s.should ==
         "GET /.*example.*/ with query params hash_including({\"a\"=>[\"b\", \"c\"]})"
+    end
+
+    it "should report string describing itself with body as hash including matcher" do
+      WebMock::RequestPattern.new(:get, /.*example.*/,
+      :body => WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s.should ==
+        "GET /.*example.*/ with body hash_including({\"a\"=>[\"b\", \"c\"]})"
     end
   end
 
@@ -336,9 +342,35 @@ describe WebMock::RequestPattern do
               end
         end
       end
+
+      describe "when body in a pattern is declared as a partial hash matcher" do
+        let(:signature) { WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=1&c[d][]=e&c[d][]=f&b=five') }
+
+       it "should match when query params are declared as HashIncluding matcher matching params" do
+          WebMock::RequestPattern.new(:post, "www.example.com",
+          :body => WebMock::Matchers::HashIncludingMatcher.new({:a => '1', 'c' => {'d' => ['e', 'f']}})).
+            should match(signature)
+        end
+
+        it "should not match when query params are declared as HashIncluding matcher not matching params" do
+          WebMock::RequestPattern.new(:post, "www.example.com",
+          :body => WebMock::Matchers::HashIncludingMatcher.new({:x => '1', 'c' => {'d' => ['e', 'f']}})).
+            should_not match(signature)
+        end
+
+        it "should match when query params are declared as RSpec HashIncluding matcher matching params" do
+          WebMock::RequestPattern.new(:post, "www.example.com",
+          :body => RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({:a => '1', 'c' => {'d' => ['e', 'f']}})).
+            should match(signature)
+        end
+
+        it "should not match when query params are declared as RSpec HashIncluding matcher not matching params" do
+          WebMock::RequestPattern.new(:post, "www.example.com",
+          :body => RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({:x => '1', 'c' => {'d' => ['e', 'f']}})).
+            should_not match(signature)
+        end
+      end
     end
-
-
 
     it "should match if pattern and request have the same headers" do
       WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'Content-Type' => 'image/jpeg'}).

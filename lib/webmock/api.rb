@@ -33,7 +33,7 @@ module WebMock
     end
 
     def hash_including(expected)
-      if defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
+      if defined?(::RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
         RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
       else
         WebMock::Matchers::HashIncludingMatcher.new(expected)

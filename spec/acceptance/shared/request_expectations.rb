@@ -216,7 +216,7 @@ shared_context "request expectations" do
 
       describe "when expected reqest body is declared as a hash" do
         let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
-        let(:fail_message) {%r(The request POST http://www.example.com/ with body .* was expected to execute 1 time but it executed 0 times)}
+        let(:fail_message) {%r(The request POST http://www.example.com/ with body .+ was expected to execute 1 time but it executed 0 times)}
 
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
@@ -297,6 +297,26 @@ shared_context "request expectations" do
         end
       end
 
+      describe "when expected reqest body is declared as a partial hash matcher" do
+        let(:body_hash) { hash_including({:a => '1', 'c' => {'d' => ['e', 'f']}}) }
+        let(:fail_message) {%r(The request POST http://www.example.com/ with body hash_including(.+) was expected to execute 1 time but it executed 0 times)}
+
+        describe "when request is made with url encoded body matching hash" do
+          it "should satisfy expectation" do
+            lambda {
+              http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
+              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+            }.should_not raise_error
+          end
+
+          it "should fail if request is executed with url encoded body not matching hash" do
+            lambda {
+              http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
+              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+            }.should fail_with(fail_message)
+          end
+        end
+      end
 
       describe "when request with headers is expected" do
         it "should satisfy expectation if request was executed with the same headers" do
