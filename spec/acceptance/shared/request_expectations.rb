@@ -1,4 +1,4 @@
-shared_context "request expectations" do
+shared_context "request expectations" do |*adapter_info|
   describe "when request expectations are set" do
     describe "when net connect is not allowed" do
       before(:each) do
@@ -437,9 +437,8 @@ shared_context "request expectations" do
         end
       end
 
-      describe "with authentication" do
+      describe "with authentication", :unless => (adapter_info.include?(:no_url_auth)) do
         before(:each) do
-          pending "Excon does not accept basic auth user-info in URLs" if http_library == :excon
           stub_request(:any, "http://user:pass@www.example.com")
           stub_request(:any, "http://user:pazz@www.example.com")
         end

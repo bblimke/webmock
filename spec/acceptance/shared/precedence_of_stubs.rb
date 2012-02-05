@@ -1,4 +1,4 @@
-shared_context "precedence of stubs" do
+shared_context "precedence of stubs" do |*adapter_info|
   describe "when choosing a matching request stub" do
     it "should use the last declared matching request stub" do
       stub_request(:get, "www.example.com").to_return(:body => "abc")
