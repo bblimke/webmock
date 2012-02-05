@@ -356,8 +356,8 @@ josevalim:
                 :content_type => 'application/xml' )    # ===> Success
 
         request(:post, "www.example.com").
-        dy => {:data => {:a => '1', :b => 'five'}},
-        s => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
+        with(:body => {:data => {:a => '1', :b => 'five'}},
+        :headers => 'Content-Type' => 'application/json').should have_been_made         # ===> Success
 
 * Request callbacks (Thanks to Myron Marston for all suggestions)
 
