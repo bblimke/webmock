@@ -1,4 +1,4 @@
-shared_context "allowing and disabling net connect" do
+shared_context "allowing and disabling net connect" do |*adapter_info|
   describe "when net connect" do
     describe "is allowed", :net_connect => true do
       before(:each) do

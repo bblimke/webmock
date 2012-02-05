@@ -1,4 +1,4 @@
-shared_context "enabled and disabled webmock" do
+shared_context "enabled and disabled webmock" do |*adapter_info|
   describe "when webmock is disabled" do
     before(:each) do
       WebMock.disable!

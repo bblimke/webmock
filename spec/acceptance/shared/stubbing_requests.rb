@@ -1,4 +1,4 @@
-shared_examples_for "stubbing requests" do
+shared_examples_for "stubbing requests" do |*adapter_info|
   describe "when requests are stubbed" do
     describe "based on uri" do
       it "should return stubbed response even if request have escaped parameters" do
@@ -295,11 +295,7 @@ shared_examples_for "stubbing requests" do
       end
     end
 
-    describe "when stubbing request with basic authentication" do
-      before do
-        pending "Excon does not accept basic auth user-info in URLs" if http_library == :excon
-      end
-
+    describe "when stubbing request with basic authentication", :unless => (adapter_info.include?(:no_url_auth)) do
       it "should match if credentials are the same" do
         stub_request(:get, "user:pass@www.example.com")
         http_request(:get, "http://user:pass@www.example.com/").status.should == "200"

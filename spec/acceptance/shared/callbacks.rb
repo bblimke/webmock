@@ -1,4 +1,4 @@
-shared_context "callbacks" do
+shared_context "callbacks" do |*adapter_info|
   describe "when after_request callback is declared" do
     before(:each) do
       WebMock.reset_callbacks
@@ -105,12 +105,8 @@ shared_context "callbacks" do
         end
 
         it "should pass real response to callback with status and message" do
-          # not supported by em-http-request, it always returns "unknown" for http_reason
-          # not supported by excon, it only returns a status code
-          unless [:em_http_request, :excon].include?(http_library)
-            @response.status[0].should == 302
-            @response.status[1].should == "Found"
-          end
+          @response.status[0].should == 302
+          @response.status[1].should == "Found" unless adapter_info.include?(:no_status_message)
         end
 
         it "should pass real response to callback with headers" do
