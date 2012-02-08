@@ -9,7 +9,7 @@ unless RUBY_PLATFORM =~ /java/
   describe "EM::HttpRequest" do
     include EMHttpRequestSpecHelper
 
-    include_examples "with WebMock"
+    include_context "with WebMock", :no_status_message
 
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)

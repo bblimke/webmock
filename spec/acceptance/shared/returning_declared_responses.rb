@@ -1,6 +1,6 @@
 class MyException < StandardError; end;
 
-shared_context "declared responses" do
+shared_context "declared responses" do |*adapter_info|
   describe "when request stub declares that request should raise exception" do
     it "should raise exception" do
       stub_request(:get, "www.example.com").to_raise(MyException)
@@ -72,14 +72,10 @@ shared_context "declared responses" do
       http_request(:get, "http://www.example.com/").status.should == "500"
     end
 
-    it "should return response with declared status message" do
+    it "should return response with declared status message", :unless => (adapter_info.include?(:no_status_message)) do
       stub_request(:get, "www.example.com").to_return(:status => [500, "Internal Server Error"])
       response = http_request(:get, "http://www.example.com/")
-      # not supported by em-http-request, it always returns "unknown" for http_reason
-      # not supported by excon, it only returns a status code
-      unless [:em_http_request, :excon].include?(http_library)
-        response.message.should == "Internal Server Error"
-      end
+      response.message.should == "Internal Server Error"
     end
 
     it "should return response with a default status code" do
@@ -87,14 +83,10 @@ shared_context "declared responses" do
       http_request(:get, "http://www.example.com/").status.should == "200"
     end
 
-    it "should return default response with empty message if response was not declared" do
+    it "should return default response with empty message if response was not declared", :unless => (adapter_info.include?(:no_status_message)) do
       stub_request(:get, "www.example.com")
       response = http_request(:get, "http://www.example.com/")
-      # not supported by em-http-request, it always returns "unknown" for http_reason
-      # not supported by excon, it only returns a status code
-      unless [:em_http_request, :excon].include?(http_library)
-        response.message.should == ""
-      end
+      response.message.should == ""
     end
 
     describe "when response body was declared as IO" do
@@ -188,12 +180,8 @@ shared_context "declared responses" do
         @response.status.should == "202"
       end
 
-      it "should return recorded status message" do
-        # not supported by em-http-request, it always returns "unknown" for http_reason
-        # not supported by excon, it only returns a status code
-        unless [:em_http_request, :excon].include?(http_library)
-          @response.message.should == "OK"
-        end
+      it "should return recorded status message", :unless => (adapter_info.include?(:no_status_message)) do
+        @response.message.should == "OK"
       end
 
       it "should ensure file is closed" do
@@ -226,12 +214,8 @@ shared_context "declared responses" do
         @response.status.should == "202"
       end
 
-      it "should return recorded status message" do
-        # not supported by em-http-request, it always returns "unknown" for http_reason
-        # not supported by excon, it only returns a status code
-        unless [:em_http_request, :excon].include?(http_library)
-          @response.message.should == "OK"
-        end
+      it "should return recorded status message", :unless => (adapter_info.include?(:no_status_message)) do
+        @response.message.should == "OK"
       end
     end
 
