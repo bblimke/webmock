@@ -221,7 +221,8 @@ module WebMock
       # @return [Boolean] true if the paramaters match the comparison
       #   hash, false if not.
       def matching_hashes?(query_parameters, pattern)
-        return false unless query_parameters.size == pattern.size
+        return false unless query_parameters.is_a?(Hash)
+        return false unless query_parameters.keys.sort == pattern.keys.sort
         query_parameters.each do |key, actual|
           expected = pattern[key]
 

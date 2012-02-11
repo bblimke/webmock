@@ -317,7 +317,25 @@ describe WebMock::RequestPattern do
             WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
                                                              :headers => {:content_type => 'application/json'}, :body => "foo bar"))
-              end
+          end
+
+          it "shound not match if request body is different" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => {:a => 1, :b => 2}).
+              should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
+              :headers => {:content_type => 'application/json'}, :body => "{\"a\":1,\"c\":null}"))
+          end
+
+          it "should not match if request body is has less params than pattern" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => {:a => 1, :b => 2}).
+              should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
+              :headers => {:content_type => 'application/json'}, :body => "{\"a\":1}"))
+          end
+
+          it "should not match if request body is has more params than pattern" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => {:a => 1}).
+              should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
+              :headers => {:content_type => 'application/json'}, :body => "{\"a\":1,\"c\":1}"))
+          end
         end
 
         describe "for request with xml body and content type is set to xml" do

@@ -64,6 +64,10 @@
 
     Thanks to [Mark Abramov](https://github.com/markiz)
 
+* Fixed problem with body params being matched even if params were different.
+
+    Thanks to [Evgeniy Dolzhenko](https://github.com/dolzenko) for reporting this issue.
+
 ## 1.7.10
 
 * Yanked 1.7.9 and rebuilt gem on 1.8.7 to deal with syck/psych incompatibilties in gemspec.
