@@ -41,28 +41,27 @@ end
 
 shared_context "disabled WebMock" do
   it "should not register executed requests" do
-    http_request(:get, "http://www.example.com/")
-    a_request(:get, "http://www.example.com/").should_not have_been_made
+    http_request(:get, webmock_server_url)
+    a_request(:get, webmock_server_url).should_not have_been_made
   end
 
   it "should not block unstubbed requests" do
     lambda {
-      http_request(:get, "http://www.example.com/")
+      http_request(:get, webmock_server_url)
     }.should_not raise_error
   end
 
   it "should return real response even if there are stubs" do
     stub_request(:get, /.*/).to_return(:body => "x")
-    http_request(:get, "http://www.example.com/").
-      status.should == "302"
+    http_request(:get, webmock_server_url).body.should == "hello world"
   end
 
   it "should not invoke any callbacks" do
     WebMock.reset_callbacks
-    stub_request(:get, "http://www.example.com/")
+    stub_request(:get, webmock_server_url)
     @called = nil
     WebMock.after_request { @called = 1 }
-    http_request(:get, "http://www.example.com/")
+    http_request(:get, webmock_server_url)
     @called.should == nil
   end
 end
@@ -70,8 +69,8 @@ end
 shared_context "enabled WebMock" do
   it "should register executed requests" do
     WebMock.allow_net_connect!
-    http_request(:get, "http://www.example.com/")
-    a_request(:get, "http://www.example.com/").should have_been_made
+    http_request(:get, webmock_server_url)
+    a_request(:get, webmock_server_url).should have_been_made
   end
 
   it "should block unstubbed requests" do
@@ -90,7 +89,7 @@ shared_context "enabled WebMock" do
     WebMock.reset_callbacks
     @called = nil
     WebMock.after_request { @called = 1 }
-    http_request(:get, "http://www.example.com/")
+    http_request(:get, webmock_server_url)
     @called.should == 1
   end
 end
