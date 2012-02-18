@@ -112,7 +112,17 @@ if defined?(::HTTPClient)
   def build_webmock_response(httpclient_response)
     webmock_response = WebMock::Response.new
     webmock_response.status = [httpclient_response.status, httpclient_response.reason]
-    webmock_response.headers = httpclient_response.header.all
+
+    webmock_response.headers = {}.tap do |hash|
+      httpclient_response.header.all.each do |(key, value)|
+        if hash.has_key?(key)
+          hash[key] = Array(hash[key]) + [value]
+        else
+          hash[key] = value
+        end
+      end
+    end
+
     if  httpclient_response.content.respond_to?(:read)
       webmock_response.body = httpclient_response.content.read
       body = HTTP::Message::Body.new

@@ -33,11 +33,13 @@ class WebMockServer
       end
       server.start do |socket|
         socket.puts <<-EOT.gsub(/^\s+\|/, '')
-          |HTTP/1.1 200 OK
-          |Date: Fri, 31 Dec 1999 23:59:59 GMT
-          |Content-Type: text/html
-          |Content-Length: 11
-          |
+          |HTTP/1.1 200 OK\r
+          |Date: Fri, 31 Dec 1999 23:59:59 GMT\r
+          |Content-Type: text/html\r
+          |Content-Length: 11\r
+          |Set-Cookie: bar\r
+          |Set-Cookie: foo\r
+          |\r
           |hello world
         EOT
       end

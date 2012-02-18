@@ -10,6 +10,16 @@ module CurbSpecHelper
     status, response_headers =
      WebMock::HttpLibAdapters::CurbAdapter.parse_header_string(curl.header_str)
 
+    # Deal with the fact that the HTTP spec allows multi-values headers
+    # to either be a single entry with a comma-separated listed of
+    # values, or multiple separate entries
+    response_headers.keys.each do |k|
+      v = response_headers[k]
+      if v.is_a?(Array)
+        response_headers[k] = v.join(', ')
+      end
+    end
+
     OpenStruct.new(
       :body => curl.body_str,
       :headers => WebMock::Util::Headers.normalize_headers(response_headers),

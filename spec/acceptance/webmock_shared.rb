@@ -6,6 +6,7 @@ require 'acceptance/shared/request_expectations'
 require 'acceptance/shared/stubbing_requests'
 require 'acceptance/shared/allowing_and_disabling_net_connect'
 require 'acceptance/shared/precedence_of_stubs'
+require 'acceptance/shared/complex_cross_concern_behaviors'
 
 unless defined? SAMPLE_HEADERS
   SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
@@ -34,5 +35,7 @@ shared_examples "with WebMock" do |*adapter_info|
     include_context "callbacks", *adapter_info
 
     include_context "enabled and disabled webmock", *adapter_info
+
+    include_context "complex cross-concern behaviors", *adapter_info
   end
 end
