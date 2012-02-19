@@ -11,8 +11,8 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
       it "should make a real https request if request is not stubbed" do
         unless http_library == :httpclient
-          http_request(:get, "https://www.paypal.com/uk/cgi-bin/webscr").
-            body.should =~ /.*paypal.*/
+          http_request(:get, "https://www.google.com/").
+            body.should =~ /.*google.*/
         end
       end
 
