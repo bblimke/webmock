@@ -178,6 +178,12 @@ describe WebMock::Util::URI do
       uri = WebMock::Util::URI.normalize_uri(uri_string)
       uri.query_values.should == {"a"=>{"d"=>"b", "e"=>"c", "b"=>{"c"=>"1"}}}
     end
+
+    it "should successfully handle nested hash parameters" do
+      uri_string = 'http://www.example.com:80/path?one[two][three][]=four&one[two][three][]=five'
+      uri = WebMock::Util::URI.normalize_uri(uri_string)
+      uri.query_values.should == {"one"=>{"two"=>{"three" => ["four", "five"]}}}
+    end
   end
 
   describe "stripping default port" do

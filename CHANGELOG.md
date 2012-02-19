@@ -49,6 +49,8 @@
 
     Thanks to [Myron Marston](https://github.com/myronmarston)
 
+* Updated dependency on Addressable to version >= 2.2.7 to handle nested hash query values. I.e. `?one[two][three][]=four&one[two][three][]=five`
+
 * Fixed compatibility with Curb >= 0.7.16 This breaks compatibility with Curb < 0.7.16
 
 * Fix #to_rack to handle non-array response bodies.
