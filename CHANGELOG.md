@@ -45,6 +45,10 @@
 
     Thanks to [Frank Schumacher](https://github.com/thenoseman)
 
+* Ensure multiple values for the same header can be recorded and played back
+
+    Thanks to [Myron Marston](https://github.com/myronmarston)
+
 * Fixed compatibility with Curb >= 0.7.16 This breaks compatibility with Curb < 0.7.16
 
 * Fix #to_rack to handle non-array response bodies.
