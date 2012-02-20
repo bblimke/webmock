@@ -1,6 +1,6 @@
 # Changelog
 
-## Master
+## 1.8.0
 
 * Matching request body against partial hash.
 
