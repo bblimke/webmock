@@ -71,6 +71,8 @@ Add the following code to `features/support/env.rb`
 
     require 'webmock/cucumber'
 
+### Outside a test framework
+
 You can also use WebMock outside a test framework:
 
     require 'webmock'
