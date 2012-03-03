@@ -27,7 +27,7 @@ if defined?(EventMachine::HttpClient)
 
   module EventMachine
 
-    if defined?(Synchrony)
+    if defined?(Synchrony) && HTTPMethods.instance_methods.include?(:aget)
       # have to make the callbacks fire on the next tick in order
       # to avoid the dreaded "double resume" exception
       module HTTPMethods
