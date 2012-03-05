@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.8.1
+
+* Ensured WebMock doesn't interfere with `em-synchrony`, when `em-synchrony/em-http` is not included.
+
+    Thanks to [Nick Recobra](https://github.com/oruen)
+
+* Improved README
+
+    Thanks to [Jordan Elver](https://github.com/jordelver)
+
+
 ## 1.8.0
 
 * Matching request body against partial hash.
