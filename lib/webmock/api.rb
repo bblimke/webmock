@@ -35,6 +35,8 @@ module WebMock
     def hash_including(expected)
       if defined?(::RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
         RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
+      elsif defined?(::Spec::Mocks::ArgumentMatchers::HashIncludingMatcher)
+        Spec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
       else
         WebMock::Matchers::HashIncludingMatcher.new(expected)
       end
