@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.2
+
+* Prevent Webmock `hash_including` from overriding RSpec version 1 `hash_including` method.
+
+    Thanks to [Joe Karayusuf](https://github.com/karayusuf)
+
+* Ensured WebMock handles RSpec 1 `hash_including` matcher for matching query params and body.
+
 ## 1.8.1
 
 * Ensured WebMock doesn't interfere with `em-synchrony`, when `em-synchrony/em-http` is not included.

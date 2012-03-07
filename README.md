@@ -697,6 +697,9 @@ People who submitted patches and new features or suggested improvements. Many th
 * Dimitrij Denissenko
 * Marnen Laibow-Koser
 * Evgeniy Dolzhenko
+* Nick Recobra
+* Jordan Elver
+* Joe Karayusuf
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
