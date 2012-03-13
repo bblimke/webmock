@@ -154,7 +154,7 @@ if defined?(EventMachine::HttpClient)
 
         method = @req.method
         uri = @req.uri
-        auth = @req.proxy[:authorization]
+        auth = @req.proxy[:authorization] if @req.proxy
         query = @req.query
 
         if auth
