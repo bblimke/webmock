@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.3
+
+* Fixed compatibility with latest em-http-request
+
+    Thanks to [Paul Cortens](https://github.com/thoughtless)
+
 ## 1.8.2
 
 * Prevent Webmock `hash_including` from overriding RSpec version 1 `hash_including` method.
