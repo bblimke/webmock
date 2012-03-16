@@ -16,7 +16,10 @@ module TyphoeusHydraSpecHelper
       }
     )
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
-    raise FakeTyphoeusHydraConnectError.new if response.code == 0
+    if response.code == 0
+      p response
+      raise FakeTyphoeusHydraConnectError.new
+    end
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
