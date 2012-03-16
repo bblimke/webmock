@@ -3,6 +3,7 @@ require 'ostruct'
 module ExconSpecHelper
 
   def http_request(method, uri, options = {}, &block)
+    Excon.defaults[:ssl_verify_peer] = false
     uri      = Addressable::URI.heuristic_parse(uri)
     uri      = uri.omit(:userinfo).to_s.gsub(' ', '+')
 
