@@ -23,7 +23,7 @@ module NetHTTPSpecHelper
     if uri.scheme == "https"
       http.use_ssl = true
       #1.9.1 has a bug with ssl_timeout
-      http.ssl_timeout = 20 if http.respond_to?("ssl_timeout=")
+      http.ssl_timeout = 20 unless RUBY_PLATFORM =~ /java/
       http.open_timeout = 60
       http.read_timeout = 60
     end
