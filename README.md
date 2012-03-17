@@ -36,6 +36,7 @@ Supported Ruby Interpreters
 * MRI 1.9.3
 * REE 1.8.7
 * JRuby
+* Rubinius
 
 ##Installation
 
