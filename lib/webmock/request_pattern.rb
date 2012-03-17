@@ -1,5 +1,11 @@
 module WebMock
 
+  module RSpecMatcherDetector
+    def rSpecHashIncludingMatcher?(matcher)
+      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashIncludingMatcher/
+    end
+  end
+
   class RequestPattern
 
     attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern
@@ -73,6 +79,8 @@ module WebMock
 
 
   class URIPattern
+    include RSpecMatcherDetector
+
     def initialize(pattern)
       @pattern = pattern.is_a?(Addressable::URI) ? pattern : WebMock::Util::URI.normalize_uri(pattern)
     end
@@ -82,8 +90,7 @@ module WebMock
         query_params
       elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher)
         query_params
-      elsif (defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher) && query_params.is_a?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)) ||
-          (defined?(Spec::Mocks::ArgumentMatchers::HashIncludingMatcher) && query_params.is_a?(Spec::Mocks::ArgumentMatchers::HashIncludingMatcher))
+      elsif rSpecHashIncludingMatcher?(query_params)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
       else
         Addressable::URI.parse('?' + query_params).query_values
@@ -145,6 +152,7 @@ module WebMock
 
 
   class BodyPattern
+    include RSpecMatcherDetector
 
     BODY_FORMATS = {
       'text/xml'               => :xml,
@@ -162,8 +170,7 @@ module WebMock
     def initialize(pattern)
       @pattern = if pattern.is_a?(Hash)
         normalize_hash(pattern)
-      elsif (defined?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher) && pattern.is_a?(RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)) ||
-          (defined?(Spec::Mocks::ArgumentMatchers::HashIncludingMatcher) && pattern.is_a?(Spec::Mocks::ArgumentMatchers::HashIncludingMatcher))
+      elsif rSpecHashIncludingMatcher?(pattern)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(pattern)
       else
         pattern
