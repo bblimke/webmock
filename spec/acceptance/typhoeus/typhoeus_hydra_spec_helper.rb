@@ -7,7 +7,7 @@ module TyphoeusHydraSpecHelper
 
   def http_request(method, uri, options = {}, &block)
     uri.gsub!(" ", "%20") #typhoeus doesn't like spaces in the uri
-    response = Typhoeus::Request.run(uri,
+    request = Typhoeus::Request.new(uri,
       {
         :method  => method,
         :body    => options[:body],
@@ -16,11 +16,12 @@ module TyphoeusHydraSpecHelper
         :verbose => true
       }
     )
+    hydra = Typhoeus::Hydra.new(:initial_pool_size => 0)
+    hydra.queue(request)
+    hydra.run
+    response = request.response
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
-    if response.code == 0
-      p response
-      raise FakeTyphoeusHydraConnectError.new
-    end
+    raise FakeTyphoeusHydraConnectError.new if response.code == 0
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
