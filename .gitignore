@@ -25,3 +25,4 @@ Gemfile.lock
 pkg/*
 tmp/*
 *.rbc
+*.rbx
