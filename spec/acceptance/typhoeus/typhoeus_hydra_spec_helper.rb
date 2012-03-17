@@ -12,8 +12,7 @@ module TyphoeusHydraSpecHelper
         :method  => method,
         :body    => options[:body],
         :headers => options[:headers],
-        :timeout => 25000, # milliseconds
-        :verbose => true
+        :timeout => 25000
       }
     )
     hydra = Typhoeus::Hydra.new(:initial_pool_size => 0)
