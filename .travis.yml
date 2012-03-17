@@ -5,5 +5,6 @@ rvm:
   - ree
   - jruby-19mode
   - jruby-18mode
+  - rbx-18mode
 
 script: "bundle exec rake && rake em_http_request_0_x_spec"
