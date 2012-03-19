@@ -5,6 +5,7 @@ rescue LoadError
 end
 
 if defined?(Typhoeus)
+  WebMock::VersionChecker.new('Typhoeus', Typhoeus::VERSION, '0.3.2').check_version!
 
   module WebMock
     module HttpLibAdapters
