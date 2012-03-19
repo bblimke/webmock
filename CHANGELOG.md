@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.4
+
+* Warning message is printed when an unsupported version of a http library is loaded.
+
+    Thanks to [Alexander Staubo](https://github.com/alexstaubo) for reporting the problem and to [Myron Marston](https://github.com/myronmarston) for a help with solution.
+
 ## 1.8.3
 
 * Fixed compatibility with latest em-http-request
