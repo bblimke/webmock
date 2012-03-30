@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.5
+
+* WebMock::RackResponse supports basic auth
+
+    Thanks to [jugyo](https://github.com/jugyo)
+
 ## 1.8.4
 
 * Warning message is printed when an unsupported version of a http library is loaded.
