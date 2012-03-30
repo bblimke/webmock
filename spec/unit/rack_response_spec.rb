@@ -4,6 +4,11 @@ describe WebMock::RackResponse do
   before :each do
     @rack_response = WebMock::RackResponse.new(MyRackApp)
     @locked_rack_response = WebMock::RackResponse.new(MyLockedRackApp)
+    @rack_response_with_basic_auth = WebMock::RackResponse.new(
+      Rack::Auth::Basic.new(MyRackApp) do |username, password|
+        username == 'username' && password == 'password'
+      end
+    )
   end
 
   it "should hook up to a rack appliance" do
@@ -47,5 +52,21 @@ describe WebMock::RackResponse do
 
     response = @rack_response.evaluate(request)
     response.body.should include('Good to meet you, Jimmy!')
+  end
+
+  describe 'basic auth request' do
+    it 'should be failure when wrong credentials' do
+      request = WebMock::RequestSignature.new(:get, 'foo:bar@www.example.com')
+      response = @rack_response_with_basic_auth.evaluate(request)
+      response.status.first.should == 401
+      response.body.should_not include('This is my root!')
+    end
+
+    it 'should be success when valid credentials' do
+      request = WebMock::RequestSignature.new(:get, 'username:password@www.example.com')
+      response = @rack_response_with_basic_auth.evaluate(request)
+      response.status.first.should == 200
+      response.body.should include('This is my root!')
+    end
   end
 end
