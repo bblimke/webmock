@@ -3,12 +3,6 @@ require 'spec_helper'
 describe WebMock::RackResponse do
   before :each do
     @rack_response = WebMock::RackResponse.new(MyRackApp)
-    @locked_rack_response = WebMock::RackResponse.new(MyLockedRackApp)
-    @rack_response_with_basic_auth = WebMock::RackResponse.new(
-      Rack::Auth::Basic.new(MyRackApp) do |username, password|
-        username == 'username' && password == 'password'
-      end
-    )
   end
 
   it "should hook up to a rack appliance" do
@@ -28,6 +22,7 @@ describe WebMock::RackResponse do
   end
 
   it "should shouldn't blow up when hitting a locked resource twice" do
+    @locked_rack_response = WebMock::RackResponse.new(MyLockedRackApp)
     request   = WebMock::RequestSignature.new(:get, 'www.example.com/locked')
     response  = @locked_rack_response.evaluate(request)
     response2 = @locked_rack_response.evaluate(request)
@@ -55,6 +50,13 @@ describe WebMock::RackResponse do
   end
 
   describe 'basic auth request' do
+    before :each do
+      @rack_response_with_basic_auth = WebMock::RackResponse.new(
+        Rack::Auth::Basic.new(MyRackApp) do |username, password|
+          username == 'username' && password == 'password'
+        end
+      )
+    end
     it 'should be failure when wrong credentials' do
       request = WebMock::RequestSignature.new(:get, 'foo:bar@www.example.com')
       response = @rack_response_with_basic_auth.evaluate(request)
