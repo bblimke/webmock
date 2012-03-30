@@ -38,6 +38,8 @@ module WebMock
         'SERVER_NAME'    => uri.host
       }
 
+      env['HTTP_AUTHORIZATION'] = 'Basic ' + [uri.userinfo].pack('m').delete("\r\n") if uri.userinfo
+
       # Rack-specific variables
       env['rack.input']      = StringIO.new(body)
       env['rack.version']    = Rack::VERSION
