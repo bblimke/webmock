@@ -26,6 +26,12 @@ class MyRackApp
       when ['POST', '/greet']
         name = env["rack.input"].read[/name=([^&]*)/, 1] || "World"
         [200, {}, ["Good to meet you, #{name}!"]]
+      when ['GET', '/compute']
+        if env['SERVER_PORT'] == 80
+          [200, {}, [""]]
+        else
+          [401, {}, [""]]
+        end
       else
         [404, {}, ['']]
     end
