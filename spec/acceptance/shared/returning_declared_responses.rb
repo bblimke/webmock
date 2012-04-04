@@ -238,12 +238,14 @@ shared_context "declared responses" do |*adapter_info|
     end
 
     describe "when response is declared as an Rack app" do
-      before(:each) do
+      it "should return response returned by the rack app" do
         stub_request(:any, "http://www.example.com/greet").to_rack(MyRackApp)
+        http_request(:post, 'http://www.example.com/greet', :body => 'name=Jimmy').body.should == 'Good to meet you, Jimmy!'
       end
 
-      it "should return response returned by the rack app" do
-        http_request(:post, 'http://www.example.com/greet', :body => 'name=Jimmy').body.should == 'Good to meet you, Jimmy!'
+      it "should pass along the port number to the rack app" do
+        stub_request(:get, "http://www.example.com/compute").to_rack(MyRackApp)
+        http_request(:get, "http://www.example.com/compute").status.should == "200"
       end
     end
 
