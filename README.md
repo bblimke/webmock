@@ -703,6 +703,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Joe Karayusuf
 * Paul Cortens
 * jugyo
+* aindustries
+* Eric Oestrich
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.6
+
+* Pass through SERVER_PORT when stubbing to rack
+
+    Thanks to [Eric Oestrich](https://github.com/oestrich)
+
+* Fixed problem with missing parenthesis in `WebMock#net_connect_allowed?` conditions.
+
+    Thanks to [aindustries](https://github.com/aindustries)
+
 ## 1.8.5
 
 * WebMock::RackResponse supports basic auth
