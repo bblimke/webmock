@@ -57,12 +57,20 @@ module WebMock
     if uri.is_a?(String)
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
+
     Config.instance.allow_net_connect ||
-      (Config.instance.allow_localhost && WebMock::Util::URI.is_uri_localhost?(uri)) ||
-      Config.instance.allow && (
-        (Config.instance.allow.kind_of?(Regexp) && uri.to_s =~ Config.instance.allow) ||
-        (Config.instance.allow.respond_to?(:include?) &&
-         Config.instance.allow.include?(uri.host) || Config.instance.allow.include?("#{uri.host}:#{uri.port}")))
+    (
+    Config.instance.allow_localhost && WebMock::Util::URI.is_uri_localhost?(uri)) ||
+    Config.instance.allow && (
+      (Config.instance.allow.kind_of?(Regexp) && uri.to_s =~ Config.instance.allow) ||
+      (
+        Config.instance.allow.respond_to?(:include?) &&
+        (
+          Config.instance.allow.include?(uri.host) ||
+          Config.instance.allow.include?("#{uri.host}:#{uri.port}")
+        )
+      )
+    )
   end
 
   def self.reset!
@@ -105,10 +113,10 @@ module WebMock
     registered_request?
   ).each do |method|
     self.class_eval(%Q(
-      def #{method}(*args, &block)
-        WebMock::Deprecation.warning("WebMock##{method} instance method is deprecated. Please use WebMock.#{method} class method instead")
-        WebMock.#{method}(*args, &block)
-      end
+                      def #{method}(*args, &block)
+                        WebMock::Deprecation.warning("WebMock##{method} instance method is deprecated. Please use WebMock.#{method} class method instead")
+                        WebMock.#{method}(*args, &block)
+                          end
     ))
   end
 
