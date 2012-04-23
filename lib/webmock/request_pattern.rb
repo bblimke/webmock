@@ -83,6 +83,7 @@ module WebMock
 
     def initialize(pattern)
       @pattern = pattern.is_a?(Addressable::URI) ? pattern : WebMock::Util::URI.normalize_uri(pattern)
+      @query_params = nil
     end
 
     def add_query_params(query_params)
@@ -105,11 +106,6 @@ module WebMock
   end
 
   class URIRegexpPattern  < URIPattern
-    def initialize *args, &block
-      @query_params = nil
-      super
-    end
-
     def matches?(uri)
       WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
         (@query_params.nil? || @query_params == uri.query_values)
