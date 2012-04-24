@@ -27,7 +27,7 @@ class MyRackApp
         name = env["rack.input"].read[/name=([^&]*)/, 1] || "World"
         [200, {}, ["Good to meet you, #{name}!"]]
       when ['GET', '/compute']
-        if env['SERVER_PORT'] == 80
+        if env['SERVER_PORT'] == 80 && env["SCRIPT_NAME"] == ""
           [200, {}, [""]]
         else
           [401, {}, [""]]
