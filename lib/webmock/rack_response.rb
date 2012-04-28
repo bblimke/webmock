@@ -36,7 +36,8 @@ module WebMock
         'PATH_INFO'      => uri.path,
         'QUERY_STRING'   => uri.query || '',
         'SERVER_NAME'    => uri.host,
-        'SERVER_PORT'    => uri.port
+        'SERVER_PORT'    => uri.port,
+        'SCRIPT_NAME'    => ""
       }
 
       env['HTTP_AUTHORIZATION'] = 'Basic ' + [uri.userinfo].pack('m').delete("\r\n") if uri.userinfo
