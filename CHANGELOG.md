@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.8.7
+
+* Compatibility with RSpec >= 2.10
+
+    Thanks to [erwanlr](https://github.com/erwanlr) for reporting this issue.
+
+* Add missing required rack environment variable SCRIPT_NAME
+
+    Thanks to [Eric Oestrich](https://github.com/oestrich)
+
+* Fixed warnings due to @query_params not being initialized
+
+    Thanks to [Ben Bleything](https://github.com/bleything)
+
 ## 1.8.6
 
 * Pass through SERVER_PORT when stubbing to rack
