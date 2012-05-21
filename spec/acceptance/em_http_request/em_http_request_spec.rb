@@ -141,26 +141,41 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     describe "mocking EM::HttpClient API" do
+      let(:uri) { "http://www.example.com/" }
+
       before do
-        stub_request(:get, "www.example.com/")
+        stub_request(:get, uri)
         WebMock::HttpLibAdapters::EmHttpRequestAdapter.enable!
       end
-      subject do
+
+      def client(uri, options = {})
         client = nil
         EM.run do
-          client = EventMachine::HttpRequest.new('http://www.example.com/').get
+          client = EventMachine::HttpRequest.new(uri).get(options)
           client.callback { EM.stop }
           client.errback { failed }
         end
         client
       end
 
+      subject { client(uri) }
+
       it 'should support #uri' do
-        subject.uri.should == Addressable::URI.parse('http://www.example.com/')
+        subject.uri.should == Addressable::URI.parse(uri)
       end
 
       it 'should support #last_effective_url' do
-        subject.last_effective_url.should == Addressable::URI.parse('http://www.example.com/')
+        subject.last_effective_url.should == Addressable::URI.parse(uri)
+      end
+
+      context "with a query" do
+        let(:uri) { "http://www.example.com/?a=1&b=2" }
+        subject { client("http://www.example.com/?a=1", :query => { 'b' => 2 }) }
+
+        it "#request_signature doesn't mutate the original uri" do
+          subject.uri.should == Addressable::URI.parse("http://www.example.com/?a=1")
+          subject.request_signature.uri.should == Addressable::URI.parse(uri)
+        end
       end
     end
 
