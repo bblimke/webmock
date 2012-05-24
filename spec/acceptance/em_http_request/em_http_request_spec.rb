@@ -11,6 +11,39 @@ unless RUBY_PLATFORM =~ /java/
 
     include_context "with WebMock", :no_status_message
 
+    context 'when a real request is made and redirects are followed' do
+      before { WebMock.allow_net_connect! }
+
+      # This url redirects to the https URL.
+      let(:http_url) { "http://raw.github.com:80/gist/fb555cb593f3349d53af/6921dd638337d3f6a51b0e02e7f30e3c414f70d6/vcr_gist" }
+      let(:https_url) { http_url.gsub('http', 'https').gsub('80', '443') }
+
+      def make_request
+        EM.run do
+          request = EM::HttpRequest.new(http_url).get(:redirects => 1)
+          request.callback { EM.stop }
+        end
+      end
+
+      it "invokes the globally_stub_request hook with both requests" do
+        urls = []
+        WebMock.globally_stub_request { |r| urls << r.uri.to_s; nil }
+
+        make_request
+
+        urls.should eq([http_url, https_url])
+      end
+
+      it 'invokes the after_request hook with both requests' do
+        urls = []
+        WebMock.after_request { |r| urls << r.uri.to_s }
+
+        make_request
+
+        urls.should eq([http_url, https_url])
+      end
+    end
+
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)
       describe "with middleware" do
