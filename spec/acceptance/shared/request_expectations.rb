@@ -190,10 +190,10 @@ shared_context "request expectations" do |*adapter_info|
 
       it "should fail if request was executed with different body" do
         lambda {
-          http_request(:get, "http://www.example.com/", :body => "abc")
-          a_request(:get, "www.example.com").
+          http_request(:post, "http://www.example.com/", :body => "abc")
+          a_request(:post, "www.example.com").
           with(:body => "def").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times))
+        }.should fail_with(%r(The request POST http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times))
       end
 
       describe "when expected request body is declared as a regexp" do
@@ -206,10 +206,10 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should fail if request was executed with body not matching regexp" do
           lambda {
-            http_request(:get, "http://www.example.com/", :body => "abc")
-            a_request(:get, "www.example.com").
+            http_request(:post, "http://www.example.com/", :body => "abc")
+            a_request(:post, "www.example.com").
             with(:body => /^xabc/).should have_been_made
-          }.should fail_with(%r(The request GET http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
+          }.should fail_with(%r(The request POST http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
         end
 
       end
@@ -389,11 +389,11 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should satisfy expectation if request was executed with body and headers but they were not specified in expectantion" do
           lambda {
-            http_request(:get, "http://www.example.com/",
+            http_request(:post, "http://www.example.com/",
                          :body => "abc",
                          :headers => SAMPLE_HEADERS
                          )
-            a_request(:get, "www.example.com").should have_been_made
+            a_request(:post, "www.example.com").should have_been_made
           }.should_not raise_error
         end
 
