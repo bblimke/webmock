@@ -156,7 +156,7 @@ if defined?(EventMachine::HttpClient)
 
         method = @req.method
         uri = @req.uri.clone
-        auth = @req.proxy[:authorization] if @req.proxy
+        auth = @req.headers[:'proxy-authorization']
         query = @req.query
 
         if auth
