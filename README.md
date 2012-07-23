@@ -707,6 +707,11 @@ People who submitted patches and new features or suggested improvements. Many th
 * Eric Oestrich
 * erwanlr
 * Ben Bleything
+* Jon Leighton
+* Ryan Schlesinger
+* Julien Boyer
+* Kevin Glowacz
+* Hans Hasselberg
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
