@@ -87,9 +87,10 @@ module WebMock
             end
             response = if (started? && !WebMock::Config.instance.net_http_connect_on_start) || !started?
               @started = false #otherwise start_with_connect wouldn't execute and connect
-              start_with_connect
-              response = request_without_webmock(request, nil)
-              after_request.call(response)
+              start_with_connect {
+                response = request_without_webmock(request, nil)
+                after_request.call(response)
+              }
             else
               response = request_without_webmock(request, nil)
               after_request.call(response)
