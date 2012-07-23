@@ -27,6 +27,7 @@ module WebMock
 
     def matches?(request_signature)
       content_type = request_signature.headers['Content-Type'] if request_signature.headers
+      content_type = content_type.split(';').first if content_type
       @method_pattern.matches?(request_signature.method) &&
         @uri_pattern.matches?(request_signature.uri) &&
         (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, content_type || "")) &&
