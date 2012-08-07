@@ -73,4 +73,31 @@ describe "HTTPClient" do
     end
   end
 
+  context 'when a client instance is re-used for another identical request' do
+    let(:client) { HTTPClient.new }
+    let(:webmock_server_url) {"http://#{WebMockServer.instance.host_with_port}/"}
+
+    before { WebMock.allow_net_connect! }
+
+    it 'invokes the global_stub_request hook for each request' do
+      request_signatures = []
+      WebMock.globally_stub_request do |request_sig|
+        request_signatures << request_sig
+        nil # to let the request be made for real
+      end
+
+      # To make two requests that have the same request signature, the headers must match.
+      # Since the webmock server has a Set-Cookie header, the 2nd request will automatically
+      # include a Cookie header (due to how httpclient works), so we have to set the header
+      # manually on the first request but not on the 2nd request.
+      http_request(:get, webmock_server_url, :client => client,
+                         :headers => { "Cookie" => "bar=; foo=" })
+      http_request(:get, webmock_server_url, :client => client)
+
+      request_signatures.should have(2).signatures
+      # Verify the request signatures were identical as needed by this example
+      request_signatures.first.should eq(request_signatures.last)
+    end
+  end
+
 end
