@@ -5,7 +5,7 @@ module HTTPClientSpecHelper
 
   def http_request(method, uri, options = {}, &block)
     uri = Addressable::URI.heuristic_parse(uri)
-    c = HTTPClient.new
+    c = options.fetch(:client) { HTTPClient.new }
     c.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
     c.set_basic_auth(nil, uri.user, uri.password) if uri.user
     params = [method, "#{uri.omit(:userinfo, :query).normalize.to_s}",

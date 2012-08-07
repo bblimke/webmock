@@ -53,6 +53,9 @@ if defined?(::HTTPClient)
           {:lib => :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
+        # in case there is a nil entry in the hash...
+        webmock_responses.delete(request_signature)
+
         res = if stream
           do_get_stream_without_webmock(req, proxy, conn, &block)
         else
