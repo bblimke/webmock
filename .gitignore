@@ -21,7 +21,7 @@ pkg
 ## PROJECT::SPECIFIC
 *.gem
 .bundle
-Gemfile.lock
+*emfile.lock
 .yardoc
 doc/
 pkg/*

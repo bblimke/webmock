@@ -10,6 +10,7 @@ group :development do
   gem 'guard-rspec', '~> 1.2'
 end
 
-platforms :jruby do
-  gem 'jruby-openssl', '~> 0.7.7'
-end
+# Appraisal does not support platforms.
+#
+# https://github.com/thoughtbot/appraisal/issues/21
+gem 'jruby-openssl', '~> 0.7.7', platform: :jruby

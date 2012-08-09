@@ -14,10 +14,12 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = 'webmock'
 
-  s.add_dependency 'addressable', '~> 2.2.8'
+  s.add_dependency 'addressable', '>= 2.2', '< 2.4'
   s.add_dependency 'crack', '>=0.1.7'
 
   s.add_development_dependency 'rspec',           '~> 2.10'
+  s.add_development_dependency 'appraisal',       '~> 0.4'
+  s.add_development_dependency 'rack',            '~> 1.4'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
   s.add_development_dependency 'patron',          '>= 0.4.18' unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'em-http-request', '>= 1.0.2'

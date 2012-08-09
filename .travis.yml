@@ -7,6 +7,9 @@ rvm:
   - jruby-18mode
   - rbx-18mode
   - rbx-19mode
+gemfile:
+  - gemfiles/addressable-2.2.gemfile
+  - gemfiles/addressable-2.3.gemfile
 matrix:
   allow_failures:
     - rvm: rbx-18mode
