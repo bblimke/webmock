@@ -22,6 +22,8 @@ pkg
 *.gem
 .bundle
 Gemfile.lock
+.yardoc
+doc/
 pkg/*
 tmp/*
 *.rbc
