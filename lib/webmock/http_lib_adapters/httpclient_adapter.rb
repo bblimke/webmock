@@ -28,16 +28,18 @@ if defined?(::HTTPClient)
 
 
   class WebMockHTTPClient < HTTPClient
+    alias_method :do_get_block_without_webmock, :do_get_block
+    alias_method :do_get_stream_without_webmock, :do_get_stream
 
-    def do_get_block_with_webmock(req, proxy, conn, &block)
-      do_get_with_webmock(req, proxy, conn, false, &block)
+    def do_get_block(req, proxy, conn, &block)
+      do_get(req, proxy, conn, false, &block)
     end
 
-    def do_get_stream_with_webmock(req, proxy, conn, &block)
-      do_get_with_webmock(req, proxy, conn, true, &block)
+    def do_get_stream(req, proxy, conn, &block)
+      do_get(req, proxy, conn, true, &block)
     end
 
-    def do_get_with_webmock(req, proxy, conn, stream = false, &block)
+    def do_get(req, proxy, conn, stream = false, &block)
       request_signature = build_request_signature(req, :reuse_existing)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -72,26 +74,17 @@ if defined?(::HTTPClient)
       end
     end
 
-    def do_request_async_with_webmock(method, uri, query, body, extheader)
+    def do_request_async(method, uri, query, body, extheader)
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
       webmock_request_signatures << request_signature
 
       if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
-        do_request_async_without_webmock(method, uri, query, body, extheader)
+        super
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
-
-    alias_method :do_get_block_without_webmock, :do_get_block
-    alias_method :do_get_block, :do_get_block_with_webmock
-
-    alias_method :do_get_stream_without_webmock, :do_get_stream
-    alias_method :do_get_stream, :do_get_stream_with_webmock
-
-    alias_method :do_request_async_without_webmock, :do_request_async
-    alias_method :do_request_async, :do_request_async_with_webmock
 
     def build_httpclient_response(webmock_response, stream = false, &block)
       body = stream ? StringIO.new(webmock_response.body) : webmock_response.body
