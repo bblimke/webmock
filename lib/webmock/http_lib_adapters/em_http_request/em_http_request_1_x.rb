@@ -48,7 +48,7 @@ if defined?(EventMachine::HttpClient)
     end
 
     class WebMockHttpConnection < HttpConnection
-      def webmock_activate_connection(client)
+      def activate_connection(client)
         request_signature = client.request_signature
 
         if client.stubbed_webmock_response
@@ -65,13 +65,11 @@ if defined?(EventMachine::HttpClient)
           finalize_request(client)
           @conn.set_deferred_status :succeeded
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          real_activate_connection(client)
+          super
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
-      alias_method :real_activate_connection, :activate_connection
-      alias_method :activate_connection, :webmock_activate_connection
     end
 
     class WebMockHttpClient < EventMachine::HttpClient
@@ -92,7 +90,7 @@ if defined?(EventMachine::HttpClient)
         end
       end
 
-      def send_request_with_webmock(head, body)
+      def send_request(head, body)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if stubbed_webmock_response
@@ -104,14 +102,11 @@ if defined?(EventMachine::HttpClient)
           }
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          send_request_without_webmock(head, body)
+          super
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
-
-      alias_method :send_request_without_webmock, :send_request
-      alias_method :send_request, :send_request_with_webmock
 
       def set_deferred_status(status, *args)
         if status == :succeeded && !stubbed_webmock_response && WebMock::CallbackRegistry.any_callbacks?
