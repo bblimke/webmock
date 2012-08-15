@@ -95,7 +95,7 @@ module WebMock
       elsif rSpecHashIncludingMatcher?(query_params)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
       else
-        Addressable::URI.parse('?' + query_params).query_values
+        WebMock::Util::QueryMapper.query_to_values(query_params)
       end
     end
 
@@ -109,7 +109,7 @@ module WebMock
   class URIRegexpPattern  < URIPattern
     def matches?(uri)
       WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
-        (@query_params.nil? || @query_params == uri.query_values)
+        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
     end
 
     def to_s
@@ -123,7 +123,8 @@ module WebMock
     def matches?(uri)
       if @pattern.is_a?(Addressable::URI)
         if @query_params
-          uri.omit(:query) === @pattern && (@query_params.nil? || @query_params == uri.query_values)
+          uri.omit(:query) === @pattern &&
+          (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
         else
           uri === @pattern
         end
@@ -135,7 +136,8 @@ module WebMock
     def add_query_params(query_params)
       super
       if @query_params.is_a?(Hash) || @query_params.is_a?(String)
-        @pattern.query_values = (@pattern.query_values || {}).merge(@query_params)
+        query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query) || {}).merge(@query_params)
+        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash)
         @query_params = nil
       end
     end
@@ -199,7 +201,7 @@ module WebMock
       when :xml then
         Crack::XML.parse(body)
       else
-        Addressable::URI.parse('?' + body).query_values
+        WebMock::Util::QueryMapper.query_to_values(body)
       end
     end
 

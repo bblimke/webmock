@@ -81,7 +81,7 @@ module WebMock
 
       if signature.body.to_s != ''
         body = if signature.url_encoded?
-          Addressable::URI.parse('?' + signature.body).query_values
+          WebMock::Util::QueryMapper.query_to_values(signature.body)
         else
           signature.body
         end

@@ -8,6 +8,7 @@ require 'webmock/version'
 
 require 'webmock/errors'
 
+require 'webmock/util/query_mapper'
 require 'webmock/util/uri'
 require 'webmock/util/headers'
 require 'webmock/util/hash_counter'
