@@ -38,19 +38,21 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
-        it "should work with response middleware" do
-          stub_request(:get, "www.example.com").to_return(:body => 'foo')
-
-          middleware = Class.new do
+        let(:response_middleware) do
+          Class.new do
             def response(resp)
               resp.response = 'bar'
             end
           end
+        end
+
+        it "should work with response middleware" do
+          stub_request(:get, "www.example.com").to_return(:body => 'foo')
 
           EM.run do
             conn = EventMachine::HttpRequest.new('http://www.example.com/')
 
-            conn.use middleware
+            conn.use response_middleware
 
             http = conn.get
 
@@ -59,6 +61,36 @@ unless RUBY_PLATFORM =~ /java/
               EM.stop
             end
           end
+        end
+
+        let(:webmock_server_url) { "http://#{WebMockServer.instance.host_with_port}/" }
+
+        shared_examples_for "em-http-request middleware/after_request hook integration" do
+          it 'yields the original raw body to the after_request hook even if a response middleware modifies the body' do
+            yielded_response_body = nil
+            ::WebMock.after_request do |request, response|
+              yielded_response_body = response.body
+            end
+
+            EM::HttpRequest.use response_middleware
+
+            EM.run do
+              http = EventMachine::HttpRequest.new(webmock_server_url).get
+              http.callback { EM.stop }
+            end
+
+            yielded_response_body.should eq("hello world")
+          end
+        end
+
+        context 'making a real request' do
+          before { WebMock.allow_net_connect! }
+          include_examples "em-http-request middleware/after_request hook integration"
+        end
+
+        context 'when the request is stubbed' do
+          before { stub_request(:get, webmock_server_url).to_return(:body => 'hello world') }
+          include_examples "em-http-request middleware/after_request hook integration"
         end
       end
 
