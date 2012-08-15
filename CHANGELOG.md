@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.8.9
+
+* Fixed problem with caching nil responses when the same HTTPClient instance is used.
+
+    Thanks to [Myron Marston](https://github.com/myronmarston)
+
+* Added support for Addressable >= 2.3.0. Addressable 2.3.0 removed support for multiple query value notations and broke backwards compatibility.
+
+    https://github.com/sporkmonger/addressable/commit/f51e290b5f68a98293327a7da84eb9e2d5f21c62
+    https://github.com/sporkmonger/addressable/issues/77
+
+
 ## 1.8.8
 
 * Fixed Net::HTTP adapter so that it returns `nil` for an empty body response.

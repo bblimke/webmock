@@ -712,6 +712,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Julien Boyer
 * Kevin Glowacz
 * Hans Hasselberg
+* Andrew France
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
