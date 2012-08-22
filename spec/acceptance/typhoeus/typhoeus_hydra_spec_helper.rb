@@ -25,7 +25,7 @@ module TyphoeusHydraSpecHelper
     raise FakeTyphoeusHydraConnectError.new if response.code == 0
     OpenStruct.new({
       :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers_hash)),
+      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.header)),
       :status => response.code.to_s,
       :message => response.status_message
     })
