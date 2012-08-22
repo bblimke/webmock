@@ -15,9 +15,11 @@ module TyphoeusHydraSpecHelper
         :timeout => 25000
       }
     )
-    hydra = Typhoeus::Hydra.new(:initial_pool_size => 0)
-    hydra.queue(request)
-    hydra.run
+    Typhoeus.with_connection {
+      hydra = Typhoeus::Hydra.new
+      hydra.queue(request)
+      hydra.run
+    }
     response = request.response
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
     raise FakeTyphoeusHydraConnectError.new if response.code == 0
