@@ -15,13 +15,13 @@ if defined?(Typhoeus)
         def self.enable!
           @disabled = false
           add_after_request_callback
-          ::Typhoeus::Hydra.allow_net_connect = true
+          ::Typhoeus::Config.block_connection = true
         end
 
         def self.disable!
           @disabled = true
           remove_after_request_callback
-          ::Typhoeus::Hydra.allow_net_connect = true
+          ::Typhoeus::Config.block_connection = false
         end
 
         def self.disabled?
