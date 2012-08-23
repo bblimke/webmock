@@ -47,10 +47,6 @@ if defined?(Typhoeus)
 
           body = req.options[:body]
 
-          if req.params && req.method == :post
-            body = request_body_for_post_request_with_params(req)
-          end
-
           request_signature = WebMock::RequestSignature.new(
             req.options[:method],
             uri.to_s,
