@@ -29,17 +29,13 @@ if defined?(Typhoeus)
         end
 
         def self.add_after_request_callback
-          unless Typhoeus::Hydra.
-            global_hooks[:after_request_before_on_complete].
-              include?(AFTER_REQUEST_CALLBACK)
-            Typhoeus::Hydra.
-              global_hooks[:after_request_before_on_complete] << AFTER_REQUEST_CALLBACK
+          unless Typhoeus.on_complete.include?(AFTER_REQUEST_CALLBACK)
+            Typhoeus.on_complete << AFTER_REQUEST_CALLBACK
           end
         end
 
         def self.remove_after_request_callback
-          Typhoeus::Hydra.global_hooks[:after_request_before_on_complete].
-            delete_if {|v| v == AFTER_REQUEST_CALLBACK }
+          Typhoeus.on_complete.delete_if {|v| v == AFTER_REQUEST_CALLBACK }
         end
 
         def self.build_request_signature(req)
@@ -118,12 +114,13 @@ if defined?(Typhoeus)
           hash
         end
 
-        AFTER_REQUEST_CALLBACK = Proc.new do |request|
+        AFTER_REQUEST_CALLBACK = Proc.new do |response|
+          request = response.request
           request_signature = request.instance_variable_get(:@__webmock_request_signature)
           webmock_response =
             ::WebMock::HttpLibAdapters::TyphoeusAdapter.
-              build_webmock_response(request.response)
-          if request.response.mock?
+              build_webmock_response(response)
+          if response.mock
             WebMock::CallbackRegistry.invoke_callbacks(
               {:lib => :typhoeus},
               request_signature,
