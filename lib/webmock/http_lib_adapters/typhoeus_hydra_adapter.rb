@@ -96,12 +96,10 @@ if defined?(Typhoeus)
             )
           end
 
-
-          typhoeus.stub(
-            request_signature.method || :any,
-            /.*/,
-            :webmock_stub => true
-          ).and_return(response)
+          Typhoeus.stub(
+            nil,
+            :method => request_signature.method,
+          ).stubbed_from(:webmock).and_return(response)
         end
 
         def self.request_hash(request_signature)
@@ -166,9 +164,8 @@ if defined?(Typhoeus)
       alias_method :queue, :queue_with_webmock
 
       def clear_webmock_stubs
-        self.stubs = [] unless self.stubs
-        self.stubs.delete_if {|s|
-          s.instance_variable_get(:@options)[:webmock_stub]
+        Typhoeus::Expectation.all.delete_if {|e|
+          e.from == :webmock
         }
       end
     end
