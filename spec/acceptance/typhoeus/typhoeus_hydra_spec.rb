@@ -6,6 +6,11 @@ unless RUBY_PLATFORM =~ /java/
 
   describe "Typhoeus::Hydra" do
     include TyphoeusHydraSpecHelper
+    let(:hydra) { Typhoeus::Hydra.new }
+
+    before do
+      Typhoeus::Expectation.clear
+    end
 
     include_context "with WebMock"
 
