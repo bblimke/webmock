@@ -41,22 +41,21 @@ if defined?(Typhoeus)
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
-          if req.username
-            uri.user = req.username
-            uri.password = req.password
+          if req.options[:userpwd]
+            uri.user, uri.password = req.options[:userpwd].split(':')
           end
 
-          body = req.body
+          body = req.options[:body]
 
           if req.params && req.method == :post
             body = request_body_for_post_request_with_params(req)
           end
 
           request_signature = WebMock::RequestSignature.new(
-            req.method,
+            req.options[:method],
             uri.to_s,
             :body => body,
-            :headers => req.headers
+            :headers => req.options[:headers]
           )
 
           req.instance_variable_set(:@__webmock_request_signature, request_signature)
@@ -75,7 +74,7 @@ if defined?(Typhoeus)
           webmock_response = WebMock::Response.new
           webmock_response.status = [typhoeus_response.code, typhoeus_response.status_message]
           webmock_response.body = typhoeus_response.body
-          webmock_response.headers = typhoeus_response.headers_hash
+          webmock_response.headers = typhoeus_response.header
           webmock_response
         end
 
@@ -85,15 +84,15 @@ if defined?(Typhoeus)
               :code         => 0,
               :status_message => "",
               :body         => "",
-              :headers_hash => {},
-              :curl_return_code => 28
+              :header => {},
+              :return_code => 28
             )
           else
             ::Typhoeus::Response.new(
               :code         => webmock_response.status[0],
               :status_message => webmock_response.status[1],
               :body         => webmock_response.body,
-              :headers_hash => webmock_response.headers
+              :header => webmock_response.headers
             )
           end
 
