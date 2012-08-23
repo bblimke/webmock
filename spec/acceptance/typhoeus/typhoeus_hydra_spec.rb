@@ -22,13 +22,17 @@ unless RUBY_PLATFORM =~ /java/
 
       describe "when params are used" do
         it "should take into account params for POST request" do
-          stub_request(:post, "www.example.com").with(:body => {:hello => 'world'})
-          Typhoeus::Request.post("www.example.com", :params => {:hello => 'world'})
+          stub_request(:post, "www.example.com").with(:params => {:hello => 'world'})
+          request = Typhoeus::Request.new("http://www.example.com", :method => :post, :params => {:hello => 'world'})
+          hydra.queue(request)
+          hydra.run
         end
 
         it "should take into account params for GET request" do
-          stub_request(:get, "http://www.example.com/?hello=world")
-          Typhoeus::Request.get("www.example.com", :params => {:hello => 'world'})
+          stub_request(:get, "http://www.example.com/?hello=world").to_return({})
+          request = Typhoeus::Request.new("http://www.example.com/?hello=world", :method => :get)
+          hydra.queue(request)
+          hydra.run
         end
       end
 
@@ -36,15 +40,16 @@ unless RUBY_PLATFORM =~ /java/
         it "should support native typhoeus timeouts" do
           stub_request(:any, "example.com").to_timeout
 
-          response = Typhoeus::Request.get("http://example.com")
+          request = Typhoeus::Request.new("http://example.com", :method => :get)
+          hydra.queue(request)
+          hydra.run
 
-          response.should be_timed_out
+          request.response.should be_timed_out
         end
       end
 
       describe "callbacks" do
         before(:each) do
-          @hydra = Typhoeus::Hydra.new
           @request = Typhoeus::Request.new("http://example.com")
         end
 
@@ -53,11 +58,11 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, "example.com").to_return(:body => body)
 
           test = nil
-          @hydra.on_complete do |c|
+          Typhoeus.on_complete do |c|
             test = c.body
           end
-          @hydra.queue @request
-          @hydra.run
+          hydra.queue @request
+          hydra.run
           test.should == body
         end
 
@@ -66,11 +71,11 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, "example.com").to_return(:status => [response_code, "Server On Fire"])
 
           test = nil
-          @hydra.on_complete do |c|
+          Typhoeus.on_complete do |c|
             test = c.code
           end
-          @hydra.queue @request
-          @hydra.run
+          hydra.queue @request
+          hydra.run
           test.should == response_code
         end
       end
