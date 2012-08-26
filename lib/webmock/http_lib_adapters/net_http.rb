@@ -28,6 +28,14 @@ module WebMock
         Net.send(:const_set, :HTTP, OriginalNetHTTP)
         Net.send(:const_set, :HTTPSession, OriginalNetHTTP)
         Net.send(:const_set, :BufferedIO, OriginalNetBufferedIO)
+
+        #copy all constants from @webMockNetHTTP to original Net::HTTP
+        #in case any constants were added to @webMockNetHTTP instead of Net::HTTP
+        #after WebMock was enabled.
+        #i.e Net::HTTP::DigestAuth
+        (@webMockNetHTTP.constants - OriginalNetHTTP.constants).each do |constant|
+          OriginalNetHTTP.send(:const_set, constant, @webMockNetHTTP.const_get(constant))
+        end
       end
 
       @webMockNetHTTP = Class.new(Net::HTTP) do

@@ -86,6 +86,19 @@ describe "Net:HTTP" do
         Object.const_get("Net").const_get("HTTP").constants(false).map(&:to_s).should include("Get")
       end
     end
+
+    describe "after WebMock is disabled" do
+      after(:each) do
+        WebMock.enable!
+      end
+      it "Net::HTTP should have the same constants" do
+        orig_consts_number = Net::HTTP.constants.size
+        Net::HTTP.send(:const_set, "TEST_CONST", 10)
+        Net::HTTP.constants.size.should == orig_consts_number + 1
+        WebMock.disable!
+        Net::HTTP.constants.size.should == orig_consts_number + 1
+      end
+    end
   end
 
   it "should work with block provided" do
