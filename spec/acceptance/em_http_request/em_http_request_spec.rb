@@ -36,7 +36,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it 'invokes the after_request hook with both requests' do
         urls = []
-        WebMock.after_request { |r| urls << r.uri.to_s }
+        WebMock.after_request { |req, res| urls << req.uri.to_s }
 
         make_request
 
