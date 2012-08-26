@@ -13,7 +13,7 @@ if defined?(::Patron)
         OriginalPatronSession = ::Patron::Session unless const_defined?(:OriginalPatronSession)
 
         class WebMockPatronSession < ::Patron::Session
-          def handle_request_with_webmock(req)
+          def handle_request(req)
             request_signature =
               WebMock::HttpLibAdapters::PatronAdapter.build_request_signature(req)
 
@@ -28,7 +28,7 @@ if defined?(::Patron)
                 {:lib => :patron}, request_signature, webmock_response)
               res
             elsif WebMock.net_connect_allowed?(request_signature.uri)
-              res = handle_request_without_webmock(req)
+              res = super
               if WebMock::CallbackRegistry.any_callbacks?
                 webmock_response = WebMock::HttpLibAdapters::PatronAdapter.
                   build_webmock_response(res)
@@ -41,9 +41,6 @@ if defined?(::Patron)
               raise WebMock::NetConnectNotAllowedError.new(request_signature)
             end
           end
-
-          alias_method :handle_request_without_webmock, :handle_request
-          alias_method :handle_request, :handle_request_with_webmock
         end
 
         def self.enable!

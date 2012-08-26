@@ -1,23 +1,22 @@
-module Addressable
-  class URI
-    module CharacterClasses
-      USERINFO = UNRESERVED + SUB_DELIMS + "\\:"
-    end
-  end
-end
-
 module WebMock
 
   module Util
 
     class URI
+      module CharacterClasses
+        USERINFO = Addressable::URI::CharacterClasses::UNRESERVED + Addressable::URI::CharacterClasses::SUB_DELIMS + "\\:"
+      end
+
       ADDRESSABLE_URIS = Hash.new do |hash, key|
         hash[key] = Addressable::URI.heuristic_parse(key)
       end
 
       NORMALIZED_URIS = Hash.new do |hash, uri|
         normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
-        normalized_uri.query_values = sort_query_values(normalized_uri.query_values) if normalized_uri.query_values
+        if normalized_uri.query_values
+          sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query) || {})
+          normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values)
+        end
         normalized_uri = normalized_uri.normalize #normalize! is slower
         normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
         hash[uri] = normalized_uri
@@ -63,7 +62,7 @@ module WebMock
       end
 
       def self.encode_unsafe_chars_in_userinfo(userinfo)
-        Addressable::URI.encode_component(userinfo, Addressable::URI::CharacterClasses::USERINFO)
+        Addressable::URI.encode_component(userinfo, WebMock::Util::URI::CharacterClasses::USERINFO)
       end
 
       def self.is_uri_localhost?(uri)

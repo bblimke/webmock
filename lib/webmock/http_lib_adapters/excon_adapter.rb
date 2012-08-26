@@ -42,7 +42,7 @@ if defined?(Excon)
           params = params.dup
           method  = (params.delete(:method) || :get).to_s.downcase.to_sym
           params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
-          uri     = Addressable::URI.new(params).to_s
+          uri = Addressable::URI.new(params).to_s
           WebMock::RequestSignature.new method, uri, :body => params[:body], :headers => params[:headers]
         end
 

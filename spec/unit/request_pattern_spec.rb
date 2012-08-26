@@ -358,6 +358,13 @@ describe WebMock::RequestPattern do
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
                                                              :headers => {:content_type => 'application/xml'}, :body => "foo bar"))
               end
+
+          it "matches when the content type include a charset" do
+            WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash).
+              should match(WebMock::RequestSignature.new(:post, "www.example.com", :headers => {:content_type => 'application/xml;charset=UTF-8'},
+                                                         :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n"))
+
+          end
         end
       end
 

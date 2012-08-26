@@ -170,117 +170,83 @@ if defined?(Curl)
       ### Mocks of Curl::Easy methods below here.
       ###
 
-      def http_with_webmock(method)
+      def http(method)
         @webmock_method = method
-          http_without_webmock(method)
+        super
       end
-      alias_method :http_without_webmock, :http
-      alias_method :http, :http_with_webmock
 
       %w[ get head delete ].each do |verb|
-        define_method "http_#{verb}_with_webmock" do
+        define_method "http_#{verb}" do
           @webmock_method = verb
-          send( "http_#{verb}_without_webmock" )
+          super()
         end
-
-        alias_method "http_#{verb}_without_webmock", "http_#{verb}"
-        alias_method "http_#{verb}", "http_#{verb}_with_webmock"
       end
 
-      def http_put_with_webmock data = nil
+      def http_put data = nil
         @webmock_method = :put
         @put_data = data if data
-        http_put_without_webmock(data)
+        super
       end
-      alias_method :http_put_without_webmock, :http_put
-      alias_method :http_put, :http_put_with_webmock
 
-      def http_post_with_webmock *data
+      def http_post *data
         @webmock_method = :post
         @post_body = data.join('&') if data && !data.empty?
-        http_post_without_webmock(*data)
+        super
       end
-      alias_method :http_post_without_webmock, :http_post
-      alias_method :http_post, :http_post_with_webmock
 
-
-      def perform_with_webmock
+      def perform
         @webmock_method ||= :get
-        curb_or_webmock do
-          perform_without_webmock
-        end
+        curb_or_webmock { super }
       end
-      alias :perform_without_webmock :perform
-      alias :perform :perform_with_webmock
 
-      def put_data_with_webmock= data
+      def put_data= data
         @webmock_method = :put
         @put_data = data
-        self.put_data_without_webmock = data
+        super
       end
-      alias_method :put_data_without_webmock=, :put_data=
-      alias_method :put_data=, :put_data_with_webmock=
 
-      def post_body_with_webmock= data
+      def post_body= data
         @webmock_method = :post
-        self.post_body_without_webmock = data
+        super
       end
-      alias_method :post_body_without_webmock=, :post_body=
-      alias_method :post_body=, :post_body_with_webmock=
 
-      def delete_with_webmock= value
+      def delete= value
         @webmock_method = :delete if value
-        self.delete_without_webmock = value
+        super
       end
-      alias_method :delete_without_webmock=, :delete=
-      alias_method :delete=, :delete_with_webmock=
 
-      def head_with_webmock= value
+      def head= value
         @webmock_method = :head if value
-        self.head_without_webmock = value
+        super
       end
-      alias_method :head_without_webmock=, :head=
-      alias_method :head=, :head_with_webmock=
 
-      def body_str_with_webmock
-        @body_str || body_str_without_webmock
+      def body_str
+        @body_str || super
       end
-      alias :body_str_without_webmock :body_str
-      alias :body_str :body_str_with_webmock
 
-      def response_code_with_webmock
-        @response_code || response_code_without_webmock
+      def response_code
+        @response_code || super
       end
-      alias :response_code_without_webmock :response_code
-      alias :response_code :response_code_with_webmock
 
-      def header_str_with_webmock
-        @header_str || header_str_without_webmock
+      def header_str
+        @header_str || super
       end
-      alias :header_str_without_webmock :header_str
-      alias :header_str :header_str_with_webmock
 
-      def last_effective_url_with_webmock
-        @last_effective_url || last_effective_url_without_webmock
+      def last_effective_url
+        @last_effective_url || super
       end
-      alias :last_effective_url_without_webmock :last_effective_url
-      alias :last_effective_url :last_effective_url_with_webmock
 
-      def content_type_with_webmock
-        @content_type || content_type_without_webmock
+      def content_type
+        @content_type || super
       end
-      alias :content_type_without_webmock :content_type
-      alias :content_type :content_type_with_webmock
 
       %w[ success failure header body complete progress ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
-          def on_#{callback}_with_webmock &block
+          def on_#{callback} &block
             @on_#{callback} = block
-            on_#{callback}_without_webmock &block
+            super
           end
         METHOD
-        alias_method "on_#{callback}_without_webmock", "on_#{callback}"
-        alias_method "on_#{callback}", "on_#{callback}_with_webmock"
       end
     end
   end

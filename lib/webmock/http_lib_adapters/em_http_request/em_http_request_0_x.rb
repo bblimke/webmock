@@ -47,7 +47,7 @@ if defined?(EventMachine::HttpRequest)
         end
       end
 
-      def send_request_with_webmock(&block)
+      def send_request(&block)
         request_signature = build_request_signature
 
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -61,7 +61,7 @@ if defined?(EventMachine::HttpRequest)
             webmock_response.should_timeout ? "WebMock timeout error" : nil)
           client
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          http = send_request_without_webmock(&block)
+          http = super
           http.callback {
             if WebMock::CallbackRegistry.any_callbacks?
               webmock_response = build_webmock_response(http)
@@ -75,10 +75,6 @@ if defined?(EventMachine::HttpRequest)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
-
-      alias_method :send_request_without_webmock, :send_request
-      alias_method :send_request, :send_request_with_webmock
-
 
       private
 

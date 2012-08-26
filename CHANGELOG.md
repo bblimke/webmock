@@ -1,5 +1,50 @@
 # Changelog
 
+## 1.8.9
+
+* Fixed problem with caching nil responses when the same HTTPClient instance is used.
+
+    Thanks to [Myron Marston](https://github.com/myronmarston)
+
+* Added support for Addressable >= 2.3.0. Addressable 2.3.0 removed support for multiple query value notations and broke backwards compatibility.
+
+    https://github.com/sporkmonger/addressable/commit/f51e290b5f68a98293327a7da84eb9e2d5f21c62
+    https://github.com/sporkmonger/addressable/issues/77
+
+
+## 1.8.8
+
+* Fixed Net::HTTP adapter so that it returns `nil` for an empty body response.
+
+    Thanks to [Myron Marston](https://github.com/myronmarston)
+
+* Gemspec defines compatibility with Addressable ~> 2.2.8, not >= 2.3.0
+
+* Specs compatibility with Typhoeus 0.4.0
+
+    Thanks to [Hans Hasselberg](https://github.com/i0rek)
+
+* Handling content types that specify a charset
+
+    Thanks to [Kevin Glowacz](https://github.com/kjg)
+
+* Fixed em-http-request adapter to correctly fetch authorization header from a request
+
+    Thanks to [Julien Boyer](https://github.com/chatgris)
+
+* Fixing travis-ci image to report master's status
+
+    Thanks to [Ryan Schlesinger](https://github.com/ryansch)
+
+* Fixed problem with em-http-request callback triggering if there were other EM::Deferred callbacks registered
+
+    Thanks to [Jon Leighton](https://github.com/jonleighton)
+
+* Fixed problem with em-http-request appending the query to the URI a second time, and
+the parameters are repeated.
+
+    Thanks to [Jon Leighton](https://github.com/jonleighton)
+
 ## 1.8.7
 
 * Compatibility with RSpec >= 2.10

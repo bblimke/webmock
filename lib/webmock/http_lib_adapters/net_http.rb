@@ -32,11 +32,9 @@ module WebMock
 
       @webMockNetHTTP = Class.new(Net::HTTP) do
         class << self
-          def socket_type_with_webmock
+          def socket_type
             StubSocket
           end
-          alias_method :socket_type_without_webmock, :socket_type
-          alias_method :socket_type, :socket_type_with_webmock
 
           if Module.method(:const_defined?).arity == 1
             def const_defined?(name)
@@ -63,7 +61,7 @@ module WebMock
           end
         end
 
-        def request_with_webmock(request, body = nil, &block)
+        def request(request, body = nil, &block)
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -88,19 +86,17 @@ module WebMock
             response = if (started? && !WebMock::Config.instance.net_http_connect_on_start) || !started?
               @started = false #otherwise start_with_connect wouldn't execute and connect
               start_with_connect {
-                response = request_without_webmock(request, nil)
+                response = super(request, nil, &nil)
                 after_request.call(response)
               }
             else
-              response = request_without_webmock(request, nil)
+              response = super(request, nil, &nil)
               after_request.call(response)
             end
           else
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
         end
-        alias_method :request_without_webmock, :request
-        alias_method :request, :request_with_webmock
 
         def start_without_connect
           raise IOError, 'HTTP session already opened' if @started
@@ -116,19 +112,22 @@ module WebMock
           self
         end
 
-        def start_with_conditional_connect(&block)
+        alias_method :start_with_connect, :start
+
+        def start(&block)
           if WebMock::Config.instance.net_http_connect_on_start
-            start_with_connect(&block)
+            super(&block)
           else
             start_without_connect(&block)
           end
         end
-        alias_method :start_with_connect, :start
-        alias_method :start, :start_with_conditional_connect
 
         def build_net_http_response(webmock_response, &block)
           response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
-          response.instance_variable_set(:@body, webmock_response.body)
+          body = webmock_response.body
+          body = nil if body.to_s == ''
+
+          response.instance_variable_set(:@body, body)
           webmock_response.headers.to_a.each do |name, values|
             values = [values] unless values.is_a?(Array)
             values.each do |value|
@@ -201,7 +200,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize_with_webmock(io, debug_output = nil)
+    def initialize(io, debug_output = nil)
       @read_timeout = 60
       @rbuf = ''
       @debug_output = debug_output
@@ -214,8 +213,6 @@ module Net  #:nodoc: all
       end
       raise "Unable to create local socket" unless @io
     end
-    alias_method :initialize_without_webmock, :initialize
-    alias_method :initialize, :initialize_with_webmock
   end
 
 end

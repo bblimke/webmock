@@ -170,19 +170,19 @@ describe WebMock::Util::URI do
     it "should successfully handle array parameters" do
       uri_string = 'http://www.example.com:80/path?a[]=b&a[]=c'
       uri = WebMock::Util::URI.normalize_uri(uri_string)
-      uri.query_values.should == {"a"=>["b", "c"]}
+      WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"a"=>["b", "c"]}
     end
 
     it "should successfully handle hash parameters" do
       uri_string = 'http://www.example.com:80/path?a[d]=b&a[e]=c&a[b][c]=1'
       uri = WebMock::Util::URI.normalize_uri(uri_string)
-      uri.query_values.should == {"a"=>{"d"=>"b", "e"=>"c", "b"=>{"c"=>"1"}}}
+      WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"a"=>{"d"=>"b", "e"=>"c", "b"=>{"c"=>"1"}}}
     end
 
     it "should successfully handle nested hash parameters" do
       uri_string = 'http://www.example.com:80/path?one[two][three][]=four&one[two][three][]=five'
       uri = WebMock::Util::URI.normalize_uri(uri_string)
-      uri.query_values.should == {"one"=>{"two"=>{"three" => ["four", "five"]}}}
+      WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"one"=>{"two"=>{"three" => ["four", "five"]}}}
     end
   end
 
