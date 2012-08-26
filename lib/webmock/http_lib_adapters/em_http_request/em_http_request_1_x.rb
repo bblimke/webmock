@@ -108,14 +108,16 @@ if defined?(EventMachine::HttpClient)
         end
       end
 
-      def set_deferred_status(status, *args)
-        if status == :succeeded && !stubbed_webmock_response && WebMock::CallbackRegistry.any_callbacks?
+      def unbind(reason = nil)
+        if !stubbed_webmock_response && WebMock::CallbackRegistry.any_callbacks?
           webmock_response = build_webmock_response
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :em_http_request, :real_request => true},
             request_signature,
             webmock_response)
         end
+        @request_signature = nil
+        remove_instance_variable(:@stubbed_webmock_response)
 
         super
       end
