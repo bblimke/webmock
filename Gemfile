@@ -17,5 +17,5 @@ group :test do
 end
 
 platforms :jruby do
-  gem 'jruby-openssl', '~> 0.7.4.0'
+  gem 'jruby-openssl', '~> 0.7.7'
 end

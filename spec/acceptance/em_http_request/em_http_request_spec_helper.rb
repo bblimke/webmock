@@ -49,7 +49,7 @@ module EMHttpRequestSpecHelper
   end
 
   def connection_refused_exception_class
-    ""
+    RuntimeError
   end
 
   def http_library
