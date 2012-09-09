@@ -239,7 +239,8 @@ unless RUBY_PLATFORM =~ /java/
 
         it "#request_signature doesn't mutate the original uri" do
           subject.uri.should == Addressable::URI.parse("http://www.example.com/?a=1")
-          subject.request_signature.uri.should == Addressable::URI.parse(uri)
+          signature = WebMock::RequestRegistry.instance.requested_signatures.hash.keys.first
+          signature.uri.should == Addressable::URI.parse(uri)
         end
       end
     end
