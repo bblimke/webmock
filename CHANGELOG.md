@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8.10
+
+* em-http-request fix. After request callbacks are correctly invoked for 3xx responses,
+  when :redirects option is set.
+
+    Thanks to [Myron Marston](https://github.com/myronmarston) for reporting that issue.
+
+* Fixed compatibility with Net::HTTP::DigestAuth
+
+    Thanks to [Jonathan Hyman](https://github.com/jonhyman) for reporting that issue.
+
+* Fixed problem in em-http-request 0.x appending the query to the client URI twice.
+
+    Thanks to [Paweł Pierzchała](https://github.com/wrozka)
+
 ## 1.8.9
 
 * Fixed problem with caching nil responses when the same HTTPClient instance is used.
