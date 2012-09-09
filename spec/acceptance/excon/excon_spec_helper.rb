@@ -7,7 +7,7 @@ module ExconSpecHelper
     uri      = Addressable::URI.heuristic_parse(uri)
     uri      = uri.omit(:userinfo).to_s.gsub(' ', '+')
 
-    options  = options.merge(:method => method) # Dup and merge
+    options  = options.merge(:method => method, :nonblock => false) # Dup and merge
     response = Excon.new(uri).request(options, &block)
 
     headers  = WebMock::Util::Headers.normalize_headers(response.headers)
