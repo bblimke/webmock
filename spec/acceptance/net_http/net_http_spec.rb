@@ -92,7 +92,7 @@ describe "Net:HTTP" do
         WebMock.enable!
       end
       it "Net::HTTP should have the same constants" do
-        orig_consts_number = Net::HTTP.constants.size
+        orig_consts_number = WebMock::HttpLibAdapters::NetHttpAdapter::OriginalNetHTTP.constants.size
         Net::HTTP.send(:const_set, "TEST_CONST", 10)
         Net::HTTP.constants.size.should == orig_consts_number + 1
         WebMock.disable!

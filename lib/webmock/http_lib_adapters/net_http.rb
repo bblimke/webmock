@@ -33,8 +33,10 @@ module WebMock
         #in case any constants were added to @webMockNetHTTP instead of Net::HTTP
         #after WebMock was enabled.
         #i.e Net::HTTP::DigestAuth
-        (@webMockNetHTTP.constants - OriginalNetHTTP.constants).each do |constant|
-          OriginalNetHTTP.send(:const_set, constant, @webMockNetHTTP.const_get(constant))
+        @webMockNetHTTP.constants.each do |constant|
+          if !OriginalNetHTTP.constants.map(&:to_s).include?(constant.to_s)
+            OriginalNetHTTP.send(:const_set, constant, @webMockNetHTTP.const_get(constant))
+          end
         end
       end
 
@@ -64,7 +66,7 @@ module WebMock
 
           if Module.method(:constants).arity != 0
             def constants(inherit=true)
-              super + self.superclass.constants(inherit)
+              (super + self.superclass.constants(inherit)).uniq
             end
           end
         end
