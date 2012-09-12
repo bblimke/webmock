@@ -72,6 +72,10 @@ module WebMock
       self.request_pattern.matches?(request_signature)
     end
 
+    def ==(another_request_stub)
+      self.to_s == another_request_stub.to_s
+    end
+
     def to_s
       self.request_pattern.to_s
     end

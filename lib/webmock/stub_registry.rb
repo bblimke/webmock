@@ -31,6 +31,10 @@ module WebMock
       global_stubs.push stub
     end
 
+    def unregister_request_stub(stub)
+      self.request_stubs.delete_if { |obj| obj == stub }
+    end
+
     def register_request_stub(stub)
       request_stubs.insert(0, stub)
       stub
