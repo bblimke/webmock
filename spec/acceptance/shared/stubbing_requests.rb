@@ -452,7 +452,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     end
 
     it "should be able to remove a previously stubbed uri" do
-      WebMock.remove_stub(:get, "www.example.com")
+      WebMock.remove_request_stub(:get, "www.example.com")
       lambda {
         http_request(:get, "http://www.example.com/")
       }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
@@ -460,7 +460,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
     it "should only remove the stub with the specified verb" do
       stub_request(:post, "www.example.com")
-      WebMock.remove_stub(:get, "www.example.com")
+      WebMock.remove_request_stub(:get, "www.example.com")
       lambda {
         http_request(:get, "http://www.example.com/")
       }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
@@ -469,7 +469,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
     it "should only remove the stub with the specified uri" do
       stub_request(:get, "www.another.example.com")
-      WebMock.remove_stub(:get, "www.example.com")
+      WebMock.remove_request_stub(:get, "www.example.com")
       lambda {
         http_request(:get, "http://www.example.com/")
       }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))

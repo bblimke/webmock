@@ -7,7 +7,7 @@ module WebMock
         register_request_stub(WebMock::RequestStub.new(method, uri))
     end
 
-    def remove_stub(method, uri)
+    def remove_request_stub(method, uri)
       WebMock::StubRegistry.instance.
         unregister_request_stub(WebMock::RequestStub.new(method, uri))
     end
