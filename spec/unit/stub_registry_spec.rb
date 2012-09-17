@@ -26,7 +26,7 @@ describe WebMock::StubRegistry do
       WebMock::StubRegistry.instance.register_request_stub(another_request_stub)
 
       WebMock::StubRegistry.instance.registered_request?(@request_signature).should == @request_stub
-      WebMock::StubRegistry.instance.unregister_request_stub(@request_stub)
+      WebMock::StubRegistry.instance.unregister_request_stub(@request_signature)
       WebMock::StubRegistry.instance.registered_request?(@request_signature).should == nil
 
       WebMock::StubRegistry.instance.registered_request?(another_request_signature).should == another_request_stub

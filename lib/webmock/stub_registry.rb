@@ -31,8 +31,8 @@ module WebMock
       global_stubs.push stub
     end
 
-    def unregister_request_stub(stub)
-      self.request_stubs.delete_if { |obj| obj == stub }
+    def unregister_request_stub(signature)
+      self.request_stubs.delete_if { |stub| stub.matches?(signature) }
     end
 
     def register_request_stub(stub)
