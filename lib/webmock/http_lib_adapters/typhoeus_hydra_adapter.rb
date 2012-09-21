@@ -79,14 +79,6 @@ if defined?(Typhoeus)
           webmock_response
         end
 
-        def self.stub_typhoeus(request_signature, webmock_response, typhoeus)
-          response = generate_typhoeus_response(request_signature, webmock_response)
-          Typhoeus.stub(
-            nil,
-            :method => request_signature.method,
-          ).stubbed_from(:webmock).and_return(response)
-        end
-
         def self.generate_typhoeus_response(request_signature, webmock_response)
           response = if webmock_response.should_timeout
             ::Typhoeus::Response.new(
