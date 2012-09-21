@@ -14,6 +14,7 @@ if defined?(Typhoeus)
 
         def self.enable!
           @disabled = false
+          add_before_callback
           add_after_request_callback
           ::Typhoeus::Config.block_connection = true
         end
@@ -21,11 +22,22 @@ if defined?(Typhoeus)
         def self.disable!
           @disabled = true
           remove_after_request_callback
+          remove_before_callback
           ::Typhoeus::Config.block_connection = false
         end
 
         def self.disabled?
           !!@disabled
+        end
+
+        def self.add_before_callback
+          unless Typhoeus.before.include?(BEFORE_CALLBACK)
+            Typhoeus.before << BEFORE_CALLBACK
+          end
+        end
+
+        def self.remove_before_callback
+          Typhoeus.before.delete_if {|v| v == BEFORE_CALLBACK }
         end
 
         def self.add_after_request_callback
@@ -59,13 +71,6 @@ if defined?(Typhoeus)
           request_signature
         end
 
-        def self.request_body_for_post_request_with_params(req)
-          params = req.params
-          form = Typhoeus::Form.new(params)
-          form.process!
-          form.to_s
-        end
-
         def self.build_webmock_response(typhoeus_response)
           webmock_response = WebMock::Response.new
           webmock_response.status = [typhoeus_response.code, typhoeus_response.status_message]
@@ -75,13 +80,21 @@ if defined?(Typhoeus)
         end
 
         def self.stub_typhoeus(request_signature, webmock_response, typhoeus)
+          response = generate_typhoeus_response(request_signature, webmock_response)
+          Typhoeus.stub(
+            nil,
+            :method => request_signature.method,
+          ).stubbed_from(:webmock).and_return(response)
+        end
+
+        def self.generate_typhoeus_response(request_signature, webmock_response)
           response = if webmock_response.should_timeout
             ::Typhoeus::Response.new(
               :code         => 0,
               :status_message => "",
               :body         => "",
               :header => {},
-              :return_code => 28
+              :return_code => :operation_timedout
             )
           else
             ::Typhoeus::Response.new(
@@ -91,11 +104,8 @@ if defined?(Typhoeus)
               :header => webmock_response.headers
             )
           end
-
-          Typhoeus.stub(
-            nil,
-            :method => request_signature.method,
-          ).stubbed_from(:webmock).and_return(response)
+          response.mock = :webmock
+          response
         end
 
         def self.request_hash(request_signature)
@@ -127,42 +137,28 @@ if defined?(Typhoeus)
             )
           end
         end
-      end
-    end
-  end
 
+        BEFORE_CALLBACK = Proc.new do |request|
+          Typhoeus::Expectation.all.delete_if {|e| e.from == :webmock }
+          res = true
 
-  module Typhoeus
-    class Hydra
-      def queue_with_webmock(request)
-        self.clear_webmock_stubs
+          unless WebMock::HttpLibAdapters::TyphoeusAdapter.disabled?
+            request_signature = ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request)
 
-        if WebMock::HttpLibAdapters::TyphoeusAdapter.disabled?
-          return queue_without_webmock(request)
+            ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+
+            if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
+              # ::WebMock::HttpLibAdapters::TyphoeusAdapter.stub_typhoeus(request_signature, webmock_response, self)
+              response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(request_signature, webmock_response)
+              request.finish(response)
+              webmock_response.raise_error_if_any
+              res = false
+            elsif !WebMock.net_connect_allowed?(request_signature.uri)
+              raise WebMock::NetConnectNotAllowedError.new(request_signature)
+            end
+          end
+          res
         end
-
-        request_signature =
-         ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request)
-
-        ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
-
-        if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
-          ::WebMock::HttpLibAdapters::TyphoeusAdapter.
-            stub_typhoeus(request_signature, webmock_response, self)
-          webmock_response.raise_error_if_any
-        elsif !WebMock.net_connect_allowed?(request_signature.uri)
-          raise WebMock::NetConnectNotAllowedError.new(request_signature)
-        end
-        queue_without_webmock(request)
-      end
-
-      alias_method :queue_without_webmock, :queue
-      alias_method :queue, :queue_with_webmock
-
-      def clear_webmock_stubs
-        Typhoeus::Expectation.all.delete_if {|e|
-          e.from == :webmock
-        }
       end
     end
   end

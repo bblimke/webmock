@@ -21,8 +21,8 @@ module TyphoeusHydraSpecHelper
       hydra.run
     }
     response = request.response
+    raise FakeTyphoeusHydraConnectError.new if response.return_code == :couldnt_connect
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
-    raise FakeTyphoeusHydraConnectError.new if response.code == 0
     OpenStruct.new({
       :body => response.body,
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.header)),
