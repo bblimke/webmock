@@ -25,7 +25,7 @@ module TyphoeusHydraSpecHelper
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
     OpenStruct.new({
       :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.header)),
+      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),
       :status => response.code.to_s,
       :message => response.status_message
     })

@@ -75,7 +75,7 @@ if defined?(Typhoeus)
           webmock_response = WebMock::Response.new
           webmock_response.status = [typhoeus_response.code, typhoeus_response.status_message]
           webmock_response.body = typhoeus_response.body
-          webmock_response.headers = typhoeus_response.header
+          webmock_response.headers = typhoeus_response.headers
           webmock_response
         end
 
@@ -85,7 +85,7 @@ if defined?(Typhoeus)
               :code         => 0,
               :status_message => "",
               :body         => "",
-              :header => {},
+              :headers => {},
               :return_code => :operation_timedout
             )
           else
@@ -93,7 +93,7 @@ if defined?(Typhoeus)
               :code         => webmock_response.status[0],
               :status_message => webmock_response.status[1],
               :body         => webmock_response.body,
-              :header => webmock_response.headers
+              :headers => webmock_response.headers
             )
           end
           response.mock = :webmock
