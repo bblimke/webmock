@@ -43,7 +43,16 @@ if defined?(Excon)
           method  = (params.delete(:method) || :get).to_s.downcase.to_sym
           params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
           uri = Addressable::URI.new(params).to_s
-          WebMock::RequestSignature.new method, uri, :body => params[:body], :headers => params[:headers]
+          WebMock::RequestSignature.new method, uri, :body => body_from(params), :headers => params[:headers]
+        end
+
+        def self.body_from(params)
+          body = params[:body]
+          return body unless body.respond_to?(:read)
+
+          contents = body.read
+          body.rewind if body.respond_to?(:rewind)
+          contents
         end
 
         def self.real_response(mock)
