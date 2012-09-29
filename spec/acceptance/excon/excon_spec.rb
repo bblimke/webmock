@@ -11,5 +11,20 @@ describe "Excon" do
     Excon.get('http://example.com', :path => "resource/", :query => {:a => 1, :b => 2}).body.should == "abc"
   end
 
+  let(:file) { File.new(__FILE__) }
+  let(:file_contents) { File.new(__FILE__).read }
+
+  it 'handles file uploads correctly' do
+    stub_request(:put, "http://example.com/upload").with(:body => file_contents)
+
+    yielded_request_body = nil
+    WebMock.after_request do |req, res|
+      yielded_request_body = req.body
+    end
+
+    Excon.put("http://example.com", :path => "upload", :body => file)
+
+    yielded_request_body.should eq(file_contents)
+  end
 end
 
