@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.11
+
+* Fix excon adapter to handle `:body => some_file_object`
+
+  Thanks to [Myron Marston](https://github.com/myronmarston)
+
 ## 1.8.10
 
 * em-http-request fix. After request callbacks are correctly invoked for 3xx responses,
