@@ -205,6 +205,23 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:post, "http://www.example.com").body.bytesize.should == body.bytesize
     end
 
+    context "in presence of special characters in the request" do
+      it "should correctly tell the user how to stub" do
+        WebMock.disable_net_connect!
+        begin
+          http_request(:get, "http://www.example.com/?foo=a+/b=c")
+        rescue WebMock::NetConnectNotAllowedError => e
+          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/\?foo=a%2B\/b=c/m
+          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/\?foo=a%2B\/b=c"\)/m
+        rescue Exception => e
+          fail "unknown exception #{e.message}"
+        else
+          fail "unknown error"
+        end
+
+      end
+    end
+
     describe "mocking EM::HttpClient API" do
       let(:uri) { "http://www.example.com/" }
 
