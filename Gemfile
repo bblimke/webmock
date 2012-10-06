@@ -10,6 +10,7 @@ group :development do
   gem 'rake'
   gem 'guard-rspec'
   gem 'rb-fsevent'
+  gem "typhoeus", git: "git@github.com:typhoeus/typhoeus.git"
 end
 
 group :test do
