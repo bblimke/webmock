@@ -136,6 +136,7 @@ if defined?(Typhoeus)
 
           unless WebMock::HttpLibAdapters::TyphoeusAdapter.disabled?
             request_signature = ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request)
+            request.block_connection = false;
 
             ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
