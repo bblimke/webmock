@@ -8,6 +8,17 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
       @stub_https = stub_http_request(:any, "https://www.example.com")
     end
 
+    it "should update assertions count" do
+      assert_equal 0, _assertions
+      http_request(:get, "http://www.example.com/")
+
+      assert_requested(@stub_http)
+      assert_equal 2, _assertions
+
+      assert_not_requested(:post, "http://www.example.com")
+      assert_equal 4, _assertions
+    end
+
     it "should raise error on non stubbed request" do
       lambda { http_request(:get, "http://www.example.net/") }.must_raise(WebMock::NetConnectNotAllowedError)
     end
