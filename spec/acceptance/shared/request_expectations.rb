@@ -1,3 +1,5 @@
+require 'json'
+
 shared_context "request expectations" do |*adapter_info|
   describe "when request expectations are set" do
     describe "when net connect is not allowed" do
@@ -254,6 +256,15 @@ shared_context "request expectations" do |*adapter_info|
             lambda {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                            :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
+              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
+            }.should_not raise_error
+          end
+
+          it "should satisfy expectation even if json had date in the content" do
+            body_hash['date'] = Date.today
+            lambda {
+              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+                           :body => body_hash.to_json)
               a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
             }.should_not raise_error
           end
