@@ -236,6 +236,10 @@ module WebMock
 
         if actual.is_a?(Hash) && expected.is_a?(Hash)
           return false unless matching_hashes?(actual, expected)
+        elsif actual.is_a?(Array) && expected.is_a?(Array)
+          actual_as_hash = Hash[actual.each_with_index.map { |x,i| [i+1, x] }]
+          expected_as_hash = Hash[expected.each_with_index.map { |x,i| [i+1, x] }]
+          return false unless matching_hashes?(actual_as_hash, expected_as_hash)
         else
           return false unless expected === actual
         end
