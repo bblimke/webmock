@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.0
+
+* Added support for Typhoeus >= 0.5.0 and removed support for Typhoeus < 0.5.0.
+
+  Thanks to [Hans Hasselberg](https://github.com/i0rek)
+
 ## 1.8.11
 
 * Fix excon adapter to handle `:body => some_file_object`
