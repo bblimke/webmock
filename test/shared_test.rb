@@ -73,4 +73,19 @@ module SharedTest
       assert_not_requested(@stub_http)
     end
   end
+
+  def test_that_block_is_executed_when_setting_expectations_on_the_stub
+    called = false
+    stub = stub_request(:get, "http://www.example.com/")
+    http_request(:get, "http://www.example.com/")
+    assert_requested(stub, :times => 1) { called = true }
+    assert called, "block was not executed"
+  end
+
+  def test_that_block_is_executed_when_setting_expectations
+    called = false
+    http_request(:get, "http://www.example.com/")
+    assert_requested(:get, "http://www.example.com/", :times => 1) { called = true }
+    assert called, "block was not executed"
+  end
 end
