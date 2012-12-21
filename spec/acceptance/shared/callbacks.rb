@@ -68,7 +68,7 @@ shared_context "callbacks" do |*adapter_info|
         before(:each) do
           stub_request(:get, "http://www.example.com").
           to_return(
-            :status => ["200", "hello"],
+            :status => [200, "hello"],
             :headers => {'Content-Length' => '666', 'Hello' => 'World'},
             :body => "foo bar"
           )
@@ -79,7 +79,7 @@ shared_context "callbacks" do |*adapter_info|
         end
 
         it "should pass response to callback with the status and message" do
-          @response.status.should == ["200", "hello"]
+          @response.status.should == [200, "hello"]
         end
 
         it "should pass response to callback with headers" do
