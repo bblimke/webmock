@@ -565,7 +565,7 @@ i.e the following two sets of headers are equal:
 
 ## Recording real requests and responses and replaying them later
 
-To record your application's real HTTP interactions and replay them later in tests you can use [VCR](http://github.com/myronmarston/vcr) with WebMock.
+To record your application's real HTTP interactions and replay them later in tests you can use [VCR](https://github.com/vcr/vcr) with WebMock.
 
 ## Request callbacks
 
