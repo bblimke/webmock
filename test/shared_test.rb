@@ -73,4 +73,11 @@ module SharedTest
       assert_not_requested(@stub_http)
     end
   end
+
+  def test_uri_parser_does_not_escape_delimeter
+    #https://github.com/bblimke/webmock/issues/240
+    uri = "http://somedomain.org/contrlr/actn.formt?conditions[model_id]=1"
+    parsed = WebMock::Util::URI.normalize_uri(uri)
+    assert parsed.query == "conditions[model_id]=1", "Query format mismatch"
+  end
 end
