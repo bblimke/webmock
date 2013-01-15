@@ -216,7 +216,7 @@ module Net  #:nodoc: all
       @debug_output = debug_output
 
       @io = case io
-      when Socket, OpenSSL::SSL::SSLSocket, IO
+      when Socket, OpenSSL::SSL::SSLSocket, IO, StringIO
         io
       when String
         StringIO.new(io)
