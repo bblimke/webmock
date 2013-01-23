@@ -205,6 +205,11 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:post, "http://www.example.com").body.bytesize.should == body.bytesize
     end
 
+    it "should yield control to given block" do
+      stub_request(:get, "www.example.com").to_return(:body => "abc")
+      expect { |b| http_request(:get, "http://www.example.com/", &b) }.to yield_control
+    end
+
     describe "mocking EM::HttpClient API" do
       let(:uri) { "http://www.example.com/" }
 

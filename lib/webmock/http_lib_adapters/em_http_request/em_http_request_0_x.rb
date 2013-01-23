@@ -59,6 +59,7 @@ if defined?(EventMachine::HttpRequest)
           client.on_error("WebMock timeout error") if webmock_response.should_timeout
           client.setup(make_raw_response(webmock_response), @uri,
             webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          block.call(client) unless block.nil?
           client
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           http = super
