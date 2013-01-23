@@ -238,6 +238,10 @@ unless RUBY_PLATFORM =~ /java/
         subject.last_effective_url.should == Addressable::URI.parse(uri)
       end
 
+      it 'should support #options' do
+        subject.options.should == { :timeout => 10, :redirects => 0, :keepalive => false }
+      end
+
       context "with a query" do
         let(:uri) { "http://www.example.com/?a=1&b=2" }
         subject { client("http://www.example.com/?a=1", :query => { 'b' => 2 }) }
