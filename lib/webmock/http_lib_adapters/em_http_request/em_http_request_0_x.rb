@@ -58,6 +58,7 @@ if defined?(EventMachine::HttpRequest)
           {:lib => :em_http_request}, request_signature, webmock_response)
           client = WebMockHttpClient.new(nil)
           client.options = @req.options
+          client.on_error("WebMock errback", true) if webmock_response.should_errback
           client.on_error("WebMock timeout error") if webmock_response.should_timeout
           client.setup(make_raw_response(webmock_response), @uri,
             webmock_response.should_timeout ? "WebMock timeout error" : nil)

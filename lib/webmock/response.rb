@@ -72,12 +72,17 @@ module WebMock
       @should_timeout == true
     end
 
+    def should_errback
+      @should_errback == true
+    end
+
     def options=(options)
       self.headers = options[:headers]
       self.status = options[:status]
       self.body = options[:body]
       self.exception = options[:exception]
       @should_timeout = options[:should_timeout]
+      @should_errback = options[:should_errback]
     end
 
     def evaluate(request_signature)
