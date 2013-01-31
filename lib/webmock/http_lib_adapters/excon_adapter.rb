@@ -87,7 +87,14 @@ if defined?(Excon)
 
           if mock_response = WebMock::StubRegistry.instance.response_for_request(mock_request)
             ExconAdapter.perform_callbacks(mock_request, mock_response, :real_request => false)
-            ExconAdapter.real_response(mock_response)
+            response = ExconAdapter.real_response(mock_response)
+
+            if params.has_key?(:expects) && ![*params[:expects]].include?(response.status)
+              raise(Excon::Errors.status_error(params, response))
+            else
+              response
+            end
+
           elsif WebMock.net_connect_allowed?(mock_request.uri)
             real_response = super
             ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response), :real_request => true)

@@ -11,6 +11,11 @@ describe "Excon" do
     Excon.get('http://example.com', :path => "resource/", :query => {:a => 1, :b => 2}).body.should == "abc"
   end
 
+  it 'should support Excon :expects options' do
+    stub_request(:get, "http://example.com/").to_return(:body => 'a')
+    lambda { Excon.get('http://example.com', :expects => 204) }.should raise_error(Excon::Errors::OK)
+  end
+
   let(:file) { File.new(__FILE__) }
   let(:file_contents) { File.new(__FILE__).read }
 
@@ -27,4 +32,3 @@ describe "Excon" do
     yielded_request_body.should eq(file_contents)
   end
 end
-
