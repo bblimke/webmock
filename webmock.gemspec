@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://github.com/bblimke/webmock'
   s.summary     = %q{Library for stubbing HTTP requests in Ruby.}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
+  s.license     = "MIT"
 
   s.rubyforge_project = 'webmock'
 
