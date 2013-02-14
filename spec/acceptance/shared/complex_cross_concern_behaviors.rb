@@ -20,7 +20,7 @@ shared_context "complex cross-concern behaviors" do |*adapter_info|
 
   let(:no_content_url) { 'http://httpstat.us/204' }
   [nil, ''].each do |stub_val|
-    it "returns the same value (nil or "") for a request stubbed as #{stub_val.inspect} that a real empty response has" do
+    it "returns the same value (nil or "") for a request stubbed as #{stub_val.inspect} that a real empty response has", :net_connect => true do
       unless http_library == :curb
         WebMock.allow_net_connect!
 
