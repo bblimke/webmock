@@ -16,20 +16,35 @@ describe "Excon" do
     lambda { Excon.get('http://example.com', :expects => 204) }.should raise_error(Excon::Errors::OK)
   end
 
-  it "should support excon response_block for real requests" do
-    a = []
-    WebMock.allow_net_connect!
-    r = Excon.get('http://httpstat.us/200', :response_block => lambda {|e,remaining, total| a << e}, :chunk_size => 1)
-    a.should == ["2", "0", "0", " ", "O", "K"]
-    r.body.should == ""
-  end
+  context "with response_block" do
+    it "should support excon response_block for real requests" do
+      a = []
+      WebMock.allow_net_connect!
+      r = Excon.get('http://httpstat.us/200', :response_block => lambda {|e,remaining, total| a << e}, :chunk_size => 1)
+      a.should == ["2", "0", "0", " ", "O", "K"]
+      r.body.should == ""
+    end
 
-  it "should support excon response_block" do
-    a = []
-    stub_request(:get, "http://example.com/").to_return(:body => "abc")
-    r = Excon.get('http://example.com', :response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
-    a.should == ['a', 'b', 'c']
-    r.body.should == ""
+    it "should support excon response_block" do
+      a = []
+      stub_request(:get, "http://example.com/").to_return(:body => "abc")
+      r = Excon.get('http://example.com', :response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
+      a.should == ['a', 'b', 'c']
+      r.body.should == ""
+    end
+
+    it "should invoke callbacks with response body even if a real request is made" do
+      a = []
+      WebMock.allow_net_connect!
+      response = nil
+      WebMock.after_request { |_, res|
+        response = res
+      }
+      r = Excon.get('http://httpstat.us/200', :response_block => lambda {|e,remaining, total| a << e}, :chunk_size => 1)
+      response.body.should == "200 OK"
+      a.should == ["2", "0", "0", " ", "O", "K"]
+      r.body.should == ""
+    end
   end
 
   let(:file) { File.new(__FILE__) }

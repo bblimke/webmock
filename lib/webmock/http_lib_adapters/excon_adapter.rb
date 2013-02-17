@@ -64,11 +64,11 @@ if defined?(Excon)
             :headers => mock.headers
         end
 
-        def self.mock_response(real)
+        def self.mock_response(real, response_body_from_chunks)
           mock = WebMock::Response.new
           mock.status  = real.status
           mock.headers = real.headers
-          mock.body    = real.body
+          mock.body    = response_body_from_chunks || real.body
           mock
         end
 
@@ -105,8 +105,17 @@ if defined?(Excon)
             response
 
           elsif WebMock.net_connect_allowed?(mock_request.uri)
+            response_body_from_chunks = nil
+            if params.has_key?(:response_block)
+              response_body_from_chunks = ""
+              original_block = params[:response_block]
+              params[:response_block] = lambda {|chunk, remaining, total|
+                response_body_from_chunks << chunk
+                original_block.call(chunk, remaining, total)
+              }
+            end
             real_response = super
-            ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response), :real_request => true)
+            ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response, response_body_from_chunks), :real_request => true)
             real_response
           else
             raise WebMock::NetConnectNotAllowedError.new(mock_request)
