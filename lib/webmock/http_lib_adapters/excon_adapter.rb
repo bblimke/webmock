@@ -81,7 +81,7 @@ if defined?(Excon)
 
       class ExconConnection < ::Excon::Connection
 
-        def request_kernel(params, &block)
+        def request_kernel(params)
           mock_request  = ExconAdapter.build_request params.dup
           WebMock::RequestRegistry.instance.requested_signatures.put(mock_request)
 
@@ -91,9 +91,18 @@ if defined?(Excon)
 
             if params.has_key?(:expects) && ![*params[:expects]].include?(response.status)
               raise(Excon::Errors.status_error(params, response))
-            else
-              response
+            elsif params.has_key?(:response_block)
+              content_length = remaining = response.body.bytesize
+              body = response.body
+              response.body = ""
+              i = 0
+              while i < body.length
+                params[:response_block].call(body[i, params[:chunk_size]], [remaining - params[:chunk_size], 0].max, content_length)
+                remaining -= params[:chunk_size]
+                i += params[:chunk_size]
+              end
             end
+            response
 
           elsif WebMock.net_connect_allowed?(mock_request.uri)
             real_response = super
