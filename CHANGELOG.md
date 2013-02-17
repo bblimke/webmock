@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.2
+
+* Added support for Excon's :response_block parameter
+
+  Thanks to [Myron Marston](https://github.com/myronmarston) for reporting this issue.
+
 ## 1.9.1
 
 * Fix 'rack.errors' not being set for Rack apps
