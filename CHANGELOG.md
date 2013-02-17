@@ -2,6 +2,10 @@
 
 ## Master
 
+* Added support for minitest assertions count
+
+  Thanks to [Mokevnin Kirill](https://github.com/mokevnin)
+
 * Fixed issues with registering http requests in multi-threaded environments
 
   Thanks to [Travis Beauvais](https://github.com/tbeauvais)
