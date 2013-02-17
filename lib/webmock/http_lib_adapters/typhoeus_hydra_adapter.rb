@@ -60,7 +60,7 @@ if defined?(Typhoeus)
           body = req.options[:body]
 
           request_signature = WebMock::RequestSignature.new(
-            req.options[:method],
+            req.options[:method] || :get,
             uri.to_s,
             :body => body,
             :headers => req.options[:headers]
