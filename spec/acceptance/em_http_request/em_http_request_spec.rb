@@ -13,7 +13,7 @@ unless RUBY_PLATFORM =~ /java/
 
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)
-      context 'when a real request is made and redirects are followed' do
+      context 'when a real request is made and redirects are followed', :net_connect => true do
         before { WebMock.allow_net_connect! }
 
         # This url redirects to the https URL.
@@ -116,7 +116,7 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
-        context 'making a real request' do
+        context 'making a real request', :net_connect => true do
           before { WebMock.allow_net_connect! }
           include_examples "em-http-request middleware/after_request hook integration"
         end
