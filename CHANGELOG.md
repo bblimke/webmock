@@ -2,6 +2,10 @@
 
 ## Master
 
+* Fix 'rack.errors' not being set for Rack apps
+
+  Thanks to [Alex Grant](https://github.com/grantovich)
+
 * Added support for minitest assertions count
 
   Thanks to [Mokevnin Kirill](https://github.com/mokevnin)
