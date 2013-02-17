@@ -2,7 +2,7 @@ require 'rack'
 
 class MyRackApp
   class NonArrayResponse
-    # The rack response body need not implement #join, 
+    # The rack response body need not implement #join,
     # but it must implement #each.  It need not be an Array.
     # ActionDispatch::Response, for example, exercises that fact.
     # See: http://rack.rubyforge.org/doc/SPEC.html
@@ -32,6 +32,9 @@ class MyRackApp
         else
           [401, {}, [""]]
         end
+      when ['GET', '/error']
+        env['rack.errors'].puts('Error!')
+        [500, {}, ['']]
       else
         [404, {}, ['']]
     end

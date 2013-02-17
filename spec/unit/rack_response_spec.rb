@@ -49,6 +49,24 @@ describe WebMock::RackResponse do
     response.body.should include('Good to meet you, Jimmy!')
   end
 
+  describe 'rack error output' do
+    before :each do
+      @original_stderr = $stderr
+      $stderr = StringIO.new
+    end
+
+    after :each do
+      $stderr = @original_stderr
+    end
+
+    it 'should behave correctly when an app uses rack.errors' do
+      request = WebMock::RequestSignature.new(:get, 'www.example.com/error')
+
+      expect { @rack_response.evaluate(request) }.to_not raise_error
+      expect($stderr.length).to_not eq 0
+    end
+  end
+
   describe 'basic auth request' do
     before :each do
       @rack_response_with_basic_auth = WebMock::RackResponse.new(
