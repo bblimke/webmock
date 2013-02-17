@@ -1,6 +1,6 @@
 # Changelog
 
-## Master
+## 1.9.1
 
 * Fix 'rack.errors' not being set for Rack apps
 
@@ -18,7 +18,7 @@
 
   Thanks to [Jake Benilov](https://github.com/benilovj)
 
-* Defaulted method to GET when no method specified in Typhoeus adapter
+* Fixed issues in Typhoeus 0.6. Defaulted method to GET when no method specified.
 
   Thanks to [Hans Hasselberg](https://github.com/i0rek)
 
