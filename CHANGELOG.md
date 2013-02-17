@@ -1,5 +1,35 @@
 # Changelog
 
+## Master
+
+* Fixed issues with registering http requests in multi-threaded environments
+
+  Thanks to [Travis Beauvais](https://github.com/tbeauvais)
+
+* Bumped Crack version to >=0.3.2
+
+  Thanks to [Jake Benilov](https://github.com/benilovj)
+
+* Defaulted method to GET when no method specified in Typhoeus adapter
+
+  Thanks to [Hans Hasselberg](https://github.com/i0rek)
+
+* Add license information to the gemspec
+
+  Thanks to [Jordi Massaguer Pla](https://github.com/jordimassaguerpla) and [Murahashi Sanemat Kenichi](https://github.com/sanemat)
+
+* Added support for :expects option in Excon adapter
+
+  Thanks to [Evgeniy Dolzhenko](https://github.com/dolzenko)
+
+* Fixed Faye compatibility by treating StringIO in Net::HTTP adapter properly
+
+  Thanks to [Pavel Forkert](https://github.com/fxposter)
+
+* Updated VCR link
+
+  Thanks to [Rex Feng](https://github.com/xta)
+
 ## 1.9.0
 
 * Added support for Typhoeus >= 0.5.0 and removed support for Typhoeus < 0.5.0.
