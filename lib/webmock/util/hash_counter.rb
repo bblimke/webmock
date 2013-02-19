@@ -6,7 +6,7 @@ module WebMock
         self.hash = {}
         @order = {}
         @max = 0
-        @lock = Mutex.new
+        @lock = ::Mutex.new
       end
       def put key, num=1
         @lock.synchronize do
