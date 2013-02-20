@@ -721,6 +721,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Travis Beauvais
 * Mokevnin Kirill
 * Alex Grant
+* Lucas Dohmen
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

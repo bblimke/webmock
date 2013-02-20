@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.3
+
+* Fixed issue with unavailable constant Mutex in Ruby < 1.9
+
+  Thanks to [Lucas Dohmen](https://github.com/moonglum) for reporting this issue.
+
 ## 1.9.2
 
 * Added support for Excon's :response_block parameter
