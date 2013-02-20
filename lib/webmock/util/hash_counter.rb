@@ -1,3 +1,5 @@
+require 'mutex'
+
 module WebMock
   module Util
     class Util::HashCounter
