@@ -1,4 +1,4 @@
-require 'mutex'
+require 'thread'
 
 module WebMock
   module Util
