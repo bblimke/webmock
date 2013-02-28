@@ -21,15 +21,19 @@ module WebMock
     def assert_requested(*args, &block)
       if not args[0].is_a?(WebMock::RequestStub)
         args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+      elsif block
+        raise ArgumentError, "assert_requested with a stub object, doesn't accept blocks"
       end
-      assert_request_requested(*args, &block)
+      assert_request_requested(*args)
     end
 
     def assert_not_requested(*args, &block)
       if not args[0].is_a?(WebMock::RequestStub)
         args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+      elsif block
+        raise ArgumentError, "assert_not_requested with a stub object, doesn't accept blocks"
       end
-      assert_request_not_requested(*args, &block)
+      assert_request_not_requested(*args)
     end
 
     def hash_including(expected)

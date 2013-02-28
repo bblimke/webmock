@@ -1,5 +1,9 @@
 # Changelog
 
+## Master
+
+* `assert_requested` and `assert_not_requested` raise an error if a stub object is provided together with a block.
+
 ## 1.9.3
 
 * Fixed issue with unavailable constant Mutex in Ruby < 1.9

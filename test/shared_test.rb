@@ -9,6 +9,18 @@ module SharedTest
     @stub_https = stub_http_request(:any, "https://www.example.com")
   end
 
+  def test_assert_requested_with_stub_and_block_raises_error
+    assert_raise ArgumentError do
+      assert_requested(@stub_http) {}
+    end
+  end
+
+  def test_assert_not_requested_with_stub_and_block_raises_error
+    assert_raise ArgumentError do
+      assert_not_requested(@stub_http) {}
+    end
+  end
+
   def test_error_on_non_stubbed_request
     default_ruby_headers = (RUBY_VERSION >= "1.9.1") ? "{'Accept'=>'*/*', 'User-Agent'=>'Ruby'}" : "{'Accept'=>'*/*'}"
     assert_raise_with_message(WebMock::NetConnectNotAllowedError, %r{Real HTTP connections are disabled. Unregistered request: GET http://www.example.net/ with headers}) do
