@@ -9,15 +9,27 @@ describe WebMock::StubRegistry do
     @request_stub = WebMock::RequestStub.new(:get, "www.example.com")
   end
 
-  describe "reset!" do
+  describe "cleaning the stubs" do
     before(:each) do
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
     end
 
-    it "should clean request stubs" do
+    it "should clean all request stubs" do
       WebMock::StubRegistry.instance.registered_request?(@request_signature).should == @request_stub
       WebMock::StubRegistry.instance.reset!
       WebMock::StubRegistry.instance.registered_request?(@request_signature).should == nil
+    end
+
+    it "should clean only one stub" do
+      another_request_signature = WebMock::RequestSignature.new(:get, "www.another.example.com")
+      another_request_stub = WebMock::RequestStub.new(:get, "www.another.example.com")
+      WebMock::StubRegistry.instance.register_request_stub(another_request_stub)
+
+      WebMock::StubRegistry.instance.registered_request?(@request_signature).should == @request_stub
+      WebMock::StubRegistry.instance.unregister_request_stub(@request_signature)
+      WebMock::StubRegistry.instance.registered_request?(@request_signature).should == nil
+
+      WebMock::StubRegistry.instance.registered_request?(another_request_signature).should == another_request_stub
     end
   end
 
