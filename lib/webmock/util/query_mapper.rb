@@ -66,7 +66,7 @@ module WebMock::Util
                 value = true if value.nil?
                 key = Addressable::URI.unencode_component(key)
                 if value != true
-                  value = Addressable::URI.unencode_component(value.gsub(/\+/, " "))
+                  value = Addressable::URI.unencode_component(value)
                 end
                 if options[:notation] == :flat
                   if accumulator[key]

@@ -15,6 +15,15 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, /.*x=ab c.*/).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/hello/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
+
+      it "should raise error specifying stubbing instructions with escaped characters in params if there is no matching stub" do
+        begin
+          http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
+        rescue WebMock::NetConnectNotAllowedError => e
+          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred\+m/m
+          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred\+m"\)/m
+        end
+      end
     end
 
     describe "based on query params" do

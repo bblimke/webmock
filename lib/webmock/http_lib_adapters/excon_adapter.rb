@@ -31,7 +31,7 @@ if defined?(Excon)
               string << key.to_s << '&'
             else
               for value in [*values]
-                string << key.to_s << '=' << CGI.escape(value.to_s) << '&'
+                string << key.to_s << '=' << URI.escape(value.to_s) << '&'
               end
             end
           end
