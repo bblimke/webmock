@@ -20,8 +20,8 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         begin
           http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
         rescue WebMock::NetConnectNotAllowedError => e
-          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred\+m/m
-          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred\+m"\)/m
+          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%2Bm/m
+          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%2Bm"\)/m
         end
       end
     end

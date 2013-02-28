@@ -47,14 +47,14 @@ URIS_WITH_AUTH =
 
 URIS_WITH_PATH_AND_PARAMS =
 [
-  "www.example.com/my path/?a=my param&b=c",
-  "www.example.com/my%20path/?a=my%20param&b=c",
-  "www.example.com:80/my path/?a=my param&b=c",
-  "www.example.com:80/my%20path/?a=my%20param&b=c",
-  "http://www.example.com/my path/?a=my param&b=c",
-  "http://www.example.com/my%20path/?a=my%20param&b=c",
-  "http://www.example.com:80/my path/?a=my param&b=c",
-  "http://www.example.com:80/my%20path/?a=my%20param&b=c",
+  "www.example.com/my path/?a=my param&b=c+d",
+  "www.example.com/my%20path/?a=my%20param&b=c%2Bd",
+  "www.example.com:80/my path/?a=my param&b=c+d",
+  "www.example.com:80/my%20path/?a=my%20param&b=c%2Bd",
+  "http://www.example.com/my path/?a=my param&b=c+d",
+  "http://www.example.com/my%20path/?a=my%20param&b=c%2Bd",
+  "http://www.example.com:80/my path/?a=my param&b=c+d",
+  "http://www.example.com:80/my%20path/?a=my%20param&b=c%2Bd",
   ].sort
 
 URIS_WITH_DIFFERENT_PORT =
