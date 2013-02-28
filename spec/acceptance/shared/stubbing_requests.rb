@@ -444,4 +444,18 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       end
     end
   end
+
+  describe "when request stub was removed" do
+    it "should raise an error on request" do
+      stub = stub_request(:get, "www.example.com")
+
+      http_request(:get, "http://www.example.com/")
+
+      remove_request_stub(stub)
+
+      lambda {
+        http_request(:get, "http://www.example.com/")
+      }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+    end
+  end
 end

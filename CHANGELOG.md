@@ -2,6 +2,11 @@
 
 ## Master
 
+* added `remove_request_stub` method to the api to allow removing unused stubs i.e.
+
+        stub_get = stub_request(:get, "www.example.com")
+        remove_request_stub(stub_get)
+
 * `assert_requested` and `assert_not_requested` raise an error if a stub object is provided together with a block.
 
 ## 1.9.3

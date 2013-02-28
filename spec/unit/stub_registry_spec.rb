@@ -9,6 +9,15 @@ describe WebMock::StubRegistry do
     @request_stub = WebMock::RequestStub.new(:get, "www.example.com")
   end
 
+  describe "remove_request_stub" do
+    it "should remove stub from registry" do
+      WebMock::StubRegistry.instance.register_request_stub(@request_stub)
+      WebMock::StubRegistry.instance.registered_request?(@request_signature).should == @request_stub
+      WebMock::StubRegistry.instance.remove_request_stub(@request_stub)
+      WebMock::StubRegistry.instance.registered_request?(@request_signature).should == nil
+    end
+  end
+
   describe "reset!" do
     before(:each) do
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)

@@ -46,6 +46,10 @@ module WebMock
       end
     end
 
+    def remove_request_stub(stub)
+      WebMock::StubRegistry.instance.remove_request_stub(stub)
+    end
+
     private
 
     def convert_uri_method_and_options_to_request_and_options(*args, &block)
