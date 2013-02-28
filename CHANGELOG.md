@@ -1,6 +1,10 @@
 # Changelog
 
-## Master
+## 1.10.0
+
+* '+' in query params is not treated as space anymore and is encoded as %2B
+
+  Thanks to [goblin](https://github.com/goblin) for reporting this issue.
 
 * added `remove_request_stub` method to the api to allow removing unused stubs i.e.
 
