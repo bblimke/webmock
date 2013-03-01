@@ -117,6 +117,13 @@ shared_context "declared responses" do |*adapter_info|
       it "should return evaluated response headers" do
         stub_request(:post, "www.example.com").to_return(:headers => lambda { |request| request.headers })
         http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'B'}).headers['A'].should == 'B'
+        http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'C'}).headers['A'].should == 'C'
+      end
+
+      it "should evaluate response body for each request" do
+        stub_request(:post, "www.example.com").to_return(:body => lambda { |request| request.body })
+        http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
+        http_request(:post, "http://www.example.com/", :body => "foxtrot").body.should == "foxtrot"
       end
     end
 
@@ -132,6 +139,7 @@ shared_context "declared responses" do |*adapter_info|
                                                                 {:body => request.body}
         })
         http_request(:post, "http://www.example.com/", :body => "echo").body.should == "echo"
+        http_request(:post, "http://www.example.com/", :body => "foxtrot").body.should == "foxtrot"
       end
 
       it "should return evaluated response headers" do

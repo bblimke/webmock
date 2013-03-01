@@ -1,5 +1,11 @@
 # Changelog
 
+## Master
+
+* Fixed issue: response body declared as Proc was not evaluated again on subsequent requests.
+
+  Thanks to [Rick Fletcher](https://github.com/rfletcher) for reporting this issue.
+
 ## 1.10.0
 
 * '+' in query params is not treated as space anymore and is encoded as %2B
