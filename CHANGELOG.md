@@ -1,6 +1,10 @@
 # Changelog
 
-## Master
+## 1.10.1
+
+* '+' in request body is still treated as a space. This fixes a bug introduced in previous version.
+
+  Thanks to [Erik Michaels-Ober](https://github.com/sferik) for reporting this problem.
 
 * Fixed issue: response body declared as Proc was not evaluated again on subsequent requests.
 
