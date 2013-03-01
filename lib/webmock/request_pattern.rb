@@ -201,7 +201,7 @@ module WebMock
       when :xml then
         Crack::XML.parse(body)
       else
-        WebMock::Util::QueryMapper.query_to_values(body)
+        WebMock::Util::QueryMapper.query_to_values(body, :form_url_encoded => true)
       end
     end
 

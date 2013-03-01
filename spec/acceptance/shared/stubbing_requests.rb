@@ -105,20 +105,20 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       describe "when body is declared as a hash" do
         before(:each) do
           stub_request(:post, "www.example.com").
-            with(:body => {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']} })
+            with(:body => {:a => '1', :b => 'five x', 'c' => {'d' => ['e', 'f']} })
         end
 
         describe "for request with url encoded body" do
           it "should match request if hash matches body" do
             http_request(
               :post, "http://www.example.com/",
-            :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
+            :body => 'a=1&c[d][]=e&c[d][]=f&b=five+x').status.should == "200"
           end
 
           it "should match request if hash matches body in different order of params" do
             http_request(
               :post, "http://www.example.com/",
-            :body => 'a=1&c[d][]=e&b=five&c[d][]=f').status.should == "200"
+            :body => 'a=1&c[d][]=e&b=five+x&c[d][]=f').status.should == "200"
           end
 
           it "should not match if hash doesn't match url encoded body" do
@@ -151,6 +151,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
             :body => "{\"foo\":\"2010-01-01\"}").status.should == "200"
+          end
+
+          it "should match if any of the strings have spaces" do
+            WebMock.reset!
+            stub_request(:post, "www.example.com").with(:body => {"foo" => "a b c"})
+            http_request(
+              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+            :body => "{\"foo\":\"a b c\"}").status.should == "200"
           end
         end
 
