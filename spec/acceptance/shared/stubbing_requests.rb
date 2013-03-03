@@ -135,13 +135,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           it "should match if hash matches body" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five x\"}").status.should == "200"
           end
 
           it "should match if hash matches body in different form" do
             http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
+            :body => "{\"a\":\"1\",\"b\":\"five x\",\"c\":{\"d\":[\"e\",\"f\"]}}").status.should == "200"
           end
 
           it "should match if hash contains date string" do #Crack creates date object
