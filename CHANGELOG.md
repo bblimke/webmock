@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.10.2
+
+* '+' in request path is treated as plus, but in query params always as a space.
+
 ## 1.10.1
 
 * '+' in request body is still treated as a space. This fixes a bug introduced in previous version.
