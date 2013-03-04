@@ -46,18 +46,6 @@ end
 
 task :default => [:spec, :spec_http_without_webmock, :test, :minitest]
 
-require 'rdoc/task'
-RDoc::Task.new do |rdoc|
-  $:.push File.expand_path('../lib', __FILE__)
-  require 'webmock/version'
-
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "webmock #{WebMock::VERSION}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/webmock/webmock.rb')
-end
-
-
 task :require_ruby_18 do
   raise "This must be run on Ruby 1.8" unless RUBY_VERSION =~ /^1\.8/
 end
