@@ -114,6 +114,7 @@ module WebMock::Util
     #
     # @param [Hash, #to_hash, Array] new_query_values The new query values.
     def self.values_to_query(new_query_values)
+
       if new_query_values == nil
         return nil
       end
@@ -146,7 +147,7 @@ module WebMock::Util
         if value.is_a?(Hash)
           value = value.map do |key, val|
             [
-              Addressable::URI.encode_component(key, Addressable::URI::CharacterClasses::UNRESERVED),
+              Addressable::URI.encode_component(key.dup, Addressable::URI::CharacterClasses::UNRESERVED),
               val
             ]
           end
@@ -168,7 +169,7 @@ module WebMock::Util
           return parent
         else
           encoded_value = Addressable::URI.encode_component(
-            value, Addressable::URI::CharacterClasses::UNRESERVED
+            value.dup, Addressable::URI::CharacterClasses::UNRESERVED
           )
           return "#{parent}=#{encoded_value}"
         end
@@ -178,7 +179,7 @@ module WebMock::Util
       buffer = ""
       new_query_values.each do |parent, value|
         encoded_parent = Addressable::URI.encode_component(
-          parent, Addressable::URI::CharacterClasses::UNRESERVED
+          parent.dup, Addressable::URI::CharacterClasses::UNRESERVED
         )
         buffer << "#{to_query.call(encoded_parent, value)}&"
       end
