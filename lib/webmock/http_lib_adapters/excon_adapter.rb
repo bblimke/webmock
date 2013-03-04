@@ -28,14 +28,18 @@ if defined?(Excon)
         end
 
         def self.add_excon_stub
-          ::Excon.defaults[:mock] = true
-          @stub ||= ::Excon.stub({}) do |params|
-            self.handle_request(params)
+          if not @stub
+            @original_excon_mock_default = ::Excon.defaults[:mock]
+            ::Excon.defaults[:mock] = true
+            @stub = ::Excon.stub({}) do |params|
+              self.handle_request(params)
+            end
           end
         end
 
         def self.remove_excon_stub
-          ::Excon.defaults[:mock] = false
+          ::Excon.defaults[:mock] = @original_excon_mock_default
+          @original_excon_mock_default = nil
           Excon.stubs.delete(@stub)
           @stub = nil
         end
