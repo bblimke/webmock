@@ -2,13 +2,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
   describe "when requests are stubbed" do
     describe "based on uri" do
       it "should return stubbed response even if request have escaped parameters" do
-        stub_request(:get, "www.example.com/hello/?#{NOT_ESCAPED_PARAMS}").to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/hello/?#{ESCAPED_PARAMS}").body.should == "abc"
+        stub_request(:get, "www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/hello%2B/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
 
       it "should return stubbed response even if request has non escaped params" do
-        stub_request(:get, "www.example.com/hello/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
+        stub_request(:get, "www.example.com/hello%2B/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
       end
 
       it "should return stubbed response even if stub uri is declared as regexp and request params are escaped" do
@@ -18,14 +18,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
       it "should raise error specifying stubbing instructions with escaped characters in params if there is no matching stub" do
         begin
-          http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
+          http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}")
         rescue WebMock::NetConnectNotAllowedError => e
-          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m/m
-          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m"\)/m
+          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\+\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m/m
+          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\+\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m"\)/m
         end
 
-        stub_request(:get, "http://www.example.com/hello/?x=ab%20c&z='Stop!'%20said%20Fred%20m")
-        http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
+        stub_request(:get, "http://www.example.com/hello+/?x=ab%20c&z='Stop!'%20said%20Fred%20m")
+        http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}")
       end
     end
 
