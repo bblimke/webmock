@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.0
+
+* Excon >= 0.17 support.
+
+  Thanks to [Nathan Sutton](https://github.com/nate) for reporting this issue and to [Wesley Beary](https://github.com/geemus) and [Myron Marston](https://github.com/myronmarston) for help.
+
 ## 1.10.2
 
 * '+' in request path is treated as plus, but in query params always as a space.
