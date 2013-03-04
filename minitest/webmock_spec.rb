@@ -56,6 +56,5 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
        assert_requested(@stub_http)
      end
     end
-
   end
 

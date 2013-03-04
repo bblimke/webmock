@@ -20,16 +20,19 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         begin
           http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
         rescue WebMock::NetConnectNotAllowedError => e
-          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%2Bm/m
-          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%2Bm"\)/m
+          e.message.should match /Unregistered request: GET http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m/m
+          e.message.should match /stub_request\(:get, "http:\/\/www\.example\.com\/hello\/\?x=ab%20c&z='Stop!'%20said%20Fred%20m"\)/m
         end
+
+        stub_request(:get, "http://www.example.com/hello/?x=ab%20c&z='Stop!'%20said%20Fred%20m")
+        http_request(:get, "http://www.example.com/hello/?#{NOT_ESCAPED_PARAMS}")
       end
     end
 
     describe "based on query params" do
       it "should return stubbed response when stub declares query params as a hash" do
-        stub_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).to_return(:body => "abc")
-        http_request(:get, "http://www.example.com/?a[]=b&a[]=c").body.should == "abc"
+        stub_request(:get, "www.example.com").with(:query => {"a" => ["b x", "c d"]}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a[]=b+x&a[]=c%20d").body.should == "abc"
       end
 
       it "should return stubbed response when stub declares query params as a hash" do
