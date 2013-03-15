@@ -203,6 +203,11 @@ describe "Net:HTTP" do
         response = Net::HTTP.get('www.google.com','/')
       end
 
+      it "should connect to the server if the URI matches any regex the array", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => [/google.com/, /yahoo.com/])
+        response = Net::HTTP.get('www.google.com','/')
+      end
+
     end
 
   end
