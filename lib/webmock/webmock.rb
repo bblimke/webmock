@@ -59,18 +59,20 @@ module WebMock
     end
 
     Config.instance.allow_net_connect ||
-    (
-    Config.instance.allow_localhost && WebMock::Util::URI.is_uri_localhost?(uri)) ||
-    Config.instance.allow && (
-      (Config.instance.allow.kind_of?(Regexp) && uri.to_s =~ Config.instance.allow) ||
-      (
-        Config.instance.allow.respond_to?(:include?) &&
-        (
-          Config.instance.allow.include?(uri.host) ||
-          Config.instance.allow.include?("#{uri.host}:#{uri.port}")
-        )
-      )
-    )
+    ( Config.instance.allow_localhost && WebMock::Util::URI.is_uri_localhost?(uri) ||
+      Config.instance.allow && net_connect_explicit_allowed?(Config.instance.allow, uri) )
+  end
+
+  def self.net_connect_explicit_allowed?(allowed, uri=nil)
+    case allowed
+    when Array
+      allowed.any? { |allowed_item| net_connect_explicit_allowed?(allowed_item, uri) }
+    when Regexp
+      uri.to_s =~ allowed
+    when String
+      allowed == uri.host ||
+      allowed == "#{uri.host}:#{uri.port}"
+    end
   end
 
   def self.reset!
