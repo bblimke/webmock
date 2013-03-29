@@ -68,7 +68,7 @@ Add the following code to `test/test_helper`:
 
 ### Cucumber
 
-Add the following code to `features/support/env.rb`
+Create a file `features/support/webmock.rb` with the following contents:
 
     require 'webmock/cucumber'
 
