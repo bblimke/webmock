@@ -143,7 +143,7 @@ if defined?(Curl)
 
       def invoke_curb_callbacks
         @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
-        @on_header.call(self.header_str) if @on_header
+        self.header_str.lines.each { |header_line| @on_header.call header_line } if @on_header
         @on_body.call(self.body_str) if @on_body
         @on_complete.call(self) if @on_complete
 
