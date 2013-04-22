@@ -193,7 +193,7 @@ end
 
 class StubSocket #:nodoc:
 
-  attr_accessor :read_timeout
+  attr_accessor :read_timeout, :continue_timeout
 
   def initialize(*args)
   end
