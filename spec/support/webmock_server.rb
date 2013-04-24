@@ -29,7 +29,11 @@ class WebMockServer
 
     concurrent do
       ['TERM', 'INT'].each do |signal|
-        trap(signal){ server.shutdown }
+        trap(signal) do
+          Thread.new do
+            server.shutdown
+          end
+        end
       end
       server.start do |socket|
         socket.puts <<-EOT.gsub(/^\s+\|/, '')
