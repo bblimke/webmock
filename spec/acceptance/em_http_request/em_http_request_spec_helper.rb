@@ -17,6 +17,7 @@ module EMHttpRequestSpecHelper
       http = request.send(method, {
         :timeout => 30,
         :body => options[:body],
+        :file => options[:file],
         :query => options[:query],
         :head => head.merge('authorization' => [uri.user, uri.password])
       }, &block)

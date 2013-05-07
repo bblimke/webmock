@@ -174,7 +174,7 @@ if defined?(EventMachine::HttpClient)
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
-          :body => body,
+          :body => body || (@req.file && File.read(@req.file)),
           :headers => headers
         )
       end
