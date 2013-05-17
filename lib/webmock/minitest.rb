@@ -1,7 +1,7 @@
-require 'minitest/unit'
+require 'minitest/test'
 require 'webmock'
 
-MiniTest::Unit::TestCase.class_eval do
+MiniTest::Test.class_eval do
   include WebMock::API
 
   alias_method :teardown_without_webmock, :teardown
