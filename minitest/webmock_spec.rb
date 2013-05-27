@@ -9,14 +9,14 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
     end
 
     it "should update assertions count" do
-      assert_equal 0, _assertions
+      assert_equal 0, assertions
       http_request(:get, "http://www.example.com/")
 
       assert_requested(@stub_http)
-      assert_equal 2, _assertions
+      assert_equal 2, assertions
 
       assert_not_requested(:post, "http://www.example.com")
-      assert_equal 4, _assertions
+      assert_equal 4, assertions
     end
 
     it "should raise error on non stubbed request" do
