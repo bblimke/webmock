@@ -14,6 +14,7 @@ end
 
 group :test do
   gem 'rack'
+  gem 'minitest_tu_shim'
 end
 
 platforms :jruby do
