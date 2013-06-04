@@ -834,7 +834,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Pavel Forkert
 * Jordi Massaguer Pla
 * Jake Benilov
-* Travis Beauvais
+* Tom Beauvais
 * Mokevnin Kirill
 * Alex Grant
 * Lucas Dohmen

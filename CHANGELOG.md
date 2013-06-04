@@ -57,7 +57,7 @@
 
 * Fixed issues with registering http requests in multi-threaded environments
 
-  Thanks to [Travis Beauvais](https://github.com/tbeauvais)
+  Thanks to [Tom Beauvais](https://github.com/tbeauvais)
 
 * Bumped Crack version to >=0.3.2
 
