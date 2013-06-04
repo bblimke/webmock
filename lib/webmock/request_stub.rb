@@ -39,6 +39,11 @@ module WebMock
       self
     end
 
+    def to_errback
+      @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_errback => true)])
+      self
+    end
+
     def response
       if @responses_sequences.empty?
         WebMock::Response.new

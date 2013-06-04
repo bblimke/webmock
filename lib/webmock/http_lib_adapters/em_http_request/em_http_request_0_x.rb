@@ -26,6 +26,7 @@ if defined?(EventMachine::HttpRequest)
       include HttpEncoding
 
       class WebMockHttpClient < EventMachine::HttpClient
+        attr_writer :options
 
         def setup(response, uri, error = nil)
           @last_effective_url = @uri = uri
@@ -56,9 +57,12 @@ if defined?(EventMachine::HttpRequest)
           WebMock::CallbackRegistry.invoke_callbacks(
           {:lib => :em_http_request}, request_signature, webmock_response)
           client = WebMockHttpClient.new(nil)
+          client.options = @req.options
+          client.on_error("WebMock errback", true) if webmock_response.should_errback
           client.on_error("WebMock timeout error") if webmock_response.should_timeout
           client.setup(make_raw_response(webmock_response), @uri,
             webmock_response.should_timeout ? "WebMock timeout error" : nil)
+          block.call(client) unless block.nil?
           client
         elsif WebMock.net_connect_allowed?(request_signature.uri)
           http = super

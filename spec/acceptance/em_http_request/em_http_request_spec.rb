@@ -212,6 +212,28 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:post, "http://www.example.com").body.bytesize.should == body.bytesize
     end
 
+    it "should yield control to given block" do
+      stub_request(:get, "www.example.com").to_return(:body => "abc")
+      expect { |b| http_request(:get, "http://www.example.com/", &b) }.to yield_control
+    end
+
+    describe "when request stub declares that request should errback" do
+      it "should errback" do
+        stub_request(:get, "www.example.com").to_errback
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error("WebMock errback")
+      end
+
+      it "should errback after returning declared successful response first" do
+        stub_request(:get, "www.example.com").to_return(:body => "abc").then.to_errback
+        http_request(:get, "http://www.example.com/").body.should == "abc"
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error("WebMock errback")
+      end
+    end
+
     describe "mocking EM::HttpClient API" do
       let(:uri) { "http://www.example.com/" }
 
@@ -238,6 +260,10 @@ unless RUBY_PLATFORM =~ /java/
 
       it 'should support #last_effective_url' do
         subject.last_effective_url.should == Addressable::URI.parse(uri)
+      end
+
+      it 'should support #options' do
+        subject.options.should == { :timeout => 10, :redirects => 0, :keepalive => false }
       end
 
       context "with a query" do
