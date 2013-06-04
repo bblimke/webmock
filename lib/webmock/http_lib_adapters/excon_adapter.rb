@@ -122,7 +122,7 @@ if defined?(Excon)
           mock = WebMock::Response.new
           mock.status  = real.status
           mock.headers = real.headers
-          mock.body    = real.body
+          mock.body    = real.body.dup
           mock
         end
 
