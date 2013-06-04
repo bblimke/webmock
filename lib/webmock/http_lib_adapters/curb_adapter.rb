@@ -144,8 +144,13 @@ if defined?(Curl)
       def invoke_curb_callbacks
         @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
         @on_header.call(self.header_str) if @on_header
-        @on_body.call(self.body_str) if @on_body
+        on_body_return = @on_body.call(self.body_str) if @on_body
         @on_complete.call(self) if @on_complete
+
+        # Raise WriteError just like real curl
+        if on_body_return == -1
+          raise Curl::Easy.error(23).first
+        end
 
         case response_code
         when 200..299

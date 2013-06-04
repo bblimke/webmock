@@ -81,6 +81,19 @@ unless RUBY_PLATFORM =~ /java/
         test.should == body
       end
 
+      it "should raise WriteError when -1 is returned from on_body" do
+        body = "on_body fired"
+        stub_request(:any, "example.com").
+          to_return(:body => body)
+
+        @curl.on_body do |data|
+          -1
+        end
+        expect {
+          @curl.http_get
+        }.to raise_error Curl::Err::WriteError
+      end
+
       it "should call on_header when response headers are read" do
         stub_request(:any, "example.com").
           to_return(:headers => {:one => 1})
