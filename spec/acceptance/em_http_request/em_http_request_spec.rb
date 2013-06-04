@@ -199,9 +199,11 @@ unless RUBY_PLATFORM =~ /java/
       http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body.should == "ok"
     end
 
-    it "should work when a file is passed as body" do
-      stub_request(:post, "www.example.com").with(:body => File.read(__FILE__)).to_return(:body => "ok")
-      http_request(:post, "http://www.example.com", :file => __FILE__).body.should == "ok"
+    if defined?(EventMachine::HttpConnection)
+      it "should work when a file is passed as body" do
+        stub_request(:post, "www.example.com").with(:body => File.read(__FILE__)).to_return(:body => "ok")
+        http_request(:post, "http://www.example.com", :file => __FILE__).body.should == "ok"
+      end
     end
 
     it "should work with UTF-8 strings" do
