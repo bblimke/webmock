@@ -227,7 +227,8 @@ RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1")    # ===> Success
 ### Stubbing with custom response
 
 ```ruby
-stub_request(:any, "www.example.com").to_return(:body => "abc", :status => 200,  :headers => { 'Content-Length' => 3 })
+stub_request(:any, "www.example.com").
+  to_return(:body => "abc", :status => 200, :headers => { 'Content-Length' => 3 })
 
 Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 ```
@@ -237,7 +238,8 @@ Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 ```ruby
 File.open('/tmp/response_body.txt', 'w') { |f| f.puts 'abc' }
 
-stub_request(:any, "www.example.com").to_return(:body => File.new('/tmp/response_body.txt'), :status => 200)
+stub_request(:any, "www.example.com").
+  to_return(:body => File.new('/tmp/response_body.txt'), :status => 200)
 
 Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 ```
@@ -248,7 +250,7 @@ Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
 
 req = Net::HTTP::Get.new("/")
-Net::HTTP.start("www.example.com") { |http| http.request(req) }.message    # ===> "Internal Server Error"
+Net::HTTP.start("www.example.com") {|http| http.request(req)}.message    # ===> "Internal Server Error"
 ```
 
 ### Replaying raw responses recorded with `curl -is`
@@ -292,7 +294,8 @@ RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
 
     `curl -is www.example.com > /tmp/www.example.com.txt`
 ```ruby
-stub_request(:get, "www.example.com").to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
+stub_request(:get, "www.example.com").
+  to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
 ```
 
 ### Responses with dynamically evaluated parts
@@ -501,7 +504,8 @@ assert_not_requested(stub_post)
 ```ruby
 require 'webmock/rspec'
 
-WebMock.should have_requested(:get, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).twice
+WebMock.should have_requested(:get, "www.example.com").
+  with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 
 WebMock.should_not have_requested(:get, "www.something.com")
 
@@ -509,7 +513,8 @@ WebMock.should have_requested(:post, "www.example.com").with { |req| req.body ==
 
 WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
-WebMock.should have_requested(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+WebMock.should have_requested(:get, "www.example.com").
+  with(:query => hash_including({"a" => ["b", "c"]}))
 
 WebMock.should have_requested(:get, "www.example.com").
   with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
@@ -518,7 +523,8 @@ WebMock.should have_requested(:get, "www.example.com").
 ### Setting expectations in RSpec with `a_request`
 
 ```ruby
-a_request(:post, "www.example.com").with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
+a_request(:post, "www.example.com").
+  with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
 
 a_request(:post, "www.something.com").should have_been_made.times(3)
 
@@ -528,10 +534,12 @@ a_request(:post, "www.example.com").with { |req| req.body == "abc" }.should have
 
 a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
 
-a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
+a_request(:get, "www.example.com").
+  with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
 
 a_request(:post, "www.example.com").
-  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).should have_been_made
+  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).
+  should have_been_made
 ```
 
 ### Setting expectations in RSpec on the stub
@@ -680,8 +688,8 @@ end
 #### invoke callbacks for real requests only and except requests made with Patron
 
 ```ruby
-WebMock.after_request(:except => [:patron], :real_requests_only => true)  do |request_signature, response|
-  puts "Request #{request_signature} was made and #{response} was returned"
+WebMock.after_request(:except => [:patron], :real_requests_only => true) do |req_signature, response|
+  puts "Request #{req_signature} was made and #{response} was returned"
 end
 ```
 
