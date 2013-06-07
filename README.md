@@ -112,9 +112,10 @@ stub_request(:post, "www.example.com").with(:body => "abc", :headers => { 'Conte
 uri = URI.parse("http://www.example.com/")
 req = Net::HTTP::Post.new(uri.path)
 req['Content-Length'] = 3
-res = Net::HTTP.start(uri.host, uri.port) {|http|
+
+res = Net::HTTP.start(uri.host, uri.port) do |http|
   http.request(req, "abc")
-}    # ===> Success
+end    # ===> Success
 ```
 
 ### Matching request body and headers against regular expressions
@@ -126,9 +127,10 @@ stub_request(:post, "www.example.com").
 uri = URI.parse('http://www.example.com/')
 req = Net::HTTP::Post.new(uri.path)
 req['Content-Type'] = 'image/png'
-res = Net::HTTP.start(uri.host, uri.port) {|http|
+
+res = Net::HTTP.start(uri.host, uri.port) do |http|
   http.request(req, 'hello world')
-}    # ===> Success
+end    # ===> Success
 ```
 
 ### Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
@@ -165,9 +167,10 @@ stub_request(:any, "www.example.com").with(:headers=>{ 'Header-Name' => 'Header-
 uri = URI.parse('http://www.example.com/')
 req = Net::HTTP::Post.new(uri.path)
 req['Header-Name'] = 'Header-Value'
-res = Net::HTTP.start(uri.host, uri.port) {|http|
+
+res = Net::HTTP.start(uri.host, uri.port) do |http|
   http.request(req, 'abc')
-}    # ===> Success
+end    # ===> Success
 ```
 
 ### Matching multiple headers with the same name
@@ -463,9 +466,10 @@ stub_request(:any, "www.example.com")
 uri = URI.parse('http://www.example.com/')
 req = Net::HTTP::Post.new(uri.path)
 req['Content-Length'] = 3
-res = Net::HTTP.start(uri.host, uri.port) {|http|
+
+res = Net::HTTP.start(uri.host, uri.port) do |http|
   http.request(req, 'abc')
-}
+end
 
 assert_requested :post, "http://www.example.com",
   :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
