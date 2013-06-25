@@ -29,11 +29,11 @@ Supported HTTP libraries
 Supported Ruby Interpreters
 ---------------------------
 
-* MRI 1.8.6
 * MRI 1.8.7
 * MRI 1.9.1
 * MRI 1.9.2
 * MRI 1.9.3
+* MRI 2.0.0
 * REE 1.8.7
 * JRuby
 * Rubinius
