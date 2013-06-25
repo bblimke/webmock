@@ -430,6 +430,8 @@ RestClient.get('www.example.org:8080', '/')    # ===> Allowed
 
 WebMock.disable_net_connect!(:allow => /ample.org/)
 
+WebMock.disable_net_connect!(:allow => [/ample.org/, /googl/])
+
 RestClient.get('www.example.org', '/')    # ===> Allowed
 ```
 
@@ -838,6 +840,13 @@ People who submitted patches and new features or suggested improvements. Many th
 * Mokevnin Kirill
 * Alex Grant
 * Lucas Dohmen
+* Bastien Vaucher
+* Joost Baaij
+* Joel Chippindale
+* Murahashi Sanemat Kenichi
+* Tim Kurvers
+* Ilya Vassilevsky
+* gotwalt
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

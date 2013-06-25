@@ -1,5 +1,46 @@
 # Changelog
 
+
+## 1.12.0
+
+* Not using Gem spec anymore to check loaded Curb version.
+
+* `WebMock.disable_net_connect!` now accepts array of regexps as allow param:
+
+  i.e. `WebMock.disable_net_connect!(:allow => [/google.com/, /yahoo.com/])`
+
+  Thanks to [Bastien Vaucher](https://github.com/bastien)
+
+* Fixed `on_header` Curb callback behaviour in Curb adapter
+
+  Thanks to [Joel Chippindale](https://github.com/mocoso)
+
+* Fixed aws-sdk compatibility with Ruby 2.0, by supporting `continue_timeout` accessor on Net::HTTP socket.
+
+   Thanks to [Lin Jen-Shin](https://github.com/godfat)
+
+* Fixed WebMock::Server to not give "log writing failed. can't be called from trap context" warning with Ruby 2.0
+
+   Thanks to [Murahashi Sanemat Kenichi](https://github.com/sanemat)
+
+* Added support for EM-HTTP-Request streaming data off disk feature.
+
+   Thanks to [Lin Jen-Shin](https://github.com/godfat)
+
+* Added compatibility with Minitest 5
+
+   Thanks to [Tim Kurvers](https://github.com/timkurvers)
+
+* Excon >= 0.22 compatibility.
+
+* README has nice sytnax hightlighting and fixed code styling!
+
+   Thanks to [Ilya Vassilevsky](https://github.com/vassilevsky)
+
+* Compatibility with Rails 4 `rack.session.options`
+
+   Thanks to [gotwalt](https://github.com/gotwalt)
+
 ## 1.11.0
 
 * Excon >= 0.17 support.
