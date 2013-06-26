@@ -10,7 +10,9 @@ gem 'minitest'
 require 'minitest/autorun'
 require 'webmock/minitest'
 
-class MiniTest::Test
+test_class = defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase
+
+test_class.class_eval do
 
   def assert_raise(*exp, &block)
     assert_raises(*exp, &block)
