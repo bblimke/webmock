@@ -1,6 +1,10 @@
 # Changelog
 
 
+## 1.12.1
+
+* Fixed Minitest < 5.0 compatibility
+
 ## 1.12.0
 
 * Not using Gem spec anymore to check loaded Curb version.
