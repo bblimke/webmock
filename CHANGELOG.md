@@ -1,9 +1,22 @@
 # Changelog
 
+## 1.12.2
+
+* Fixed issue with handling request.path when Addressable::URI is passed to #request instead of URI with Ruby 2.0.
+
+  Thanks to [Leif Bladt](https://github.com/leifbladt)
+
+* Accept integers as query param values in request stubs
+
+  i.e. `stub_request(:get, /.*/).with(:query => {"a" => 1})`
+
+  Thanks to [Mitsutaka Mimura](https://github.com/takkanm)
 
 ## 1.12.1
 
 * Fixed Minitest < 5.0 compatibility
+
+  Thanks to [Alex Tomlins](https://github.com/alext) for reporting the issue.
 
 ## 1.12.0
 

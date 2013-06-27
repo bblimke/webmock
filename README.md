@@ -847,6 +847,9 @@ People who submitted patches and new features or suggested improvements. Many th
 * Tim Kurvers
 * Ilya Vassilevsky
 * gotwalt
+* Leif Bladt
+* Alex Tomlins
+* Mitsutaka Mimura
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
