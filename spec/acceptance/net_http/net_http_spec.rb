@@ -158,6 +158,11 @@ describe "Net:HTTP" do
     WebMock::RequestRegistry.instance.requested_signatures.hash.values.first.should == 1
   end
 
+  it "should work with Addressable::URI passed to Net::HTTP.get_response" do
+    stub_request(:get, 'http://www.example.com')
+    Net::HTTP.get_response(Addressable::URI.parse('http://www.example.com/'))
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)
