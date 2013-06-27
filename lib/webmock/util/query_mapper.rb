@@ -169,7 +169,7 @@ module WebMock::Util
           return parent
         else
           encoded_value = Addressable::URI.encode_component(
-            value.dup, Addressable::URI::CharacterClasses::UNRESERVED
+            value.to_s.dup, Addressable::URI::CharacterClasses::UNRESERVED
           )
           return "#{parent}=#{encoded_value}"
         end
