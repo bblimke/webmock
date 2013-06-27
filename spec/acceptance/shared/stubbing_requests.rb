@@ -6,7 +6,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         http_request(:get, "http://www.example.com/hello%2B/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
 
-      it "should return stubbed response if query params as a hash with can't dup object" do
+      it "should return stubbed response even if query params have integer values" do
         stub_request(:get, "www.example.com").with(:query => {"a" => 1}).to_return(:body => "abc")
         http_request(:get, "http://www.example.com/?a=1").body.should == "abc"
       end
