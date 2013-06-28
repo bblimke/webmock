@@ -61,7 +61,7 @@ describe "HTTPClient" do
       }
     ]}
 
-    let(:make_request) {HTTPClient.new.post("http://www.example.com", body: body, header: header)}
+    let(:make_request) {HTTPClient.new.post("http://www.example.com", :body => body, :header => header)}
 
     before do
       stub_request(:post, "www.example.com")
