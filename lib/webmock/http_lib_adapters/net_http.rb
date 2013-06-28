@@ -236,8 +236,8 @@ module WebMock
 
       path = request.path
 
-      if path.respond_to?(:path) #https://github.com/bblimke/webmock/issues/288
-        path = path.path
+      if path.respond_to?(:request_uri) #https://github.com/bblimke/webmock/issues/288
+        path = path.request_uri
       end
 
       path = WebMock::Util::URI.heuristic_parse(path).request_uri if path =~ /^http/
