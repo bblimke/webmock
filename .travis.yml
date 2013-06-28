@@ -13,5 +13,3 @@ matrix:
     - rvm: rbx-18mode
     - rvm: rbx-19mode
     - rvm: jruby-18mode
-
-script: "bundle exec rake && rake em_http_request_0_x_spec"
