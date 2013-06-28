@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.12.3
+
+* Fixed issue with handling Addressable::URI with query params passed to `Net::HTTP.get_response`
+
+  Thanks to [Leif Bladt](https://github.com/leifbladt)
+
+* Fixed HTTPClient adapter to not raise an error if a request with multipart body is executed.
+
 ## 1.12.2
 
 * Fixed issue with handling request.path when Addressable::URI is passed to #request instead of URI with Ruby 2.0.
