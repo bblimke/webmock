@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.13.0
+
+* Net::HTTP::Persistent compatibility.
+  WebMock doesn't disconnect previously started connections upon a request anymore.
+
+
 ## 1.12.3
 
 * Fixed issue with handling Addressable::URI with query params passed to `Net::HTTP.get_response`
