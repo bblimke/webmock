@@ -93,15 +93,22 @@ module WebMock
               block.call response if block
               response
             end
-            response = if (started? && !WebMock::Config.instance.net_http_connect_on_start) || !started?
-              @started = false #otherwise start_with_connect wouldn't execute and connect
-              start_with_connect {
-                response = super(request, nil, &nil)
-                after_request.call(response)
-              }
-            else
+            super_with_after_request = lambda {
               response = super(request, nil, &nil)
               after_request.call(response)
+            }
+            response = if started?
+              if WebMock::Config.instance.net_http_connect_on_start
+                super_with_after_request.call
+              else
+                start_with_connect_without_finish {
+                  super_with_after_request.call
+                }
+              end
+            else
+              start_with_connect {
+                super_with_after_request.call
+              }
             end
           else
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
@@ -119,6 +126,18 @@ module WebMock
             end
           end
           @started = true
+          self
+        end
+
+
+        def start_with_connect_without_finish  # :yield: http
+          if block_given?
+            begin
+              do_start
+              return yield(self)
+            end
+          end
+          do_start
           self
         end
 
