@@ -6,6 +6,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         http_request(:get, "http://www.example.com/hello%2B/?#{ESCAPED_PARAMS}").body.should == "abc"
       end
 
+      it "should return stubbed response even if query params have integer values" do
+        stub_request(:get, "www.example.com").with(:query => {"a" => 1}).to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?a=1").body.should == "abc"
+      end
+
       it "should return stubbed response even if request has non escaped params" do
         stub_request(:get, "www.example.com/hello%2B/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"

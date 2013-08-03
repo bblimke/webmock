@@ -5,7 +5,7 @@ rescue LoadError
 end
 
 if defined?(Excon)
-  WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.9.6').check_version!
+  WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.22.0').check_version!
 
   module WebMock
     module HttpLibAdapters
@@ -122,7 +122,7 @@ if defined?(Excon)
           mock = WebMock::Response.new
           mock.status  = real.status
           mock.headers = real.headers
-          mock.body    = real.body
+          mock.body    = real.body.dup
           mock
         end
 

@@ -1,7 +1,16 @@
-require 'minitest/unit'
+begin
+  require 'minitest/test'
+  test_class= MiniTest::Test
+  assertions = "assertions"
+rescue LoadError
+  require "minitest/unit"
+  test_class = MiniTest::Unit::TestCase
+  assertions = "_assertions"
+end
+
 require 'webmock'
 
-MiniTest::Unit::TestCase.class_eval do
+test_class.class_eval do
   include WebMock::API
 
   alias_method :teardown_without_webmock, :teardown
@@ -14,7 +23,7 @@ MiniTest::Unit::TestCase.class_eval do
   [:assert_request_requested, :assert_request_not_requested].each do |name|
     alias_method :"#{name}_without_assertions_count", name
     define_method :"#{name}_with_assertions_count" do |*args|
-      self._assertions += 1
+      self.send("#{assertions}=", self.send("#{assertions}") + 1)
       send :"#{name}_without_assertions_count", *args
     end
     alias_method name, :"#{name}_with_assertions_count"

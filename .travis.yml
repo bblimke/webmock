@@ -10,9 +10,6 @@ rvm:
   - rbx-19mode
 matrix:
   allow_failures:
-    - rvm: 2.0.0
     - rvm: rbx-18mode
     - rvm: rbx-19mode
-    - rvm: jruby-19mode
-
-script: "bundle exec rake && rake em_http_request_0_x_spec"
+    - rvm: jruby-18mode

@@ -5,11 +5,15 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require File.expand_path(File.dirname(__FILE__) + '/../test/http_request')
 
-gem "minitest"
+gem 'minitest'
+
 require 'minitest/autorun'
 require 'webmock/minitest'
 
-class MiniTest::Unit::TestCase
+test_class = defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase
+
+test_class.class_eval do
+
   def assert_raise(*exp, &block)
     assert_raises(*exp, &block)
   end
@@ -26,4 +30,5 @@ class MiniTest::Unit::TestCase
    def assert_fail(message, &block)
      assert_raise_with_message(MiniTest::Assertion, message, &block)
    end
+
 end

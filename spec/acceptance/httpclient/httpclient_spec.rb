@@ -8,6 +8,7 @@ describe "HTTPClient" do
   include HTTPClientSpecHelper
 
   before(:each) do
+    WebMock.reset_callbacks
     HTTPClientSpecHelper.async_mode = false
   end
 
@@ -45,6 +46,32 @@ describe "HTTPClient" do
     end
     str.should == 'test'
   end
+
+  context "multipart bodies" do
+    let(:header) {{
+        'Accept' => 'application/json',
+        'Content-Type' => 'multipart/form-data'
+    }}
+
+   let(:body) {[
+      {
+        'Content-Type' => 'application/json',
+        'Content-Disposition' => 'form-data',
+        :content => '{"foo": "bar", "baz": 2}'
+      }
+    ]}
+
+    let(:make_request) {HTTPClient.new.post("http://www.example.com", :body => body, :header => header)}
+
+    before do
+      stub_request(:post, "www.example.com")
+    end
+
+    it "should work with multipart bodies" do
+      make_request
+    end
+  end
+
 
   context "Filters" do
     class Filter

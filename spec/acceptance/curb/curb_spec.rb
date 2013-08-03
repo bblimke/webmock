@@ -85,12 +85,15 @@ unless RUBY_PLATFORM =~ /java/
         stub_request(:any, "example.com").
           to_return(:headers => {:one => 1})
 
-        test = nil
+        test = []
         @curl.on_header do |data|
-          test = data
+          test << data
         end
         @curl.http_get
-        test.should match(/One: 1/)
+        test.should == [
+          "HTTP/1.1 200 \r\n",
+          'One: 1'
+        ]
       end
 
       it "should call on_complete when request is complete" do

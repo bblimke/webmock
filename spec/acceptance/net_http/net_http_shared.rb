@@ -32,8 +32,15 @@ shared_examples_for "Net::HTTP" do
         conn.request(Net::HTTP::Get.new("/"))
         socket_id_after_request = conn.instance_variable_get(:@socket).object_id
       }
-      socket_id_after_request.should_not be_nil
-      socket_id_after_request.should == socket_id_before_request
+
+      if !defined?(WebMock::Config) || WebMock::Config.instance.net_http_connect_on_start
+        socket_id_before_request.should_not == nil.object_id
+        socket_id_after_request.should_not == nil.object_id
+        socket_id_after_request.should == socket_id_before_request
+      else
+        socket_id_before_request.should == nil.object_id
+        socket_id_after_request.should_not == nil.object_id
+      end
     end
 
     describe "without start" do
@@ -119,6 +126,16 @@ shared_examples_for "Net::HTTP" do
         }
         started.should == true
         @http.started?.should == false
+      end
+    end
+
+    describe "with start without a block and finish" do
+      it "should gracefully start and close connection" do
+        @http.start
+        @http.get("/")
+        @http.should be_started
+        @http.finish
+        @http.should_not be_started
       end
     end
   end

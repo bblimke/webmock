@@ -1,5 +1,77 @@
 # Changelog
 
+## 1.13.0
+
+* Net::HTTP::Persistent compatibility.
+  WebMock doesn't disconnect previously started connections upon a request anymore.
+
+
+## 1.12.3
+
+* Fixed issue with handling Addressable::URI with query params passed to `Net::HTTP.get_response`
+
+  Thanks to [Leif Bladt](https://github.com/leifbladt)
+
+* Fixed HTTPClient adapter to not raise an error if a request with multipart body is executed.
+
+## 1.12.2
+
+* Fixed issue with handling request.path when Addressable::URI is passed to #request instead of URI with Ruby 2.0.
+
+  Thanks to [Leif Bladt](https://github.com/leifbladt)
+
+* Accept integers as query param values in request stubs
+
+  i.e. `stub_request(:get, /.*/).with(:query => {"a" => 1})`
+
+  Thanks to [Mitsutaka Mimura](https://github.com/takkanm)
+
+## 1.12.1
+
+* Fixed Minitest < 5.0 compatibility
+
+  Thanks to [Alex Tomlins](https://github.com/alext) for reporting the issue.
+
+## 1.12.0
+
+* Not using Gem spec anymore to check loaded Curb version.
+
+* `WebMock.disable_net_connect!` now accepts array of regexps as allow param:
+
+  i.e. `WebMock.disable_net_connect!(:allow => [/google.com/, /yahoo.com/])`
+
+  Thanks to [Bastien Vaucher](https://github.com/bastien)
+
+* Fixed `on_header` Curb callback behaviour in Curb adapter
+
+  Thanks to [Joel Chippindale](https://github.com/mocoso)
+
+* Fixed aws-sdk compatibility with Ruby 2.0, by supporting `continue_timeout` accessor on Net::HTTP socket.
+
+   Thanks to [Lin Jen-Shin](https://github.com/godfat)
+
+* Fixed WebMock::Server to not give "log writing failed. can't be called from trap context" warning with Ruby 2.0
+
+   Thanks to [Murahashi Sanemat Kenichi](https://github.com/sanemat)
+
+* Added support for EM-HTTP-Request streaming data off disk feature.
+
+   Thanks to [Lin Jen-Shin](https://github.com/godfat)
+
+* Added compatibility with Minitest 5
+
+   Thanks to [Tim Kurvers](https://github.com/timkurvers)
+
+* Excon >= 0.22 compatibility.
+
+* README has nice sytnax hightlighting and fixed code styling!
+
+   Thanks to [Ilya Vassilevsky](https://github.com/vassilevsky)
+
+* Compatibility with Rails 4 `rack.session.options`
+
+   Thanks to [gotwalt](https://github.com/gotwalt)
+
 ## 1.11.0
 
 * Excon >= 0.17 support.
@@ -57,7 +129,7 @@
 
 * Fixed issues with registering http requests in multi-threaded environments
 
-  Thanks to [Travis Beauvais](https://github.com/tbeauvais)
+  Thanks to [Tom Beauvais](https://github.com/tbeauvais)
 
 * Bumped Crack version to >=0.3.2
 

@@ -26,3 +26,5 @@ pkg/*
 tmp/*
 *.rbc
 *.rbx
+.ruby-gemset
+.ruby-version
