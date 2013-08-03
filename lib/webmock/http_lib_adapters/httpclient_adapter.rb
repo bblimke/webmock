@@ -31,6 +31,11 @@ if defined?(::HTTPClient)
     alias_method :do_get_block_without_webmock, :do_get_block
     alias_method :do_get_stream_without_webmock, :do_get_stream
 
+    def initialize
+      super
+      @lock = Mutex.new
+    end
+
     def do_get_block(req, proxy, conn, &block)
       do_get(req, proxy, conn, false, &block)
     end
@@ -40,52 +45,56 @@ if defined?(::HTTPClient)
     end
 
     def do_get(req, proxy, conn, stream = false, &block)
-      request_signature = build_request_signature(req, :reuse_existing)
+      @lock.synchronize do
+        request_signature = build_request_signature(req, :reuse_existing)
 
-      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-      if webmock_responses[request_signature]
-        webmock_response = webmock_responses.delete(request_signature)
-        response = build_httpclient_response(webmock_response, stream, &block)
-        @request_filter.each do |filter|
-          filter.filter_response(req, response)
-        end
-        res = conn.push(response)
-        WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :httpclient}, request_signature, webmock_response)
-        res
-      elsif WebMock.net_connect_allowed?(request_signature.uri)
-        # in case there is a nil entry in the hash...
-        webmock_responses.delete(request_signature)
-
-        res = if stream
-          do_get_stream_without_webmock(req, proxy, conn, &block)
-        else
-          do_get_block_without_webmock(req, proxy, conn, &block)
-        end
-        res = conn.pop
-        conn.push(res)
-        if WebMock::CallbackRegistry.any_callbacks?
-          webmock_response = build_webmock_response(res)
+        if webmock_responses[request_signature]
+          webmock_response = webmock_responses.delete(request_signature)
+          response = build_httpclient_response(webmock_response, stream, &block)
+          @request_filter.each do |filter|
+            filter.filter_response(req, response)
+          end
+          res = conn.push(response)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :httpclient, :real_request => true}, request_signature,
-            webmock_response)
+            {:lib => :httpclient}, request_signature, webmock_response)
+          res
+        elsif WebMock.net_connect_allowed?(request_signature.uri)
+          # in case there is a nil entry in the hash...
+          webmock_responses.delete(request_signature)
+
+          res = if stream
+            do_get_stream_without_webmock(req, proxy, conn, &block)
+          else
+            do_get_block_without_webmock(req, proxy, conn, &block)
+          end
+          res = conn.pop
+          conn.push(res)
+          if WebMock::CallbackRegistry.any_callbacks?
+            webmock_response = build_webmock_response(res)
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {:lib => :httpclient, :real_request => true}, request_signature,
+              webmock_response)
+          end
+          res
+        else
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
-        res
-      else
-        raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
     end
 
     def do_request_async(method, uri, query, body, extheader)
-      req = create_request(method, uri, query, body, extheader)
-      request_signature = build_request_signature(req)
-      webmock_request_signatures << request_signature
+      @lock.synchronize do
+        req = create_request(method, uri, query, body, extheader)
+        request_signature = build_request_signature(req)
+        webmock_request_signatures << request_signature
 
-      if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
-        super
-      else
-        raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
+          super
+        else
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        end
       end
     end
 
