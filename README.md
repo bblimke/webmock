@@ -258,7 +258,10 @@ Net::HTTP.start("www.example.com") {|http| http.request(req)}.message    # ===> 
 
 ### Replaying raw responses recorded with `curl -is`
 
-    `curl -is www.example.com > /tmp/example_curl_-is_output.txt`
+```
+curl -is www.example.com > /tmp/example_curl_-is_output.txt
+```
+
 ```ruby
 raw_response_file = File.new("/tmp/example_curl_-is_output.txt")
 ```
