@@ -27,6 +27,24 @@ describe "errors" do
                "bbb\n\nregistered request stubs:\n\nbbb\n\n============================================================"
         WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
       end
+
+      it "should not be caught by a rescue block without arguments" do
+        request_signature = mock(:to_s => "aaa")
+        request_stub = mock
+        WebMock::RequestStub.stub!(:from_request_signature).and_return(request_stub)
+        WebMock::StubRequestSnippet.stub!(:new).
+          with(request_stub).and_return(mock(:to_s => "bbb"))
+
+        exception = WebMock::NetConnectNotAllowedError.new(request_signature)
+
+        expect do
+          begin
+            raise exception
+          rescue
+            raise "exception should not be caught"
+          end
+        end.to raise_exception exception
+      end
     end
   end
 end
