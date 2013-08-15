@@ -184,6 +184,19 @@ describe WebMock::Util::URI do
       uri = WebMock::Util::URI.normalize_uri(uri_string)
       WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"one"=>{"two"=>{"three" => ["four", "five"]}}}
     end
+
+    it "should successfully handle mixed array and hash parameters" do
+      # derived from an elasticsearch query:
+      # load => {
+      #   :include => [
+      #     { :staff => :email },
+      #     :business_name
+      #   ]
+      # }
+      uri_string = "http://www.example.com:80/path?load[include][][staff]=email&load[include][]=business_name"
+      uri = WebMock::Util::URI.normalize_uri(uri_string)
+      WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"load"=>{"include"=>[{"staff"=>"email"},"business_name"]}}
+    end
   end
 
   describe "stripping default port" do
