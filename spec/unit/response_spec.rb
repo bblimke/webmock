@@ -6,14 +6,14 @@ describe WebMock::ResponseFactory do
 
     it "should create response with options passed as arguments" do
       options = {:body => "abc", :headers => {:a => :b}}
-      WebMock::Response.should_receive(:new).with(options).and_return(@response = mock(WebMock::Response))
+      WebMock::Response.should_receive(:new).with(options).and_return(@response = double(WebMock::Response))
       WebMock::ResponseFactory.response_for(options).should == @response
     end
 
 
     it "should create dynamic response for argument responding to call" do
-      callable = mock(:call => {:body => "abc"})
-      WebMock::DynamicResponse.should_receive(:new).with(callable).and_return(@response = mock(WebMock::Response))
+      callable = double(:call => {:body => "abc"})
+      WebMock::DynamicResponse.should_receive(:new).with(callable).and_return(@response = double(WebMock::Response))
       WebMock::ResponseFactory.response_for(callable).should == @response
     end
 

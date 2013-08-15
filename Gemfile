@@ -14,7 +14,7 @@ end
 
 group :test do
   gem 'rack'
-  gem 'minitest_tu_shim'
+  gem 'minitest_tu_shim', :git => "https://github.com/seattlerb/minitest_tu_shim.git"
 end
 
 platforms :jruby do

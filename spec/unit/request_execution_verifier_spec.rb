@@ -3,7 +3,7 @@ require 'spec_helper'
 describe WebMock::RequestExecutionVerifier do
   before(:each) do
     @verifier = WebMock::RequestExecutionVerifier.new
-    @request_pattern = mock(WebMock::RequestPattern, :to_s => "www.example.com")
+    @request_pattern = double(WebMock::RequestPattern, :to_s => "www.example.com")
     @verifier.request_pattern = @request_pattern
     WebMock::RequestRegistry.instance.stub(:to_s).and_return("executed requests")
     @executed_requests_info = "\n\nThe following requests were made:\n\nexecuted requests\n" + "="*60
