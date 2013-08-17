@@ -83,7 +83,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
       let(:host_with_port){ WebMockServer.instance.host_with_port }
 
       before(:each) do
-        WebMock.disable_net_connect!(:allow => ["www.example.org", host_with_port])
+        WebMock.disable_net_connect!(:allow => ["www.example.org", "httpstat.us", host_with_port])
       end
 
       context "when the host is not allowed" do
@@ -120,7 +120,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
         end
 
         it "should make a real request to allowed host", :net_connect => true do
-          http_request(:get, "http://www.example.org/").status.should == "302"
+          http_request(:get, "http://httpstat.us/200").status.should == "200"
         end
       end
 

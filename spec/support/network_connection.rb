@@ -16,7 +16,7 @@ module NetworkConnection
 
   def self.is_network_available?
     begin
-      self.connect_to("192.0.32.10", 80, 5)
+      self.connect_to("173.194.113.176", 80, 5)
       true
     rescue
       false
