@@ -90,6 +90,9 @@ module WebMock::Util
                     current_hash = current_hash[subkey]
                   end
                   if array_value
+                    if current_hash[subkeys.last] && !current_hash[subkeys.last].is_a?(Array)
+                      current_hash[subkeys.last] = [current_hash[subkeys.last]]
+                    end
                     current_hash[subkeys.last] = [] unless current_hash[subkeys.last]
                     current_hash[subkeys.last] << value
                   else

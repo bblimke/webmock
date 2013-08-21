@@ -9,7 +9,7 @@ require 'test/unit'
 class Test::Unit::TestCase
   AssertionFailedError =  Test::Unit::AssertionFailedError rescue MiniTest::Assertion
   def assert_raise_with_message(e, message, &block)
-    e = assert_raise(e, &block)
+    e = assert_raises(e, &block)
     if message.is_a?(Regexp)
       assert_match(message, e.message)
     else
