@@ -10,13 +10,13 @@ module SharedTest
   end
 
   def test_assert_requested_with_stub_and_block_raises_error
-    assert_raise ArgumentError do
+    assert_raises ArgumentError do
       assert_requested(@stub_http) {}
     end
   end
 
   def test_assert_not_requested_with_stub_and_block_raises_error
-    assert_raise ArgumentError do
+    assert_raises ArgumentError do
       assert_not_requested(@stub_http) {}
     end
   end
