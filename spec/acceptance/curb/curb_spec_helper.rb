@@ -66,7 +66,7 @@ module CurbSpecHelper
         curl.put_data = body
       end
 
-      curl.http(method)
+      curl.http(method.to_s.upcase)
       curl
     end
   end
