@@ -127,6 +127,23 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      it 'should trigger error callbacks asynchronously' do
+        stub_request(:get, 'www.example.com').to_timeout
+        called = false
+
+        EM.run do
+          conn = EventMachine::HttpRequest.new('http://www.example.com/')
+          http = conn.get
+          http.errback do
+            called = true
+            EM.stop
+          end
+          called.should == false
+        end
+
+        called.should == true
+      end
+
       # not pretty, but it works
       if defined?(EventMachine::Synchrony)
         describe "with synchrony" do

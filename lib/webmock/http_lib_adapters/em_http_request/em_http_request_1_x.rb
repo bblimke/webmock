@@ -94,7 +94,6 @@ if defined?(EventMachine::HttpClient)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if stubbed_webmock_response
-          on_error("WebMock timeout error") if stubbed_webmock_response.should_timeout
           WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, stubbed_webmock_response)
           EM.next_tick {
             setup(make_raw_response(stubbed_webmock_response), @uri,
