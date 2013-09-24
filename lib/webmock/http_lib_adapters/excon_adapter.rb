@@ -13,7 +13,7 @@ if defined?(Excon)
       class ExconAdapter < HttpLibAdapter
         PARAMS_TO_DELETE = [:expects, :idempotent,
                             :instrumentor_name, :instrumentor,
-                            :response_block, :request_block,
+                            :response_block,
                             :__construction_args, :stack,
                             :connection, :response]
 
