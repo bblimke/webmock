@@ -78,7 +78,10 @@ module WebMock
       end
 
       def self.uris_with_inferred_port_and_without(uris)
-        uris.map { |uri| [ uri, uri.gsub(%r{(:80)|(:443)}, "").freeze ] }.flatten
+        uris.map { |uri|
+          uri = uri.dup.force_encoding(Encoding::ASCII_8BIT) if uri.respond_to?(:force_encoding)
+          [ uri, uri.gsub(%r{(:80)|(:443)}, "").freeze ]
+        }.flatten
       end
 
       def self.uris_encoded_and_unencoded(uris)

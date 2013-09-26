@@ -37,6 +37,7 @@ module WebMock::Util
     #     "?one=two&one=three").query_values(:notation => :flat_array)
     #   #=> [['one', 'two'], ['one', 'three']]
     def self.query_to_values(query, options={})
+      query.force_encoding('utf-8') if query.respond_to?(:force_encoding)
       defaults = {:notation => :subscript}
       options = defaults.merge(options)
       if ![:flat, :dot, :subscript, :flat_array].include?(options[:notation])
@@ -65,6 +66,7 @@ module WebMock::Util
               end).compact.inject(empty_accumulator.dup) do |accumulator, (key, value)|
                 value = true if value.nil?
                 key = Addressable::URI.unencode_component(key)
+                key = key.dup.force_encoding(Encoding::ASCII_8BIT) if key.respond_to?(:force_encoding)
                 if value != true
                   value = Addressable::URI.unencode_component(value.gsub(/\+/, " "))
                 end

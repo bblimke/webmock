@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 shared_examples_for "stubbing requests" do |*adapter_info|
   describe "when requests are stubbed" do
     describe "based on uri" do
@@ -14,6 +16,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       it "should return stubbed response even if request has non escaped params" do
         stub_request(:get, "www.example.com/hello%2B/?#{ESCAPED_PARAMS}").to_return(:body => "abc")
         http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}").body.should == "abc"
+      end
+
+      it "should return stubbed response for url with non utf query params", "ruby>1.9" => true do
+        param = 'aäoöuü'.encode('iso-8859-1')
+        param = CGI.escape(param)
+        stub_request(:get, "www.example.com/?#{param}").to_return(:body => "abc")
+        http_request(:get, "http://www.example.com/?#{param}").body.should == "abc"
       end
 
       it "should return stubbed response even if stub uri is declared as regexp and request params are escaped" do
