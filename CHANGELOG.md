@@ -1,5 +1,35 @@
 # Changelog
 
+## 1.14.0
+
+* Handling non UTF-8 characters in query params.
+
+  Thanks to [Florian Dütsch](https://github.com/der-flo) for reporting the issue.
+
+* Added support for `request_block` param in Excon
+
+  Thanks to [Dmitry Gutov](https://github.com/dgutov) for reporting the issue.
+
+* Fixed compatibility with latest Curb
+
+  Thanks to [Ian Lesperance](https://github.com/elliterate) and [Matthew Horan](https://github.com/mhoran)
+
+* Triggering errbacks assynchronously in em-http-request adapter.
+
+  Thanks to [Ian Lesperance](https://github.com/elliterate) and [Matthew Horan](https://github.com/mhoran)
+
+* Handling query params with a hashes nested inside arrays.
+
+  Thanks to [Ian Asaff](https://github.com/montague)
+
+* Changed NetConnectNotAllowedError to inherit from Exception to allow it to bubble up into a test suite.
+
+  Thanks to [Daniel van Hoesel](https://github.com/s0meone)
+
+* HTTPClient adapter is thread safe.
+
+  Thanks to [Tom Beauvais](https://github.com/tbeauvais)
+
 ## 1.13.0
 
 * Net::HTTP::Persistent compatibility.
