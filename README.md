@@ -136,7 +136,7 @@ end    # ===> Success
 ### Matching request body against a hash. Body can be URL-Encoded, JSON or XML.
 
 ```ruby
-stub_http_request(:post, "www.example.com").
+stub_request(:post, "www.example.com").
   with(:body => {:data => {:a => '1', :b => 'five'}})
 
 RestClient.post('www.example.com', "data[a]=1&data[b]=five",
@@ -152,7 +152,7 @@ RestClient.post('www.example.com', '<data a="1" b="five" />',
 ### Matching request body against partial hash.
 
 ```ruby
-stub_http_request(:post, "www.example.com").
+stub_request(:post, "www.example.com").
   with(:body => hash_including({:data => {:a => '1', :b => 'five'}}))
 
 RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
@@ -176,7 +176,7 @@ end    # ===> Success
 ### Matching multiple headers with the same name
 
 ```ruby
-stub_http_request(:get, 'www.example.com').with(:headers => {'Accept' => ['image/jpeg', 'image/png'] })
+stub_request(:get, 'www.example.com').with(:headers => {'Accept' => ['image/jpeg', 'image/png'] })
 
 req = Net::HTTP::Get.new("/")
 req['Accept'] = ['image/png']
@@ -214,7 +214,7 @@ Net::HTTP.get('www.example.com', '/')    # ===> Success
 ### Matching query params using hash
 
 ```ruby
-stub_http_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+stub_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
 RestClient.get("http://www.example.com/?a[]=b&a[]=c")    # ===> Success
 ```
@@ -222,7 +222,7 @@ RestClient.get("http://www.example.com/?a[]=b&a[]=c")    # ===> Success
 ### Matching partial query params using hash
 
 ```ruby
-stub_http_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+stub_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
 
 RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1")    # ===> Success
 ```
