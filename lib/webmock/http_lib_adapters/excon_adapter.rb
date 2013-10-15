@@ -5,7 +5,7 @@ rescue LoadError
 end
 
 if defined?(Excon)
-  WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.22.0').check_version!
+  WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.27.5').check_version!
 
   module WebMock
     module HttpLibAdapters
@@ -54,7 +54,7 @@ if defined?(Excon)
             response
           elsif WebMock.net_connect_allowed?(mock_request.uri)
             conn = new_excon_connection(params)
-            real_response = conn.request(scrub_params_from(params.merge(:mock => false)))
+            real_response = conn.request(request_params_from(params.merge(:mock => false)))
 
             ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response), :real_request => true)
 
@@ -68,11 +68,21 @@ if defined?(Excon)
           # Ensure the connection is constructed with the exact same args
           # that the orginal connection was constructed with.
           args = params.fetch(:__construction_args)
-          ::Excon::Connection.new(scrub_params_from args.merge(:mock => false))
+          ::Excon::Connection.new(connection_params_from args.merge(:mock => false))
         end
 
-        def self.scrub_params_from(hash)
+        def self.connection_params_from(hash)
           hash = hash.dup
+          PARAMS_TO_DELETE.each { |key| hash.delete(key) }
+          hash
+        end
+
+        def self.request_params_from(hash)
+          hash = hash.dup
+          if Excon::VERSION >= '0.27.5'
+            request_keys = Excon::Utils.valid_request_keys(hash)
+            hash.reject! {|key,_| !request_keys.include?(key) }
+          end
           PARAMS_TO_DELETE.each { |key| hash.delete(key) }
           hash
         end
