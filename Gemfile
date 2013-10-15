@@ -8,8 +8,6 @@ end
 
 group :development do
   gem 'rake'
-  gem 'guard-rspec'
-  gem 'rb-fsevent'
 end
 
 group :test do
