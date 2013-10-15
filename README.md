@@ -860,6 +860,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Matthew Horan
 * Dmitry Gutov
 * Florian Dütsch
+* Manuel Meurer
+* Brian D. Burns
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

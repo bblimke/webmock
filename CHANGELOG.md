@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.0
+
+* Excon >= 0.27.5 compatibility.
+
+  Thanks to [Brian D. Burns](https://github.com/burns)
+
 ## 1.14.0
 
 * Handling non UTF-8 characters in query params.
