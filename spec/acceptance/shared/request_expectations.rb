@@ -159,11 +159,22 @@ shared_context "request expectations" do |*adapter_info|
         end
       end
 
-      it "should fail if request was made more times than expected" do
-        lambda {
-          http_request(:get, "http://www.example.com/?a=1&a=2")
-          a_request(:get, "http://www.example.com/?a=1").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/?a=1&a=2 was expected to execute 1 time but it executed 0 times))
+      context "when using flat array notation" do
+        before :all do
+          WebMock::Config.instance.query_values_notation = :flat_array
+        end
+
+        it "should satisfy expectation if request includes different repeated query params in flat array notation" do
+          lambda {
+            stub_request(:get, "http://www.example.com/?a=1&a=2")
+            http_request(:get, "http://www.example.com/?a=1&a=2")
+            a_request(:get, "http://www.example.com/?a=1&a=2").should have_been_made
+          }.should_not raise_error
+        end
+
+        after :all do
+          WebMock::Config.instance.query_values_notation = nil
+        end
       end
 
       it "should fail if request was made more times than expected" do
