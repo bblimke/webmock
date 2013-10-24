@@ -161,6 +161,13 @@ shared_context "request expectations" do |*adapter_info|
 
       it "should fail if request was made more times than expected" do
         lambda {
+          http_request(:get, "http://www.example.com/?a=1&a=2")
+          a_request(:get, "http://www.example.com/?a=1").should have_been_made
+        }.should fail_with(%r(The request GET http://www.example.com/?a=1&a=2 was expected to execute 1 time but it executed 0 times))
+      end
+
+      it "should fail if request was made more times than expected" do
+        lambda {
           http_request(:get, "http://www.example.com/")
           http_request(:get, "http://www.example.com/")
           a_request(:get, "http://www.example.com").should have_been_made
