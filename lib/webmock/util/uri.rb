@@ -74,7 +74,8 @@ module WebMock
       private
 
       def self.sort_query_values(query_values)
-        Hash[*query_values.sort.inject([]) { |values, pair| values + pair}]
+        sorted_query_values = query_values.sort
+        query_values.is_a?(Hash) ? Hash[*sorted_query_values.inject([]) { |values, pair| values + pair}] : sorted_query_values
       end
 
       def self.uris_with_inferred_port_and_without(uris)
