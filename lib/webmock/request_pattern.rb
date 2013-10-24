@@ -137,7 +137,7 @@ module WebMock
       super
       if @query_params.is_a?(Hash) || @query_params.is_a?(String)
         query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query, :notation => Config.instance.query_values_notation) || {}).merge(@query_params)
-        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash)
+        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash, :notation => WebMock::Config.instance.query_values_notation)
         @query_params = nil
       end
     end

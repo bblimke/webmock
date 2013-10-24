@@ -117,7 +117,9 @@ module WebMock::Util
     # An empty Hash will result in a nil query.
     #
     # @param [Hash, #to_hash, Array] new_query_values The new query values.
-    def self.values_to_query(new_query_values)
+    def self.values_to_query(new_query_values, options = {})
+      notation = options[:notation] || :subscript
+      puts "#{notation}"
 
       if new_query_values == nil
         return nil
@@ -158,14 +160,14 @@ module WebMock::Util
           value.sort!
           buffer = ""
           value.each do |key, val|
-            new_parent = "#{parent}[#{key}]"
+            new_parent = notation != :flat_array ? "#{parent}[#{key}]" : parent
             buffer << "#{to_query.call(new_parent, val)}&"
           end
           return buffer.chop
         elsif value.is_a?(Array)
           buffer = ""
           value.each_with_index do |val, i|
-            new_parent = "#{parent}[#{i}]"
+            new_parent = notation != :flat_array ? "#{parent}[#{i}]" : parent
             buffer << "#{to_query.call(new_parent, val)}&"
           end
           return buffer.chop
