@@ -119,7 +119,6 @@ module WebMock::Util
     # @param [Hash, #to_hash, Array] new_query_values The new query values.
     def self.values_to_query(new_query_values, options = {})
       notation = options[:notation] || :subscript
-      puts "#{notation}"
 
       if new_query_values == nil
         return nil
