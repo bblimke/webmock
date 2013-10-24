@@ -38,9 +38,8 @@ module WebMock::Util
     #   #=> [['one', 'two'], ['one', 'three']]
     def self.query_to_values(query, options={})
       query.force_encoding('utf-8') if query.respond_to?(:force_encoding)
-      defaults = {:notation => :subscript}
-      options = defaults.merge(options)
-      if ![:flat, :dot, :subscript, :flat_array].include?(options[:notation])
+      notation = options[:notation] || :subscript
+      if ![:flat, :dot, :subscript, :flat_array].include?(notation)
         raise ArgumentError,
           "Invalid notation. Must be one of: " +
           "[:flat, :dot, :subscript, :flat_array]."
@@ -60,7 +59,7 @@ module WebMock::Util
         end
       end
       return nil if query == nil
-      empty_accumulator = :flat_array == options[:notation] ? [] : {}
+      empty_accumulator = :flat_array == notation ? [] : {}
       return ((query.split("&").map do |pair|
                  pair.split("=", 2) if pair && !pair.empty?
               end).compact.inject(empty_accumulator.dup) do |accumulator, (key, value)|
@@ -70,18 +69,18 @@ module WebMock::Util
                 if value != true
                   value = Addressable::URI.unencode_component(value.gsub(/\+/, " "))
                 end
-                if options[:notation] == :flat
+                if notation == :flat
                   if accumulator[key]
                     raise ArgumentError, "Key was repeated: #{key.inspect}"
                   end
                   accumulator[key] = value
-                elsif options[:notation] == :flat_array
+                elsif notation == :flat_array
                   accumulator << [key, value]
                 else
-                  if options[:notation] == :dot
+                  if notation == :dot
                     array_value = false
                     subkeys = key.split(".")
-                  elsif options[:notation] == :subscript
+                  elsif notation == :subscript
                     array_value = !!(key =~ /\[\]$/)
                     subkeys = key.split(/[\[\]]+/)
                   end
@@ -103,7 +102,7 @@ module WebMock::Util
                 end
                 accumulator
       end).inject(empty_accumulator.dup) do |accumulator, (key, value)|
-        if options[:notation] == :flat_array
+        if notation == :flat_array
           accumulator << [key, value]
         else
           accumulator[key] = value.kind_of?(Hash) ? dehash.call(value) : value
