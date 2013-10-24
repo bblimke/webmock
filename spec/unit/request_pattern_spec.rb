@@ -192,11 +192,6 @@ describe WebMock::RequestPattern do
             should match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
         end
 
-        it "should not match when repeated query params are not the same as declared as string" do
-          WebMock::RequestPattern.new(:get, "www.example.com", :query => "a=b&a=c").
-            should_not match(WebMock::RequestSignature.new(:get, "www.example.com?a=z&a=c"))
-        end
-
         it "should match when query params are the same as declared both in query option or url" do
           WebMock::RequestPattern.new(:get, "www.example.com/?x=3", :query => "a[]=b&a[]=c").
             should match(WebMock::RequestSignature.new(:get, "www.example.com/?x=3&a[]=b&a[]=c"))
@@ -224,6 +219,21 @@ describe WebMock::RequestPattern do
           WebMock::RequestPattern.new(:get, "www.example.com",
           :query => RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"a" => ["b", "d"]})).
             should_not match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        context "when using query values notation as flat array" do
+          before :all do
+            WebMock::Config.instance.query_values_notation = :flat_array
+          end
+
+          it "should not match when repeated query params are not the same as declared as string" do
+            WebMock::RequestPattern.new(:get, "www.example.com", :query => "a=b&a=c").
+              should match(WebMock::RequestSignature.new(:get, "www.example.com?a=b&a=c"))
+          end
+
+          after :all do
+            WebMock::Config.instance.query_values_notation = nil
+          end
         end
       end
     end
