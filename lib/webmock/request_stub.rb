@@ -81,7 +81,7 @@ module WebMock
 
       if signature.body.to_s != ''
         body = if signature.url_encoded?
-          WebMock::Util::QueryMapper.query_to_values(signature.body, notation: Config.instance.query_values_notation)
+          WebMock::Util::QueryMapper.query_to_values(signature.body, :notation => Config.instance.query_values_notation)
         else
           signature.body
         end
