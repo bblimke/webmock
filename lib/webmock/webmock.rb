@@ -43,6 +43,7 @@ module WebMock
 
   def self.allow_net_connect!(options = {})
     Config.instance.allow_net_connect = true
+    Config.instance.query_values_notation = options[:query_values_notation] || :subscript
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
 
@@ -50,6 +51,7 @@ module WebMock
     Config.instance.allow_net_connect = false
     Config.instance.allow_localhost = options[:allow_localhost]
     Config.instance.allow = options[:allow]
+    Config.instance.query_values_notation = options[:query_values_notation] || :subscript
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
 
