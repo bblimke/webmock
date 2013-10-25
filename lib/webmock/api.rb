@@ -36,11 +36,15 @@ module WebMock
       assert_request_not_requested(*args)
     end
 
-    def hash_including(expected)
+    def hash_including(*expected)
       if defined?(::RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
         RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
       elsif defined?(::Spec::Mocks::ArgumentMatchers::HashIncludingMatcher)
-        Spec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
+        # wish we could just access the method hash_including, but this
+        # weirdness is necessary to support passing arrays of hash keys
+        hash = expected.last.class == Hash ? expected.delete_at(-1) : {}
+        expected.each { | arg | hash[arg] = Spec::Mocks::ArgumentMatchers::AnyArgMatcher.new(nil) }
+        Spec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(hash)
       else
         WebMock::Matchers::HashIncludingMatcher.new(expected)
       end
