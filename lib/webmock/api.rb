@@ -15,8 +15,17 @@ module WebMock
 
     class << self
       alias :request :a_request
-    end
 
+      def included(mod)
+        unless mod.respond_to?(:hash_including)
+          mod.class_eval do
+            def hash_including(expected)
+              WebMock::Matchers::HashIncludingMatcher.new(expected)
+            end
+          end
+        end
+      end
+    end
 
     def assert_requested(*args, &block)
       if not args[0].is_a?(WebMock::RequestStub)
@@ -34,16 +43,6 @@ module WebMock
         raise ArgumentError, "assert_not_requested with a stub object, doesn't accept blocks"
       end
       assert_request_not_requested(*args)
-    end
-
-    def hash_including(expected)
-      if defined?(::RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher)
-        RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
-      elsif defined?(::Spec::Mocks::ArgumentMatchers::HashIncludingMatcher)
-        Spec::Mocks::ArgumentMatchers::HashIncludingMatcher.new(expected)
-      else
-        WebMock::Matchers::HashIncludingMatcher.new(expected)
-      end
     end
 
     def remove_request_stub(stub)
