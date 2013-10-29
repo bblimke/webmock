@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.15.1
+
+*  Fixed `hash_including` to accept a splat of solitary keys.
+
+   Thanks to [Tamir Duberstein](https://github.com/tamird) and [https://github.com/strongriley](https://github.com/strongriley)
+
 ## 1.15.0
 
 * Excon >= 0.27.5 compatibility.
