@@ -244,9 +244,9 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     describe "based on headers" do
       it "should match requests if headers are the same" do
         stub_request(:get, "www.example.com").with(:headers => SAMPLE_HEADERS )
-        http_request(
-          :get, "http://www.example.com/",
-        :headers => SAMPLE_HEADERS).status.should == "200"
+        http_request(:get, "http://www.example.com/",
+                     :headers => SAMPLE_HEADERS,
+                     :adapter_flags => {:httpclient => [:omit_session_headers]}).status.should == "200"
       end
 
       it "should match requests if headers are the same and declared as array" do
