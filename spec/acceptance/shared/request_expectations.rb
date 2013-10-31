@@ -321,9 +321,7 @@ shared_context "request expectations" do |*adapter_info|
       describe "when request with headers is expected" do
         it "should satisfy expectation if request was executed with the same headers" do
           lambda {
-            http_request(:get, "http://www.example.com/",
-                         :headers => SAMPLE_HEADERS,
-                         :adapter_flags => {:httpclient => [:omit_session_headers]})
+            http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
             a_request(:get, "www.example.com").
             with(:headers => SAMPLE_HEADERS).should have_been_made
           }.should_not raise_error

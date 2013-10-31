@@ -31,10 +31,6 @@ if defined?(::HTTPClient)
     alias_method :do_get_block_without_webmock, :do_get_block
     alias_method :do_get_stream_without_webmock, :do_get_stream
 
-    def omit_session_headers!
-      @omit_session_headers = true
-    end
-
     def do_get_block(req, proxy, conn, &block)
       do_get(req, proxy, conn, false, &block)
     end
@@ -152,13 +148,7 @@ if defined?(::HTTPClient)
       hdrs[header[0]] << header[1]
       hdrs
     end
-
-    unless @omit_session_headers
-      headers_from_session(uri).all.each do |header|
-        headers[header[0]] ||= []
-        headers[header[0]] << header[1]
-      end
-    end
+    headers = headers_from_session(uri).merge(headers)
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
       userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
@@ -204,7 +194,10 @@ if defined?(::HTTPClient)
   def headers_from_session(uri)
     session_headers = HTTP::Message::Headers.new
     @session_manager.send(:open, uri).send(:set_header, MessageMock.new(session_headers))
-    session_headers
+    session_headers.all.inject({}) do |hdrs, header|
+      hdrs[header[0]] = header[1]
+      hdrs
+    end
   end
 
   # Mocks a HTTPClient HTTP::Message
