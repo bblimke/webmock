@@ -9,10 +9,7 @@ require 'acceptance/shared/precedence_of_stubs'
 require 'acceptance/shared/complex_cross_concern_behaviors'
 
 unless defined? SAMPLE_HEADERS
-  SAMPLE_HEADERS = { "Content-Length" => "8888",
-                     "Accept"         => "application/json",
-                     "User-Agent"     => "Webmock/0.1",
-                     "Date"           => "Thu, 31 Oct 2013 10:20:55 GMT" }
+  SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
   ESCAPED_PARAMS = "x=ab%20c&z=%27Stop%21%27%20said%20Fred%20m"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred m&x=ab c"
 end
