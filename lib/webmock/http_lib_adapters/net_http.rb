@@ -97,7 +97,7 @@ module WebMock
               response = super(request, nil, &nil)
               after_request.call(response)
             }
-            response = if started?
+            if started?
               if WebMock::Config.instance.net_http_connect_on_start
                 super_with_after_request.call
               else
