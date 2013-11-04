@@ -148,6 +148,7 @@ if defined?(::HTTPClient)
       hdrs[header[0]] << header[1]
       hdrs
     end
+    headers = headers_from_session(uri).merge(headers)
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
       userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
@@ -184,6 +185,30 @@ if defined?(::HTTPClient)
   def previous_signature_for(signature)
     return nil unless index = webmock_request_signatures.index(signature)
     webmock_request_signatures.delete_at(index)
+  end
+
+  private
+
+  # some of the headers sent by HTTPClient are derived from
+  # the client session
+  def headers_from_session(uri)
+    session_headers = HTTP::Message::Headers.new
+    @session_manager.send(:open, uri).send(:set_header, MessageMock.new(session_headers))
+    session_headers.all.inject({}) do |hdrs, header|
+      hdrs[header[0]] = header[1]
+      hdrs
+    end
+  end
+
+  # Mocks a HTTPClient HTTP::Message
+  class MessageMock
+    attr_reader :header
+
+    def initialize(headers)
+      @header = headers
+    end
+
+    def http_version=(value);end
   end
 
 end

@@ -127,4 +127,29 @@ describe "HTTPClient" do
     end
   end
 
+  context 'session headers' do
+
+    it "client sends a User-Agent header when given an agent_name explicitly to the client" do
+      user_agent = "Client/0.1"
+      stub_request(:get, "www.example.com").with(:headers => { 'User-agent' => "#{user_agent} #{HTTPClient::LIB_NAME}" })
+      HTTPClient.new(:agent_name => user_agent).get("www.example.com")
+    end
+
+    it "client sends the Accept, User-Agent, and Date by default" do
+      stub_request(:get, "www.example.com").with do |req|
+        req.headers["Accept"].should == "*/*"
+        req.headers["User-Agent"].should == "#{HTTPClient::DEFAULT_AGENT_NAME} #{HTTPClient::LIB_NAME}"
+        req.headers["Date"].should_not be_nil
+      end
+      http_request(:get, "www.example.com")
+    end
+
+    it "explicitly defined headers take precedence over session defaults" do
+      headers = { 'Accept'  => 'foo/bar', 'User-Agent' => 'custom', 'Date' => 'today' }
+      stub_request(:get, "www.example.com").with(:headers => headers)
+      HTTPClient.new.get("www.example.com", nil, headers)
+    end
+
+  end
+
 end
