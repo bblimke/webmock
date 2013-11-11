@@ -35,11 +35,21 @@ module WebMock
       assert_request_not_requested(*args)
     end
 
-    def hash_including(*expected)
+    # Similar to RSpec::Mocks::ArgumentMatchers#hash_including()
+    #
+    # Matches a hash that includes the specified key(s) or key/value pairs.
+    # Ignores any additional keys.
+    #
+    # @example
+    #
+    #   object.should_receive(:message).with(hash_including(:key => val))
+    #   object.should_receive(:message).with(hash_including(:key))
+    #   object.should_receive(:message).with(hash_including(:key, :key2 => val2))
+    def hash_including(*args)
       if defined?(super)
         super
       else
-        WebMock::Matchers::HashIncludingMatcher.new(expected)
+        WebMock::Matchers::HashIncludingMatcher.new(anythingize_lonely_keys(*args))
       end
     end
 
@@ -62,6 +72,13 @@ module WebMock
     def assert_request_not_requested(request, options = {})
       verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times))
       WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
+    end
+
+    #this is a based on RSpec::Mocks::ArgumentMatchers#anythingize_lonely_keys
+    def anythingize_lonely_keys(*args)
+      hash = args.last.class == Hash ? args.delete_at(-1) : {}
+      args.each { | arg | hash[arg] =  WebMock::Matchers::AnyArgMatcher.new(nil) }
+      hash
     end
 
   end

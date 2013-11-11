@@ -8,7 +8,11 @@ module WebMock
       end
 
       def ==(actual)
-        @expected.all? {|k,v| actual.has_key?(k) && v == actual[k]}
+        unless @expected.empty? 
+          @expected.all? {|k,v| actual.has_key?(k) && v == actual[k]}
+        else 
+          actual.empty? 
+        end
       rescue NoMethodError
         false
       end
@@ -21,5 +25,16 @@ module WebMock
         new(matcher.instance_variable_get(:@expected))
       end
     end
+
+    #this is a based on RSpec::Mocks::ArgumentMatchers::AnyArgMatcher
+    class AnyArgMatcher
+      def initialize(ignore)
+      end
+
+      def ==(other)
+        true
+      end
+    end
+
   end
 end
