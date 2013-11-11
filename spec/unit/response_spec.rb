@@ -120,6 +120,10 @@ describe WebMock::Response do
       @response.body.should == File.read(__FILE__)
     end
 
+    it "should work with Pathnames" do
+      @response = WebMock::Response.new(:body => Pathname.new(__FILE__))
+      @response.body.should == File.read(__FILE__)
+    end
   end
 
   describe "from raw response" do
