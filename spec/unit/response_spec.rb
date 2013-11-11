@@ -111,13 +111,13 @@ describe WebMock::Response do
 
     it "should report content of a IO object if provided" do
       @response = WebMock::Response.new(:body => File.new(__FILE__))
-      @response.body.should == File.new(__FILE__).read
+      @response.body.should == File.read(__FILE__)
     end
 
     it "should report many times content of a IO object if provided" do
       @response = WebMock::Response.new(:body => File.new(__FILE__))
-      @response.body.should == File.new(__FILE__).read
-      @response.body.should == File.new(__FILE__).read
+      @response.body.should == File.read(__FILE__)
+      @response.body.should == File.read(__FILE__)
     end
 
   end
@@ -157,7 +157,7 @@ describe WebMock::Response do
 
     describe "when input is String" do
       before(:each) do
-        @input = File.new(CURL_EXAMPLE_OUTPUT_PATH).read
+        @input = File.read(CURL_EXAMPLE_OUTPUT_PATH)
         @response = WebMock::Response.new(@input)
       end
 

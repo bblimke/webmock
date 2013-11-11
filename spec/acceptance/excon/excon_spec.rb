@@ -48,7 +48,7 @@ describe "Excon" do
   end
 
   let(:file) { File.new(__FILE__) }
-  let(:file_contents) { File.new(__FILE__).read }
+  let(:file_contents) { File.read(__FILE__) }
 
   it 'handles file uploads correctly' do
     stub_request(:put, "http://example.com/upload").with(:body => file_contents)

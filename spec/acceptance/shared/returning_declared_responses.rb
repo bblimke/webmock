@@ -92,13 +92,13 @@ shared_context "declared responses" do |*adapter_info|
     describe "when response body was declared as IO" do
       it "should return response body" do
         stub_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
-        http_request(:get, "http://www.example.com/").body.should == File.new(__FILE__).read
+        http_request(:get, "http://www.example.com/").body.should == File.read(__FILE__)
       end
 
       it "should return response body if requested many times" do
         stub_request(:get, "www.example.com").to_return(:body => File.new(__FILE__))
         2.times do
-          http_request(:get, "http://www.example.com/").body.should == File.new(__FILE__).read
+          http_request(:get, "http://www.example.com/").body.should == File.read(__FILE__)
         end
       end
 
@@ -199,7 +199,7 @@ shared_context "declared responses" do |*adapter_info|
 
     describe "when response was declared as a string with a raw response" do
       before(:each) do
-        @input = File.new(CURL_EXAMPLE_OUTPUT_PATH).read
+        @input = File.read(CURL_EXAMPLE_OUTPUT_PATH)
         stub_request(:get, "www.example.com").to_return(@input)
         @response = http_request(:get, "http://www.example.com/")
       end
