@@ -210,34 +210,62 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       end
 
       describe "when body is declared as partial hash matcher" do
-        before(:each) do
-          stub_request(:post, "www.example.com").
-            with(:body => hash_including({:a => '1', 'c' => {'d' => ['e', 'f']} }))
-        end
+        subject(:request) { http_request( :post, "http://www.example.com/",
+                                :body => 'a=1&c[d][]=e&c[d][]=f&b=five') }
 
-        describe "for request with url encoded body" do
-          it "should match request if hash matches body" do
-            http_request(
-              :post, "http://www.example.com/",
-            :body => 'a=1&c[d][]=e&c[d][]=f&b=five').status.should == "200"
+        subject(:wrong_request) { http_request(:post, "http://www.example.com/",
+                                      :body => 'c[d][]=f&a=1&c[d][]=e').status }
+
+        describe "when using 'RSpec:Mocks::ArgumentMatchers#hash_including'" do
+          before(:each) do
+            stub_request(:post, "www.example.com").
+              with(:body => hash_including(:a, :c => {'d' => ['e', 'f']} ))
           end
 
-          it "should not match if hash doesn't match url encoded body" do
-            lambda {
+          describe "for request with url encoded body" do
+            it "should match request if hash matches body" do
+              expect(request.status).to eq("200")
+            end
+
+            it "should not match if hash doesn't match url encoded body" do
+              lambda { wrong_request }.should raise_error
+            end
+          end
+
+          describe "for request with json body and content type is set to json" do
+            it "should match if hash matches body" do
               http_request(
-                :post, "http://www.example.com/",
-              :body => 'c[d][]=f&a=1&c[d][]=e').status
-            }.should raise_error
+                :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+            end
           end
         end
 
-        describe "for request with json body and content type is set to json" do
-          it "should match if hash matches body" do
-            http_request(
-              :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+        describe "when using 'WebMock::API#hash_including'" do
+          before(:each) do
+            stub_request(:post, "www.example.com").
+              with(:body => WebMock::API.hash_including(:a, :c => {'d' => ['e', 'f']} ))
+          end
+
+          describe "for request with url encoded body" do
+            it "should match request if hash matches body" do
+              expect(request.status).to eq("200")
+            end
+
+            it "should not match if hash doesn't match url encoded body" do
+              lambda { wrong_request }.should raise_error
+            end
+          end
+
+          describe "for request with json body and content type is set to json" do
+            it "should match if hash matches body" do
+              http_request(
+                :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
+              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status.should == "200"
+            end
           end
         end
+
       end
     end
 

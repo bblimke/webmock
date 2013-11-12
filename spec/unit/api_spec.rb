@@ -7,7 +7,6 @@ describe WebMock::API do
     let(:args) { {:data => :one} }
 
     context 'when mixed into a class that does not define `hash_including`' do
-
       let(:klass) do
         Class.new do
           include WebMock::API
@@ -18,36 +17,36 @@ describe WebMock::API do
         expect(subject).to be_a(WebMock::Matchers::HashIncludingMatcher)
       end
 
-
+      #  by testing equality for HashIncludingMatcher (which stringifies the passed hash) we are
+      #  testing HashIncludingMatcher.initialize behavior as well
       context "when args correspond to an hash" do
-        it "uses it to initialize 'HashIncludingMatcher'" do
+        it "creates 'HashIncludingMatcher'" do
           expect(subject).to eq("data" => :one)
         end
       end
 
-      context "when args are one or many solitary keys" do
+      context "when args are one or many keys" do
         subject {klass.new.hash_including(:foo, :bar)}
         let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
-        it "creates an hash and uses it to initialize 'HashIncludingMatcher'" do
+        it "creates 'HashIncludingMatcher' with keys anythingized" do
           expect(subject).to eq("foo" => anything, "bar" => anything )
         end
       end
 
-
-      context "when args are both solitary keys and an hash" do
+      context "when args are both keys and key/value pairs" do
         subject {klass.new.hash_including(:foo, :bar, :data => :one)}
         let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
-        it "creates an hash and uses it to initialize 'HashIncludingMatcher'" do
+        it "creates 'HashIncludingMatcher' with keys anythingized" do
           expect(subject).to eq("foo" => anything, "bar" => anything, "data" => :one)
         end
       end
 
-      context "when args are an emtpy hash (can't include anything)" do
+      context "when args are an emtpy hash" do
         subject {klass.new.hash_including({})}
 
-        it "uses it to initialize 'HashIncludingMatcher'" do
+        it "creates 'HashIncludingMatcher' with an empty hash" do
           expect(subject).to eq({})
         end
       end
