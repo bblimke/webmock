@@ -71,7 +71,7 @@ module WebMock
         end
 
         #  Pay attention: Rspec::Mocks::HashIncludingMatcher matches any value to {} as opposite as here 
-        it "does not match any non-empty hash with an empty hash " do 
+        it "does not match any non-empty hash with an empty hash " do
           expect(HashIncludingMatcher.new({})).not_to eq({'a' => 1})
         end
 
@@ -87,7 +87,6 @@ module WebMock
           expect(HashIncludingMatcher.new(:a => nil)).not_to eq('b' => nil)
         end
       end
-    
     end
   end
 end
