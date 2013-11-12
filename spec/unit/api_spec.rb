@@ -3,8 +3,8 @@ require 'spec_helper'
 describe WebMock::API do
   describe '#hash_including' do
 
-    subject { klass.new.hash_including(args) }  
-    let(:args) { {data: :one} }
+    subject { klass.new.hash_including(args) }
+    let(:args) { {:data => :one} }
 
     context 'when mixed into a class that does not define `hash_including`' do
 
@@ -19,13 +19,13 @@ describe WebMock::API do
       end
 
 
-      context "when args correspond to an hash" do 
+      context "when args correspond to an hash" do
         it "uses it to initialize 'HashIncludingMatcher'" do
           expect(subject).to eq("data" => :one)
         end
       end
 
-      context "when args are one or many solitary keys" do 
+      context "when args are one or many solitary keys" do
         subject {klass.new.hash_including(:foo, :bar)}
         let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
@@ -40,7 +40,7 @@ describe WebMock::API do
         let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
         it "creates an hash and uses it to initialize 'HashIncludingMatcher'" do
-          expect(subject).to eq("foo" => anything, "bar" => anything, "data" => :one) 
+          expect(subject).to eq("foo" => anything, "bar" => anything, "data" => :one)
         end
       end
 
@@ -48,7 +48,7 @@ describe WebMock::API do
         subject {klass.new.hash_including({})}
 
         it "uses it to initialize 'HashIncludingMatcher'" do
-          expect(subject).to eq({}) 
+          expect(subject).to eq({})
         end
       end
     end
@@ -61,7 +61,7 @@ describe WebMock::API do
         Class.new(
           Class.new do
             def hash_including(*args)
-              args 
+              args
             end
           end
         ) { include WebMock::API }

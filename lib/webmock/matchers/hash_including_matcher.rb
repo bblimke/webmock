@@ -8,10 +8,10 @@ module WebMock
       end
 
       def ==(actual)
-        unless @expected.empty? 
+        unless @expected.empty?
           @expected.all? {|k,v| actual.has_key?(k) && v == actual[k]}
-        else 
-          actual.empty? 
+        else
+          actual.empty?
         end
       rescue NoMethodError
         false
