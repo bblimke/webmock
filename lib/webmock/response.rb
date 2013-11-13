@@ -100,10 +100,10 @@ module WebMock
     private
 
     def stringify_body!
-      if @body.is_a?(IO)
+      if @body.is_a?(IO) || @body.is_a?(Pathname)
         io = @body
         @body = io.read
-        io.close
+        io.close if io.respond_to?(:close)
       end
     end
 
