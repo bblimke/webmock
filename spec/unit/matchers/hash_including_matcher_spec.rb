@@ -51,8 +51,8 @@ module WebMock
         end
 
         describe "when matching an empty hash" do
-          it "only matches against an empty hash" do
-            expect(HashIncludingMatcher.new({})).to eq({})
+          it "matches against any hash" do
+            expect(HashIncludingMatcher.new({})).to eq({:a => 1, :b => 2, :c => 3})
           end
         end
       end
@@ -68,11 +68,6 @@ module WebMock
 
         it "does not match an empty hash with a given key" do
           expect(HashIncludingMatcher.new(:a => 1)).not_to eq({})
-        end
-
-        #  Pay attention: Rspec::Mocks::HashIncludingMatcher matches any value to {} as opposite as here 
-        it "does not match any non-empty hash with an empty hash " do
-          expect(HashIncludingMatcher.new({})).not_to eq({'a' => 1})
         end
 
         it "does not match a hash with a missing key when one pair is matching" do
