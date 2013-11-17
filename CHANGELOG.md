@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.16.0
+
+* Allow a Pathname to be passed as a Response body
+
+        stub_request(:get, /example.com/).to_return(
+          body: Rails.root.join('test/fixtures/foo.txt')
+        )
+
+  Thanks to [Ben Pickles](https://github.com/benpickles)
+
+* `hash_including` matcher can be initialized with empty keys to match any values.
+
+        stub_request(:post, "www.example.com").with(:body => hash_including(:a, :b => {'c'}))
+        RestClient.post('www.example.com', '{"a":"1","b":"c"}', :content_type => 'application/json')
+
+  Thanks to [Stefano Uliari](https://github.com/steookk)
+
 ## 1.15.2
 
 *  Fixed `hash_including` to accept a splat of solitary keys.
