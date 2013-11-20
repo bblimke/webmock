@@ -128,11 +128,19 @@ module WebMock
 
   class URIAddressablePattern  < URIPattern
     def matches?(uri)
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| @pattern.match(u) }
+      if @query_params.nil?
+        # Let Addressable check the whole URI
+        WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| @pattern.match(u) }
+      else
+        # WebMock checks the query, Addressable checks everything else
+        WebMock::Util::URI.variations_of_uri_as_strings(uri.omit(:query)).any? { |u| @pattern.match(u) } &&
+        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
+      end
     end
 
     def add_query_params(query_params)
-      raise NotImplementedError, "Query params must be specified in the pattern when using Addressable::Template"
+      warn "WebMock warning: ignoring query params in RFC 6570 template and checking them with WebMock"
+      super(query_params)
     end
 
     def to_s
