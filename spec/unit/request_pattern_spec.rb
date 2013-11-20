@@ -206,6 +206,13 @@ describe WebMock::RequestPattern do
         end
       end
 
+      describe "when uri is described as Addressable::Template" do
+        it "should raise error if query params are specified" do
+          expect{WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com"), :query => {"a" => ["b", "c"]})}.
+          to raise_error(NotImplementedError, "Query params must be specified in the pattern when using Addressable::Template")
+        end
+      end
+
       describe "when uri is described as string" do
         it "should match when query params are the same as declared in hash" do
           WebMock::RequestPattern.new(:get, "www.example.com", :query => {"a" => ["b", "c"]}).

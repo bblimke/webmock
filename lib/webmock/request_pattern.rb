@@ -128,13 +128,16 @@ module WebMock
 
   class URIAddressablePattern  < URIPattern
     def matches?(uri)
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| @pattern.match(u) } &&
-        (@query_params.nil? || @query_params == @pattern.extract(uri))
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| @pattern.match(u) }
+    end
+
+    def add_query_params(query_params)
+      raise NotImplementedError, "Query params must be specified in the pattern when using Addressable::Template"
     end
 
     def to_s
       str = @pattern.pattern.inspect
-      str += " with query params #{@query_params.inspect}" if @query_params
+      str += " with variables #{@pattern.variables.inspect}" if @pattern.variables
       str
     end
   end
