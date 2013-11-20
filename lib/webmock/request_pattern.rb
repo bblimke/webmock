@@ -56,6 +56,8 @@ module WebMock
     def create_uri_pattern(uri)
       if uri.is_a?(Regexp)
         URIRegexpPattern.new(uri)
+      elsif uri.is_a?(Addressable::Template)
+        URIAddressablePattern.new(uri)
       else
         URIStringPattern.new(uri)
       end
@@ -83,7 +85,12 @@ module WebMock
     include RSpecMatcherDetector
 
     def initialize(pattern)
-      @pattern = pattern.is_a?(Addressable::URI) ? pattern : WebMock::Util::URI.normalize_uri(pattern)
+      @pattern = case pattern
+      when Addressable::URI, Addressable::Template
+        pattern
+      else
+          WebMock::Util::URI.normalize_uri(pattern)
+      end
       @query_params = nil
     end
 
@@ -114,6 +121,19 @@ module WebMock
 
     def to_s
       str = @pattern.inspect
+      str += " with query params #{@query_params.inspect}" if @query_params
+      str
+    end
+  end
+
+  class URIAddressablePattern  < URIPattern
+    def matches?(uri)
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| @pattern.match(u) } &&
+        (@query_params.nil? || @query_params == @pattern.extract(uri))
+    end
+
+    def to_s
+      str = @pattern.pattern.inspect
       str += " with query params #{@query_params.inspect}" if @query_params
       str
     end

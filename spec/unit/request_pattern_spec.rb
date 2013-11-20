@@ -99,6 +99,16 @@ describe WebMock::RequestPattern do
         should match(WebMock::RequestSignature.new(:get, "www.example.com"))
     end
 
+    it "should match if uri Addressable::Template pattern matches unescaped form of request uri" do
+      WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/{any_path}")).
+        should match(WebMock::RequestSignature.new(:get, "www.example.com/my%20path"))
+    end
+
+    it "should match if uri Addressable::Template pattern matches request uri" do
+      WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com")).
+        should match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    end
+
     it "should match for uris with same parameters as pattern" do
       WebMock::RequestPattern.new(:get, "www.example.com?a=1&b=2").
         should match(WebMock::RequestSignature.new(:get, "www.example.com?a=1&b=2"))
@@ -134,6 +144,26 @@ describe WebMock::RequestPattern do
       it "should match if uri regexp pattern matches uri with escaped parameters and request has unescaped parameters"  do
         WebMock::RequestPattern.new(:get, /.*a=a%20b.*/).
           should match(WebMock::RequestSignature.new(:get, "www.example.com/?a=a b"))
+      end
+
+      it "should match if uri Addressable::Template pattern matches uri without parameter value and request has escaped parameters" do
+        WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/{?a}")).
+          should match(WebMock::RequestSignature.new(:get, "www.example.com/?a=a%20b"))
+      end
+
+      it "should match if uri Addressable::Template pattern matches uri without parameter value and request has unescaped parameters"  do
+        WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/{?a}")).
+          should match(WebMock::RequestSignature.new(:get, "www.example.com/?a=a b"))
+      end
+
+      it "should match if uri Addressable::Template pattern matches uri with unescaped parameter value and request has unescaped parameters"  do
+        WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/?a=a b")).
+          should match(WebMock::RequestSignature.new(:get, "www.example.com/?a=a b"))
+      end
+
+      it "should match if uri Addressable::Template pattern matches uri with escaped parameter value and request has escaped parameters"  do
+        WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/?a=a%20b")).
+          should match(WebMock::RequestSignature.new(:get, "www.example.com/?a=a%20b"))
       end
 
     end
