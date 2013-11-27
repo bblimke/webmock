@@ -1,4 +1,5 @@
 #compatibility with Ruby 1.9.2 preview1 to allow reading raw responses
+require 'pathname'
 class StringIO
   alias_method :read_nonblock, :sysread
 end
