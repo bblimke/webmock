@@ -1,4 +1,5 @@
 #compatibility with Ruby 1.9.2 preview1 to allow reading raw responses
+require "pathname"
 class StringIO
   alias_method :read_nonblock, :sysread
 end
@@ -100,10 +101,10 @@ module WebMock
     private
 
     def stringify_body!
-      if @body.is_a?(IO)
+      if @body.is_a?(IO) || @body.is_a?(Pathname)
         io = @body
         @body = io.read
-        io.close
+        io.close  if io.respond_to?(:close)
       end
     end
 
