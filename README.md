@@ -211,6 +211,24 @@ stub_request(:any, /.*example.*/)
 Net::HTTP.get('www.example.com', '/')    # ===> Success
 ```
 
+### Matching uris using RFC 6570 - Basic Example
+
+```ruby
+uri_template = Addressable::Template.new "www.example.com/{id}/"
+stub_request(:any, uri_template)
+
+Net::HTTP.get('www.example.com', '/webmock/')    # ===> Success
+```
+
+### Matching uris using RFC 6570 - Advanced Example
+
+```ruby
+uri_template = Addressable::Template.new "www.example.com/thing/{id}.json{?x,y,z}{&other*}"
+stub_request(:any, uri_template)
+
+Net::HTTP.get('www.example.com', '/thing/5.json?x=1&y=2&z=3&anyParam=4')    # ===> Success
+```
+
 ### Matching query params using hash
 
 ```ruby
@@ -588,7 +606,7 @@ WebMock.enable!(:except => [:patron])    #enable WebMock for all libs except Pat
 
 An executed request matches stubbed request if it passes following criteria:
 
-  When request URI matches stubbed request URI string or Regexp pattern<br/>
+  When request URI matches stubbed request URI string, Regexp pattern or RFC 6570 URI Template<br/>
   And request method is the same as stubbed request method or stubbed request method is :any<br/>
   And request body is the same as stubbed request body or stubbed request body is not specified<br/>
   And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified<br/>
@@ -659,6 +677,12 @@ or these
 If you provide Regexp to match URI, WebMock will try to match it against every valid form of the same url.
 
 I.e `/.*my param.*/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
+
+## Matching with URI Templates
+
+If you match use [Addressable::Template](https://github.com/sporkmonger/addressable#uri-templates) for matching, then WebMock will defer the matching rules to Addressable, which complies with [RFC 6570](http://tools.ietf.org/html/rfc6570).
+
+If you use any of the WebMock methods for matching query params, then Addressable will be used to match the base URI and WebMock will match the query params.  If you do not, then WebMock will let Addressable match the full URI.
 
 ## Matching headers
 
@@ -865,6 +889,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Riley Strong
 * Tamir Duberstein
 * Stefano Uliari
+* Max Lincoln
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
