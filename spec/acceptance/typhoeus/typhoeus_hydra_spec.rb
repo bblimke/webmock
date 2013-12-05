@@ -78,6 +78,25 @@ unless RUBY_PLATFORM =~ /java/
           hydra.run
           test.should == response_code
         end
+
+        it "should call on_body with 2xx response" do
+          body = "on_body fired"
+          stub_request(:any, "example.com").to_return(:body => body)
+
+          test_body = nil
+          test_complete = nil
+          pending("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_body)
+          @request.on_body do |response, body|
+            test_body = body
+          end
+          @request.on_complete do |response|
+            test_complete = response.body
+          end
+          hydra.queue @request
+          hydra.run
+          test_body.should == body
+          test_complete.should == ""
+        end
       end
     end
   end
