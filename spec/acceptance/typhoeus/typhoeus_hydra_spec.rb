@@ -97,6 +97,20 @@ unless RUBY_PLATFORM =~ /java/
           test_body.should == body
           test_complete.should == ""
         end
+
+        it "should call on_headers with 2xx response" do
+          body = "on_headers fired"
+          stub_request(:any, "example.com").to_return(:body => body, :headers => {'X-Test' => '1'})
+
+          test_headers = nil
+          pending("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_headers)
+          @request.on_headers do |response|
+            test_headers = response.headers
+          end
+          hydra.queue @request
+          hydra.run
+          test_headers.should include('X-Test' => '1')
+        end
       end
     end
   end
