@@ -145,7 +145,7 @@ if defined?(Typhoeus)
               response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(request_signature, webmock_response)
               if request.respond_to?(:streaming?) && request.streaming?
                 response.options[:response_body] = ""
-                request.on_body.each { |callback| callback.call(response, webmock_response.body) }
+                request.on_body.each { |callback| callback.call(webmock_response.body, response) }
               end
               request.finish(response)
               webmock_response.raise_error_if_any
