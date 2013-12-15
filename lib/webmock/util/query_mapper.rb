@@ -81,24 +81,66 @@ module WebMock::Util
                   if options[:notation] == :dot
                     array_value = false
                     subkeys = key.split(".")
-                  elsif options[:notation] == :subscript
-                    array_value = !!(key =~ /\[\]$/)
-                    subkeys = key.split(/[\[\]]+/)
-                  end
-                  current_hash = accumulator
-                  for i in 0...(subkeys.size - 1)
-                    subkey = subkeys[i]
-                    current_hash[subkey] = {} unless current_hash[subkey]
-                    current_hash = current_hash[subkey]
-                  end
-                  if array_value
-                    if current_hash[subkeys.last] && !current_hash[subkeys.last].is_a?(Array)
-                      current_hash[subkeys.last] = [current_hash[subkeys.last]]
+                    current_hash = accumulator
+                    subkeys[0..-2].each do |subkey|
+                      subkey = subkeys[i]
+                      current_hash[subkey] = {} unless current_hash[subkey]
+                      current_hash = current_hash[subkey]
                     end
-                    current_hash[subkeys.last] = [] unless current_hash[subkeys.last]
-                    current_hash[subkeys.last] << value
-                  else
-                    current_hash[subkeys.last] = value
+                    if array_value
+                      if current_hash[subkeys.last] && !current_hash[subkeys.last].is_a?(Array)
+                        current_hash[subkeys.last] = [current_hash[subkeys.last]]
+                      end
+                      current_hash[subkeys.last] = [] unless current_hash[subkeys.last]
+                      current_hash[subkeys.last] << value
+                    else
+                      current_hash[subkeys.last] = value
+                    end
+                  elsif options[:notation] == :subscript
+                    current_node = accumulator
+                    subkeys = key.split(/(?=\[\w)/)
+                    subkeys[0..-2].each do |subkey|
+                      node = subkey =~ /\[\]$/ ? [] : {}
+                      subkey = subkey.gsub(/[\[\]]/, '')
+                      if current_node.is_a? Array
+                        container = current_node.find { |n| n.is_a?(Hash) && n.has_key?(subkey) }
+                        if container
+                          current_node = container[subkey]
+                        else
+                          current_node << {subkey => node}
+                          current_node = node
+                        end
+                      else
+                        current_node[subkey] = node unless current_node[subkey]
+                        current_node = current_node[subkey]
+                      end
+                    end
+                    last_key = subkeys.last
+                    array_value = !!(last_key =~ /\[\]$/)
+                    last_key = last_key.gsub(/[\[\]]/, '')
+                    if current_node.is_a? Array
+                      container = current_node.find { |n| n.is_a?(Hash) && n.has_key?(last_key) }
+                      if container
+                        if array_value
+                          container[last_key] << value
+                        else
+                          container[last_key] = value
+                        end
+                      else
+                        if array_value
+                          current_node << {last_key => [value]}
+                        else
+                          current_node << {last_key => value}
+                        end
+                      end
+                    else
+                      if array_value
+                        current_node[last_key] = [] unless current_node[last_key]
+                        current_node[last_key] << value
+                      else
+                        current_node[last_key] = value
+                      end
+                    end
                   end
                 end
                 accumulator
