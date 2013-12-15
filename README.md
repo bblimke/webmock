@@ -394,6 +394,13 @@ Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
 ```
 
+### Removing unused stubs
+
+```ruby
+stub_get = stub_request(:get, "www.example.com")
+remove_request_stub(stub_get)
+```
+
 ### Real requests to network can be allowed or disabled
 
 ```ruby
