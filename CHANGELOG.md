@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.16.1
+
+* Fixed "NameError: uninitialized constant WebMock::Response::Pathname" issue.
+
+  Thanks to [Alex Stupakow and Karen Wang](https://github.com/stupakov) for the fix.
+
 ## 1.16.0
 
 * Allow a Pathname to be passed as a Response body
