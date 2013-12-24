@@ -46,7 +46,7 @@ module WebMock::Util
         unless %w(flat dot subscript flat_array).include?(options[:notation].to_s)
           raise ArgumentError,
                 'Invalid notation. Must be one of: ' +
-                    '[:flat, :dot, :subscript, :flat_array].'
+                '[:flat, :dot, :subscript, :flat_array].'
         end
 
         empty_accumulator = :flat_array == options[:notation] ? [] : {}
