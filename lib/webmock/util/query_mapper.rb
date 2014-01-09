@@ -131,8 +131,8 @@ module WebMock::Util
         end
         new_query_values = new_query_values.to_hash
         new_query_values = new_query_values.map do |key, value|
-          key = key.to_s if key.kind_of?(Symbol)
-          [key, value]
+          key = key.to_s if key.kind_of?(Symbol) || key.nil?
+          [key.to_s, value]
         end
         # Useful default for OAuth and caching.
         # Only to be used for non-Array inputs. Arrays should preserve order.
