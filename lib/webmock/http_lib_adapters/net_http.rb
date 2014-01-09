@@ -111,7 +111,9 @@ module WebMock
               }
             end
           else
-            raise WebMock::NetConnectNotAllowedError.new(request_signature)
+            error = WebMock::NetConnectNotAllowedError.new(request_signature)
+            Rails.logger.error(error.to_s) if defined?(Rails) && Rails.logger
+            raise error
           end
         end
 
