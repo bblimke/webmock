@@ -25,6 +25,7 @@ Supported HTTP libraries
 * Curb (currently only Curb::Easy)
 * Typhoeus (currently only Typhoeus::Hydra)
 * Excon
+* HTTP Gem
 
 Supported Ruby Interpreters
 ---------------------------
