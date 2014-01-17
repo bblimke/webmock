@@ -46,7 +46,7 @@ if defined?(HTTP::Client)
         webmock_response = ::WebMock::Response.new
 
         webmock_response.status  = [status, reason]
-        webmock_response.body    = body
+        webmock_response.body    = body.to_s
         webmock_response.headers = headers
 
         webmock_response
