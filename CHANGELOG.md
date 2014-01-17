@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.17.1
+
+* Added missing license statements.
+
+  Thanks to [Praveen Arimbrathodiyil](https://github.com/pravi)
+
 ## 1.17.0
 
 * HTTP gem support!
