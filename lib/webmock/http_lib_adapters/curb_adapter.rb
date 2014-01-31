@@ -125,6 +125,7 @@ if defined?(Curl)
           end
 
           @content_type = webmock_response.headers["Content-Type"]
+          @transfer_encoding = webmock_response.headers["Transfer-Encoding"]
         end
 
         @last_effective_url ||= self.url
@@ -144,7 +145,15 @@ if defined?(Curl)
       def invoke_curb_callbacks
         @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
         self.header_str.lines.each { |header_line| @on_header.call header_line } if @on_header
-        @on_body.call(self.body_str) if @on_body
+        if @on_body
+          if chunked_response?
+            self.body_str.each do |chunk|
+              @on_body.call(chunk)
+            end
+          else
+            @on_body.call(self.body_str)
+          end
+        end
         @on_complete.call(self) if @on_complete
 
         case response_code
@@ -153,6 +162,10 @@ if defined?(Curl)
         when 400..599
           @on_failure.call(self, self.response_code) if @on_failure
         end
+      end
+
+      def chunked_response?
+        @transfer_encoding == 'chunked' && self.body_str.respond_to?(:each)
       end
 
       def build_webmock_response
