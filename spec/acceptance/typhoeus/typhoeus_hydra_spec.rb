@@ -28,6 +28,12 @@ unless RUBY_PLATFORM =~ /java/
           hydra.run
         end
 
+        it "should take into account body for POST request" do
+          stub_request(:post, "www.example.com").with(:body => {:hello => 'world'})
+          response = Typhoeus.post("http://www.example.com", :method => :post, :body => {:hello => 'world'})
+          expect(response.code).to eq(200)
+        end
+
         it "should take into account params for GET request" do
           stub_request(:get, "http://www.example.com/?hello=world").to_return({})
           request = Typhoeus::Request.new("http://www.example.com/?hello=world", :method => :get)

@@ -59,6 +59,10 @@ if defined?(Typhoeus)
 
           body = req.options[:body]
 
+          if body.is_a?(Hash)
+            body = WebMock::Util::QueryMapper.values_to_query(body)
+          end
+
           request_signature = WebMock::RequestSignature.new(
             req.options[:method] || :get,
             uri.to_s,
