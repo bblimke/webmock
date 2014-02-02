@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.17.2
+
+* Support for chunked responses in Curb
+
+  Thanks to [Zachary Belzer](https://github.com/zbelzer)
+
+* Fixed handling of request body passed as a hash to `Typhoeus.post`
+
+  Thanks to [Mason Chang](https://github.com/changmason) for reporting.
+
 ## 1.17.1
 
 * Added missing license statements.
