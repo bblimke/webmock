@@ -22,19 +22,6 @@ shared_examples "with WebMock" do |*adapter_info|
       WebMock.reset!
     end
 
-    it "preserves content-type header when proxying to a rack app" do
-      stub_request(:any, //).to_rack(lambda {|req| [200, {}, ["OK"]] })
-
-      url = "https://google.com/hi/there"
-      headers = {
-        "Accept"       => "application/json",
-        "Content-Type" => "application/json"
-      }
-
-      http_request(:get, url, :headers => headers)
-      WebMock.should have_requested(:get, url).with(:headers => headers)
-    end
-
     include_context "allowing and disabling net connect", *adapter_info
 
     include_context "stubbing requests", *adapter_info
