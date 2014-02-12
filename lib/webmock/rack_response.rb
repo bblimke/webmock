@@ -25,7 +25,7 @@ module WebMock
 
     def build_rack_env(request)
       uri = request.uri
-      headers = request.headers || {}
+      headers = (request.headers || {}).dup
       body = request.body || ''
 
       env = {
