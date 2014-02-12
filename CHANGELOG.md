@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.17.3
+
+* Fixed issue with Rack response removing 'Content-Type' header
+
+  Thanks to [Bo Jeanes](https://github.com/bjeanes) and [Matthew Conway](https://github.com/mattonrails)
+
 ## 1.17.2
 
 * Support for chunked responses in Curb
