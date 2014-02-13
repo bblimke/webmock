@@ -688,7 +688,7 @@ I.e `/.*my param.*/` will match `www.example.com/my%20path` because it is equiva
 
 ## Matching with URI Templates
 
-If you match use [Addressable::Template](https://github.com/sporkmonger/addressable#uri-templates) for matching, then WebMock will defer the matching rules to Addressable, which complies with [RFC 6570](http://tools.ietf.org/html/rfc6570).
+If you use [Addressable::Template](https://github.com/sporkmonger/addressable#uri-templates) for matching, then WebMock will defer the matching rules to Addressable, which complies with [RFC 6570](http://tools.ietf.org/html/rfc6570).
 
 If you use any of the WebMock methods for matching query params, then Addressable will be used to match the base URI and WebMock will match the query params.  If you do not, then WebMock will let Addressable match the full URI.
 
