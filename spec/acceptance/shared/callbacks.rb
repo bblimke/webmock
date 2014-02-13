@@ -101,20 +101,20 @@ shared_context "callbacks" do |*adapter_info|
           WebMock.after_request(:except => [:other_lib])  do |_, response|
             @response = response
           end
-          http_request(:get, "http://httpstat.us/200")
+          http_request(:get, "http://httpstat.us/201")
         end
 
         it "should pass real response to callback with status and message" do
-          @response.status[0].should == 200
-          @response.status[1].should == "OK" unless adapter_info.include?(:no_status_message)
+          @response.status[0].should == 201
+          @response.status[1].should == "Created" unless adapter_info.include?(:no_status_message)
         end
 
         it "should pass real response to callback with headers" do
-          @response.headers["Content-Length"].should == "6"
+          @response.headers["Content-Length"].should == "11"
         end
 
         it "should pass response to callback with body" do
-          @response.body.size.should == 6
+          @response.body.size.should == 11
         end
       end
     end

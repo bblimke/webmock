@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.17.3
+
+* Fixed issue with Rack response removing 'Content-Type' header
+
+  Thanks to [Bo Jeanes](https://github.com/bjeanes) and [Matthew Conway](https://github.com/mattonrails)
+
+## 1.17.2
+
+* Support for chunked responses in Curb
+
+  Thanks to [Zachary Belzer](https://github.com/zbelzer)
+
+* Fixed handling of request body passed as a hash to `Typhoeus.post`
+
+  Thanks to [Mason Chang](https://github.com/changmason) for reporting.
+
+## 1.17.1
+
+* Added missing license statements.
+
+  Thanks to [Praveen Arimbrathodiyil](https://github.com/pravi)
+
+## 1.17.0
+
+* HTTP gem support!
+
+  Thanks to [Aleksey V. Zapparov](https://github.com/ixti)
+
+* Limited Excon gem requirement to version < 0.30 until the compatibility with version > 0.30.0 is fixed.
+
+  Thanks to [Aleksey V. Zapparov](https://github.com/ixti)
+
+* Fixed issue where empty query key caused a `TypeError`
+
+  Thanks to [Jon Rowe](https://github.com/JonRowe)
+
+* Handling Typhoeus `on_headers` and `on_body` params.
+
+  Thanks to [Matt Burke](https://github.com/spraints)
+
+## 1.16.1
+
+* Fixed "NameError: uninitialized constant WebMock::Response::Pathname" issue.
+
+  Thanks to [Alex Stupakow and Karen Wang](https://github.com/stupakov) for the fix.
+
 ## 1.16.0
 
 * Allow a Pathname to be passed as a Response body

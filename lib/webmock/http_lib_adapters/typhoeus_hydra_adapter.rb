@@ -59,6 +59,10 @@ if defined?(Typhoeus)
 
           body = req.options[:body]
 
+          if body.is_a?(Hash)
+            body = WebMock::Util::QueryMapper.values_to_query(body)
+          end
+
           request_signature = WebMock::RequestSignature.new(
             req.options[:method] || :get,
             uri.to_s,
@@ -143,6 +147,13 @@ if defined?(Typhoeus)
             if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
               # ::WebMock::HttpLibAdapters::TyphoeusAdapter.stub_typhoeus(request_signature, webmock_response, self)
               response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(request_signature, webmock_response)
+              if request.respond_to?(:on_headers)
+                request.execute_headers_callbacks(response)
+              end
+              if request.respond_to?(:streaming?) && request.streaming?
+                response.options[:response_body] = ""
+                request.on_body.each { |callback| callback.call(webmock_response.body, response) }
+              end
               request.finish(response)
               webmock_response.raise_error_if_any
               res = false

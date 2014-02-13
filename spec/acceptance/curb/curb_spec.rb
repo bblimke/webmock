@@ -81,6 +81,20 @@ unless RUBY_PLATFORM =~ /java/
         test.should == body
       end
 
+      it "should call on_body for each chunk with chunked response" do
+        body = "on_body fired"
+        stub_request(:any, "example.com").
+          to_return(:body => ["first_chunk", "second_chunk"],
+                    :headers => {"Transfer-Encoding" => "chunked"})
+
+        test = []
+        @curl.on_body do |data|
+          test << data
+        end
+        @curl.http_get
+        test.should == ["first_chunk", "second_chunk"]
+      end
+
       it "should call on_header when response headers are read" do
         stub_request(:any, "example.com").
           to_return(:headers => {:one => 1})
@@ -265,6 +279,41 @@ unless RUBY_PLATFORM =~ /java/
           @curl.http_get
           @curl.content_type.should be_nil
         end
+      end
+    end
+
+    describe "#chunked_response?" do
+      before(:each) do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+      end
+
+      it "is true when Transfer-Encoding is 'chunked' and body responds to each" do
+        stub_request(:any, 'example.com').
+          to_return(:body     => ["abc", "def"],
+                    :status   => 200,
+                    :headers  => { 'Transfer-Encoding' => 'chunked' })
+
+        @curl.http_get
+        @curl.should be_chunked_response
+      end
+
+      it "is false when Transfer-Encoding is not 'chunked'" do
+        stub_request(:any, 'example.com').
+          to_return(:body     => ["abc", "def"],
+                    :status   => 200)
+
+        @curl.http_get
+        @curl.should_not be_chunked_response
+      end
+
+      it "is false when Transfer-Encoding is 'chunked' but body does not respond to each" do
+        stub_request(:any, 'example.com').
+          to_return(:body     => "abc",
+                    :status   => 200)
+
+        @curl.http_get
+        @curl.should_not be_chunked_response
       end
     end
   end

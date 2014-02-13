@@ -25,6 +25,7 @@ Supported HTTP libraries
 * Curb (currently only Curb::Easy)
 * Typhoeus (currently only Typhoeus::Hydra)
 * Excon
+* HTTP Gem
 
 Supported Ruby Interpreters
 ---------------------------
@@ -410,6 +411,13 @@ stub_request(:get, "www.example.com").
 Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
+```
+
+### Removing unused stubs
+
+```ruby
+stub_get = stub_request(:get, "www.example.com")
+remove_request_stub(stub_get)
 ```
 
 ### Real requests to network can be allowed or disabled
@@ -889,6 +897,14 @@ People who submitted patches and new features or suggested improvements. Many th
 * Riley Strong
 * Tamir Duberstein
 * Stefano Uliari
+* Alex Stupakov
+* Karen Wang
+* Matt Burke
+* Jon Rowe
+* Aleksey V. Zapparov
+* Praveen Arimbrathodiyil
+* Bo Jeanes
+* Matthew Conway
 * Max Lincoln
 
 For a full list of contributors you can visit the
