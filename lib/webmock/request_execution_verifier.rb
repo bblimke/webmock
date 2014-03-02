@@ -32,7 +32,7 @@ module WebMock
       text
     end
 
-    def negative_failure_message
+    def failure_message_when_negated
       text = if @expected_times_executed
         %Q(The request #{request_pattern.to_s} was not expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
       else

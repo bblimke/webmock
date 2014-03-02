@@ -71,7 +71,7 @@ module WebMock
 
     def assert_request_not_requested(request, options = {})
       verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times))
-      WebMock::AssertionFailure.failure(verifier.negative_failure_message) unless verifier.does_not_match?
+      WebMock::AssertionFailure.failure(verifier.failure_message_when_negated) unless verifier.does_not_match?
     end
 
     #this is a based on RSpec::Mocks::ArgumentMatchers#anythingize_lonely_keys

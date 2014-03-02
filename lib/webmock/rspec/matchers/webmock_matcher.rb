@@ -38,9 +38,11 @@ module WebMock
       @request_execution_verifier.failure_message
     end
 
-
-    def negative_failure_message
-      @request_execution_verifier.negative_failure_message
+    def failure_message_when_negated
+      @request_execution_verifier.failure_message_when_negated
     end
+
+    # RSpec 2 compatibility:
+    alias_method :negative_failure_message, :failure_message_when_negated
   end
 end
