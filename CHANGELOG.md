@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.17.4
+
+* Update matchers for RSpec 3's matcher protocol
+
+  Thanks to [Rob Olson](https://github.com/robolson)
+
 ## 1.17.3
 
 * Fixed issue with Rack response removing 'Content-Type' header
