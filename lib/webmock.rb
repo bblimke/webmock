@@ -1,6 +1,7 @@
 require 'singleton'
 
 require 'addressable/uri'
+require 'addressable/template'
 require 'crack'
 
 require 'webmock/deprecation'
