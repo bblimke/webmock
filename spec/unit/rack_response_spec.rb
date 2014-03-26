@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 describe WebMock::RackResponse do
@@ -47,6 +48,15 @@ describe WebMock::RackResponse do
 
     response = @rack_response.evaluate(request)
     response.body.should include('Good to meet you, Jimmy!')
+  end
+
+  it "should send params with proper content length if params have non-ascii symbols" do
+    request = WebMock::RequestSignature.new(:post, 'www.example.com/greet',
+      :body => 'name=Олег'
+    )
+
+    response = @rack_response.evaluate(request)
+    response.body.should include('Good to meet you, Олег!')
   end
 
   describe 'rack error output' do
