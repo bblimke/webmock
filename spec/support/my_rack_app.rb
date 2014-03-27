@@ -24,7 +24,7 @@ class MyRackApp
       when ['GET', '/locked']
         [200, {}, ["Single threaded response."]]
       when ['POST', '/greet']
-        name = env["rack.input"].read[/name=([^&]*)/, 1] || "World"
+        name = env["rack.input"].read(env["CONTENT_LENGTH"]).force_encoding("UTF-8")[/name=([^&]*)/, 1] || "World"
         [200, {}, ["Good to meet you, #{name}!"]]
       when ['GET', '/compute']
         if env['SERVER_PORT'] == 80 && env["SCRIPT_NAME"] == ""

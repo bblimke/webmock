@@ -32,7 +32,7 @@ module WebMock
         # CGI variables specified by Rack
         'REQUEST_METHOD' => request.method.to_s.upcase,
         'CONTENT_TYPE'   => headers.delete('Content-Type'),
-        'CONTENT_LENGTH' => body.size,
+        'CONTENT_LENGTH' => body.bytesize,
         'PATH_INFO'      => uri.path,
         'QUERY_STRING'   => uri.query || '',
         'SERVER_NAME'    => uri.host,
