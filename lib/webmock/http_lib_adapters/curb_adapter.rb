@@ -200,12 +200,14 @@ if defined?(Curl)
         @put_data = data if data
         super
       end
+      alias put http_put
 
       def http_post *data
         @webmock_method = :post
         @post_body = data.join('&') if data && !data.empty?
         super
       end
+      alias post http_post
 
       def perform
         @webmock_method ||= :get
@@ -236,6 +238,7 @@ if defined?(Curl)
       def body_str
         @body_str || super
       end
+      alias body body_str
 
       def response_code
         @response_code || super
@@ -244,6 +247,7 @@ if defined?(Curl)
       def header_str
         @header_str || super
       end
+      alias head header_str
 
       def last_effective_url
         @last_effective_url || super
