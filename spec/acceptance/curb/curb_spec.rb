@@ -331,6 +331,15 @@ unless RUBY_PLATFORM =~ /java/
         c.http(:GET)
         c.body_str.should == "abc"
       end
+
+      it "should alias body to body_str" do
+        stub_request(:get, "www.example.com").to_return(:body => "abc")
+
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http(:GET)
+        c.body.should == "abc"
+      end
     end
 
     describe "using #http_* methods for requests" do
