@@ -31,7 +31,7 @@ if defined?(HTTP::Client)
     class Request
 
       def webmock_signature
-        ::WebMock::RequestSignature.new(method, uri.to_s, {
+        ::WebMock::RequestSignature.new(verb, uri.to_s, {
           :headers  => headers,
           :body     => body
         })
