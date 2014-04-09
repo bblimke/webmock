@@ -130,7 +130,7 @@ module WebMock::Util
             "Can't convert #{new_query_values.class} into Hash."
         end
         new_query_values = new_query_values.to_hash
-        new_query_values = new_query_values.each_with_object([]) do |(key, value), object|
+        new_query_values = new_query_values.inject([]) do |object, (key, value)|
           key = key.to_s if key.kind_of?(Symbol) || key.nil?
 
           if value.respond_to?(:each)
@@ -138,6 +138,7 @@ module WebMock::Util
           else
             object << [key.to_s, value]
           end
+          object
         end
         # Useful default for OAuth and caching.
         # Only to be used for non-Array inputs. Arrays should preserve order.
