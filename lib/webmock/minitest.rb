@@ -1,6 +1,10 @@
 begin
   require 'minitest/test'
-  test_class= MiniTest::Test
+  begin
+    test_class= MiniTest::Test
+  rescue NameError
+    test_class= Minitest::Test
+  end
   assertions = "assertions"
 rescue LoadError
   require "minitest/unit"
@@ -30,4 +34,10 @@ test_class.class_eval do
   end
 end
 
-WebMock::AssertionFailure.error_class = MiniTest::Assertion
+begin
+  error_class = MiniTest::Assertion
+rescue NameError
+  error_class = Minitest::Assertion
+end
+
+WebMock::AssertionFailure.error_class = error_class
