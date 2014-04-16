@@ -1,6 +1,6 @@
 begin
   require 'minitest/test'
-  test_class= Minitest::Test
+  test_class = Minitest::Test
   assertions = "assertions"
 rescue LoadError
   require "minitest/unit"
