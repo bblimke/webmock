@@ -1,5 +1,32 @@
 # Changelog
 
+## 1.18.0
+
+* Updated dependency on Addressable to versions >= 2.3.6
+
+* Added support for matching uris using RFC 6570 (URI Templates)
+
+        uri_template = Addressable::Template.new "www.example.com/{id}/"
+        stub_request(:any, uri_template)
+
+  Thanks to [Max Lincoln](https://github.com/maxlinc)
+
+* Fixed content length calculation for Rack responses with UTF8 body
+
+  Thanks to [Oleg Gritsenko](https://github.com/Claster)
+
+* Add missing Curl::Easy aliases
+
+  Thanks to [Hwan-Joon Choi](https://github.com/hc5duke)
+
+* HTTP Gem >= 0.6.0 compatibility
+
+  Thanks to [Aleksey V. Zapparov](https://github.com/ixti)
+
+* Minitest 4 and 5 compatibility.
+
+  Thanks to [SHIBATA Hiroshi](https://github.com/hsbt)
+
 ## 1.17.4
 
 * Update matchers for RSpec 3's matcher protocol
