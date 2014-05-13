@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = 'webmock'
 
-  s.add_dependency 'addressable', '>= 2.2.7'
+  s.add_dependency 'addressable', '>= 2.3.6'
   s.add_dependency 'crack', '>=0.3.2'
 
   s.add_development_dependency 'rspec',           '~> 2.10'
