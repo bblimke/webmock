@@ -133,8 +133,10 @@ module WebMock::Util
         new_query_values = new_query_values.inject([]) do |object, (key, value)|
           key = key.to_s if key.kind_of?(Symbol) || key.nil?
 
-          if value.respond_to?(:each)
+          if value.is_a?(Array)
             value.each { |v| object << [key.to_s + '[]', v] }
+          elsif value.is_a?(Hash)
+            value.each { |k, v| object << ["#{key.to_s}[#{k}]", v]}
           else
             object << [key.to_s, value]
           end
