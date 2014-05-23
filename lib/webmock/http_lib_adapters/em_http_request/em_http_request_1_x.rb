@@ -133,6 +133,16 @@ if defined?(EventMachine::HttpClient)
         @stubbed_webmock_response
       end
 
+      def get_response_cookie(name)
+        name = name.to_s
+
+        raw_cookie = response_header.cookie
+        raw_cookie = [raw_cookie] if raw_cookie.is_a? String
+
+        cookie = raw_cookie.select { |c| c.start_with? name }.first
+        cookie and cookie.split('=', 2)[1]
+      end
+
       private
 
       def build_webmock_response
@@ -189,15 +199,21 @@ if defined?(EventMachine::HttpClient)
 
         headers["Content-Length"] = body.bytesize unless headers["Content-Length"]
         headers.each do |header, value|
-          value = value.join(", ") if value.is_a?(Array)
+          if header =~ /set-cookie/i
+            [value].flatten.each do |cookie|
+              response_string << "#{header}: #{cookie}"
+            end
+          else
+            value = value.join(", ") if value.is_a?(Array)
 
-          # WebMock's internal processing will not handle the body
-          # correctly if the header indicates that it is chunked, unless
-          # we also create all the chunks.
-          # It's far easier just to remove the header.
-          next if header =~ /transfer-encoding/i && value =~/chunked/i
+            # WebMock's internal processing will not handle the body
+            # correctly if the header indicates that it is chunked, unless
+            # we also create all the chunks.
+            # It's far easier just to remove the header.
+            next if header =~ /transfer-encoding/i && value =~/chunked/i
 
-          response_string << "#{header}: #{value}"
+            response_string << "#{header}: #{value}"
+          end
         end if headers
 
         response_string << "" << body
