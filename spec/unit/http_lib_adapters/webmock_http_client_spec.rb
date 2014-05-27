@@ -7,9 +7,9 @@ describe EventMachine::WebMockHttpClient do
     before(:each) do
       stub_request(:get, "http://example.org/").
       to_return(
-        status: 200,
-        body: "",
-        headers: { 'Set-Cookie' => cookie_string }
+        :status => 200,
+        :body => "",
+        :headers => { 'Set-Cookie' => cookie_string }
       )
     end
 
