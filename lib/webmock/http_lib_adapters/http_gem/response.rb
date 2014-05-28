@@ -10,12 +10,13 @@ module HTTP
       webmock_response
     end
 
-    def self.from_webmock(webmock_response)
+    def self.from_webmock(webmock_response, request_signature = nil)
       status  = webmock_response.status.first
       headers = webmock_response.headers || {}
       body    = Body.new Streamer.new webmock_response.body
+      uri     = URI request_signature.uri.to_s if request_signature
 
-      new(status, "1.1", headers, body)
+      new(status, "1.1", headers, body, uri)
     end
   end
 end
