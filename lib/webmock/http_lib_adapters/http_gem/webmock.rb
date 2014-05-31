@@ -37,7 +37,7 @@ module HTTP
       webmock_response.raise_error_if_any
 
       invoke_callbacks(webmock_response, :real_request => false)
-      ::HTTP::Response.from_webmock webmock_response
+      ::HTTP::Response.from_webmock webmock_response, request_signature
     end
 
     def perform

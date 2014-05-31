@@ -47,4 +47,13 @@ describe "HTTP Gem" do
       expect(headers).to include "Host" => "www.example.com"
     end
   end
+
+  it "restores request uri on replayed response object" do
+    uri = URI "http://example.com/foo"
+
+    stub_request :get, "example.com/foo"
+    response = HTTP.get uri
+
+    expect(response.uri).to eq uri
+  end
 end
