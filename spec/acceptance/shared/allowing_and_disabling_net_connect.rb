@@ -22,6 +22,17 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
       end
     end
 
+    describe "is allowed with block", :net_connection => true do
+      it "should make a real web request only while inside the block" do
+        WebMock.allow_net_connect! do
+          http_request(:get, webmock_server_url).status.should == "200"
+        end
+        lambda {
+          http_request(:get, "http://www.example.com/")
+        }.should raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+      end
+    end
+
     describe "is not allowed" do
       before(:each) do
         WebMock.disable_net_connect!
