@@ -46,7 +46,7 @@ if defined?(::HTTPClient)
 
       if webmock_responses[request_signature]
         webmock_response = webmock_responses.delete(request_signature)
-        response = build_httpclient_response(webmock_response, stream, &block)
+        response = build_httpclient_response(webmock_response, stream, req.header, &block)
         @request_filter.each do |filter|
           filter.filter_response(req, response)
         end
@@ -89,9 +89,9 @@ if defined?(::HTTPClient)
       end
     end
 
-    def build_httpclient_response(webmock_response, stream = false, &block)
+    def build_httpclient_response(webmock_response, stream = false, req_header = nil, &block)
       body = stream ? StringIO.new(webmock_response.body) : webmock_response.body
-      response = HTTP::Message.new_response(body)
+      response = HTTP::Message.new_response(body, req_header)
       response.header.init_response(webmock_response.status[0])
       response.reason=webmock_response.status[1]
       webmock_response.headers.to_a.each { |name, value| response.header.set(name, value) }

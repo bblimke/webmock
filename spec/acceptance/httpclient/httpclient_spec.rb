@@ -152,4 +152,11 @@ describe "HTTPClient" do
 
   end
 
+  context 'httpclient response header' do
+    it 'receives request_method, request_uri, and request_query from the request header' do
+      stub_request :get, 'www.example.com'
+      message = HTTPClient.new.get 'www.example.com'
+      message.header.request_uri.to_s.should == 'www.example.com'
+    end
+  end
 end
