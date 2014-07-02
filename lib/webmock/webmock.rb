@@ -42,11 +42,12 @@ module WebMock
   end
 
   def self.allow_net_connect!(options = {})
+    state_snapshot = Config.instance.to_h
     Config.instance.allow_net_connect = true
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
     if block_given?
       yield
-      disable_net_connect!
+      disable_net_connect! state_snapshot
     end
   end
 
