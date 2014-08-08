@@ -162,7 +162,15 @@ module WebMock::Util
             current_node[last_key] = [] unless current_node[last_key]
             current_node[last_key] << value
           else
-            current_node[last_key] = value
+            if current_node.has_key?(last_key)
+              unless current_node[last_key].is_a?(Array)
+                current_node[last_key] = [current_node[last_key]]
+              end
+
+              current_node[last_key] << value
+            else
+              current_node[last_key] = value
+            end
           end
         end
       end

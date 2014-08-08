@@ -34,6 +34,13 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['one']).to eq(%w(foo bar))
     end
 
+    it 'should parse queries with repeated keys like array queries' do
+      # {"one" => ["foo", "bar"]}
+      query = 'one=foo&one=bar'
+      hsh = subject.query_to_values(query)
+      expect(hsh['one']).to eq(%w(foo bar))
+    end
+
     it 'should parse string queries' do
       # {"one" => "two", "three" => "four"}
       query = 'one=two&three=four'
