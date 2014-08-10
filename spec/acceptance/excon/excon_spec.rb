@@ -66,8 +66,8 @@ describe "Excon" do
   describe '.request_params_from' do
 
     it 'rejects invalid request keys' do
-      request_params = WebMock::HttpLibAdapters::ExconAdapter.request_params_from(body: :keep, fake: :reject)
-      request_params.should eq(body: :keep)
+      request_params = WebMock::HttpLibAdapters::ExconAdapter.request_params_from(:body => :keep, :fake => :reject)
+      request_params.should eq(:body => :keep)
     end
 
   end
