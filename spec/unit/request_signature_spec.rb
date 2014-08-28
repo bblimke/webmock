@@ -26,6 +26,9 @@ describe WebMock::RequestSignature do
       WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc").body.should == "abc"
     end
 
+    it "should symbolize the method" do
+      WebMock::RequestSignature.new('get', "www.example.com", :body => "abc").method.should == :get
+    end
   end
 
   it "should report string describing itself" do

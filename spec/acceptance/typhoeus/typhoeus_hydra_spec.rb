@@ -28,6 +28,13 @@ unless RUBY_PLATFORM =~ /java/
           hydra.run
         end
 
+        it "should work if you give stub action as a symbol and hydra method as a string" do
+          stub_request(:post, "www.example.com")
+          request = Typhoeus::Request.new("http://www.example.com", :method => 'post')
+          hydra.queue(request)
+          hydra.run
+        end
+
         it "should take into account body for POST request" do
           stub_request(:post, "www.example.com").with(:body => {:hello => 'world'})
           response = Typhoeus.post("http://www.example.com", :method => :post, :body => {:hello => 'world'})

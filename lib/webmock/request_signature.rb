@@ -6,7 +6,7 @@ module WebMock
     attr_reader :headers
 
     def initialize(method, uri, options = {})
-      self.method = method
+      self.method = method.to_sym
       self.uri = uri.is_a?(Addressable::URI) ? uri : WebMock::Util::URI.normalize_uri(uri)
       assign_options(options)
     end
