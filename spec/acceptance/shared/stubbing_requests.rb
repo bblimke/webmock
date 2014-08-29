@@ -71,6 +71,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         http_request(:get, "http://www.example.com/").status.should == "200"
       end
 
+      it "should match stubbed request when http request was made with method given as string" do
+        stub_request(:get, "www.example.com")
+        http_request('get', "http://www.example.com/").status.should == "200"
+      end
+
       it "should raise error if stubbed request has different method" do
         stub_request(:get, "www.example.com")
         http_request(:get, "http://www.example.com/").status.should == "200"
