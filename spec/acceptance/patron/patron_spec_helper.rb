@@ -2,6 +2,7 @@ require 'ostruct'
 
 module PatronSpecHelper
   def http_request(method, uri, options = {}, &block)
+    method = method.to_sym
     uri = Addressable::URI.heuristic_parse(uri)
     sess = Patron::Session.new
     sess.base_url = "#{uri.omit(:userinfo, :path, :query).normalize.to_s}".gsub(/\/$/,"")
