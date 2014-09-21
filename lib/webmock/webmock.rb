@@ -75,6 +75,18 @@ module WebMock
     end
   end
 
+  def self.hide_stubbing_instructions!
+    Config.instance.show_stubbing_instructions = false
+  end
+
+  def self.show_stubbing_instructions!
+    Config.instance.show_stubbing_instructions = true
+  end
+
+  def self.show_stubbing_instructions?
+    Config.instance.show_stubbing_instructions
+  end
+
   def self.reset!
     WebMock::RequestRegistry.instance.reset!
     WebMock::StubRegistry.instance.reset!
