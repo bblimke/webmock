@@ -2,19 +2,20 @@ module WebMock
 
   class NetConnectNotAllowedError < Exception
     def initialize(request_signature)
-      text = "Real HTTP connections are disabled. Unregistered request: #{request_signature}"
-      text << "\n\n"
-      text << stubbing_instructions(request_signature)
-      text << request_stubs
-      text << "\n\n" + "="*60
+      text = [
+        "Real HTTP connections are disabled. Unregistered request: #{request_signature}",
+        stubbing_instructions(request_signature),
+        request_stubs,
+        "="*60
+      ].compact.join("\n\n")
       super(text)
     end
 
     private
 
     def request_stubs
-      return "" if WebMock::StubRegistry.instance.request_stubs.empty?
-      text = "\n\nregistered request stubs:\n"
+      return if WebMock::StubRegistry.instance.request_stubs.empty?
+      text = "registered request stubs:\n"
       WebMock::StubRegistry.instance.request_stubs.each do |stub|
         text << "\n#{WebMock::StubRequestSnippet.new(stub).to_s(false)}"
       end
@@ -22,6 +23,7 @@ module WebMock
     end
 
     def stubbing_instructions(request_signature)
+      return unless WebMock.show_stubbing_instructions?
       text = ""
       request_stub = RequestStub.from_request_signature(request_signature)
       text << "You can stub this request with the following snippet:\n\n"
