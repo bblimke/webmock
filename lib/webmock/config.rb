@@ -11,5 +11,6 @@ module WebMock
     attr_accessor :allow
     attr_accessor :net_http_connect_on_start
     attr_accessor :show_stubbing_instructions
+    attr_accessor :query_values_notation
   end
 end

@@ -102,7 +102,7 @@ module WebMock
       elsif rSpecHashIncludingMatcher?(query_params)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
       else
-        WebMock::Util::QueryMapper.query_to_values(query_params)
+        WebMock::Util::QueryMapper.query_to_values(query_params, :notation => Config.instance.query_values_notation)
       end
     end
 
@@ -116,7 +116,7 @@ module WebMock
   class URIRegexpPattern  < URIPattern
     def matches?(uri)
       WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
-        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
+        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => Config.instance.query_values_notation))
     end
 
     def to_s
@@ -155,7 +155,7 @@ module WebMock
       if @pattern.is_a?(Addressable::URI)
         if @query_params
           uri.omit(:query) === @pattern &&
-          (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
+          (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => Config.instance.query_values_notation))
         else
           uri === @pattern
         end
@@ -167,8 +167,8 @@ module WebMock
     def add_query_params(query_params)
       super
       if @query_params.is_a?(Hash) || @query_params.is_a?(String)
-        query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query) || {}).merge(@query_params)
-        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash)
+        query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query, :notation => Config.instance.query_values_notation) || {}).merge(@query_params)
+        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash, :notation => WebMock::Config.instance.query_values_notation)
         @query_params = nil
       end
     end
@@ -232,7 +232,7 @@ module WebMock
       when :xml then
         Crack::XML.parse(body)
       else
-        WebMock::Util::QueryMapper.query_to_values(body)
+        WebMock::Util::QueryMapper.query_to_values(body, :notation => Config.instance.query_values_notation)
       end
     end
 
