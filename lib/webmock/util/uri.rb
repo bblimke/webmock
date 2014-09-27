@@ -14,8 +14,8 @@ module WebMock
       NORMALIZED_URIS = Hash.new do |hash, uri|
         normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
         if normalized_uri.query_values
-          sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query) || {})
-          normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values)
+          sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query, :notation => Config.instance.query_values_notation) || {})
+          normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values, :notation => WebMock::Config.instance.query_values_notation)
         end
         normalized_uri = normalized_uri.normalize #normalize! is slower
         normalized_uri.query = normalized_uri.query.gsub("+", "%2B") if normalized_uri.query
@@ -74,7 +74,8 @@ module WebMock
       private
 
       def self.sort_query_values(query_values)
-        Hash[*query_values.sort.inject([]) { |values, pair| values + pair}]
+        sorted_query_values = query_values.sort
+        query_values.is_a?(Hash) ? Hash[*sorted_query_values.inject([]) { |values, pair| values + pair}] : sorted_query_values
       end
 
       def self.uris_with_inferred_port_and_without(uris)

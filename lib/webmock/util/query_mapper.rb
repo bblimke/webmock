@@ -41,9 +41,9 @@ module WebMock::Util
         return nil if query.nil?
         query.force_encoding('utf-8') if query.respond_to?(:force_encoding)
 
-        options = {:notation => :subscript}.merge(options)
+        options[:notation] ||= :subscript
 
-        unless %w(flat dot subscript flat_array).include?(options[:notation].to_s)
+        if ![:flat, :dot, :subscript, :flat_array].include?(options[:notation])
           raise ArgumentError,
                 'Invalid notation. Must be one of: ' +
                 '[:flat, :dot, :subscript, :flat_array].'
@@ -173,7 +173,8 @@ module WebMock::Util
       # An empty Hash will result in a nil query.
       #
       # @param [Hash, #to_hash, Array] new_query_values The new query values.
-      def values_to_query(new_query_values)
+      def values_to_query(new_query_values, options = {})
+        options[:notation] ||= :subscript
         return if new_query_values.nil?
 
         unless new_query_values.is_a?(Array)
@@ -196,7 +197,7 @@ module WebMock::Util
           encoded_parent = ::Addressable::URI.encode_component(
               parent.dup, ::Addressable::URI::CharacterClasses::UNRESERVED
           )
-          buffer << "#{to_query(encoded_parent, value)}&"
+          buffer << "#{to_query(encoded_parent, value, options)}&"
         end
         buffer.chop
       end
@@ -227,7 +228,8 @@ module WebMock::Util
       # @return [String] a properly escaped and ordered URL query.
 
       # new_query_values have form [['key1', 'value1'], ['key2', 'value2']]
-      def to_query(parent, value)
+      def to_query(parent, value, options = {})
+        options[:notation] ||= :subscript
         case value
         when ::Hash
           value = value.map do |key, val|
@@ -239,15 +241,15 @@ module WebMock::Util
           value.sort!
           buffer = ''
           value.each do |key, val|
-            new_parent = "#{parent}[#{key}]"
-            buffer << "#{to_query(new_parent, val)}&"
+            new_parent = options[:notation] != :flat_array ? "#{parent}[#{key}]" : parent
+            buffer << "#{to_query(new_parent, val, options)}&"
           end
           buffer.chop
         when ::Array
           buffer = ''
           value.each_with_index do |val, i|
-            new_parent = "#{parent}[#{i}]"
-            buffer << "#{to_query(new_parent, val)}&"
+            new_parent = options[:notation] != :flat_array ? "#{parent}[#{i}]" : parent
+            buffer << "#{to_query(new_parent, val, options)}&"
           end
           buffer.chop
         when TrueClass

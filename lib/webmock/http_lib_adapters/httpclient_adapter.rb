@@ -132,7 +132,7 @@ if defined?(::HTTPClient)
 
   def build_request_signature(req, reuse_existing = false)
     uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
-    uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query) if req.header.request_query
+    uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, :notation => WebMock::Config.instance.query_values_notation) if req.header.request_query
     uri.port = req.header.request_uri.port
     uri = uri.omit(:userinfo)
 

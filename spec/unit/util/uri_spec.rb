@@ -197,6 +197,35 @@ describe WebMock::Util::URI do
       uri = WebMock::Util::URI.normalize_uri(uri_string)
       WebMock::Util::QueryMapper.query_to_values(uri.query).should == {"load"=>{"include"=>[{"staff"=>"email"},"business_name"]}}
     end
+
+    context "when query notation is set to :flat_array" do
+      before :all do
+        WebMock::Config.instance.query_values_notation = :flat_array
+      end
+
+      it "should successfully handle repeated paramters" do
+        uri_string = "http://www.example.com:80/path?target=host1&target=host2"
+        uri = WebMock::Util::URI.normalize_uri(uri_string)
+        WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => WebMock::Config.instance.query_values_notation).should == [['target', 'host1'], ['target', 'host2']]
+      end
+    end
+  end
+
+  describe "sorting query values" do
+
+    context "when query values is a Hash" do
+      it "returns an alphabetically sorted hash" do
+        sorted_query = WebMock::Util::URI.sort_query_values({"b"=>"one", "a"=>"two"})
+        sorted_query.should == {"a"=>"two", "b"=>"one"}
+      end
+    end
+
+    context "when query values is an Array" do
+      it "returns an alphabetically sorted array" do
+        sorted_query = WebMock::Util::URI.sort_query_values([["b","two"],["a","one_b"],["a","one_a"]])
+        sorted_query.should == [["a","one_a"],["a","one_b"],["b","two"]]
+      end
+    end
   end
 
   describe "stripping default port" do
