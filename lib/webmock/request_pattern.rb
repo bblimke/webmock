@@ -268,7 +268,11 @@ module WebMock
         if actual.is_a?(Hash) && expected.is_a?(Hash)
           return false unless matching_hashes?(actual, expected)
         else
-          return false unless expected === actual
+          if is_kind_of_date?(expected)
+            return false unless WebMock::Util::DateComparator.compare(actual, expected)
+          else
+            return false unless expected === actual
+          end
         end
       end
       true
@@ -280,6 +284,10 @@ module WebMock
 
     def normalize_hash(hash)
       Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash).sort]
+    end
+
+    def is_kind_of_date?(date)
+      date.is_a?(Date) || date.is_a?(DateTime) || date.is_a?(Time)
     end
 
   end
