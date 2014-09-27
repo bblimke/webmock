@@ -88,4 +88,17 @@ describe WebMock::Util::QueryMapper do
     end
   end
 
+  it 'converts array values, vice versa' do
+    query = "one%5B%5D=1&one%5B%5D=2"
+    values = {"one" => ["1","2"]}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
+
+  it 'converts hash values, vice versa' do
+    query = "one%5Ba%5D=1&one%5Bb%5D=2"
+    values = {"one" => {"a" => "1", "b" => "2"}}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
 end
