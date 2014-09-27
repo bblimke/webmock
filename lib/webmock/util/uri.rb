@@ -17,7 +17,7 @@ module WebMock
           sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query, :notation => Config.instance.query_values_notation) || {})
           normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values, :notation => WebMock::Config.instance.query_values_notation)
         end
-        normalized_uri = normalized_uri.normalize #normalize! is slower
+        normalized_uri = normalized_uri.normalize if !(normalized_uri.class == Addressable::URI && normalized_uri.userinfo.present?) #normalize! is slower
         normalized_uri.query = normalized_uri.query.gsub("+", "%2B") if normalized_uri.query
         normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
         hash[uri] = normalized_uri
