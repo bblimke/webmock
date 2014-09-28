@@ -4,7 +4,7 @@ module WebMock
     #https://github.com/rspec/rspec-mocks/blob/master/lib/rspec/mocks/argument_matchers.rb
     class HashIncludingMatcher
       def initialize(expected)
-        @expected = Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(expected).sort]
+        @expected = Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(expected, :deep => true).sort]
       end
 
       def ==(actual)

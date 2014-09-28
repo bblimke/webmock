@@ -48,9 +48,10 @@ module WebMock
 
 
     def assign_options(options)
-      @body_pattern = BodyPattern.new(options[:body]) if options.has_key?(:body)
-      @headers_pattern = HeadersPattern.new(options[:headers]) if options.has_key?(:headers)
-      @uri_pattern.add_query_params(options[:query]) if options.has_key?(:query)
+      options = WebMock::Util::HashKeysStringifier.stringify_keys!(options, :deep => true)
+      @body_pattern = BodyPattern.new(options['body']) if options.has_key?('body')
+      @headers_pattern = HeadersPattern.new(options['headers']) if options.has_key?('headers')
+      @uri_pattern.add_query_params(options['query']) if options.has_key?('query')
     end
 
     def create_uri_pattern(uri)
@@ -279,7 +280,7 @@ module WebMock
     end
 
     def normalize_hash(hash)
-      Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash).sort]
+      Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash, :deep => true).sort]
     end
 
   end
