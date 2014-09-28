@@ -320,7 +320,7 @@ RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
     `curl -is www.example.com > /tmp/www.example.com.txt`
 ```ruby
 stub_request(:get, "www.example.com").
-  to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt" }))
+  to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt") })
 ```
 
 ### Responses with dynamically evaluated parts
