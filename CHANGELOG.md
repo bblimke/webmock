@@ -1,5 +1,51 @@
 # Changelog
 
+## 1.19.0
+
+  * Fixed issue with Excon adapter giving warning message when redirects middleware was enabled.
+
+      Thanks to [Theo Hultberg](https://github.com/iconara) for reporting that.
+
+  * Fixed issue with `undefined method 'valid_request_keys' for Excon::Utils:Module`
+
+      Thanks to [Pablo Jairala](https://github.com/davidjairala)
+
+  * Fixed query mapper to encode `'one' => ['1','2']` as `'one[]=1&one[]=2'`.
+
+      Thanks to [Insoo Buzz Jung](https://github.com/insoul)
+
+  * Improved cookies support for em-http-request
+
+      Thanks to [Carlos Alonso Pérez](https://github.com/calonso)
+
+  * Fix HTTP Gem adapter to ensure uri attribute is set on response object.
+
+      Thanks to [Aleksey V. Zapparov](https://github.com/ixti)
+
+  * Fixed HTTPClient adapter. The response header now receives `request_method`, `request_uri`, and `request_query` transferred from request header
+
+      Thanks to [trlorenz](https://github.com/trlorenz)
+
+  * Query mapper supports nested data structures i.e. `{"first" => [{"two" => [{"three" => "four"}, "five"]}]}`
+
+      Thanks to [Alexander Simonov](https://github.com/simonoff)
+
+  * Fixed compatibility with latest versions of Excon which don't define `VALID_REQUEST_KEYS` anymore.
+
+      Thanks to [Pablo Jairala](https://github.com/davidjairala)
+
+  * Request method is always a symbol is request signatures. This fixes the issue of WebMock not matching Typhoeus requests with request method defined as string.
+
+      Thanks to [Thorbjørn Hermanse](https://github.com/thhermansen)
+
+  * Stubbing instructions which are displayed when no matching stub is found, can be disabled with `Config.instance.show_stubbing_instructions = false`
+
+      Thanks to [Mark Lorenz](https://github.com/dapplebeforedawn)
+
+  * Notation used for mapping query strings to data structure can be configured i.e. `WebMock::Config.instance.query_values_notation = :subscript`. This allows setting `:flat_array` notation which supports duplicated parameter names in query string.
+
+      Thanks to [tjsousa](https://github.com/tjsousa)
+
 ## 1.18.0
 
 * Updated dependency on Addressable to versions >= 2.3.6

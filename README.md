@@ -910,6 +910,16 @@ People who submitted patches and new features or suggested improvements. Many th
 * Oleg Gritsenko
 * Hwan-Joon Choi
 * SHIBATA Hiroshi
+* Caleb Thompson
+* Theo Hultberg
+* Pablo Jairala
+* Insoo Buzz Jung
+* Carlos Alonso Pérez
+* trlorenz
+* Alexander Simonov
+* Thorbjørn Hermanse
+* Mark Lorenz
+* tjsousa
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
