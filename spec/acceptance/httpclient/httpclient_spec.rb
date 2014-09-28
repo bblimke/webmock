@@ -136,10 +136,11 @@ describe "HTTPClient" do
     end
 
     it "client sends the Accept, User-Agent, and Date by default" do
+      WebMock.disable_net_connect!
       stub_request(:get, "www.example.com").with do |req|
-        req.headers["Accept"].should == "*/*"
-        req.headers["User-Agent"].should == "#{HTTPClient::DEFAULT_AGENT_NAME} #{HTTPClient::LIB_NAME}"
-        req.headers["Date"].should_not be_nil
+        req.headers["Accept"] == "*/*" &&
+        req.headers["User-Agent"] == "#{HTTPClient::DEFAULT_AGENT_NAME} #{HTTPClient::LIB_NAME}" &&
+        req.headers["Date"]
       end
       http_request(:get, "www.example.com")
     end

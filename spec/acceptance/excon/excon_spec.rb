@@ -17,7 +17,7 @@ describe "Excon" do
   end
 
   context "with response_block" do
-    it "should support excon response_block for real requests" do
+    it "should support excon response_block for real requests", :net_connect => true do
       a = []
       WebMock.allow_net_connect!
       r = Excon.new('http://httpstat.us/200').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
@@ -33,7 +33,7 @@ describe "Excon" do
       r.body.should == ""
     end
 
-    it "should invoke callbacks with response body even if a real request is made" do
+    it "should invoke callbacks with response body even if a real request is made", :net_connect => true do
       a = []
       WebMock.allow_net_connect!
       response = nil
