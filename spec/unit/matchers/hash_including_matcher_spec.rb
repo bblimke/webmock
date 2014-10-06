@@ -26,6 +26,10 @@ module WebMock
           expect(HashIncludingMatcher.new(:a => 1)).to eq("a" => 1, "b" => 2)
         end
 
+        it "matches nested hashes with extra stuff" do
+          expect(HashIncludingMatcher.new(:a => 1, :b => { :c => 3 })).to eq({'a' => 1, 'b' => { 'c' => 3, 'd' => 4 }})
+        end
+
         describe "when matching anythingized keys" do
           let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
@@ -48,6 +52,7 @@ module WebMock
           it "matches if passed many keys and many key/value pairs" do
             expect(HashIncludingMatcher.new(:a => anything, :b => anything, :c => 3, :e => 5)).to eq({'a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5})
           end
+          
         end
 
         describe "when matching an empty hash" do
