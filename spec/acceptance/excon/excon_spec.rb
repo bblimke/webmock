@@ -22,7 +22,7 @@ describe "Excon" do
       WebMock.allow_net_connect!
       r = Excon.new('http://httpstat.us/200').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
       a.should == ["2", "0", "0", " ", "O", "K"]
-      r.body.should == "200 OK" #this should be "", but there is an issue in Excon https://github.com/excon/excon/issues/429
+      r.body.should == ""
     end
 
     it "should support excon response_block" do
@@ -30,7 +30,7 @@ describe "Excon" do
       stub_request(:get, "http://example.com/").to_return(:body => "abc")
       r = Excon.new('http://example.com').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
       a.should == ['a', 'b', 'c']
-      r.body.should == "abc" #this should be "", but there is an issue in Excon https://github.com/excon/excon/issues/429
+      r.body.should == ""
     end
 
     it "should invoke callbacks with response body even if a real request is made", :net_connect => true do
@@ -43,7 +43,7 @@ describe "Excon" do
       r = Excon.new('http://httpstat.us/200').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
       response.body.should == "200 OK"
       a.should == ["2", "0", "0", " ", "O", "K"]
-      r.body.should == "200 OK" #this should be "", but there is an issue in Excon https://github.com/excon/excon/issues/429
+      r.body.should == ""
     end
   end
 
