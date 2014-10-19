@@ -42,13 +42,13 @@ unless RUBY_PLATFORM =~ /java/
         test.should == body
       end
 
-      it "should call on_failure with 4xx response" do
+      it "should call on_missing with 4xx response" do
         response_code = 403
         stub_request(:any, "example.com").
           to_return(:status => [response_code, "None shall pass"])
 
         test = nil
-        @curl.on_failure do |c, code|
+        @curl.on_missing do |c, code|
           test = code
         end
         @curl.http_get
@@ -139,6 +139,7 @@ unless RUBY_PLATFORM =~ /java/
         stub_request(:any, "example.com")
         order = []
         @curl.on_success {|*args| order << :on_success }
+        @curl.on_missing {|*args| order << :on_missing }
         @curl.on_failure {|*args| order << :on_failure }
         @curl.on_header {|*args| order << :on_header }
         @curl.on_body {|*args| order << :on_body }
@@ -153,6 +154,7 @@ unless RUBY_PLATFORM =~ /java/
         stub_request(:any, "example.com").to_return(:status => [500, ""])
         order = []
         @curl.on_success {|*args| order << :on_success }
+        @curl.on_missing {|*args| order << :on_missing }
         @curl.on_failure {|*args| order << :on_failure }
         @curl.on_header {|*args| order << :on_header }
         @curl.on_body {|*args| order << :on_body }
@@ -161,6 +163,21 @@ unless RUBY_PLATFORM =~ /java/
         @curl.http_get
 
         order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_failure]
+      end
+
+      it "should call callbacks in correct order on missing request" do
+        stub_request(:any, "example.com").to_return(:status => [403, ""])
+        order = []
+        @curl.on_success {|*args| order << :on_success }
+        @curl.on_missing {|*args| order << :on_missing }
+        @curl.on_failure {|*args| order << :on_failure }
+        @curl.on_header {|*args| order << :on_header }
+        @curl.on_body {|*args| order << :on_body }
+        @curl.on_complete {|*args| order << :on_complete }
+        @curl.on_progress {|*args| order << :on_progress }
+        @curl.http_get
+
+        order.should == [:on_progress,:on_header,:on_body,:on_complete,:on_missing]
       end
     end
 

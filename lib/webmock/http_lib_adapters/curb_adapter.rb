@@ -159,7 +159,9 @@ if defined?(Curl)
         case response_code
         when 200..299
           @on_success.call(self) if @on_success
-        when 400..599
+        when 400..499
+          @on_missing.call(self, self.response_code) if @on_missing
+        when 500..599
           @on_failure.call(self, self.response_code) if @on_failure
         end
       end
@@ -257,7 +259,7 @@ if defined?(Curl)
         @content_type || super
       end
 
-      %w[ success failure header body complete progress ].each do |callback|
+      %w[ success failure missing header body complete progress ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
           def on_#{callback} &block
             @on_#{callback} = block
