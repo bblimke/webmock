@@ -28,6 +28,41 @@ describe WebMock::RequestExecutionVerifier do
       @verifier.failure_message.should == expected_text
     end
 
+    context "at_least_times_executed is set" do
+      it "reports failure message correctly when executed times is one" do
+        @verifier.times_executed = 1
+        @verifier.at_least_times_executed = 2
+        expected_text = "The request www.example.com was expected to execute at least 2 times but it executed 1 time"
+        expected_text << @executed_requests_info
+        @verifier.failure_message.should == expected_text
+      end
+
+      it "reports failure message correctly when executed times is two" do
+        @verifier.times_executed = 2
+        @verifier.at_least_times_executed = 3
+        expected_text = "The request www.example.com was expected to execute at least 3 times but it executed 2 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message.should == expected_text
+      end
+    end
+
+    context "at_most_times_executed is set" do
+      it "reports failure message correctly when executed times is three" do
+        @verifier.times_executed = 3
+        @verifier.at_most_times_executed = 2
+        expected_text = "The request www.example.com was expected to execute at most 2 times but it executed 3 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message.should == expected_text
+      end
+
+      it "reports failure message correctly when executed times is two" do
+        @verifier.times_executed = 2
+        @verifier.at_most_times_executed = 1
+        expected_text = "The request www.example.com was expected to execute at most 1 time but it executed 2 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message.should == expected_text
+      end
+    end
   end
 
   describe "negative failure message" do
@@ -45,6 +80,42 @@ describe WebMock::RequestExecutionVerifier do
       expected_text = "The request www.example.com was expected to execute 0 times but it executed 1 time"
       expected_text << @executed_requests_info
       @verifier.failure_message_when_negated.should == expected_text
+    end
+
+    context "at_least_times_executed is set" do
+      it "reports failure message correctly when executed times is one" do
+        @verifier.times_executed = 3
+        @verifier.at_least_times_executed = 2
+        expected_text = "The request www.example.com was not expected to execute at least 2 times but it executed 3 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message_when_negated.should == expected_text
+      end
+
+      it "reports failure message correctly when executed times is two" do
+        @verifier.times_executed = 2
+        @verifier.at_least_times_executed = 2
+        expected_text = "The request www.example.com was not expected to execute at least 2 times but it executed 2 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message_when_negated.should == expected_text
+      end
+    end
+
+    context "at_most_times_executed is set" do
+      it "reports failure message correctly when executed times is three" do
+        @verifier.times_executed = 2
+        @verifier.at_most_times_executed = 3
+        expected_text = "The request www.example.com was not expected to execute at most 3 times but it executed 2 times"
+        expected_text << @executed_requests_info
+        @verifier.failure_message_when_negated.should == expected_text
+      end
+
+      it "reports failure message correctly when executed times is one" do
+        @verifier.times_executed = 1
+        @verifier.at_most_times_executed = 2
+        expected_text = "The request www.example.com was not expected to execute at most 2 times but it executed 1 time"
+        expected_text << @executed_requests_info
+        @verifier.failure_message_when_negated.should == expected_text
+      end
     end
 
   end

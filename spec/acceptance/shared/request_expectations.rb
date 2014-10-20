@@ -177,6 +177,181 @@ shared_context "request expectations" do |*adapter_info|
         end
       end
 
+
+
+      describe "at_most_times" do
+        it "fails if request was made more times than maximum" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
+          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute at most 2 times but it executed 3 times))
+        end
+
+        it "passes if request was made the maximum number of times" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
+          }.should_not raise_error
+        end
+
+        it "passes if request was made fewer than the maximum number of times" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
+          }.should_not raise_error
+        end
+
+        it "passes if request was not made at all" do
+          lambda {
+            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
+          }.should_not raise_error
+        end
+      end
+
+
+      describe "at_least_times" do
+        it "fails if request was made fewer times than minimum" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
+          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute at least 2 times but it executed 1 time))
+        end
+
+        it "passes if request was made the minimum number of times" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
+          }.should_not raise_error
+        end
+
+        it "passes if request was made more than the minimum number of times" do
+          lambda {
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            http_request(:get, "http://www.example.com/")
+            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
+          }.should_not raise_error
+        end
+
+        context "descriptive at_most_ matcher" do
+          context "at_most_once" do
+            it "succeeds if no request was executed" do
+              lambda {
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
+              }.should_not raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method once" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
+              }.should_not raise_error
+            end
+
+            it "fails if request was executed with the same uri and method twice" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
+              }.should raise_error
+            end
+          end
+
+          context "at_most_twice" do
+            it "succeeds if no request was executed" do
+              lambda {
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
+              }.should_not raise_error
+            end
+
+            it "succeeds if too few requests were executed" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
+              }.should_not raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method twice" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
+              }.should_not raise_error
+            end
+
+            it "fails if request was executed with the same uri and method three times" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
+              }.should raise_error
+            end
+          end
+        end
+
+        context "descriptive at_least_ matcher" do
+          context "at_least_once" do
+            it "fails if no request was executed" do
+              lambda {
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
+              }.should raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method once" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
+              }.should_not raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method twice" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
+              }.should_not raise_error
+            end
+          end
+
+          context "at_least_twice" do
+            it "fails if no request was executed" do
+              lambda {
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
+              }.should raise_error
+            end
+
+            it "fails if too few requests were executed" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
+              }.should raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method twice" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
+              }.should_not raise_error
+            end
+
+            it "satisfies expectation if request was executed with the same uri and method three times" do
+              lambda {
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                http_request(:get, "http://www.example.com/")
+                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
+              }.should_not raise_error
+            end
+          end
+        end
+      end
+
       it "should fail if request was made more times than expected" do
         lambda {
           http_request(:get, "http://www.example.com/")

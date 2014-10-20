@@ -563,6 +563,14 @@ a_request(:post, "www.example.com").
 
 a_request(:post, "www.something.com").should have_been_made.times(3)
 
+a_request(:post, "www.something.com").should have_been_made.at_least_once
+
+a_request(:post, "www.something.com").should have_been_made.at_least_times(3)
+
+a_request(:post, "www.something.com").should have_been_made.at_most_twice
+
+a_request(:post, "www.something.com").should have_been_made.at_most_times(3)
+
 a_request(:any, "www.example.com").should_not have_been_made
 
 a_request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
