@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.20.0
+
+  * Add support for on_missing callback of Curb::Easy
+
+      Thanks to [Tasos Stathopoulos](https://github.com/astathopoulos)
+
+  * Add at_least_times and at_most_times matchers
+
+      Thanks to [Dan Buettner](https://github.com/Capncavedan)
+
 ## 1.19.0
 
   * Fixed issue with Excon adapter giving warning message when redirects middleware was enabled.
