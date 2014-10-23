@@ -65,12 +65,19 @@ module WebMock
     end
 
     def assert_request_requested(request, options = {})
-      verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times) || 1)
+      times = options.delete(:times)
+      at_least_times = options.delete(:at_least_times)
+      at_most_times  = options.delete(:at_most_times)
+      times = 1 if times.nil? && at_least_times.nil? && at_most_times.nil?
+      verifier = WebMock::RequestExecutionVerifier.new(request, times, at_least_times, at_most_times)
       WebMock::AssertionFailure.failure(verifier.failure_message) unless verifier.matches?
     end
 
     def assert_request_not_requested(request, options = {})
-      verifier = WebMock::RequestExecutionVerifier.new(request, options.delete(:times))
+      times = options.delete(:times)
+      at_least_times = options.delete(:at_least_times)
+      at_most_times  = options.delete(:at_most_times)
+      verifier = WebMock::RequestExecutionVerifier.new(request, times, at_least_times, at_most_times)
       WebMock::AssertionFailure.failure(verifier.failure_message_when_negated) unless verifier.does_not_match?
     end
 
