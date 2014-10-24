@@ -143,9 +143,9 @@ if defined?(Curl)
       end
 
       def invoke_curb_callbacks
-        @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
-        self.header_str.lines.each { |header_line| @on_header.call header_line } if @on_header
-        if @on_body
+        @on_progress.call(0.0,1.0,0.0,1.0) if defined?( @on_progress )
+        self.header_str.lines.each { |header_line| @on_header.call header_line } if defined?( @on_header )
+        if defined?( @on_body )
           if chunked_response?
             self.body_str.each do |chunk|
               @on_body.call(chunk)
@@ -154,20 +154,20 @@ if defined?(Curl)
             @on_body.call(self.body_str)
           end
         end
-        @on_complete.call(self) if @on_complete
+        @on_complete.call(self) if defined?( @on_complete )
 
         case response_code
         when 200..299
-          @on_success.call(self) if @on_success
+          @on_success.call(self) if defined?( @on_success )
         when 400..499
-          @on_missing.call(self, self.response_code) if @on_missing
+          @on_missing.call(self, self.response_code) if defined?( @on_missing )
         when 500..599
-          @on_failure.call(self, self.response_code) if @on_failure
+          @on_failure.call(self, self.response_code) if defined?( @on_failure )
         end
       end
 
       def chunked_response?
-        @transfer_encoding == 'chunked' && self.body_str.respond_to?(:each)
+        defined?( @transfer_encoding ) && @transfer_encoding == 'chunked' && self.body_str.respond_to?(:each)
       end
 
       def build_webmock_response
