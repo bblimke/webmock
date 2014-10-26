@@ -124,6 +124,15 @@ describe WebMock::Response do
       @response = WebMock::Response.new(:body => Pathname.new(__FILE__))
       @response.body.should == File.read(__FILE__)
     end
+
+    # Users of webmock commonly make the mistake of stubbing the response
+    # body to return a hash, to prevent this:
+    #
+    it "should error if not given one of the allowed types" do
+      lambda { WebMock::Response.new(:body => Hash.new) }.should \
+        raise_error(WebMock::Response::InvalidBody)
+    end
+
   end
 
   describe "from raw response" do
