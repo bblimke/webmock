@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.20.1
+
+  * `assert_requested` and `assert_not_requested` accept `at_least_times` and `at_most_times` options
+
+      Thanks to [Dan Buettner](https://github.com/Capncavedan)
+
+  * Silenced `instance variable undefined` warnings in Curb adapted.
+
+      Thanks to [Sven Riedel](https://github.com/sriedel)
+
 ## 1.20.0
 
   * Add support for on_missing callback of Curb::Easy
