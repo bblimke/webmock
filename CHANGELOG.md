@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.20.2
+
+  * WebMock provides a helpful error message if an incompatible object is given as response body.
+
+      Thanks to [Mark Lorenz](https://github.com/dapplebeforedawn)
+
 ## 1.20.1
 
   * `assert_requested` and `assert_not_requested` accept `at_least_times` and `at_most_times` options

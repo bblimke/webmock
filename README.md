@@ -932,6 +932,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Tasos Stathopoulos
 * Dan Buettner
 * Sven Riedel
+* Mark Lorenz
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
