@@ -43,6 +43,7 @@ module WebMock
 
     def body=(body)
       @body = body
+      assert_valid_body!
       stringify_body!
     end
 
@@ -109,6 +110,13 @@ module WebMock
       end
     end
 
+    def assert_valid_body!
+      valid_types = [Proc, IO, Pathname, String, Array]
+      return if @body.nil?
+      return if valid_types.any? { |c| @body.is_a?(c) }
+      raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+    end
+
     def read_raw_response(raw_response)
       if raw_response.is_a?(IO)
         string = raw_response.read
@@ -128,6 +136,8 @@ module WebMock
       options[:status] = [response.code.to_i, response.message]
       options
     end
+
+    InvalidBody = Class.new(StandardError)
 
   end
 

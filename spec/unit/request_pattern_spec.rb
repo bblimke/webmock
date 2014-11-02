@@ -400,7 +400,7 @@ describe WebMock::RequestPattern do
                                                              :headers => {:content_type => 'application/json'}, :body => "foo bar"))
           end
 
-          it "shound not match if request body is different" do
+          it "should not match if request body is different" do
             WebMock::RequestPattern.new(:post, 'www.example.com', :body => {:a => 1, :b => 2}).
               should_not match(WebMock::RequestSignature.new(:post, "www.example.com",
               :headers => {:content_type => 'application/json'}, :body => "{\"a\":1,\"c\":null}"))
