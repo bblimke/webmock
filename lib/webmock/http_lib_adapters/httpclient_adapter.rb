@@ -148,7 +148,12 @@ if defined?(::HTTPClient)
       hdrs[header[0]] << header[1]
       hdrs
     end
-    headers = headers_from_session(uri).merge(headers)
+    arg = if respond_to?(:default_header)
+            req # httpclient >=2.5.3
+          else
+            uri # httpclient <=2.5.2
+          end
+    headers = headers_from_session(arg).merge(headers)
 
     if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
       userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
