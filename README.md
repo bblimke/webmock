@@ -546,6 +546,8 @@ WebMock.should have_requested(:get, "www.example.com").
 WebMock.should_not have_requested(:get, "www.something.com")
 
 WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
+# Note that the block with `do ... end` instead of curly brackets won't work!
+# Why? See this comment https://github.com/bblimke/webmock/issues/174#issuecomment-34908908
 
 WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
