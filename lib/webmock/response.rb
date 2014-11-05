@@ -76,11 +76,13 @@ module WebMock
     end
 
     def options=(options)
-      self.headers = options[:headers]
-      self.status = options[:status]
-      self.body = options[:body]
-      self.exception = options[:exception]
-      @should_timeout = options[:should_timeout]
+      options = WebMock::Util::HashKeysStringifier.stringify_keys!(options)
+      HashValidator.new(options).validate_keys('headers', 'status', 'body', 'exception', 'should_timeout')
+      self.headers = options['headers']
+      self.status = options['status']
+      self.body = options['body']
+      self.exception = options['exception']
+      @should_timeout = options['should_timeout']
     end
 
     def evaluate(request_signature)

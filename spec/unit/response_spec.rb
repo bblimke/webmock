@@ -26,6 +26,10 @@ describe WebMock::Response do
     @response = WebMock::Response.new(:headers => {'A' => 'a'})
   end
 
+  it "should raise an error when initialized with unknown option" do
+    expect { WebMock::Response.new(:foo => "bar") }.to raise_error('Unknown key: "foo". Valid keys are: "headers", "status", "body", "exception", "should_timeout"')
+  end
+
   it "should report normalized headers" do
     WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
     @response = WebMock::Response.new(:headers => {'A' => 'a'})
@@ -33,7 +37,6 @@ describe WebMock::Response do
   end
 
   describe "status" do
-
     it "should have 200 code and empty message by default" do
       @response.status.should == [200, ""]
     end
@@ -47,7 +50,6 @@ describe WebMock::Response do
       @response = WebMock::Response.new(:status => [500, "Internal Server Error"])
       @response.status.should == [500, "Internal Server Error"]
     end
-
   end
 
   describe "raising error" do
