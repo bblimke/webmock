@@ -5,14 +5,13 @@ if ENV["EM_HTTP_REQUEST_0_X"]
   gem 'em-http-request', '~> 0.3.0'
 end
 
-
 group :development do
   gem 'rake'
 end
 
 group :test do
   gem 'rack'
-  gem 'minitest_tu_shim'
+  gem 'minitest_tu_shim', '1.3.2'
 end
 
 platforms :jruby do
