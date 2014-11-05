@@ -48,6 +48,9 @@ describe WebMock::RequestPattern do
       @request_pattern.to_s.should ==WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
     end
 
+    it "should raise an error if options passed to `with` are invalid" do
+      expect { @request_pattern.with(:foo => "bar") }.to raise_error('Unknown key: "foo". Valid keys are: "body", "headers", "query"')
+    end
   end
 
 

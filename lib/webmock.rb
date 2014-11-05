@@ -16,6 +16,7 @@ require 'webmock/util/hash_counter'
 require 'webmock/util/hash_keys_stringifier'
 require 'webmock/util/json'
 require 'webmock/util/version_checker'
+require 'webmock/util/hash_validator'
 
 require 'webmock/matchers/hash_including_matcher'
 

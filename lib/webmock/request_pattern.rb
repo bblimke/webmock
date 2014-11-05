@@ -49,6 +49,7 @@ module WebMock
 
     def assign_options(options)
       options = WebMock::Util::HashKeysStringifier.stringify_keys!(options, :deep => true)
+      HashValidator.new(options).validate_keys('body', 'headers', 'query')
       @body_pattern = BodyPattern.new(options['body']) if options.has_key?('body')
       @headers_pattern = HeadersPattern.new(options['headers']) if options.has_key?('headers')
       @uri_pattern.add_query_params(options['query']) if options.has_key?('query')
