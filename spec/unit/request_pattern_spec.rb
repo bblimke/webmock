@@ -51,6 +51,10 @@ describe WebMock::RequestPattern do
     it "should raise an error if options passed to `with` are invalid" do
       expect { @request_pattern.with(:foo => "bar") }.to raise_error('Unknown key: "foo". Valid keys are: "body", "headers", "query"')
     end
+
+    it "should raise an error if neither options or block is provided" do
+      expect { @request_pattern.with() }.to raise_error('#with method invoked with no arguments. Either options hash or block must be specified.')
+    end
   end
 
 
