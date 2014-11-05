@@ -11,23 +11,6 @@ describe "Net:HTTP" do
 
   let(:port){ WebMockServer.instance.port }
 
-  describe 'webmock failure' do
-    it 'should call the block' do
-      stub_request(:any, 'www.example.com')
-
-      uri = URI.parse('http://www.example.com/')
-      req = Net::HTTP::Post.new(uri.path)
-      Net::HTTP.start(uri.host, uri.port) do |http|
-        http.request(req, 'abc')
-      end
-
-      expect(WebMock).to have_requested(:post, 'http://www.example.com')
-        .with do |_|
-        raise 'miserably'
-      end
-    end
-  end
-
   describe "marshalling" do
     class TestMarshalingInWebMockNetHTTP
       attr_accessor :r
