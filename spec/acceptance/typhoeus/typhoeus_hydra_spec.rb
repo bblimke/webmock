@@ -22,7 +22,7 @@ unless RUBY_PLATFORM =~ /java/
 
       describe "when params are used" do
         it "should take into account params for POST request" do
-          stub_request(:post, "www.example.com/?hello=world").with(:params => {:hello => 'world'})
+          stub_request(:post, "www.example.com/?hello=world").with(:query => {:hello => 'world'})
           request = Typhoeus::Request.new("http://www.example.com", :method => :post, :params => {:hello => 'world'})
           hydra.queue(request)
           hydra.run

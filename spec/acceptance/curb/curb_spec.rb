@@ -373,7 +373,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should work with several body arguments for post using the class method" do
-        stub_request(:post, "www.example.com").with(:user => {:first_name=>'Bartosz', :last_name=>'Blimke'})
+        stub_request(:post, "www.example.com").with(:body => {:user => {:first_name=>'Bartosz', :last_name=>'Blimke'}})
         c = Curl::Easy.http_post "http://www.example.com", 'user[first_name]=Bartosz', 'user[last_name]=Blimke'
         c.response_code.should == 200
       end
