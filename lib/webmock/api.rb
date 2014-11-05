@@ -19,7 +19,7 @@ module WebMock
 
     def assert_requested(*args, &block)
       if not args[0].is_a?(WebMock::RequestStub)
-        args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+        args = convert_uri_method_and_options_to_request_and_options(args[0], args[1], args[2], &block)
       elsif block
         raise ArgumentError, "assert_requested with a stub object, doesn't accept blocks"
       end
@@ -28,7 +28,7 @@ module WebMock
 
     def assert_not_requested(*args, &block)
       if not args[0].is_a?(WebMock::RequestStub)
-        args = convert_uri_method_and_options_to_request_and_options(*args, &block)
+        args = convert_uri_method_and_options_to_request_and_options(args[0], args[1], args[2], &block)
       elsif block
         raise ArgumentError, "assert_not_requested with a stub object, doesn't accept blocks"
       end
@@ -59,9 +59,13 @@ module WebMock
 
     private
 
-    def convert_uri_method_and_options_to_request_and_options(*args, &block)
-      request = WebMock::RequestPattern.new(*args).with(&block)
-      [request, args[2] || {}]
+    def convert_uri_method_and_options_to_request_and_options(method, uri, options, &block)
+      options ||= {}
+      options_for_pattern = options.dup
+      [:times, :at_least_times, :at_most_times].each { |key| options_for_pattern.delete(key) }
+      request = WebMock::RequestPattern.new(method, uri, options_for_pattern)
+      request = request.with(&block) if block
+      [request, options]
     end
 
     def assert_request_requested(request, options = {})
