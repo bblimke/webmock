@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.20.3
+
+  * `with` method raises error if provided without options hash and without block
+
+  * `with` and `to_return` raise an error if invoked with invalid keys in options hash.
+
 ## 1.20.2
 
   * WebMock provides a helpful error message if an incompatible object is given as response body.
