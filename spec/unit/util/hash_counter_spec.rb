@@ -3,22 +3,22 @@ require 'spec_helper'
 describe WebMock::Util::HashCounter do
 
   it "should return 0 for non existing key" do
-    WebMock::Util::HashCounter.new.get(:abc).should == 0
+    expect(WebMock::Util::HashCounter.new.get(:abc)).to eq(0)
   end
 
   it "should increase the returned value on every put with the same key" do
     counter = WebMock::Util::HashCounter.new
     counter.put(:abc)
-    counter.get(:abc).should == 1
+    expect(counter.get(:abc)).to eq(1)
     counter.put(:abc)
-    counter.get(:abc).should == 2
+    expect(counter.get(:abc)).to eq(2)
   end
 
   it "should only increase value for given key provided to put" do
     counter = WebMock::Util::HashCounter.new
     counter.put(:abc)
-    counter.get(:abc).should == 1
-    counter.get(:def).should == 0
+    expect(counter.get(:abc)).to eq(1)
+    expect(counter.get(:def)).to eq(0)
   end
 
   describe "each" do
@@ -33,7 +33,7 @@ describe WebMock::Util::HashCounter do
 
       elements = []
       counter.each {|k,v| elements << [k,v]}
-      elements.should == [[:c, 1], [:b, 2], [:a, 2], [:d, 1]]
+      expect(elements).to eq([[:c, 1], [:b, 2], [:a, 2], [:d, 1]])
     end
   end
 end

@@ -8,12 +8,12 @@ describe "Excon" do
 
   it 'should allow Excon requests to use query hash paramters' do
     stub_request(:get, "http://example.com/resource/?a=1&b=2").to_return(:body => "abc")
-    Excon.new('http://example.com').get(:path => "resource/", :query => {:a => 1, :b => 2}).body.should == "abc"
+    expect(Excon.new('http://example.com').get(:path => "resource/", :query => {:a => 1, :b => 2}).body).to eq("abc")
   end
 
   it 'should support Excon :expects options' do
     stub_request(:get, "http://example.com/").to_return(:body => 'a')
-    lambda { Excon.new('http://example.com').get(:expects => 204) }.should raise_error(Excon::Errors::OK)
+    expect { Excon.new('http://example.com').get(:expects => 204) }.to raise_error(Excon::Errors::OK)
   end
 
   context "with response_block" do
@@ -21,16 +21,16 @@ describe "Excon" do
       a = []
       WebMock.allow_net_connect!
       r = Excon.new('http://httpstat.us/200').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
-      a.should == ["2", "0", "0", " ", "O", "K"]
-      r.body.should == ""
+      expect(a).to eq(["2", "0", "0", " ", "O", "K"])
+      expect(r.body).to eq("")
     end
 
     it "should support excon response_block" do
       a = []
       stub_request(:get, "http://example.com/").to_return(:body => "abc")
       r = Excon.new('http://example.com').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
-      a.should == ['a', 'b', 'c']
-      r.body.should == ""
+      expect(a).to eq(['a', 'b', 'c'])
+      expect(r.body).to eq("")
     end
 
     it "should invoke callbacks with response body even if a real request is made", :net_connect => true do
@@ -41,9 +41,9 @@ describe "Excon" do
         response = res
       }
       r = Excon.new('http://httpstat.us/200').get(:response_block => lambda {|e, remaining, total| a << e}, :chunk_size => 1)
-      response.body.should == "200 OK"
-      a.should == ["2", "0", "0", " ", "O", "K"]
-      r.body.should == ""
+      expect(response.body).to eq("200 OK")
+      expect(a).to eq(["2", "0", "0", " ", "O", "K"])
+      expect(r.body).to eq("")
     end
   end
 
@@ -60,14 +60,14 @@ describe "Excon" do
 
     Excon.new("http://example.com").put(:path => "upload", :body => file)
 
-    yielded_request_body.should eq(file_contents)
+    expect(yielded_request_body).to eq(file_contents)
   end
 
   describe '.request_params_from' do
 
     it 'rejects invalid request keys' do
       request_params = WebMock::HttpLibAdapters::ExconAdapter.request_params_from(:body => :keep, :fake => :reject)
-      request_params.should eq(:body => :keep)
+      expect(request_params).to eq(:body => :keep)
     end
 
   end

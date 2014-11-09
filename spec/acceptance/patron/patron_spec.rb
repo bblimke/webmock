@@ -35,7 +35,7 @@ unless RUBY_PLATFORM =~ /java/
         it "should work with get_file" do
           stub_request(:get, "www.example.com").to_return(:body => "abc")
           @sess.get_file("/", @file_path)
-          File.read(@file_path).should == "abc"
+          expect(File.read(@file_path)).to eq("abc")
         end
 
         it "should raise same error as Patron if file is not readable for get request" do
@@ -44,9 +44,9 @@ unless RUBY_PLATFORM =~ /java/
             tmpfile.chmod(0400)
           end
           begin
-            lambda {
+            expect {
               @sess.get_file("/", "/tmp/read_only_file")
-            }.should raise_error(ArgumentError, "Unable to open specified file.")
+            }.to raise_error(ArgumentError, "Unable to open specified file.")
           ensure
             File.unlink("/tmp/read_only_file")
           end
@@ -66,9 +66,9 @@ unless RUBY_PLATFORM =~ /java/
 
         it "should raise same error as Patron if file is not readable for post request" do
           stub_request(:post, "www.example.com").with(:body => "abc")
-          lambda {
+          expect {
             @sess.post_file("/", "/path/to/non/existing/file")
-          }.should raise_error(ArgumentError, "Unable to open specified file.")
+          }.to raise_error(ArgumentError, "Unable to open specified file.")
         end
 
       end
@@ -76,9 +76,9 @@ unless RUBY_PLATFORM =~ /java/
       describe "handling errors same way as patron" do
         it "should raise error if put request has neither upload_data nor file_name" do
           stub_request(:post, "www.example.com")
-          lambda {
+          expect {
             @sess.post("/", nil)
-          }.should raise_error(ArgumentError, "Must provide either data or a filename when doing a PUT or POST")
+          }.to raise_error(ArgumentError, "Must provide either data or a filename when doing a PUT or POST")
         end
       end
 
@@ -100,7 +100,7 @@ unless RUBY_PLATFORM =~ /java/
             stub_request(:get, "www.example.com").
               to_return(:body => "Øl")
 
-            @sess.get("").body.encoding.should == Encoding::UTF_8
+            expect(@sess.get("").body.encoding).to eq(Encoding::UTF_8)
           end
 
           it "should encode body to default internal" do
@@ -108,7 +108,7 @@ unless RUBY_PLATFORM =~ /java/
               to_return(:headers => {'Content-Type' => 'text/html; charset=iso-8859-1'},
                         :body => "Øl".encode("iso-8859-1"))
 
-            @sess.get("").body.encoding.should == Encoding.default_internal
+            expect(@sess.get("").body.encoding).to eq(Encoding.default_internal)
           end
 
           it "should encode body based on encoding-attribute in body" do
@@ -116,7 +116,7 @@ unless RUBY_PLATFORM =~ /java/
               to_return(:body => "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
 
 
-            @sess.get("").body.encoding.should == Encoding::ISO_8859_1
+            expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
           end
 
 
@@ -126,7 +126,7 @@ unless RUBY_PLATFORM =~ /java/
 
             @sess.default_response_charset = "iso-8859-1"
 
-            @sess.get("").body.encoding.should == Encoding::ISO_8859_1
+            expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
           end
 
         end

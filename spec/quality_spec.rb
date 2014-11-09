@@ -69,13 +69,13 @@ describe "The library itself" do
         error_messages << check_for_extra_spaces(filename)
       end
     end
-    error_messages.compact.should be_well_formed
+    expect(error_messages.compact).to be_well_formed
   end
 
   it "can still be built" do
     Dir.chdir(File.expand_path('../../', __FILE__)) do
       `gem build webmock.gemspec`
-      $?.should == 0
+      expect($?).to eq(0)
 
       # clean up the .gem generated
       system("rm webmock-#{WebMock.version}.gem")

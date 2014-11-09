@@ -6,15 +6,15 @@ describe WebMock::ResponseFactory do
 
     it "should create response with options passed as arguments" do
       options = {:body => "abc", :headers => {:a => :b}}
-      WebMock::Response.should_receive(:new).with(options).and_return(@response = double(WebMock::Response))
-      WebMock::ResponseFactory.response_for(options).should == @response
+      expect(WebMock::Response).to receive(:new).with(options).and_return(@response = double(WebMock::Response))
+      expect(WebMock::ResponseFactory.response_for(options)).to eq(@response)
     end
 
 
     it "should create dynamic response for argument responding to call" do
       callable = double(:call => {:body => "abc"})
-      WebMock::DynamicResponse.should_receive(:new).with(callable).and_return(@response = double(WebMock::Response))
-      WebMock::ResponseFactory.response_for(callable).should == @response
+      expect(WebMock::DynamicResponse).to receive(:new).with(callable).and_return(@response = double(WebMock::Response))
+      expect(WebMock::ResponseFactory.response_for(callable)).to eq(@response)
     end
 
   end
@@ -31,24 +31,24 @@ describe WebMock::Response do
   end
 
   it "should report normalized headers" do
-    WebMock::Util::Headers.should_receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
     @response = WebMock::Response.new(:headers => {'A' => 'a'})
-    @response.headers.should == {'B' => 'b'}
+    expect(@response.headers).to eq({'B' => 'b'})
   end
 
   describe "status" do
     it "should have 200 code and empty message by default" do
-      @response.status.should == [200, ""]
+      expect(@response.status).to eq([200, ""])
     end
 
     it "should return assigned status" do
       @response = WebMock::Response.new(:status => 500)
-      @response.status.should == [500, ""]
+      expect(@response.status).to eq([500, ""])
     end
 
     it "should return assigned message" do
       @response = WebMock::Response.new(:status => [500, "Internal Server Error"])
-      @response.status.should == [500, "Internal Server Error"]
+      expect(@response.status).to eq([500, "Internal Server Error"])
     end
   end
 
@@ -56,23 +56,23 @@ describe WebMock::Response do
 
     it "should raise error if any assigned" do
       @response = WebMock::Response.new(:exception => ArgumentError)
-      lambda {
+      expect {
         @response.raise_error_if_any
-      }.should raise_error(ArgumentError, "Exception from WebMock")
+      }.to raise_error(ArgumentError, "Exception from WebMock")
     end
 
     it "should raise error if any assigned as instance" do
       @response = WebMock::Response.new(:exception => ArgumentError.new("hello world"))
-      lambda {
+      expect {
         @response.raise_error_if_any
-      }.should raise_error(ArgumentError, "hello world")
+      }.to raise_error(ArgumentError, "hello world")
     end
 
     it "should raise error if any assigned as string" do
       @response = WebMock::Response.new(:exception => "hello world")
-      lambda {
+      expect {
         @response.raise_error_if_any
-      }.should raise_error("hello world")
+      }.to raise_error("hello world")
     end
 
     it "should not raise error if no error assigned" do
@@ -85,12 +85,12 @@ describe WebMock::Response do
 
     it "should know if it should timeout" do
       @response = WebMock::Response.new(:should_timeout => true)
-      @response.should_timeout.should be_true
+      expect(@response.should_timeout).to be_truthy
     end
 
     it "should not timeout by default" do
       @response = WebMock::Response.new
-      @response.should_timeout.should be_false
+      expect(@response.should_timeout).to be_falsey
     end
 
   end
@@ -98,40 +98,40 @@ describe WebMock::Response do
   describe "body" do
 
     it "should return empty body by default" do
-      @response.body.should == ''
+      expect(@response.body).to eq('')
     end
 
     it "should report body if assigned" do
       @response = WebMock::Response.new(:body => "abc")
-      @response.body.should == "abc"
+      expect(@response.body).to eq("abc")
     end
 
     it "should report string even if existing file path was provided" do
       @response = WebMock::Response.new(:body => __FILE__)
-      @response.body.should == __FILE__
+      expect(@response.body).to eq(__FILE__)
     end
 
     it "should report content of a IO object if provided" do
       @response = WebMock::Response.new(:body => File.new(__FILE__))
-      @response.body.should == File.read(__FILE__)
+      expect(@response.body).to eq(File.read(__FILE__))
     end
 
     it "should report many times content of a IO object if provided" do
       @response = WebMock::Response.new(:body => File.new(__FILE__))
-      @response.body.should == File.read(__FILE__)
-      @response.body.should == File.read(__FILE__)
+      expect(@response.body).to eq(File.read(__FILE__))
+      expect(@response.body).to eq(File.read(__FILE__))
     end
 
     it "should work with Pathnames" do
       @response = WebMock::Response.new(:body => Pathname.new(__FILE__))
-      @response.body.should == File.read(__FILE__)
+      expect(@response.body).to eq(File.read(__FILE__))
     end
 
     # Users of webmock commonly make the mistake of stubbing the response
     # body to return a hash, to prevent this:
     #
     it "should error if not given one of the allowed types" do
-      lambda { WebMock::Response.new(:body => Hash.new) }.should \
+      expect { WebMock::Response.new(:body => Hash.new) }.to \
         raise_error(WebMock::Response::InvalidBody)
     end
 
@@ -147,25 +147,25 @@ describe WebMock::Response do
 
 
       it "should read status" do
-        @response.status.should == [202, "OK"]
+        expect(@response.status).to eq([202, "OK"])
       end
 
       it "should read headers" do
-        @response.headers.should == {
+        expect(@response.headers).to eq({
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
           "Content-Length"=>"419",
           "Connection"=>"Keep-Alive",
           "Accept"=>"image/jpeg, image/png"
-          }
+          })
       end
 
       it "should read body" do
-        @response.body.size.should == 419
+        expect(@response.body.size).to eq(419)
       end
 
       it "should close IO" do
-        @file.should be_closed
+        expect(@file).to be_closed
       end
 
     end
@@ -177,27 +177,27 @@ describe WebMock::Response do
       end
 
       it "should read status" do
-        @response.status.should == [202, "OK"]
+        expect(@response.status).to eq([202, "OK"])
       end
 
       it "should read headers" do
-        @response.headers.should == {
+        expect(@response.headers).to eq({
           "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
           "Content-Type"=>"text/html; charset=UTF-8",
           "Content-Length"=>"419",
           "Connection"=>"Keep-Alive",
           "Accept"=>"image/jpeg, image/png"
-          }
+          })
       end
 
       it "should read body" do
-        @response.body.size.should == 419
+        expect(@response.body.size).to eq(419)
       end
 
       it "should work with transfer-encoding set to chunked" do
         @input.gsub!("Content-Length: 419", "Transfer-Encoding: chunked")
         @response = WebMock::Response.new(@input)
-        @response.body.size.should == 419
+        expect(@response.body.size).to eq(419)
       end
 
     end
@@ -210,17 +210,17 @@ describe WebMock::Response do
 
       it "should have evaluated body" do
         @response = WebMock::Response.new(:body => lambda {|request| request.body})
-        @response.evaluate(@request_signature).body.should == "abc"
+        expect(@response.evaluate(@request_signature).body).to eq("abc")
       end
 
       it "should have evaluated headers" do
         @response = WebMock::Response.new(:headers => lambda {|request| request.headers})
-        @response.evaluate(@request_signature).headers.should == {'A' => 'a'}
+        expect(@response.evaluate(@request_signature).headers).to eq({'A' => 'a'})
       end
 
       it "should have evaluated status" do
         @response = WebMock::Response.new(:status => lambda {|request| 302})
-        @response.evaluate(@request_signature).status.should == [302, ""]
+        expect(@response.evaluate(@request_signature).status).to eq([302, ""])
       end
 
     end
@@ -241,16 +241,16 @@ describe WebMock::Response do
           }
         })
         evaluated_response = response.evaluate(request_signature)
-        evaluated_response.body.should == "abc"
-        evaluated_response.headers.should == {'A' => 'a'}
-        evaluated_response.status.should == [302, ""]
+        expect(evaluated_response.body).to eq("abc")
+        expect(evaluated_response.headers).to eq({'A' => 'a'})
+        expect(evaluated_response.status).to eq([302, ""])
       end
 
       it "should be equal to static response after evaluation" do
         request_signature = WebMock::RequestSignature.new(:post, "www.example.com", :body => "abc")
         response = WebMock::DynamicResponse.new(lambda {|request| {:body => request.body}})
         evaluated_response = response.evaluate(request_signature)
-        evaluated_response.should == WebMock::Response.new(:body => "abc")
+        expect(evaluated_response).to eq(WebMock::Response.new(:body => "abc"))
       end
 
       describe "when raw response is evaluated" do
@@ -264,14 +264,14 @@ describe WebMock::Response do
         describe "as a file" do
           it "should return response" do
             response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s] })
-            response.evaluate(@request_signature).body.size.should == 419
+            expect(response.evaluate(@request_signature).body.size).to eq(419)
           end
         end
 
         describe "as a string" do
           it "should return response" do
             response = WebMock::DynamicResponse.new(lambda {|request| @files[request.uri.host.to_s].read })
-            response.evaluate(@request_signature).body.size.should == 419
+            expect(response.evaluate(@request_signature).body.size).to eq(419)
           end
         end
       end

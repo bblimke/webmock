@@ -14,8 +14,8 @@ shared_context "complex cross-concern behaviors" do |*adapter_info|
 
     played_back_response = http_request(:get, webmock_server_url)
 
-    played_back_response.headers.keys.should include('Set-Cookie')
-    played_back_response.should == real_response
+    expect(played_back_response.headers.keys).to include('Set-Cookie')
+    expect(played_back_response).to eq(real_response)
   end
 
   let(:no_content_url) { 'http://httpstat.us/204' }
@@ -28,7 +28,7 @@ shared_context "complex cross-concern behaviors" do |*adapter_info|
         stub_request(:get, no_content_url).to_return(:status => 204, :body => stub_val)
         stubbed_response = http_request(:get, no_content_url)
 
-        stubbed_response.body.should eq(real_response.body)
+        expect(stubbed_response.body).to eq(real_response.body)
       end
     end
   end

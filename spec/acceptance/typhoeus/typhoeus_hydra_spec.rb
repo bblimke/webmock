@@ -50,7 +50,7 @@ unless RUBY_PLATFORM =~ /java/
           hydra.queue(request)
           hydra.run
 
-          request.response.should be_timed_out
+          expect(request.response).to be_timed_out
         end
       end
 
@@ -69,7 +69,7 @@ unless RUBY_PLATFORM =~ /java/
           end
           hydra.queue @request
           hydra.run
-          test.should == body
+          expect(test).to eq(body)
         end
 
         it "should call on_complete with 5xx response" do
@@ -82,7 +82,7 @@ unless RUBY_PLATFORM =~ /java/
           end
           hydra.queue @request
           hydra.run
-          test.should == response_code
+          expect(test).to eq(response_code)
         end
 
         it "should call on_body with 2xx response" do
@@ -91,7 +91,7 @@ unless RUBY_PLATFORM =~ /java/
 
           test_body = nil
           test_complete = nil
-          pending("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_body)
+          skip("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_body)
           @request.on_body do |body, response|
             test_body = body
           end
@@ -100,8 +100,8 @@ unless RUBY_PLATFORM =~ /java/
           end
           hydra.queue @request
           hydra.run
-          test_body.should == body
-          test_complete.should == ""
+          expect(test_body).to eq(body)
+          expect(test_complete).to eq("")
         end
 
         it "should call on_headers with 2xx response" do
@@ -109,13 +109,13 @@ unless RUBY_PLATFORM =~ /java/
           stub_request(:any, "example.com").to_return(:body => body, :headers => {'X-Test' => '1'})
 
           test_headers = nil
-          pending("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_headers)
+          skip("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_headers)
           @request.on_headers do |response|
             test_headers = response.headers
           end
           hydra.queue @request
           hydra.run
-          test_headers.should include('X-Test' => '1')
+          expect(test_headers).to include('X-Test' => '1')
         end
       end
     end

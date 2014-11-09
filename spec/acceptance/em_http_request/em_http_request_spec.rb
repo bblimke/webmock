@@ -33,7 +33,7 @@ unless RUBY_PLATFORM =~ /java/
 
           make_request
 
-          urls.should eq([http_url, https_url])
+          expect(urls).to eq([http_url, https_url])
         end
 
         it 'invokes the after_request hook with both requests' do
@@ -42,7 +42,7 @@ unless RUBY_PLATFORM =~ /java/
 
           make_request
 
-          urls.should eq([http_url, https_url])
+          expect(urls).to eq([http_url, https_url])
         end
       end
 
@@ -65,7 +65,7 @@ unless RUBY_PLATFORM =~ /java/
             http = conn.get(:body => 'foo')
 
             http.callback do
-              WebMock.should have_requested(:get, "www.example.com").with(:body => 'bar')
+              expect(WebMock).to have_requested(:get, "www.example.com").with(:body => 'bar')
               EM.stop
             end
           end
@@ -90,7 +90,7 @@ unless RUBY_PLATFORM =~ /java/
             http = conn.get
 
             http.callback do
-              http.response.should be == 'bar'
+              expect(http.response).to eq('bar')
               EM.stop
             end
           end
@@ -112,7 +112,7 @@ unless RUBY_PLATFORM =~ /java/
               http.callback { EM.stop }
             end
 
-            yielded_response_body.should eq("hello world")
+            expect(yielded_response_body).to eq("hello world")
           end
         end
 
@@ -138,10 +138,10 @@ unless RUBY_PLATFORM =~ /java/
             called = true
             EM.stop
           end
-          called.should == false
+          expect(called).to eq(false)
         end
 
-        called.should == true
+        expect(called).to eq(true)
       end
 
       # not pretty, but it works
@@ -161,7 +161,7 @@ unless RUBY_PLATFORM =~ /java/
 
           it "should work" do
             stub_request(:post, /.*.testserver.com*/).to_return(:status => 200, :body => 'ok')
-            lambda {
+            expect {
               EM.run do
                 fiber = Fiber.new do
                   http = EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
@@ -169,7 +169,7 @@ unless RUBY_PLATFORM =~ /java/
                 end
                 fiber.resume
               end
-            }.should_not raise_error
+            }.not_to raise_error
           end
 
           after(:each) do
@@ -193,40 +193,40 @@ unless RUBY_PLATFORM =~ /java/
         http = EventMachine::HttpRequest.new('http://www.example.com/').get
         http.stream { |chunk| response = chunk; EM.stop  }
       }
-      response.should == "abc"
+      expect(response).to eq("abc")
     end
 
     it "should work with responses that use chunked transfer encoding" do
       stub_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
-      http_request(:get, "http://www.example.com").body.should == "abc"
+      expect(http_request(:get, "http://www.example.com").body).to eq("abc")
     end
 
     it "should work with optional query params" do
       stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body.should == "abc"
+      expect(http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body).to eq("abc")
     end
 
     it "should work with optional query params declared as string" do
       stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body.should == "abc"
+      expect(http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body).to eq("abc")
     end
 
     it "should work when the body is passed as a Hash" do
       stub_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
-      http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body.should == "ok"
+      expect(http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body).to eq("ok")
     end
 
     if defined?(EventMachine::HttpConnection)
       it "should work when a file is passed as body" do
         stub_request(:post, "www.example.com").with(:body => File.read(__FILE__)).to_return(:body => "ok")
-        http_request(:post, "http://www.example.com", :file => __FILE__).body.should == "ok"
+        expect(http_request(:post, "http://www.example.com", :file => __FILE__).body).to eq("ok")
       end
     end
 
     it "should work with UTF-8 strings" do
       body = "Привет, Мир!"
       stub_request(:post, "www.example.com").to_return(:body => body)
-      http_request(:post, "http://www.example.com").body.bytesize.should == body.bytesize
+      expect(http_request(:post, "http://www.example.com").body.bytesize).to eq(body.bytesize)
     end
 
     describe "mocking EM::HttpClient API" do
@@ -250,11 +250,11 @@ unless RUBY_PLATFORM =~ /java/
       subject { client(uri) }
 
       it 'should support #uri' do
-        subject.uri.should == Addressable::URI.parse(uri)
+        expect(subject.uri).to eq(Addressable::URI.parse(uri))
       end
 
       it 'should support #last_effective_url' do
-        subject.last_effective_url.should == Addressable::URI.parse(uri)
+        expect(subject.last_effective_url).to eq(Addressable::URI.parse(uri))
       end
 
       context "with a query" do
@@ -262,9 +262,9 @@ unless RUBY_PLATFORM =~ /java/
         subject { client("http://www.example.com/?a=1", :query => { 'b' => 2 }) }
 
         it "#request_signature doesn't mutate the original uri" do
-          subject.uri.should == Addressable::URI.parse("http://www.example.com/?a=1")
+          expect(subject.uri).to eq(Addressable::URI.parse("http://www.example.com/?a=1"))
           signature = WebMock::RequestRegistry.instance.requested_signatures.hash.keys.first
-          signature.uri.should == Addressable::URI.parse(uri)
+          expect(signature.uri).to eq(Addressable::URI.parse(uri))
         end
       end
 
@@ -293,7 +293,7 @@ unless RUBY_PLATFORM =~ /java/
 
                 http.errback { fail(http.error) }
                 http.callback {
-                  http.get_response_cookie(cookie_name).should == cookie_value
+                  expect(http.get_response_cookie(cookie_name)).to eq(cookie_value)
                   EM.stop
                 }
               }
@@ -314,8 +314,8 @@ unless RUBY_PLATFORM =~ /java/
 
                 http.errback { fail(http.error) }
                 http.callback {
-                  http.get_response_cookie(cookie_name).should == cookie_value
-                  http.get_response_cookie(cookie_2_name).should == cookie_2_value
+                  expect(http.get_response_cookie(cookie_name)).to eq(cookie_value)
+                  expect(http.get_response_cookie(cookie_2_name)).to eq(cookie_2_value)
                   EM.stop
                 }
               }
@@ -333,7 +333,7 @@ unless RUBY_PLATFORM =~ /java/
 
                 http.errback { fail(http.error) }
                 http.callback {
-                  http.get_response_cookie('not_found_cookie').should == nil
+                  expect(http.get_response_cookie('not_found_cookie')).to eq(nil)
                   EM.stop
                 }
               }

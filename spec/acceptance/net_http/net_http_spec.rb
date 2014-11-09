@@ -58,32 +58,32 @@ describe "Net:HTTP" do
 
   describe "constants" do
     it "should still have const Get defined on replaced Net::HTTP" do
-      Object.const_get("Net").const_get("HTTP").const_defined?("Get").should be_true
+      expect(Object.const_get("Net").const_get("HTTP").const_defined?("Get")).to be_truthy
     end
 
     it "should still have const Get within constants on replaced Net::HTTP" do
-      Object.const_get("Net").const_get("HTTP").constants.map(&:to_s).should include("Get")
+      expect(Object.const_get("Net").const_get("HTTP").constants.map(&:to_s)).to include("Get")
     end
 
     it "should still have const Get within constants on replaced Net::HTTP" do
-      Object.const_get("Net").const_get("HTTP").const_get("Get").should_not be_nil
+      expect(Object.const_get("Net").const_get("HTTP").const_get("Get")).not_to be_nil
     end
 
     if Module.method(:const_defined?).arity != 1
       it "should still have const Get defined (and not inherited) on replaced Net::HTTP" do
-        Object.const_get("Net").const_get("HTTP").const_defined?("Get", false).should be_true
+        expect(Object.const_get("Net").const_get("HTTP").const_defined?("Get", false)).to be_truthy
       end
     end
 
     if Module.method(:const_get).arity != 1
       it "should still be able to get non inherited constant Get on replaced Net::HTTP" do
-        Object.const_get("Net").const_get("HTTP").const_get("Get", false).should_not be_nil
+        expect(Object.const_get("Net").const_get("HTTP").const_get("Get", false)).not_to be_nil
       end
     end
 
     if Module.method(:constants).arity != 0
       it "should still Get within non inherited constants on replaced Net::HTTP" do
-        Object.const_get("Net").const_get("HTTP").constants(false).map(&:to_s).should include("Get")
+        expect(Object.const_get("Net").const_get("HTTP").constants(false).map(&:to_s)).to include("Get")
       end
     end
 
@@ -94,22 +94,22 @@ describe "Net:HTTP" do
       it "Net::HTTP should have the same constants" do
         orig_consts_number = WebMock::HttpLibAdapters::NetHttpAdapter::OriginalNetHTTP.constants.size
         Net::HTTP.send(:const_set, "TEST_CONST", 10)
-        Net::HTTP.constants.size.should == orig_consts_number + 1
+        expect(Net::HTTP.constants.size).to eq(orig_consts_number + 1)
         WebMock.disable!
-        Net::HTTP.constants.size.should == orig_consts_number + 1
+        expect(Net::HTTP.constants.size).to eq(orig_consts_number + 1)
       end
     end
   end
 
   it "should work with block provided" do
     stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
-    Net::HTTP.start("www.example.com") { |query| query.get("/") }.body.should == "abc"*100000
+    expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
   it "should handle multiple values for the same response header" do
     stub_http_request(:get, "www.example.com").to_return(:headers => { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
     response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
-    response.get_fields('Set-Cookie').should == ['bar=bazz', 'foo=bar']
+    expect(response.get_fields('Set-Cookie')).to eq(['bar=bazz', 'foo=bar'])
   end
 
   it "should yield block on response" do
@@ -118,49 +118,49 @@ describe "Net:HTTP" do
     http_request(:get, "http://www.example.com/") do |response|
       response_body = response.body
     end
-    response_body.should == "abc"
+    expect(response_body).to eq("abc")
   end
 
   it "should handle Net::HTTP::Post#body" do
     stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
     req = Net::HTTP::Post.new("/")
     req.body = "my_params"
-    Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
+    expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
   it "should handle Net::HTTP::Post#body_stream" do
     stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
     req = Net::HTTP::Post.new("/")
     req.body_stream = StringIO.new("my_params")
-    Net::HTTP.start("www.example.com") { |http| http.request(req)}.body.should == "abc"
+    expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
   it "should behave like Net::HTTP and raise error if both request body and body argument are set" do
     stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
     req = Net::HTTP::Post.new("/")
     req.body = "my_params"
-    lambda {
+    expect {
       Net::HTTP.start("www.example.com") { |http| http.request(req, "my_params")}
-    }.should raise_error("both of body argument and HTTPRequest#body set")
+    }.to raise_error("both of body argument and HTTPRequest#body set")
   end
 
   it "should return a Net::ReadAdapter from response.body when a stubbed request is made with a block and #read_body" do
     WebMock.stub_request(:get, 'http://example.com/').to_return(:body => "the body")
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
-    response.body.should be_a(Net::ReadAdapter)
+    expect(response.body).to be_a(Net::ReadAdapter)
   end
 
   it "should have request 1 time executed in registry after 1 real request", :net_connect => true do
     WebMock.allow_net_connect!
     http = Net::HTTP.new('localhost', port)
     http.get('/') {}
-    WebMock::RequestRegistry.instance.requested_signatures.hash.size.should == 1
-    WebMock::RequestRegistry.instance.requested_signatures.hash.values.first.should == 1
+    expect(WebMock::RequestRegistry.instance.requested_signatures.hash.size).to eq(1)
+    expect(WebMock::RequestRegistry.instance.requested_signatures.hash.values.first).to eq(1)
   end
 
   it "should work with Addressable::URI passed to Net::HTTP.get_response" do
     stub_request(:get, 'http://www.example.com/hello?a=1').to_return(:body => "abc")
-    Net::HTTP.get_response(Addressable::URI.parse('http://www.example.com/hello?a=1')).body.should == "abc"
+    expect(Net::HTTP.get_response(Addressable::URI.parse('http://www.example.com/hello?a=1')).body).to eq("abc")
   end
 
   describe "connecting on Net::HTTP.start" do
@@ -173,7 +173,7 @@ describe "Net:HTTP" do
       it "should not connect to the server until the request", :net_connect => true do
         WebMock.allow_net_connect!
         @http.start {|conn|
-          conn.peer_cert.should be_nil
+          expect(conn.peer_cert).to be_nil
         }
       end
 
@@ -181,7 +181,7 @@ describe "Net:HTTP" do
         WebMock.allow_net_connect!(:net_http_connect_on_start => true)
         @http.start {|conn|
           cert = OpenSSL::X509::Certificate.new conn.peer_cert
-          cert.should be_a(OpenSSL::X509::Certificate)
+          expect(cert).to be_a(OpenSSL::X509::Certificate)
         }
       end
 
@@ -191,7 +191,7 @@ describe "Net:HTTP" do
       it "should not connect to the server until the request", :net_connect => true do
         WebMock.disable_net_connect!(:allow => "www.google.com")
         @http.start {|conn|
-          conn.peer_cert.should be_nil
+          expect(conn.peer_cert).to be_nil
         }
       end
 
@@ -199,7 +199,7 @@ describe "Net:HTTP" do
         WebMock.disable_net_connect!(:allow => "www.google.com", :net_http_connect_on_start => true)
         @http.start {|conn|
           cert = OpenSSL::X509::Certificate.new conn.peer_cert
-          cert.should be_a(OpenSSL::X509::Certificate)
+          expect(cert).to be_a(OpenSSL::X509::Certificate)
         }
       end
 
@@ -258,21 +258,21 @@ describe "Net:HTTP" do
       http_request(:get, "http://localhost:#{port}/") do |response|
         response.read_body { |fragment| response_body << fragment }
       end
-      response_body.should =~ expected_body_regex
+      expect(response_body).to match(expected_body_regex)
 
-      @callback_response.body.should == response_body
+      expect(@callback_response.body).to eq(response_body)
     end
 
     it "should support the after_request callback on a request with a returning block" do
       response_body = perform_get_with_returning_block
-      response_body.should =~ expected_body_regex
-      @callback_response.should be_instance_of(WebMock::Response)
-      @callback_response.body.should == response_body
+      expect(response_body).to match(expected_body_regex)
+      expect(@callback_response).to be_instance_of(WebMock::Response)
+      expect(@callback_response.body).to eq(response_body)
     end
 
     it "should only invoke the after_request callback once, even for a recursive post request" do
       Net::HTTP.new('localhost', port).post('/', nil)
-      @callback_invocation_count.should == 1
+      expect(@callback_invocation_count).to eq(1)
     end
   end
 end

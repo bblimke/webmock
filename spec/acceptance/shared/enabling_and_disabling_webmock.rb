@@ -42,18 +42,18 @@ end
 shared_context "disabled WebMock" do
   it "should not register executed requests" do
     http_request(:get, webmock_server_url)
-    a_request(:get, webmock_server_url).should_not have_been_made
+    expect(a_request(:get, webmock_server_url)).not_to have_been_made
   end
 
   it "should not block unstubbed requests" do
-    lambda {
+    expect {
       http_request(:get, webmock_server_url)
-    }.should_not raise_error
+    }.not_to raise_error
   end
 
   it "should return real response even if there are stubs" do
     stub_request(:get, /.*/).to_return(:body => "x")
-    http_request(:get, webmock_server_url).body.should == "hello world"
+    expect(http_request(:get, webmock_server_url).body).to eq("hello world")
   end
 
   it "should not invoke any callbacks" do
@@ -62,7 +62,7 @@ shared_context "disabled WebMock" do
     @called = nil
     WebMock.after_request { @called = 1 }
     http_request(:get, webmock_server_url)
-    @called.should == nil
+    expect(@called).to eq(nil)
   end
 end
 
@@ -70,18 +70,18 @@ shared_context "enabled WebMock" do
   it "should register executed requests" do
     WebMock.allow_net_connect!
     http_request(:get, webmock_server_url)
-    a_request(:get, webmock_server_url).should have_been_made
+    expect(a_request(:get, webmock_server_url)).to have_been_made
   end
 
   it "should block unstubbed requests" do
-    lambda {
+    expect {
       http_request(:get, "http://www.example.com/")
-    }.should raise_error(WebMock::NetConnectNotAllowedError)
+    }.to raise_error(WebMock::NetConnectNotAllowedError)
   end
 
   it "should return stubbed response" do
     stub_request(:get, /.*/).to_return(:body => "x")
-    http_request(:get, "http://www.example.com/").body.should == "x"
+    expect(http_request(:get, "http://www.example.com/").body).to eq("x")
   end
 
   it "should invoke callbacks" do
@@ -90,6 +90,6 @@ shared_context "enabled WebMock" do
     @called = nil
     WebMock.after_request { @called = 1 }
     http_request(:get, webmock_server_url)
-    @called.should == 1
+    expect(@called).to eq(1)
   end
 end

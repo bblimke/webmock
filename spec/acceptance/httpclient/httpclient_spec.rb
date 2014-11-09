@@ -20,14 +20,14 @@ describe "HTTPClient" do
     http_request(:get, "http://www.example.com/") do |body|
       response_body = body
     end
-    response_body.should == "abc"
+    expect(response_body).to eq("abc")
   end
 
   it "should match requests if headers are the same  but in different order" do
     stub_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
-    http_request(
+    expect(http_request(
       :get, "http://www.example.com/",
-    :headers => {"a" => ["c", "b"]}).status.should == "200"
+    :headers => {"a" => ["c", "b"]}).status).to eq("200")
   end
 
   describe "when using async requests" do
@@ -44,7 +44,7 @@ describe "HTTPClient" do
     HTTPClient.get_content('www.example.com') do |content|
       str << content
     end
-    str.should == 'test'
+    expect(str).to eq('test')
   end
 
   context "multipart bodies" do
@@ -91,12 +91,12 @@ describe "HTTPClient" do
     end
 
     it "supports request filters" do
-      @client.request(:get, 'http://www.example.com/').status.should == 200
+      expect(@client.request(:get, 'http://www.example.com/').status).to eq(200)
     end
 
     it "supports response filters" do
       res = @client.request(:get, 'http://www.example.com/')
-      res.header['X-Powered-By'].first.should == 'webmock'
+      expect(res.header['X-Powered-By'].first).to eq('webmock')
     end
   end
 
@@ -121,9 +121,9 @@ describe "HTTPClient" do
                          :headers => { "Cookie" => "bar=; foo=" })
       http_request(:get, webmock_server_url, :client => client)
 
-      request_signatures.should have(2).signatures
+      expect(request_signatures.size).to eq(2)
       # Verify the request signatures were identical as needed by this example
-      request_signatures.first.should eq(request_signatures.last)
+      expect(request_signatures.first).to eq(request_signatures.last)
     end
   end
 
@@ -157,7 +157,7 @@ describe "HTTPClient" do
     it 'receives request_method, request_uri, and request_query from the request header' do
       stub_request :get, 'www.example.com'
       message = HTTPClient.new.get 'www.example.com'
-      message.header.request_uri.to_s.should == 'www.example.com'
+      expect(message.header.request_uri.to_s).to eq('www.example.com')
     end
   end
 end

@@ -21,7 +21,7 @@ describe WebMock::Util::HashKeysStringifier do
         ]
       }
     }
-    WebMock::Util::HashKeysStringifier.stringify_keys!(hash, :deep => true).should == stringified
+    expect(WebMock::Util::HashKeysStringifier.stringify_keys!(hash, :deep => true)).to eq(stringified)
   end
 
 end

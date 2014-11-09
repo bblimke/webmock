@@ -9,7 +9,7 @@ shared_context "callbacks" do |*adapter_info|
       WebMock.after_request {
         @called = true
       }
-      @called.should == nil
+      expect(@called).to eq(nil)
     end
 
     it "should invoke a callback after request is made" do
@@ -17,7 +17,7 @@ shared_context "callbacks" do |*adapter_info|
         @called = true
       }
       http_request(:get, "http://www.example.com/")
-      @called.should == true
+      expect(@called).to eq(true)
     end
 
     it "should not invoke a callback if this http library should be ignored" do
@@ -25,7 +25,7 @@ shared_context "callbacks" do |*adapter_info|
         @called = true
       }
       http_request(:get, "http://www.example.com/")
-      @called.should == nil
+      expect(@called).to eq(nil)
     end
 
     it "should invoke a callback even if other http libraries should be ignored" do
@@ -33,7 +33,7 @@ shared_context "callbacks" do |*adapter_info|
         @called = true
       }
       http_request(:get, "http://www.example.com/")
-      @called.should == true
+      expect(@called).to eq(true)
     end
 
     it "should pass request signature to the callback" do
@@ -41,7 +41,7 @@ shared_context "callbacks" do |*adapter_info|
         @request_signature = request_signature
       end
       http_request(:get, "http://www.example.com/")
-      @request_signature.uri.to_s.should == "http://www.example.com:80/"
+      expect(@request_signature.uri.to_s).to eq("http://www.example.com:80/")
     end
 
     after(:each) do
@@ -60,7 +60,7 @@ shared_context "callbacks" do |*adapter_info|
       end
 
       http_request(:get, "http://www.example.com/")
-      global_stub_request_sig.should be(after_request_request_sig)
+      expect(global_stub_request_sig).to be(after_request_request_sig)
     end
 
     context "passing response to callback" do
@@ -79,18 +79,18 @@ shared_context "callbacks" do |*adapter_info|
         end
 
         it "should pass response to callback with the status and message" do
-          @response.status.should == [200, "hello"]
+          expect(@response.status).to eq([200, "hello"])
         end
 
         it "should pass response to callback with headers" do
-          @response.headers.should == {
+          expect(@response.headers).to eq({
             'Content-Length' => '666',
             'Hello' => 'World'
-          }
+          })
         end
 
         it "should pass response to callback with body" do
-          @response.body.should == "foo bar"
+          expect(@response.body).to eq("foo bar")
         end
       end
 
@@ -105,16 +105,16 @@ shared_context "callbacks" do |*adapter_info|
         end
 
         it "should pass real response to callback with status and message" do
-          @response.status[0].should == 201
-          @response.status[1].should == "Created" unless adapter_info.include?(:no_status_message)
+          expect(@response.status[0]).to eq(201)
+          expect(@response.status[1]).to eq("Created") unless adapter_info.include?(:no_status_message)
         end
 
         it "should pass real response to callback with headers" do
-          @response.headers["Content-Length"].should == "11"
+          expect(@response.headers["Content-Length"]).to eq("11")
         end
 
         it "should pass response to callback with body" do
-          @response.body.size.should == 11
+          expect(@response.body.size).to eq(11)
         end
       end
     end
@@ -123,16 +123,16 @@ shared_context "callbacks" do |*adapter_info|
       WebMock.after_request { @called = 1 }
       WebMock.after_request { @called += 1 }
       http_request(:get, "http://www.example.com/")
-      @called.should == 2
+      expect(@called).to eq(2)
     end
 
     it "should invoke callbacks only for real requests if requested", :net_connect => true do
       WebMock.after_request(:real_requests_only => true) { @called = true }
       http_request(:get, "http://www.example.com/")
-      @called.should == nil
+      expect(@called).to eq(nil)
       WebMock.allow_net_connect!
       http_request(:get, "http://www.example.net/")
-      @called.should == true
+      expect(@called).to eq(true)
     end
 
     it "should not invoke any callbacks after callbacks were reset" do
@@ -140,7 +140,7 @@ shared_context "callbacks" do |*adapter_info|
       WebMock.reset_callbacks
       stub_request(:get, "http://www.example.com/")
       http_request(:get, "http://www.example.com/")
-      @called.should == nil
+      expect(@called).to eq(nil)
     end
   end
 end

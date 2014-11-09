@@ -8,92 +8,92 @@ shared_context "request expectations" do |*adapter_info|
       end
 
       it "should satisfy expectation if request was executed with the same uri and method" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should have_been_made.once
-        }.should_not raise_error
+          expect(a_request(:get, "http://www.example.com")).to have_been_made.once
+        }.not_to raise_error
       end
 
       it "should satisfy expectation declared on WebMock.resuest" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          WebMock.request(:get, "http://www.example.com").should have_been_made.once
-        }.should_not raise_error
+          expect(WebMock.request(:get, "http://www.example.com")).to have_been_made.once
+        }.not_to raise_error
       end
 
       it "should satisfy expectation if request was not expected and not executed" do
-        lambda {
-          a_request(:get, "http://www.example.com").should_not have_been_made
-        }.should_not raise_error
+        expect {
+          expect(a_request(:get, "http://www.example.com")).not_to have_been_made
+        }.not_to raise_error
       end
 
       it "should fail if request was not expected but executed" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should_not have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          expect(a_request(:get, "http://www.example.com")).not_to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
       end
 
       it "should fail resulting with failure with a message and executed requests listed" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should_not have_been_made
-        }.should fail_with(%r{The following requests were made:\n\nGET http://www.example.com/.+was made 1 time})
+          expect(a_request(:get, "http://www.example.com")).not_to have_been_made
+        }.to fail_with(%r{The following requests were made:\n\nGET http://www.example.com/.+was made 1 time})
       end
 
       it "should fail if request was not executed" do
-        lambda {
-          a_request(:get, "http://www.example.com").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
+        expect {
+          expect(a_request(:get, "http://www.example.com")).to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
       end
 
       it "should fail if request was executed to different uri" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.org").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.org/ was expected to execute 1 time but it executed 0 times))
+          expect(a_request(:get, "http://www.example.org")).to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.org/ was expected to execute 1 time but it executed 0 times))
       end
 
       it "should fail if request was executed with different method" do
-        lambda {
+        expect {
           http_request(:post, "http://www.example.com/", :body => "abc")
-          a_request(:get, "http://www.example.com").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
+          expect(a_request(:get, "http://www.example.com")).to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
       end
 
       it "should satisfy expectation if request was executed with different form of uri" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "www.example.com").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:get, "www.example.com")).to have_been_made
+        }.not_to raise_error
       end
 
       it "should satisfy expectation if request was executed with different form of uri without port " do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "www.example.com:80").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:get, "www.example.com:80")).to have_been_made
+        }.not_to raise_error
       end
 
       it "should satisfy expectation if request was executed with different form of uri with port" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "www.example.com:80").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:get, "www.example.com:80")).to have_been_made
+        }.not_to raise_error
       end
 
       it "should fail if request was executed to a different port" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com:80/")
-          a_request(:get, "www.example.com:90").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com:90/ was expected to execute 1 time but it executed 0 times))
+          expect(a_request(:get, "www.example.com:90")).to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com:90/ was expected to execute 1 time but it executed 0 times))
       end
 
       it "should satisfy expectation if request was executed with different form of uri with https port" do
-        lambda {
+        expect {
           http_request(:get, "https://www.example.com/")
-          a_request(:get, "https://www.example.com:443/").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:get, "https://www.example.com:443/")).to have_been_made
+        }.not_to raise_error
       end
 
       describe "when matching requests with escaped or unescaped uris" do
@@ -103,24 +103,24 @@ shared_context "request expectations" do |*adapter_info|
         end
 
         it "should satisfy expectation if request was executed with escaped params" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}")
-            a_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}").should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}")).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with non escaped params" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?#{NOT_ESCAPED_PARAMS}")
-            a_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}").should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}")).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with escaped params and uri matching regexp was expected" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?#{ESCAPED_PARAMS}")
-            a_request(:get, /.*example.*/).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, /.*example.*/)).to have_been_made
+          }.not_to raise_error
         end
 
       end
@@ -131,31 +131,31 @@ shared_context "request expectations" do |*adapter_info|
         end
 
         it "should satisfy expectation if the request was executed with query params declared as a hash in a query option" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-            a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with query params declared as string in query option" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-            a_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c").should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c")).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with query params both in uri and in query option" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c")
-            a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]}).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]})).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with only part query params declared as a hash in a query option" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1")
-            a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))).to have_been_made
+          }.not_to raise_error
         end
       end
 
@@ -165,11 +165,11 @@ shared_context "request expectations" do |*adapter_info|
         end
 
         it "should satisfy expectation if request includes different repeated query params in flat array notation" do
-          lambda {
+          expect {
             stub_request(:get, "http://www.example.com/?a=1&a=2")
             http_request(:get, "http://www.example.com/?a=1&a=2")
-            a_request(:get, "http://www.example.com/?a=1&a=2").should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com/?a=1&a=2")).to have_been_made
+          }.not_to raise_error
         end
 
         after :all do
@@ -181,115 +181,115 @@ shared_context "request expectations" do |*adapter_info|
 
       describe "at_most_times" do
         it "fails if request was made more times than maximum" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute at most 2 times but it executed 3 times))
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_times(2)
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute at most 2 times but it executed 3 times))
         end
 
         it "passes if request was made the maximum number of times" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_times(2)
+          }.not_to raise_error
         end
 
         it "passes if request was made fewer than the maximum number of times" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_times(2)
+          }.not_to raise_error
         end
 
         it "passes if request was not made at all" do
-          lambda {
-            a_request(:get, "http://www.example.com").should have_been_made.at_most_times(2)
-          }.should_not raise_error
+          expect {
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_times(2)
+          }.not_to raise_error
         end
       end
 
 
       describe "at_least_times" do
         it "fails if request was made fewer times than minimum" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute at least 2 times but it executed 1 time))
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_times(2)
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute at least 2 times but it executed 1 time))
         end
 
         it "passes if request was made the minimum number of times" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_times(2)
+          }.not_to raise_error
         end
 
         it "passes if request was made more than the minimum number of times" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.at_least_times(2)
-          }.should_not raise_error
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_times(2)
+          }.not_to raise_error
         end
 
         context "descriptive at_most_ matcher" do
           context "at_most_once" do
             it "succeeds if no request was executed" do
-              lambda {
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
-              }.should_not raise_error
+              expect {
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_once
+              }.not_to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method once" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_once
+              }.not_to raise_error
             end
 
             it "fails if request was executed with the same uri and method twice" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_once
-              }.should raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_once
+              }.to raise_error
             end
           end
 
           context "at_most_twice" do
             it "succeeds if no request was executed" do
-              lambda {
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
-              }.should_not raise_error
+              expect {
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_twice
+              }.not_to raise_error
             end
 
             it "succeeds if too few requests were executed" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_twice
+              }.not_to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method twice" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_twice
+              }.not_to raise_error
             end
 
             it "fails if request was executed with the same uri and method three times" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_most_twice
-              }.should raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_twice
+              }.to raise_error
             end
           end
         end
@@ -297,112 +297,112 @@ shared_context "request expectations" do |*adapter_info|
         context "descriptive at_least_ matcher" do
           context "at_least_once" do
             it "fails if no request was executed" do
-              lambda {
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
-              }.should raise_error
+              expect {
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_once
+              }.to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method once" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_once
+              }.not_to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method twice" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_once
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_once
+              }.not_to raise_error
             end
           end
 
           context "at_least_twice" do
             it "fails if no request was executed" do
-              lambda {
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
-              }.should raise_error
+              expect {
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
+              }.to raise_error
             end
 
             it "fails if too few requests were executed" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
-              }.should raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
+              }.to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method twice" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
+              }.not_to raise_error
             end
 
             it "satisfies expectation if request was executed with the same uri and method three times" do
-              lambda {
+              expect {
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
-                a_request(:get, "http://www.example.com").should have_been_made.at_least_twice
-              }.should_not raise_error
+                expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
+              }.not_to raise_error
             end
           end
         end
       end
 
       it "should fail if request was made more times than expected" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 2 times))
+          expect(a_request(:get, "http://www.example.com")).to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 2 times))
       end
 
       it "should fail if request was made less times than expected" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should have_been_made.twice
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 2 times but it executed 1 time))
+          expect(a_request(:get, "http://www.example.com")).to have_been_made.twice
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 2 times but it executed 1 time))
       end
 
       it "should fail if request was made less times than expected when 3 times expected" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should have_been_made.times(3)
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 3 times but it executed 1 time))
+          expect(a_request(:get, "http://www.example.com")).to have_been_made.times(3)
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 3 times but it executed 1 time))
       end
 
       it "should satisfy expectation if request was executed with the same body" do
-        lambda {
+        expect {
           http_request(:post, "http://www.example.com/", :body => "abc")
-          a_request(:post, "www.example.com").with(:body => "abc").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:post, "www.example.com").with(:body => "abc")).to have_been_made
+        }.not_to raise_error
       end
 
       it "should fail if request was executed with different body" do
-        lambda {
+        expect {
           http_request(:post, "http://www.example.com/", :body => "abc")
-          a_request(:post, "www.example.com").
-          with(:body => "def").should have_been_made
-        }.should fail_with(%r(The request POST http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times))
+          expect(a_request(:post, "www.example.com").
+          with(:body => "def")).to have_been_made
+        }.to fail_with(%r(The request POST http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times))
       end
 
       describe "when expected request body is declared as a regexp" do
         it "should satisfy expectation if request was executed with body matching regexp" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc")
-            a_request(:post, "www.example.com").with(:body => /^abc$/).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:post, "www.example.com").with(:body => /^abc$/)).to have_been_made
+          }.not_to raise_error
         end
 
         it "should fail if request was executed with body not matching regexp" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc")
-            a_request(:post, "www.example.com").
-            with(:body => /^xabc/).should have_been_made
-          }.should fail_with(%r(The request POST http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:post, "www.example.com").
+            with(:body => /^xabc/)).to have_been_made
+          }.to fail_with(%r(The request POST http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
         end
 
       end
@@ -413,50 +413,50 @@ shared_context "request expectations" do |*adapter_info|
 
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if url encoded params have different order" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&b=five&c[d][]=f')
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should fail if request is executed with url encoded body not matching hash" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should fail_with(fail_message)
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.to fail_with(fail_message)
           end
         end
 
         describe "when request is executed with json body matching hash and Content-Type is set to json" do
           it "should satisfy expectation" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if json body is in different form" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                            :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if json body contains date string" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
                            :body => "{\"foo\":\"2010-01-01\"}")
-              a_request(:post, "www.example.com").with(:body => {"foo" => "2010-01-01"}).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => {"foo" => "2010-01-01"})).to have_been_made
+            }.not_to raise_error
           end
         end
 
@@ -465,27 +465,27 @@ shared_context "request expectations" do |*adapter_info|
           let(:body_hash) { { "opt" => {:a => "1", :b => 'five', 'c' => {'d' => ['e', 'f']}} }}
 
           it "should satisfy expectation" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                            :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if xml body is in different form" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                            :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if xml body contains date string" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
                            :body => "<opt foo=\"2010-01-01\">\n</opt>\n")
-              a_request(:post, "www.example.com").with(:body => {"opt" => {"foo" => "2010-01-01"}}).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => {"opt" => {"foo" => "2010-01-01"}})).to have_been_made
+            }.not_to raise_error
           end
         end
       end
@@ -496,137 +496,137 @@ shared_context "request expectations" do |*adapter_info|
 
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.not_to raise_error
           end
 
           it "should fail if request is executed with url encoded body not matching hash" do
-            lambda {
+            expect {
               http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
-              a_request(:post, "www.example.com").with(:body => body_hash).should have_been_made
-            }.should fail_with(fail_message)
+              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+            }.to fail_with(fail_message)
           end
         end
       end
 
       describe "when request with headers is expected" do
         it "should satisfy expectation if request was executed with the same headers" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
-            a_request(:get, "www.example.com").
-            with(:headers => SAMPLE_HEADERS).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").
+            with(:headers => SAMPLE_HEADERS)).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with the same headers but with header value declared as array" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => {"a" => "b"})
-            a_request(:get, "www.example.com").
-            with(:headers => {"a" => ["b"]}).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").
+            with(:headers => {"a" => ["b"]})).to have_been_made
+          }.not_to raise_error
         end
 
         describe "when multiple headers with the same key are passed" do
           it "should satisfy expectation" do
-            lambda {
+            expect {
               http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-              a_request(:get, "www.example.com").
-              with(:headers =>  {"a" => ["b", "c"]}).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:get, "www.example.com").
+              with(:headers =>  {"a" => ["b", "c"]})).to have_been_made
+            }.not_to raise_error
           end
 
           it "should satisfy expectation even if request was executed with the same headers but different order" do
-            lambda {
+            expect {
               http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-              a_request(:get, "www.example.com").
-              with(:headers =>  {"a" => ["c", "b"]}).should have_been_made
-            }.should_not raise_error
+              expect(a_request(:get, "www.example.com").
+              with(:headers =>  {"a" => ["c", "b"]})).to have_been_made
+            }.not_to raise_error
           end
 
           it "should fail if request was executed with different headers" do
-            lambda {
+            expect {
               http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
-              a_request(:get, "www.example.com").
-              with(:headers => {"a" => ["b", "d"]}).should have_been_made
-            }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>\['b', 'd'\]\} was expected to execute 1 time but it executed 0 times))
+              expect(a_request(:get, "www.example.com").
+              with(:headers => {"a" => ["b", "d"]})).to have_been_made
+            }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>\['b', 'd'\]\} was expected to execute 1 time but it executed 0 times))
           end
         end
 
         it "should fail if request was executed with different headers" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
-            a_request(:get, "www.example.com").
-            with(:headers => { 'Content-Length' => '9999'}).should have_been_made
-          }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'Content-Length'=>'9999'\} was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "www.example.com").
+            with(:headers => { 'Content-Length' => '9999'})).to have_been_made
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'Content-Length'=>'9999'\} was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was executed with less headers" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => {'A' => 'a'})
-            a_request(:get, "www.example.com").
-            with(:headers => {'A' => 'a', 'B' => 'b'}).should have_been_made
-          }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>'a', 'B'=>'b'\} was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "www.example.com").
+            with(:headers => {'A' => 'a', 'B' => 'b'})).to have_been_made
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>'a', 'B'=>'b'\} was expected to execute 1 time but it executed 0 times))
         end
 
         it "should satisfy expectation if request was executed with more headers" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/",
                          :headers => {'A' => 'a', 'B' => 'b'}
                          )
-            a_request(:get, "www.example.com").
-            with(:headers => {'A' => 'a'}).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").
+            with(:headers => {'A' => 'a'})).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with body and headers but they were not specified in expectantion" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/",
                          :body => "abc",
                          :headers => SAMPLE_HEADERS
                          )
-            a_request(:post, "www.example.com").should have_been_made
-          }.should_not raise_error
+            expect(a_request(:post, "www.example.com")).to have_been_made
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with headers matching regular expressions" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'MyAppName' })
-            a_request(:get, "www.example.com").
-            with(:headers => { :some_header => /^MyAppName$/ }).should have_been_made
-          }.should_not raise_error
+            expect(a_request(:get, "www.example.com").
+            with(:headers => { :some_header => /^MyAppName$/ })).to have_been_made
+          }.not_to raise_error
         end
 
         it "should fail if request was executed with headers not matching regular expression" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'xMyAppName' })
-            a_request(:get, "www.example.com").
-            with(:headers => { :some_header => /^MyAppName$/ }).should have_been_made
-          }.should fail_with(%r(The request GET http://www.example.com/ with headers \{'Some-Header'=>/\^MyAppName\$/\} was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "www.example.com").
+            with(:headers => { :some_header => /^MyAppName$/ })).to have_been_made
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'Some-Header'=>/\^MyAppName\$/\} was expected to execute 1 time but it executed 0 times))
         end
       end
 
       describe "when expectation contains a request matching block" do
         it "should satisfy expectation if request was executed and block evaluated to true" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
-            a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
-          }.should_not raise_error
+            expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).to have_been_made
+          }.not_to raise_error
         end
 
         it "should fail if request was executed and block evaluated to false" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc")
-            a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should have_been_made
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).to have_been_made
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was not expected but it executed and block matched request" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
-            a_request(:post, "www.example.com").with { |req| req.body == "wadus" }.should_not have_been_made
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+            expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).not_to have_been_made
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
         end
       end
 
@@ -637,147 +637,147 @@ shared_context "request expectations" do |*adapter_info|
         end
 
         it "should satisfy expectation if request was executed with expected credentials" do
-          lambda {
+          expect {
             http_request(:get, "http://user:pass@www.example.com/")
-            a_request(:get, "http://user:pass@www.example.com").should have_been_made.once
-          }.should_not raise_error
+            expect(a_request(:get, "http://user:pass@www.example.com")).to have_been_made.once
+          }.not_to raise_error
         end
 
         it "should fail if request was executed with different credentials than expected" do
-          lambda {
+          expect {
             http_request(:get, "http://user:pass@www.example.com/")
-            a_request(:get, "http://user:pazz@www.example.com").should have_been_made.once
-          }.should fail_with(%r(The request GET http://user:pazz@www.example.com/ was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "http://user:pazz@www.example.com")).to have_been_made.once
+          }.to fail_with(%r(The request GET http://user:pazz@www.example.com/ was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was executed without credentials and credentials were expected" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
-            a_request(:get, "http://user:pass@www.example.com").should have_been_made.once
-          }.should fail_with(%r(The request GET http://user:pass@www.example.com/ was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "http://user:pass@www.example.com")).to have_been_made.once
+          }.to fail_with(%r(The request GET http://user:pass@www.example.com/ was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was executed with credentials but expected without credentials" do
-          lambda {
+          expect {
             http_request(:get, "http://user:pass@www.example.com/")
-            a_request(:get, "http://www.example.com").should have_been_made.once
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.once
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
         end
 
         it "should satisfy expectations even if requests were executed in different order than expectations were declared" do
           stub_request(:post, "http://www.example.com")
           http_request(:post, "http://www.example.com/", :body => "def")
           http_request(:post, "http://www.example.com/", :body => "abc")
-          WebMock.should have_requested(:post, "www.example.com").with(:body => "abc")
-          WebMock.should have_requested(:post, "www.example.com").with(:body => "def")
+          expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "abc")
+          expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "def")
         end
       end
 
       describe "when expectations were set on WebMock object" do
         it "should satisfy expectation if expected request was made" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
-            WebMock.should have_requested(:get, "http://www.example.com").once
-          }.should_not raise_error
+            expect(WebMock).to have_requested(:get, "http://www.example.com").once
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request with body and headers was expected and request was made" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-            WebMock.should have_requested(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'}).once
-          }.should_not raise_error
+            expect(WebMock).to have_requested(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'}).once
+          }.not_to raise_error
         end
 
         it "should fail if request expected not to be made was made" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
-            WebMock.should_not have_requested(:get, "http://www.example.com")
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+            expect(WebMock).not_to have_requested(:get, "http://www.example.com")
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
         end
 
         it "should satisfy expectation if request was executed and expectation had block which evaluated to true" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
-            WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
-          }.should_not raise_error
+            expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
+          }.not_to raise_error
         end
 
         it "should fail if request was executed and expectation had block which evaluated to false" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc")
-            WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
+            expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was expected not to be made but was made and block matched request" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
-            WebMock.should_not have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+            expect(WebMock).not_to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
         end
       end
 
       describe "when expectation is declared using assert_requested" do
         it "should satisfy expectation if requests was made" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             assert_requested(:get, "http://www.example.com", :times => 1)
             assert_requested(:get, "http://www.example.com")
-          }.should_not raise_error
+          }.not_to raise_error
         end
 
         it "should satisfy expectation if request was made with body and headers" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
             assert_requested(:post, "http://www.example.com", :body => "abc", :headers => {'A' => 'a'})
-          }.should_not raise_error
+          }.not_to raise_error
         end
 
         it "should fail if request expected not to be made was not wade" do
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             assert_not_requested(:get, "http://www.example.com")
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
         end
 
         it "should fail if request expected not to be made was made and expectation block evaluated to true" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
             assert_not_requested(:post, "www.example.com") { |req| req.body == "wadus" }
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
         end
 
         it "should satisfy expectation if request was made and expectation block evaluated to true" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
             assert_requested(:post, "www.example.com") { |req| req.body == "wadus" }
-          }.should_not raise_error
+          }.not_to raise_error
         end
 
         it "should fail if request was made and expectation block evaluated to false" do
-          lambda {
+          expect {
             http_request(:post, "http://www.example.com/", :body => "abc")
             assert_requested(:post, "www.example.com") { |req| req.body == "wadus" }
-          }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
       end
 
       describe "when expectation is declared using assert_requested" do
         it "should satisfy expectation if requests was made" do
           stub_http = stub_http_request(:get, "http://www.example.com")
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             assert_requested(stub_http, :times => 1)
             assert_requested(stub_http)
-          }.should_not raise_error
+          }.not_to raise_error
         end
 
         it "should fail if request expected not to be made was not wade" do
           stub_http = stub_http_request(:get, "http://www.example.com")
-          lambda {
+          expect {
             http_request(:get, "http://www.example.com/")
             assert_not_requested(stub_http)
-          }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
         end
       end
     end
@@ -787,52 +787,52 @@ shared_context "request expectations" do |*adapter_info|
       it "should satisfy expectation if expected request was made" do
         stub = stub_request(:get, "http://www.example.com/")
         http_request(:get, "http://www.example.com/")
-        stub.should have_been_requested.once
+        expect(stub).to have_been_requested.once
       end
 
       it "should satisfy expectations if subsequent requests were made" do
         stub = stub_request(:get, "http://www.example.com/")
         http_request(:get, "http://www.example.com/")
-        stub.should have_been_requested.once
+        expect(stub).to have_been_requested.once
         http_request(:get, "http://www.example.com/")
-        stub.should have_been_requested.twice
+        expect(stub).to have_been_requested.twice
       end
 
       it "should satisfy expectation if expected request with body and headers was made" do
         stub = stub_request(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'})
         http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-        stub.should have_been_requested.once
+        expect(stub).to have_been_requested.once
       end
 
       it "should fail if request not expected to be made was made" do
-        lambda {
+        expect {
           stub = stub_request(:get, "http://www.example.com")
           http_request(:get, "http://www.example.com/")
-          stub.should_not have_been_requested
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          expect(stub).not_to have_been_requested
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
       end
 
       it "should fail request not expected to be made was made and expectation block evaluated to true" do
-        lambda {
+        expect {
           stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
           http_request(:post, "http://www.example.com/", :body => "wadus")
-          stub.should_not have_been_requested
-        }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+          expect(stub).not_to have_been_requested
+        }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
       end
 
       it "should satisfy expectation if request was made and expectation block evaluated to true" do
         stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
         http_request(:post, "http://www.example.com/", :body => "wadus")
-        stub.should have_been_requested
+        expect(stub).to have_been_requested
       end
 
       it "should satisfy expectation if request was made and expectation block evaluated to false" do
-        lambda {
+        expect {
           stub_request(:any, /.+/) #stub any request
           stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
           http_request(:post, "http://www.example.com/", :body => "abc")
-          stub.should have_been_requested
-        }.should fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
+          expect(stub).to have_been_requested
+        }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
       end
     end
 
@@ -842,17 +842,17 @@ shared_context "request expectations" do |*adapter_info|
       end
 
       it "should satisfy expectation if expected requests was made" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should have_been_made
-        }.should_not raise_error
+          expect(a_request(:get, "http://www.example.com")).to have_been_made
+        }.not_to raise_error
       end
 
       it "should fail request expected not to be made, was made" do
-        lambda {
+        expect {
           http_request(:get, "http://www.example.com/")
-          a_request(:get, "http://www.example.com").should_not have_been_made
-        }.should fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          expect(a_request(:get, "http://www.example.com")).not_to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
       end
     end
   end

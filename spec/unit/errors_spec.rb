@@ -4,8 +4,8 @@ describe "errors" do
   describe WebMock::NetConnectNotAllowedError do
     describe "message" do
       it "should have message with request signature and snippet" do
-        WebMock::RequestStub.stub(:from_request_signature).and_return(request_stub)
-        WebMock::StubRequestSnippet.stub(:new).
+        allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+        allow(WebMock::StubRequestSnippet).to receive(:new).
            with(request_stub).and_return(stub_result)
 
         expected =  \
@@ -13,13 +13,13 @@ describe "errors" do
           "\n\nYou can stub this request with the following snippet:" \
           "\n\n#{stub_result}" \
           "\n\n============================================================"
-        WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
+        expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
       end
 
       it "should have message with registered stubs if available" do
-        WebMock::StubRegistry.instance.stub(:request_stubs).and_return([request_stub])
-        WebMock::RequestStub.stub(:from_request_signature).and_return(request_stub)
-        WebMock::StubRequestSnippet.stub(:new).
+        allow(WebMock::StubRegistry.instance).to receive(:request_stubs).and_return([request_stub])
+        allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+        allow(WebMock::StubRequestSnippet).to receive(:new).
            with(request_stub).and_return(stub_result)
 
         expected =  \
@@ -29,12 +29,12 @@ describe "errors" do
           "\n\nregistered request stubs:" \
           "\n\n#{stub_result}" \
           "\n\n============================================================"
-        WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
+        expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
       end
 
       it "should not be caught by a rescue block without arguments" do
-        WebMock::RequestStub.stub(:from_request_signature).and_return(request_stub)
-        WebMock::StubRequestSnippet.stub(:new).
+        allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+        allow(WebMock::StubRequestSnippet).to receive(:new).
           with(request_stub).and_return(stub_result)
 
         exception = WebMock::NetConnectNotAllowedError.new(request_signature)
@@ -54,20 +54,20 @@ describe "errors" do
         end
 
         it "should have message with request signature and snippet" do
-          WebMock::RequestStub.stub(:from_request_signature).and_return(request_stub)
-          WebMock::StubRequestSnippet.stub(:new).
+          allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+          allow(WebMock::StubRequestSnippet).to receive(:new).
             with(request_stub).and_return(stub_result)
 
           expected =  \
             "Real HTTP connections are disabled. Unregistered request: #{request_signature}" \
             "\n\n============================================================"
-          WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
+          expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
         end
 
         it "should have message with registered stubs if available" do
-          WebMock::StubRegistry.instance.stub(:request_stubs).and_return([request_stub])
-          WebMock::RequestStub.stub(:from_request_signature).and_return(request_stub)
-          WebMock::StubRequestSnippet.stub(:new).
+          allow(WebMock::StubRegistry.instance).to receive(:request_stubs).and_return([request_stub])
+          allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+          allow(WebMock::StubRequestSnippet).to receive(:new).
             with(request_stub).and_return(stub_result)
 
           expected =  \
@@ -75,7 +75,7 @@ describe "errors" do
             "\n\nregistered request stubs:" \
             "\n\n#{stub_result}" \
             "\n\n============================================================"
-          WebMock::NetConnectNotAllowedError.new(request_signature).message.should == expected
+          expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
         end
       end
     end

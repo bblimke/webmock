@@ -10,16 +10,16 @@ describe WebMock::RackResponse do
     request = WebMock::RequestSignature.new(:get, 'www.example.com')
     response = @rack_response.evaluate(request)
 
-    response.status.first.should == 200
-    response.body.should include('This is my root!')
+    expect(response.status.first).to eq(200)
+    expect(response.body).to include('This is my root!')
   end
 
   it "should behave correctly when the rack response is not a simple array of strings" do
     request = WebMock::RequestSignature.new(:get, 'www.example.com/non_array_response')
     response = @rack_response.evaluate(request)
 
-    response.status.first.should == 200
-    response.body.should include('This is not in an array!')
+    expect(response.status.first).to eq(200)
+    expect(response.body).to include('This is not in an array!')
   end
 
   it "should shouldn't blow up when hitting a locked resource twice" do
@@ -28,8 +28,8 @@ describe WebMock::RackResponse do
     response  = @locked_rack_response.evaluate(request)
     response2 = @locked_rack_response.evaluate(request)
 
-    response2.body.should include('Single threaded response.')
-    response2.status.first.should == 200
+    expect(response2.body).to include('Single threaded response.')
+    expect(response2.status.first).to eq(200)
   end
 
   it "should send along params" do
@@ -37,8 +37,8 @@ describe WebMock::RackResponse do
 
     response = @rack_response.evaluate(request)
 
-    response.status.first.should == 200
-    response.body.should include('Hello, Johnny')
+    expect(response.status.first).to eq(200)
+    expect(response.body).to include('Hello, Johnny')
   end
 
   it "should send along POST params" do
@@ -47,7 +47,7 @@ describe WebMock::RackResponse do
     )
 
     response = @rack_response.evaluate(request)
-    response.body.should include('Good to meet you, Jimmy!')
+    expect(response.body).to include('Good to meet you, Jimmy!')
   end
 
   it "should send params with proper content length if params have non-ascii symbols" do
@@ -56,7 +56,7 @@ describe WebMock::RackResponse do
     )
 
     response = @rack_response.evaluate(request)
-    response.body.should include('Good to meet you, Олег!')
+    expect(response.body).to include('Good to meet you, Олег!')
   end
 
   describe 'rack error output' do
@@ -88,15 +88,15 @@ describe WebMock::RackResponse do
     it 'should be failure when wrong credentials' do
       request = WebMock::RequestSignature.new(:get, 'foo:bar@www.example.com')
       response = @rack_response_with_basic_auth.evaluate(request)
-      response.status.first.should == 401
-      response.body.should_not include('This is my root!')
+      expect(response.status.first).to eq(401)
+      expect(response.body).not_to include('This is my root!')
     end
 
     it 'should be success when valid credentials' do
       request = WebMock::RequestSignature.new(:get, 'username:password@www.example.com')
       response = @rack_response_with_basic_auth.evaluate(request)
-      response.status.first.should == 200
-      response.body.should include('This is my root!')
+      expect(response.status.first).to eq(200)
+      expect(response.body).to include('This is my root!')
     end
   end
 end
