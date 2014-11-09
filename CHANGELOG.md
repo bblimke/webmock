@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.20.4
+
+  * Fixed support for `hash_including` matcher in RSpec 3
+
 ## 1.20.3
 
   * `with` method raises error if provided without options hash and without block
