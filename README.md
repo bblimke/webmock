@@ -535,7 +535,7 @@ assert_not_requested(stub_post)
 
 
 ### Setting expectations in RSpec on `WebMock` module
- This style is borrowed from [fakeweb-matcher](http://github.com/freelancing-god/fakeweb-matcher)
+ This style is borrowed from [fakeweb-matcher](http://github.com/pat/fakeweb-matcher)
 
 ```ruby
 require 'webmock/rspec'
