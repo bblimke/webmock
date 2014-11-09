@@ -540,52 +540,51 @@ assert_not_requested(stub_post)
 ```ruby
 require 'webmock/rspec'
 
-WebMock.should have_requested(:get, "www.example.com").
+expect(WebMock).to have_requested(:get, "www.example.com").
   with(:body => "abc", :headers => {'Content-Length' => 3}).twice
 
-WebMock.should_not have_requested(:get, "www.something.com")
+expect(WebMock).not_to have_requested(:get, "www.something.com")
 
-WebMock.should have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
+expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
 # Note that the block with `do ... end` instead of curly brackets won't work!
 # Why? See this comment https://github.com/bblimke/webmock/issues/174#issuecomment-34908908
 
-WebMock.should have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+expect(WebMock).to have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
 
-WebMock.should have_requested(:get, "www.example.com").
+expect(WebMock).to have_requested(:get, "www.example.com").
   with(:query => hash_including({"a" => ["b", "c"]}))
 
-WebMock.should have_requested(:get, "www.example.com").
+expect(WebMock).to have_requested(:get, "www.example.com").
   with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
 ```
 
 ### Setting expectations in RSpec with `a_request`
 
 ```ruby
-a_request(:post, "www.example.com").
-  with(:body => "abc", :headers => {'Content-Length' => 3}).should have_been_made.once
+expect(a_request(:post, "www.example.com").
+  with(:body => "abc", :headers => {'Content-Length' => 3})).to have_been_made.once
 
-a_request(:post, "www.something.com").should have_been_made.times(3)
+expect(a_request(:post, "www.something.com")).to have_been_made.times(3)
 
-a_request(:post, "www.something.com").should have_been_made.at_least_once
+expect(a_request(:post, "www.something.com")).to have_been_made.at_least_once
 
-a_request(:post, "www.something.com").should have_been_made.at_least_times(3)
+expect(a_request(:post, "www.something.com")).to have_been_made.at_least_times(3)
 
-a_request(:post, "www.something.com").should have_been_made.at_most_twice
+expect(a_request(:post, "www.something.com")).to have_been_made.at_most_twice
 
-a_request(:post, "www.something.com").should have_been_made.at_most_times(3)
+expect(a_request(:post, "www.something.com")).to have_been_made.at_most_times(3)
 
-a_request(:any, "www.example.com").should_not have_been_made
+expect(a_request(:any, "www.example.com")).not_to have_been_made
 
-a_request(:post, "www.example.com").with { |req| req.body == "abc" }.should have_been_made
+expect(a_request(:post, "www.example.com").with { |req| req.body == "abc" }).to have_been_made
 
-a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]}).should have_been_made
+expect(a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})).to have_been_made
 
-a_request(:get, "www.example.com").
-  with(:query => hash_including({"a" => ["b", "c"]})).should have_been_made
+expect(a_request(:get, "www.example.com").
+  with(:query => hash_including({"a" => ["b", "c"]}))).to have_been_made
 
-a_request(:post, "www.example.com").
-  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'}).
-  should have_been_made
+expect(a_request(:post, "www.example.com").
+  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})).to have_been_made
 ```
 
 ### Setting expectations in RSpec on the stub
@@ -593,7 +592,7 @@ a_request(:post, "www.example.com").
 ```ruby
 stub = stub_request(:get, "www.example.com")
 # ... make requests ...
-stub.should have_been_requested
+expect(stub).to have_been_requested
 ```
 
 ## Clearing stubs and request history
