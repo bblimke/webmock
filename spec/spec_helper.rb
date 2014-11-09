@@ -53,9 +53,3 @@ end
 def fail_with(message)
   raise_error(RSpec::Expectations::ExpectationNotMetError, message)
 end
-
-class Proc
-  def should_pass
-    lambda { self.call }.should_not raise_error
-  end
-end
