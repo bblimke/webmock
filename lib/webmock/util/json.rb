@@ -42,10 +42,16 @@ module WebMock
           json.gsub(/\\\//, '/')
         else
           left_pos  = [-1].push(*marks)
-          right_pos = marks << json.length
+          right_pos = marks << json.bytesize
           output    = []
           left_pos.each_with_index do |left, i|
-            output << json[left.succ..right_pos[i]]
+            if json.respond_to?(:byteslice)
+              output << json.byteslice(left.succ..right_pos[i])
+            elsif (RUBY_VERSION >= "1.9" && RUBY_VERSION <= '1.9.2')
+              output << json.dup.force_encoding("binary").slice(left.succ..right_pos[i]).force_encoding(json.encoding)
+            else
+              output << json[left.succ..right_pos[i]]
+            end
           end
           output = output * " "
 
