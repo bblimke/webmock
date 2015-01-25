@@ -694,7 +694,7 @@ or these
 
 If you provide Regexp to match URI, WebMock will try to match it against every valid form of the same url.
 
-I.e `/.*my param.*/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
+I.e `/.*my path.*/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
 
 ## Matching with URI Templates
 
