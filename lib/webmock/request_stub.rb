@@ -22,6 +22,7 @@ module WebMock
       end
       self
     end
+    alias_method :and_return, :to_return
 
     def to_rack(app, options={})
       @responses_sequences << ResponsesSequence.new([RackResponse.new(app)])
@@ -33,11 +34,13 @@ module WebMock
       })
       self
     end
+    alias_method :and_raise, :to_raise
 
     def to_timeout
       @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_timeout => true)])
       self
     end
+    alias_method :and_timeout, :to_timeout
 
     def response
       if @responses_sequences.empty?
