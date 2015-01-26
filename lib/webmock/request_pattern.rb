@@ -137,7 +137,7 @@ module WebMock
       else
         # WebMock checks the query, Addressable checks everything else
         WebMock::Util::URI.variations_of_uri_as_strings(uri.omit(:query)).any? { |u| @pattern.match(u) } &&
-        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query))
+          @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query)
       end
     end
 
