@@ -40,7 +40,7 @@ Supported Ruby Interpreters
 * JRuby
 * Rubinius
 
-##Installation
+## Installation
 
     gem install webmock
 
@@ -652,11 +652,11 @@ WebMock.enable!(:except => [:patron])
 
 An executed request matches stubbed request if it passes following criteria:
 
-  When request URI matches stubbed request URI string, Regexp pattern or RFC 6570 URI Template<br/>
-  And request method is the same as stubbed request method or stubbed request method is :any<br/>
-  And request body is the same as stubbed request body or stubbed request body is not specified<br/>
-  And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified<br/>
-  And request matches provided block or block is not provided
+- When request URI matches stubbed request URI string, Regexp pattern or RFC 6570 URI Template
+- And request method is the same as stubbed request method or stubbed request method is :any
+- And request body is the same as stubbed request body or stubbed request body is not specified
+- And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified
+- And request matches provided block or block is not provided
 
 ## Precedence of stubs
 
@@ -756,7 +756,7 @@ To record your application's real HTTP interactions and replay them later in tes
 
 ## Request callbacks
 
-####WebMock can invoke callbacks stubbed or real requests:
+#### WebMock can invoke callbacks stubbed or real requests:
 
 ```ruby
 WebMock.after_request do |request_signature, response|
