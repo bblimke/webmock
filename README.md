@@ -202,11 +202,11 @@ RestClient.post('www.example.com', 'abc')    # ===> Success
 ```ruby
 stub_request(:get, "user:pass@www.example.com")
 
-Net::HTTP.start('www.example.com') {|http|
+Net::HTTP.start('www.example.com') do |http|
   req = Net::HTTP::Get.new('/')
   req.basic_auth 'user', 'pass'
   http.request(req)
-}    # ===> Success
+end    # ===> Success
 ```
 
 ### Matching uris using regular expressions
@@ -282,7 +282,7 @@ stub_request(:any, "www.example.com").
   to_return(:status => [500, "Internal Server Error"])
 
 req = Net::HTTP::Get.new("/")
-Net::HTTP.start("www.example.com") {|http| http.request(req)}.
+Net::HTTP.start("www.example.com") { |http| http.request(req) }.
   message    # ===> "Internal Server Error"
 ```
 
