@@ -109,7 +109,8 @@ Net::HTTP.get("www.example.com", "/")    # ===> Success
 ### Stubbing requests based on method, uri, body and headers
 
 ```ruby
-stub_request(:post, "www.example.com").with(:body => "abc", :headers => { 'Content-Length' => 3 })
+stub_request(:post, "www.example.com").
+  with(:body => "abc", :headers => { 'Content-Length' => 3 })
 
 uri = URI.parse("http://www.example.com/")
 req = Net::HTTP::Post.new(uri.path)
@@ -124,7 +125,8 @@ end    # ===> Success
 
 ```ruby
 stub_request(:post, "www.example.com").
-  with(:body => /^.*world$/, :headers => {"Content-Type" => /image\/.+/}).to_return(:body => "abc")
+  with(:body => /^.*world$/, :headers => {"Content-Type" => /image\/.+/}).
+  to_return(:body => "abc")
 
 uri = URI.parse('http://www.example.com/')
 req = Net::HTTP::Post.new(uri.path)
@@ -164,7 +166,8 @@ RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
 ### Matching custom request headers
 
 ```ruby
-stub_request(:any, "www.example.com").with(:headers=>{ 'Header-Name' => 'Header-Value' })
+stub_request(:any, "www.example.com").
+  with(:headers=>{ 'Header-Name' => 'Header-Value' })
 
 uri = URI.parse('http://www.example.com/')
 req = Net::HTTP::Post.new(uri.path)
@@ -178,7 +181,8 @@ end    # ===> Success
 ### Matching multiple headers with the same name
 
 ```ruby
-stub_request(:get, 'www.example.com').with(:headers => {'Accept' => ['image/jpeg', 'image/png'] })
+stub_request(:get, 'www.example.com').
+  with(:headers => {'Accept' => ['image/jpeg', 'image/png'] })
 
 req = Net::HTTP::Get.new("/")
 req['Accept'] = ['image/png']
@@ -225,10 +229,12 @@ Net::HTTP.get('www.example.com', '/webmock/')    # ===> Success
 ### Matching uris using RFC 6570 - Advanced Example
 
 ```ruby
-uri_template = Addressable::Template.new "www.example.com/thing/{id}.json{?x,y,z}{&other*}"
+uri_template =
+  Addressable::Template.new "www.example.com/thing/{id}.json{?x,y,z}{&other*}"
 stub_request(:any, uri_template)
 
-Net::HTTP.get('www.example.com', '/thing/5.json?x=1&y=2&z=3&anyParam=4')    # ===> Success
+Net::HTTP.get('www.example.com',
+  '/thing/5.json?x=1&y=2&z=3&anyParam=4')    # ===> Success
 ```
 
 ### Matching query params using hash
@@ -242,7 +248,8 @@ RestClient.get("http://www.example.com/?a[]=b&a[]=c")    # ===> Success
 ### Matching partial query params using hash
 
 ```ruby
-stub_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+stub_request(:get, "www.example.com").
+  with(:query => hash_including({"a" => ["b", "c"]}))
 
 RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1")    # ===> Success
 ```
@@ -251,7 +258,8 @@ RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1")    # ===> Success
 
 ```ruby
 stub_request(:any, "www.example.com").
-  to_return(:body => "abc", :status => 200, :headers => { 'Content-Length' => 3 })
+  to_return(:body => "abc", :status => 200,
+    :headers => { 'Content-Length' => 3 })
 
 Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 ```
@@ -270,10 +278,12 @@ Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 ### Response with custom status message
 
 ```ruby
-stub_request(:any, "www.example.com").to_return(:status => [500, "Internal Server Error"])
+stub_request(:any, "www.example.com").
+  to_return(:status => [500, "Internal Server Error"])
 
 req = Net::HTTP::Get.new("/")
-Net::HTTP.start("www.example.com") {|http| http.request(req)}.message    # ===> "Internal Server Error"
+Net::HTTP.start("www.example.com") {|http| http.request(req)}.
+  message    # ===> "Internal Server Error"
 ```
 
 ### Replaying raw responses recorded with `curl -is`
@@ -380,7 +390,8 @@ RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
 ### Multiple responses for repeated requests
 
 ```ruby
-stub_request(:get, "www.example.com").to_return({:body => "abc"}, {:body => "def"})
+stub_request(:get, "www.example.com").
+  to_return({:body => "abc"}, {:body => "def"})
 Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 Net::HTTP.get('www.example.com', '/')    # ===> "def\n"
 
@@ -504,11 +515,13 @@ res = Net::HTTP.start(uri.host, uri.port) do |http|
 end
 
 assert_requested :post, "http://www.example.com",
-  :headers => {'Content-Length' => 3}, :body => "abc", :times => 1    # ===> Success
+  :headers => {'Content-Length' => 3}, :body => "abc",
+  :times => 1    # ===> Success
 
 assert_not_requested :get, "http://www.something.com"    # ===> Success
 
-assert_requested(:post, "http://www.example.com", :times => 1) { |req| req.body == "abc" }
+assert_requested(:post, "http://www.example.com",
+  :times => 1) { |req| req.body == "abc" }
 ```
 
 ### Expecting real (not stubbed) requests
@@ -545,30 +558,35 @@ expect(WebMock).to have_requested(:get, "www.example.com").
 
 expect(WebMock).not_to have_requested(:get, "www.something.com")
 
-expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "abc" }
+expect(WebMock).to have_requested(:post, "www.example.com").
+  with { |req| req.body == "abc" }
 # Note that the block with `do ... end` instead of curly brackets won't work!
 # Why? See this comment https://github.com/bblimke/webmock/issues/174#issuecomment-34908908
 
-expect(WebMock).to have_requested(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})
+expect(WebMock).to have_requested(:get, "www.example.com").
+  with(:query => {"a" => ["b", "c"]})
 
 expect(WebMock).to have_requested(:get, "www.example.com").
   with(:query => hash_including({"a" => ["b", "c"]}))
 
 expect(WebMock).to have_requested(:get, "www.example.com").
-  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})
+  with(:body => {"a" => ["b", "c"]},
+    :headers => {'Content-Type' => 'application/json'})
 ```
 
 ### Setting expectations in RSpec with `a_request`
 
 ```ruby
 expect(a_request(:post, "www.example.com").
-  with(:body => "abc", :headers => {'Content-Length' => 3})).to have_been_made.once
+  with(:body => "abc", :headers => {'Content-Length' => 3})).
+  to have_been_made.once
 
 expect(a_request(:post, "www.something.com")).to have_been_made.times(3)
 
 expect(a_request(:post, "www.something.com")).to have_been_made.at_least_once
 
-expect(a_request(:post, "www.something.com")).to have_been_made.at_least_times(3)
+expect(a_request(:post, "www.something.com")).
+  to have_been_made.at_least_times(3)
 
 expect(a_request(:post, "www.something.com")).to have_been_made.at_most_twice
 
@@ -576,15 +594,18 @@ expect(a_request(:post, "www.something.com")).to have_been_made.at_most_times(3)
 
 expect(a_request(:any, "www.example.com")).not_to have_been_made
 
-expect(a_request(:post, "www.example.com").with { |req| req.body == "abc" }).to have_been_made
+expect(a_request(:post, "www.example.com").with { |req| req.body == "abc" }).
+  to have_been_made
 
-expect(a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})).to have_been_made
+expect(a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})).
+  to have_been_made
 
 expect(a_request(:get, "www.example.com").
   with(:query => hash_including({"a" => ["b", "c"]}))).to have_been_made
 
 expect(a_request(:post, "www.example.com").
-  with(:body => {"a" => ["b", "c"]}, :headers => {'Content-Type' => 'application/json'})).to have_been_made
+  with(:body => {"a" => ["b", "c"]},
+    :headers => {'Content-Type' => 'application/json'})).to have_been_made
 ```
 
 ### Setting expectations in RSpec on the stub
@@ -614,10 +635,17 @@ assert_not_requested :get, "www.example.com"    # ===> Success
 ## Disabling and enabling WebMock or only some http client adapters
 
 ```ruby
-WebMock.disable!                         #disable WebMock (all adapters)
-WebMock.disable!(:except => [:net_http]) #disable WebMock for all libs except Net::HTTP
-WebMock.enable!                          #enable WebMock (all adapters)
-WebMock.enable!(:except => [:patron])    #enable WebMock for all libs except Patron
+# Disable WebMock (all adapters)
+WebMock.disable!
+
+# Disable WebMock for all libs except Net::HTTP
+WebMock.disable!(:except => [:net_http])
+
+# Enable WebMock (all adapters)
+WebMock.enable!
+
+# Enable WebMock for all libs except Patron
+WebMock.enable!(:except => [:patron])
 ```
 
 ## Matching requests
@@ -739,7 +767,8 @@ end
 #### invoke callbacks for real requests only and except requests made with Patron
 
 ```ruby
-WebMock.after_request(:except => [:patron], :real_requests_only => true) do |req_signature, response|
+WebMock.after_request(:except => [:patron],
+                      :real_requests_only => true) do |req_signature, response|
   puts "Request #{req_signature} was made and #{response} was returned"
 end
 ```
