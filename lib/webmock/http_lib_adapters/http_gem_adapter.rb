@@ -1,11 +1,10 @@
 begin
   require "http"
-  __http_gem_found__ = true
 rescue LoadError
-  __http_gem_found__ = false
+  # HTTP gem not found
 end
 
-if __http_gem_found__
+if defined?(HTTP) && defined?(HTTP::VERSION)
   WebMock::VersionChecker.new("HTTP Gem", HTTP::VERSION, "0.6.0").check_version!
 
   module WebMock
