@@ -1,6 +1,6 @@
 require "ostruct"
 
-module HttpGemSpecHelper
+module HttpRbSpecHelper
   def http_request(method, uri, options = {})
     response = HTTP.request(method, normalize_uri(uri), options)
 
@@ -21,7 +21,7 @@ module HttpGemSpecHelper
   end
 
   def http_library
-    :http_gem
+    :http_rb
   end
 
   def normalize_uri(uri)
