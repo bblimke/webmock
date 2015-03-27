@@ -9,8 +9,8 @@ if defined?(HTTP) && defined?(HTTP::VERSION)
 
   module WebMock
     module HttpLibAdapters
-      class HttpGemAdapter < HttpLibAdapter
-        adapter_for :http_gem
+      class HttpRbAdapter < HttpLibAdapter
+        adapter_for :http_rb
 
         class << self
           def enable!
@@ -29,9 +29,9 @@ if defined?(HTTP) && defined?(HTTP::VERSION)
     end
   end
 
-  require "webmock/http_lib_adapters/http_gem/client"
-  require "webmock/http_lib_adapters/http_gem/request"
-  require "webmock/http_lib_adapters/http_gem/response"
-  require "webmock/http_lib_adapters/http_gem/streamer"
-  require "webmock/http_lib_adapters/http_gem/webmock"
+  require "webmock/http_lib_adapters/http_rb/client"
+  require "webmock/http_lib_adapters/http_rb/request"
+  require "webmock/http_lib_adapters/http_rb/response"
+  require "webmock/http_lib_adapters/http_rb/streamer"
+  require "webmock/http_lib_adapters/http_rb/webmock"
 end
