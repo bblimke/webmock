@@ -5,7 +5,7 @@ rescue LoadError
 end
 
 if defined?(Curl)
-  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16').check_version!
+  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '0.8.7').check_version!
 
   module WebMock
     module HttpLibAdapters
