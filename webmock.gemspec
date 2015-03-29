@@ -18,10 +18,12 @@ Gem::Specification.new do |s|
   s.add_dependency 'addressable', '>= 2.3.6'
   s.add_dependency 'crack', '>=0.3.2'
 
+  patron_version = (RUBY_VERSION <= '1.8.7') ? '0.4.18' : '>= 0.4.18'
+
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'http',            '>= 0.6.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
-  s.add_development_dependency 'patron',          '>= 0.4.18' unless RUBY_PLATFORM =~ /java/
+  s.add_development_dependency('patron',          patron_version) unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'em-http-request', '>= 1.0.2'
   s.add_development_dependency 'em-synchrony',    '>= 1.0.0' if RUBY_VERSION >= "1.9"
   s.add_development_dependency 'curb',            '<= 0.8.6' unless RUBY_PLATFORM =~ /java/
