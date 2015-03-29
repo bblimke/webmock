@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.21.0
+
+  * Support for http.rb >= 0.8.0
+
+      Thanks to [Zachary Anker](https://github.com/zanker), [Aleksey V. Zapparov](https://github.com/ixti)
+
+  * Support for http.rb 0.7.0
+
+      Thanks to [Mattias Putman](https://github.com/challengee)
+
+  * Added support for RSpec3-like `and_return`, `and_raise`, `and_timeout` sytnax.
+
+      Thanks to [Franky Wahl](https://github.com/frankywahl)
+
+  * Restricted Curb support up to version 0.8.6. WebMock specs fail with Curb 0.8.7.
+
 ## 1.20.4
 
   * Fixed support for `hash_including` matcher in RSpec 3
