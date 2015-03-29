@@ -53,7 +53,7 @@ module HTTP
 
     def invoke_callbacks(webmock_response, options = {})
       ::WebMock::CallbackRegistry.invoke_callbacks(
-        options.merge({ :lib => :http_gem }),
+        options.merge({ :lib => :http_rb }),
         request_signature,
         webmock_response
       )

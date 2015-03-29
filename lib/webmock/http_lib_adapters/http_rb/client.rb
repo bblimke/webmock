@@ -8,7 +8,7 @@ module HTTP
     end
 
     def webmock_enabled?
-      ::WebMock::HttpLibAdapters::HttpGemAdapter.enabled?
+      ::WebMock::HttpLibAdapters::HttpRbAdapter.enabled?
     end
   end
 end

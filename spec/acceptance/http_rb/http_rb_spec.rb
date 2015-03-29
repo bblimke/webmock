@@ -2,10 +2,10 @@
 
 require "spec_helper"
 require "acceptance/webmock_shared"
-require "acceptance/http_gem/http_gem_spec_helper"
+require "acceptance/http_rb/http_rb_spec_helper"
 
-describe "HTTP Gem" do
-  include HttpGemSpecHelper
+describe "HTTP.rb" do
+  include HttpRbSpecHelper
 
   include_examples "with WebMock", :no_status_message
 
