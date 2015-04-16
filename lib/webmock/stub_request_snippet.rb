@@ -4,6 +4,10 @@ module WebMock
       @request_stub = request_stub
     end
 
+    def body_pattern
+      request_pattern.body_pattern
+    end
+
     def to_s(with_response = true)
       request_pattern = @request_stub.request_pattern
       string = "stub_request(:#{request_pattern.method_pattern.to_s},"
