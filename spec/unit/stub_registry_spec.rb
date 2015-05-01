@@ -40,7 +40,7 @@ describe WebMock::StubRegistry do
       expect(WebMock::StubRegistry.instance.registered_request?(@request_signature)).to eq(nil)
     end
 
-    it "should register and report registered stib" do
+    it "should register and report registered stub" do
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
       expect(WebMock::StubRegistry.instance.registered_request?(@request_signature)).to eq(@request_stub)
     end
