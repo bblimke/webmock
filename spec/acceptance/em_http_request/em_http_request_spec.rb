@@ -229,6 +229,66 @@ unless RUBY_PLATFORM =~ /java/
       expect(http_request(:post, "http://www.example.com").body.bytesize).to eq(body.bytesize)
     end
 
+    it "should work with multiple requests to the same connection" do
+      stub_request(:get, "www.example.com/foo").to_return(:body => "bar")
+      stub_request(:get, "www.example.com/baz").to_return(:body => "wombat")
+      err1  = nil
+      err2  = nil
+      body1 = nil
+      body2 = nil
+      i = 0
+
+      EM.run do
+        conn = EM::HttpRequest.new("http://www.example.com")
+        conn.get(:path => "/foo").callback do |resp|
+          body1 = resp.response
+          i += 1; EM.stop if i == 2
+        end.errback do |resp|
+          err1  = resp.error
+          i += 1; EM.stop if i == 2
+        end
+
+        conn.get(:path => "/baz").callback do |resp|
+          body2 = resp.response
+          i += 1; EM.stop if i == 2
+        end.errback do |resp|
+          err2  = resp.error
+          i += 1; EM.stop if i == 2
+        end
+      end
+
+      expect(err1).to be(nil)
+      expect(err2).to be(nil)
+      expect(body1).to eq("bar")
+      expect(body2).to eq("wombat")
+    end
+
+    it "should work with multiple requests to the same connection when the first request times out" do
+      stub_request(:get, "www.example.com/foo").to_timeout.then.to_return(:status => 200, :body => "wombat")
+      err  = nil
+      body = nil
+
+      EM.run do
+        conn = EM::HttpRequest.new("http://www.example.com")
+        conn.get(:path => "/foo").callback do |resp|
+          err = :success_from_timeout
+          EM.stop
+        end.errback do |resp|
+          conn.get(:path => "/foo").callback do |resp|
+            expect(resp.response_header.status).to eq(200)
+            body = resp.response
+            EM.stop
+          end.errback do |resp|
+            err = resp.error
+            EM.stop
+          end
+        end
+      end
+
+      expect(err).to be(nil)
+      expect(body).to eq("wombat")
+    end
+
     describe "mocking EM::HttpClient API" do
       let(:uri) { "http://www.example.com/" }
 

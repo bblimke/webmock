@@ -70,6 +70,10 @@ if defined?(EventMachine::HttpClient)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
+
+      def drop_client
+        @clients.shift
+      end
     end
 
     class WebMockHttpClient < EventMachine::HttpClient
@@ -83,6 +87,7 @@ if defined?(EventMachine::HttpClient)
         @last_effective_url = @uri = uri
         if error
           on_error(error)
+          @conn.drop_client
           fail(self)
         else
           @conn.receive_data(response)
