@@ -827,7 +827,7 @@ all version with just one command.
 
 This command is wrapped up in to a rake task and can be invoked like so:
 
-    rake spec:rubies
+  rake rvm:specs
 
 ## Credits
 
