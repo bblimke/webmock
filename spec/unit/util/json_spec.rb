@@ -7,6 +7,8 @@ describe WebMock::Util::JSON do
   end
 
   it "can parse json with multibyte characters" do
-    expect(WebMock::Util::JSON.parse("{\"name\":\"山田太郎\"\,\"job\":\"会社員\"}")).to(eq({"name" => "山田太郎", "job" => "会社員"}))
+    expect(
+      WebMock::Util::JSON.parse("{\"name\":\"山田太郎\"\,\"job\":\"会社員\"}")
+    ).to eq({"name" => "山田太郎", "job" => "会社員"})
   end
 end
