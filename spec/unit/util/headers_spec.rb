@@ -8,21 +8,24 @@ describe WebMock::Util::Headers do
     expect(userinfo).to eq("username:secret")
   end
 
-  describe "sorted_headers_string" do
-
+  describe ".sorted_headers_string" do
     it "should return nice string for hash with string values" do
-      expect(WebMock::Util::Headers.sorted_headers_string({"a" => "b"})).to eq("{'A'=>'b'}")
+      expect(
+        WebMock::Util::Headers.sorted_headers_string({"a" => "b"})
+      ).to eq("{'A'=>'b'}")
     end
 
     it "should return nice string for hash with array values" do
-      expect(WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"]})).to eq("{'A'=>['b', 'c']}")
+      expect(
+        WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"]})
+      ).to eq("{'A'=>['b', 'c']}")
     end
 
     it "should return nice string for hash with array values and string values" do
-      expect(WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"], "d" => "e"})).to eq("{'A'=>['b', 'c'], 'D'=>'e'}")
+      expect(
+        WebMock::Util::Headers.sorted_headers_string({"a" => ["b", "c"], "d" => "e"})
+      ).to eq("{'A'=>['b', 'c'], 'D'=>'e'}")
     end
-
-
   end
 
 end
