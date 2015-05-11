@@ -5,6 +5,10 @@ if ENV["EM_HTTP_REQUEST_0_X"]
   gem 'em-http-request', '~> 0.3.0'
 end
 
+group :development, :test do
+  gem "pry"
+end
+
 group :development do
   gem 'rake'
 end

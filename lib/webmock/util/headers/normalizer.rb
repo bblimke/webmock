@@ -8,6 +8,9 @@ module WebMock
         end
 
         def call
+          # File.open("spec/support/header_test_data.txt", "a+") do |f|
+          #   f.write("#{name}\n#{value}\n#{normalized_name}\n#{normalized_value}\n")
+          # end
           [normalized_name, normalized_value]
         end
 
