@@ -2,7 +2,7 @@ source 'http://rubygems.org/'
 
 gemspec
 if ENV["EM_HTTP_REQUEST_0_X"]
-  gem 'em-http-request', '~> 0.3.0'
+  gem 'em-http-request', '~> 1.0.2'
 end
 
 group :development do
