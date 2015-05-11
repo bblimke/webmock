@@ -28,4 +28,12 @@ describe WebMock::Util::Headers do
     end
   end
 
+  # First I am going to create some characterization tests
+  describe ".normalize_headers" do
+    it "returns nil if no headers are passed in" do
+
+    end
+
+  end
+
 end
