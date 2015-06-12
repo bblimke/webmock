@@ -101,4 +101,12 @@ describe WebMock::Util::QueryMapper do
     expect(subject.values_to_query values).to eq query
     expect(subject.query_to_values query).to eq values
   end
+
+  it 'converts a hash with an array of hashes',focus:true do
+    query = 'tags%5B%5D%5Ba%5D=1&tags%5B%5D%5Bb%5D=2'
+    values = {"tags" => [{"a" => "1", "b" => "2"}]}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
+
 end
