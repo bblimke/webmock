@@ -60,6 +60,9 @@ describe WebMock::Util::QueryMapper do
     it 'should transform hash value' do
       expect(subject.to_query('a', {'key' => 'value'})).to eq('a[key]=value')
     end
+    it 'should transform hash value with keys that are symbols' do
+      expect(subject.to_query('a', {:key => 'value'})).to eq('a[key]=value')
+    end
     it 'should transform array value' do
       expect(subject.to_query('a', ['b', 'c'])).to eq('a[0]=b&a[1]=c')
     end

@@ -241,7 +241,7 @@ module WebMock::Util
         when ::Hash
           value = value.map do |key, val|
             [
-              ::Addressable::URI.encode_component(key.dup, ::Addressable::URI::CharacterClasses::UNRESERVED),
+              ::Addressable::URI.encode_component(key.to_s.dup, ::Addressable::URI::CharacterClasses::UNRESERVED),
               val
             ]
           end
