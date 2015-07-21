@@ -19,7 +19,7 @@ describe "HTTP.rb" do
 
     it "fails if body was already streamed" do
       response.body.to_s
-      expect { response.body.readpartial 1 }.to raise_error
+      expect { response.body.readpartial 1 }.to raise_error ArgumentError
     end
   end
 

@@ -69,7 +69,7 @@ shared_context "declared responses" do |*adapter_info|
 
     it "should return response with declared status code" do
       stub_request(:get, "www.example.com").to_return(:status => 500)
-      expect(http_request(:get, "http://www.example.com/").status).to eq("500")
+      expect(http_request(:get, "http://www.example.com/").status).to match /500/
     end
 
     it "should return response with declared status message", :unless => (adapter_info.include?(:no_status_message)) do
@@ -80,7 +80,7 @@ shared_context "declared responses" do |*adapter_info|
 
     it "should return response with a default status code" do
       stub_request(:get, "www.example.com")
-      expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+      expect(http_request(:get, "http://www.example.com/").status).to match /200/
     end
 
     it "should return default response with empty message if response was not declared", :unless => (adapter_info.include?(:no_status_message)) do
@@ -185,7 +185,7 @@ shared_context "declared responses" do |*adapter_info|
       end
 
       it "should return recorded status" do
-        expect(@response.status).to eq("202")
+        expect(@response.status).to match /202/
       end
 
       it "should return recorded status message", :unless => (adapter_info.include?(:no_status_message)) do
@@ -219,7 +219,7 @@ shared_context "declared responses" do |*adapter_info|
       end
 
       it "should return recorded status" do
-        expect(@response.status).to eq("202")
+        expect(@response.status).to match /202/
       end
 
       it "should return recorded status message", :unless => (adapter_info.include?(:no_status_message)) do
@@ -253,7 +253,7 @@ shared_context "declared responses" do |*adapter_info|
 
       it "should pass along the port number to the rack app" do
         stub_request(:get, "http://www.example.com/compute").to_rack(MyRackApp)
-        expect(http_request(:get, "http://www.example.com/compute").status).to eq("200")
+        expect(http_request(:get, "http://www.example.com/compute").status).to match /200/
       end
 
       it "preserves content-type header when proxying to a rack app" do

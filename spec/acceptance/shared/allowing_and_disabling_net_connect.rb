@@ -6,7 +6,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
       end
 
       it "should make a real web request if request is not stubbed" do
-        expect(http_request(:get, webmock_server_url).status).to eq("200")
+        expect(http_request(:get, webmock_server_url).status).to match /200/
       end
 
       it "should make a real https request if request is not stubbed" do
@@ -120,13 +120,13 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
         end
 
         it "should make a real request to allowed host", :net_connect => true do
-          expect(http_request(:get, "http://httpstat.us/200").status).to eq("200")
+          expect(http_request(:get, "http://httpstat.us/200").status).to match /200/
         end
       end
 
       context "when the host with port is allowed" do
         it "should make a real request to allowed host", :net_connect => true do
-          expect(http_request(:get, "http://#{host_with_port}/").status).to eq("200")
+          expect(http_request(:get, "http://#{host_with_port}/").status).to match /200/
         end
       end
 
