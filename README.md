@@ -736,13 +736,13 @@ If you use any of the WebMock methods for matching query params, then Addressabl
 WebMock will match request headers against stubbed request headers in the following situations:
 
 1. Stubbed request has headers specified and request headers are the same as stubbed headers <br/>
-i.e stubbed headers: `{ 'Header1' => 'Value1', 'Header1' => 'Value1' }`, requested: `{ 'Header1' => 'Value1', 'Header1' => 'Value1' }`
+i.e stubbed headers: `{ 'Header1' => 'Value1', 'Header2' => 'Value2' }`, requested: `{ 'Header1' => 'Value1', 'Header2' => 'Value2' }`
 
 2. Stubbed request has headers specified and stubbed request headers are a subset of request headers <br/>
-i.e stubbed headers: `{ 'Header1' => 'Value1'  }`, requested: `{ 'Header1' => 'Value1', 'Header1' => 'Value1' }`
+i.e stubbed headers: `{ 'Header1' => 'Value1'  }`, requested: `{ 'Header1' => 'Value1', 'Header2' => 'Value2' }`
 
 3. Stubbed request has no headers <br/>
-i.e stubbed headers: `nil`, requested: `{ 'Header1' => 'Value1', 'Header1' => 'Value1' }`
+i.e stubbed headers: `nil`, requested: `{ 'Header1' => 'Value1', 'Header2' => 'Value2' }`
 
 WebMock normalises headers and treats all forms of same headers as equal:
 i.e the following two sets of headers are equal:
