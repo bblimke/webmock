@@ -2,7 +2,7 @@ require 'singleton'
 
 require 'addressable/uri'
 require 'addressable/template'
-require 'crack'
+require 'crack/xml'
 
 require 'webmock/deprecation'
 require 'webmock/version'
