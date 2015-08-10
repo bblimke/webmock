@@ -259,8 +259,6 @@ module WebMock::Util
             buffer << "#{to_query(new_parent, val, options)}&"
           end
           buffer.chop
-        when TrueClass
-          parent
         else
           encoded_value = Addressable::URI.encode_component(
             value.to_s.dup, Addressable::URI::CharacterClasses::UNRESERVED
