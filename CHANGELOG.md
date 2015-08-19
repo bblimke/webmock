@@ -10,7 +10,7 @@
 
       Thanks to [Mattias Putman](https://github.com/challengee)
 
-  * Added support for RSpec3-like `and_return`, `and_raise`, `and_timeout` sytnax.
+  * Added support for RSpec3-like `and_return`, `and_raise`, `and_timeout` syntax.
 
       Thanks to [Franky Wahl](https://github.com/frankywahl)
 
