@@ -16,3 +16,4 @@ matrix:
     - rvm: jruby-18mode
     - rvm: jruby-head
     - rvm: ruby-head
+sudo: false
