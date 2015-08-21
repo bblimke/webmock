@@ -113,13 +113,8 @@ describe "HTTPClient" do
         nil # to let the request be made for real
       end
 
-      # To make two requests that have the same request signature, the headers must match.
-      # Since the webmock server has a Set-Cookie header, the 2nd request will automatically
-      # include a Cookie header (due to how httpclient works), so we have to set the header
-      # manually on the first request but not on the 2nd request.
-      http_request(:get, webmock_server_url, :client => client,
-                         :headers => { "Cookie" => "bar=; foo=" })
-      http_request(:get, webmock_server_url, :client => client)
+      http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+      http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
 
       expect(request_signatures.size).to eq(2)
       # Verify the request signatures were identical as needed by this example

@@ -49,7 +49,7 @@ describe "HTTP.rb" do
   end
 
   it "restores request uri on replayed response object" do
-    uri = URI "http://example.com/foo"
+    uri = Addressable::URI.parse "http://example.com/foo"
 
     stub_request :get, "example.com/foo"
     response = HTTP.get uri
