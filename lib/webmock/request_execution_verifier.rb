@@ -33,6 +33,9 @@ module WebMock
       end
     end
 
+    def description
+      "request #{request_pattern.to_s} #{quantity_phrase.strip}"
+    end
 
     def failure_message
       failure_message_phrase(is_negated=false)
