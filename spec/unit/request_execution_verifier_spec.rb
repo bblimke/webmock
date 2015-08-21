@@ -77,7 +77,7 @@ describe WebMock::RequestExecutionVerifier do
 
     it "should report failure message when not expected request but it executed" do
       @verifier.times_executed = 1
-      expected_text = "The request www.example.com was expected to execute 0 times but it executed 1 time"
+      expected_text = "The request www.example.com was not expected to execute but it executed 1 time"
       expected_text << @executed_requests_info
       expect(@verifier.failure_message_when_negated).to eq(expected_text)
     end
