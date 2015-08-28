@@ -15,22 +15,34 @@ if defined?(Manticore)
         def self.enable!
           Manticore.send(:remove_const, :Client)
           Manticore.send(:const_set, :Client, WebMockManticoreClient)
+          Manticore.instance_variable_set(:@manticore_facade, WebMockManticoreClient.new)
         end
 
         def self.disable!
           Manticore.send(:remove_const, :Client)
           Manticore.send(:const_set, :Client, OriginalManticoreClient)
+          Manticore.instance_variable_set(:@manticore_facade, OriginalManticoreClient.new)
         end
 
         class WebMockManticoreClient < Manticore::Client
-          def http(method, uri, options = {})
-            @method = method
-            @uri = uri
+          def request(klass, url, options={}, &block)
+            @method = KLASS_TO_METHOD.fetch(klass)
+            @uri = url
             @options = options
-            super(method, WebMock::Util::URI.normalize_uri(uri).to_s, format_options(options))
+            super(klass, WebMock::Util::URI.normalize_uri(url).to_s, format_options(options))
           end
 
           private
+
+          KLASS_TO_METHOD = {
+            Java::OrgManticore::HttpGetWithEntity => :get,
+            Java::OrgApacheHttpClientMethods::HttpPut => :put,
+            Java::OrgApacheHttpClientMethods::HttpHead => :head,
+            Java::OrgApacheHttpClientMethods::HttpPost => :post,
+            Java::OrgApacheHttpClientMethods::HttpDelete => :delete,
+            Java::OrgApacheHttpClientMethods::HttpOptions => :options,
+            Java::OrgApacheHttpClientMethods::HttpPatch => :patch
+          }
 
           def format_options(options)
             return options unless headers = options[:headers]
