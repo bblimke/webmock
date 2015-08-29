@@ -114,7 +114,13 @@ describe "HTTPClient" do
       end
 
       http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
-      http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+
+      httpclient_minor_version = HTTPClient::VERSION.split(".")[1].to_i
+      if httpclient_minor_version > 5
+        http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+      else
+        http_request(:get, webmock_server_url, :client => client)
+      end
 
       expect(request_signatures.size).to eq(2)
       # Verify the request signatures were identical as needed by this example
