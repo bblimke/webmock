@@ -114,7 +114,13 @@ describe "HTTPClient" do
       end
 
       http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
-      http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+
+      if defined? HTTP::CookieJar
+        http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+      else
+        # If http-cookie is not present, then the cookie headers will saved between requests
+        http_request(:get, webmock_server_url, :client => client)
+      end
 
       expect(request_signatures.size).to eq(2)
       # Verify the request signatures were identical as needed by this example
