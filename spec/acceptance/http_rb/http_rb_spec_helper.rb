@@ -7,7 +7,7 @@ module HttpRbSpecHelper
     OpenStruct.new({
       :body       => response.body.to_s,
       :headers    => normalize_headers(response.headers.to_h),
-      :status     => response.status.code.to_s,
+      :status     => response.code.to_s,
       :message    => response.reason
     })
   end
