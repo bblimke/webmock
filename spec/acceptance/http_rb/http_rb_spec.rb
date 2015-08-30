@@ -54,6 +54,6 @@ describe "HTTP.rb" do
     stub_request :get, "example.com/foo"
     response = HTTP.get uri
 
-    expect(response.uri).to eq uri
+    expect(response.uri.to_s).to eq uri.to_s
   end
 end

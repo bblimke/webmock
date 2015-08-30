@@ -113,13 +113,21 @@ describe "HTTPClient" do
         nil # to let the request be made for real
       end
 
-      # To make two requests that have the same request signature, the headers must match.
-      # Since the webmock server has a Set-Cookie header, the 2nd request will automatically
-      # include a Cookie header (due to how httpclient works), so we have to set the header
-      # manually on the first request but not on the 2nd request.
-      http_request(:get, webmock_server_url, :client => client,
-                         :headers => { "Cookie" => "bar=; foo=" })
-      http_request(:get, webmock_server_url, :client => client)
+      http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+
+      httpclient_version = Gem::Version.new(HTTPClient::VERSION)
+      major_version = httpclient_version.segments[0]
+      minor_version = httpclient_version.segments[1]
+
+      if (major_version > 2 || (major_version == 2 && minor_version > 5)) && RUBY_VERSION > '1.9.3'
+        http_request(:get, webmock_server_url, :client => client, :headers => { "Cookie" => "bar=; foo=" })
+      else
+        # To make two requests that have the same request signature, the headers must match.
+        # Since the webmock server has a Set-Cookie header, the 2nd request will automatically
+        # include a Cookie header (due to how httpclient works before version 2.6), so we have to set the header
+        # manually on the first request but not on the 2nd request.
+        http_request(:get, webmock_server_url, :client => client)
+      end
 
       expect(request_signatures.size).to eq(2)
       # Verify the request signatures were identical as needed by this example
