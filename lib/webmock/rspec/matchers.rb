@@ -12,7 +12,6 @@ module WebMock
       WebMock::RequestPatternMatcher.new
     end
 
-
     def have_not_been_made
       WebMock::RequestPatternMatcher.new.times(0)
     end
