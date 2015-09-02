@@ -31,7 +31,7 @@ shared_context "request expectations" do |*adapter_info|
         expect {
           http_request(:get, "http://www.example.com/")
           expect(a_request(:get, "http://www.example.com")).not_to have_been_made
-        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+        }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
       end
 
       it "should fail resulting with failure with a message and executed requests listed" do
@@ -626,7 +626,7 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
             expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).not_to have_been_made
-          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
       end
 
@@ -692,7 +692,7 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:get, "http://www.example.com/")
             expect(WebMock).not_to have_requested(:get, "http://www.example.com")
-          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
         end
 
         it "should satisfy expectation if request was executed and expectation had block which evaluated to true" do
@@ -713,7 +713,7 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
             expect(WebMock).not_to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
-          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
       end
 
@@ -737,14 +737,14 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:get, "http://www.example.com/")
             assert_not_requested(:get, "http://www.example.com")
-          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
         end
 
         it "should fail if request expected not to be made was made and expectation block evaluated to true" do
           expect {
             http_request(:post, "http://www.example.com/", :body => "wadus")
             assert_not_requested(:post, "www.example.com") { |req| req.body == "wadus" }
-          }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
 
         it "should satisfy expectation if request was made and expectation block evaluated to true" do
@@ -777,7 +777,7 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:get, "http://www.example.com/")
             assert_not_requested(stub_http)
-          }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+          }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
         end
       end
     end
@@ -809,7 +809,7 @@ shared_context "request expectations" do |*adapter_info|
           stub = stub_request(:get, "http://www.example.com")
           http_request(:get, "http://www.example.com/")
           expect(stub).not_to have_been_requested
-        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+        }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
       end
 
       it "should fail request not expected to be made was made and expectation block evaluated to true" do
@@ -817,7 +817,7 @@ shared_context "request expectations" do |*adapter_info|
           stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
           http_request(:post, "http://www.example.com/", :body => "wadus")
           expect(stub).not_to have_been_requested
-        }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 0 times but it executed 1 time))
+        }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
       end
 
       it "should satisfy expectation if request was made and expectation block evaluated to true" do
@@ -852,7 +852,7 @@ shared_context "request expectations" do |*adapter_info|
         expect {
           http_request(:get, "http://www.example.com/")
           expect(a_request(:get, "http://www.example.com")).not_to have_been_made
-        }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 0 times but it executed 1 time))
+        }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
       end
     end
   end

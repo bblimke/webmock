@@ -33,32 +33,16 @@ module WebMock
       end
     end
 
+    def description
+      "request #{request_pattern.to_s} #{quantity_phrase.strip}"
+    end
 
     def failure_message
-      expected_times_executed = @expected_times_executed || 1
-      text = if @at_least_times_executed
-        %Q(The request #{request_pattern.to_s} was expected to execute at least #{times(@at_least_times_executed)} but it executed #{times(times_executed)})
-      elsif @at_most_times_executed
-        %Q(The request #{request_pattern.to_s} was expected to execute at most #{times(@at_most_times_executed)} but it executed #{times(times_executed)})
-      else
-        %Q(The request #{request_pattern.to_s} was expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
-      end
-      text << self.class.executed_requests_message
-      text
+      failure_message_phrase(is_negated=false)
     end
 
     def failure_message_when_negated
-      text = if @at_least_times_executed
-        %Q(The request #{request_pattern.to_s} was not expected to execute at least #{times(@at_least_times_executed)} but it executed #{times(times_executed)})
-      elsif @at_most_times_executed
-        %Q(The request #{request_pattern.to_s} was not expected to execute at most #{times(@at_most_times_executed)} but it executed #{times(times_executed)})
-      elsif @expected_times_executed
-        %Q(The request #{request_pattern.to_s} was not expected to execute #{times(expected_times_executed)} but it executed #{times(times_executed)})
-      else
-        %Q(The request #{request_pattern.to_s} was expected to execute 0 times but it executed #{times(times_executed)})
-      end
-      text << self.class.executed_requests_message
-      text
+      failure_message_phrase(is_negated=true)
     end
 
     def self.executed_requests_message
@@ -66,6 +50,25 @@ module WebMock
     end
 
     private
+
+    def failure_message_phrase(is_negated=false)
+      negation = is_negated ? "was not" : "was"
+      text = "The request #{request_pattern.to_s} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}"
+      text << self.class.executed_requests_message
+      text
+    end
+
+    def quantity_phrase(is_negated=false)
+      if @at_least_times_executed
+        "at least #{times(@at_least_times_executed)} "
+      elsif @at_most_times_executed
+        "at most #{times(@at_most_times_executed)} "
+      elsif @expected_times_executed
+        "#{times(@expected_times_executed)} "
+      else
+        is_negated ? "" : "#{times(1)} "
+      end
+    end
 
     def times(times)
       "#{times} time#{ (times == 1) ? '' : 's'}"
