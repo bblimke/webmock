@@ -11,12 +11,12 @@ describe WebMock::RequestExecutionVerifier do
 
   describe "description" do
 
-    it "should report description" do
+    it "reports the description" do
       @verifier.expected_times_executed = 2
       expect(@verifier.description).to eq "request www.example.com 2 times"
     end
 
-    it "should report description correctly when expectation is 1 time" do
+    it "reports description correctly when expectation is 1 time" do
       @verifier.expected_times_executed = 1
       expect(@verifier.description).to eq "request www.example.com 1 time"
     end
@@ -49,7 +49,7 @@ describe WebMock::RequestExecutionVerifier do
 
   describe "failure message" do
 
-    it "should report failure message" do
+    it "reports the failure message" do
       @verifier.times_executed = 0
       @verifier.expected_times_executed = 2
       expected_text = "The request www.example.com was expected to execute 2 times but it executed 0 times"
@@ -57,7 +57,7 @@ describe WebMock::RequestExecutionVerifier do
       expect(@verifier.failure_message).to eq(expected_text)
     end
 
-    it "should report failure message correctly when executed times is one" do
+    it "reports failure message correctly when executed times is one" do
       @verifier.times_executed = 1
       @verifier.expected_times_executed = 1
       expected_text = "The request www.example.com was expected to execute 1 time but it executed 1 time"
@@ -104,7 +104,7 @@ describe WebMock::RequestExecutionVerifier do
 
   describe "negative failure message" do
 
-    it "should report failure message if it executed number of times specified" do
+    it "reports failure message if it executed number of times specified" do
       @verifier.times_executed = 2
       @verifier.expected_times_executed = 2
       expected_text = "The request www.example.com was not expected to execute 2 times but it executed 2 times"
@@ -112,7 +112,7 @@ describe WebMock::RequestExecutionVerifier do
       expect(@verifier.failure_message_when_negated).to eq(expected_text)
     end
 
-    it "should report failure message when not expected request but it executed" do
+    it "reports failure message when not expected request but it executed" do
       @verifier.times_executed = 1
       expected_text = "The request www.example.com was not expected to execute but it executed 1 time"
       expected_text << @executed_requests_info
@@ -159,14 +159,14 @@ describe WebMock::RequestExecutionVerifier do
 
   describe "matches?" do
 
-    it "should succeed if request was executed expected number of times" do
+    it "succeeds if request was executed expected number of times" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(10)
       @verifier.expected_times_executed = 10
       expect(@verifier.matches?).to be_truthy
     end
 
-    it "should fail if request was not executed expected number of times" do
+    it "fails if request was not executed expected number of times" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(10)
       @verifier.expected_times_executed = 5
@@ -177,26 +177,26 @@ describe WebMock::RequestExecutionVerifier do
 
   describe "does_not_match?" do
 
-    it "should fail if request executed expected number of times" do
+    it "fails if request executed expected number of times" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(10)
       @verifier.expected_times_executed = 10
       expect(@verifier.does_not_match?).to be_falsey
     end
 
-    it "should succeed if request was not executed at all and expected number of times was not set" do
+    it "succeeds if request was not executed at all and expected number of times was not set" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(0)
       expect(@verifier.does_not_match?).to be_truthy
     end
 
-    it "should fail if request was executed and expected number of times was not set" do
+    it "fails if request was executed and expected number of times was not set" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(1)
       expect(@verifier.does_not_match?).to be_falsey
     end
 
-    it "should succeed if request was not executed expected number of times" do
+    it "succeeds if request was not executed expected number of times" do
       expect(WebMock::RequestRegistry.instance).
         to receive(:times_executed).with(@request_pattern).and_return(10)
       @verifier.expected_times_executed = 5
