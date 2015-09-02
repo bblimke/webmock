@@ -257,7 +257,7 @@ shared_context "request expectations" do |*adapter_info|
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
                 expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_once
-              }.to raise_error
+              }.to raise_error RSpec::Expectations::ExpectationNotMetError
             end
           end
 
@@ -289,7 +289,7 @@ shared_context "request expectations" do |*adapter_info|
                 http_request(:get, "http://www.example.com/")
                 http_request(:get, "http://www.example.com/")
                 expect(a_request(:get, "http://www.example.com")).to have_been_made.at_most_twice
-              }.to raise_error
+              }.to raise_error RSpec::Expectations::ExpectationNotMetError
             end
           end
         end
@@ -299,7 +299,7 @@ shared_context "request expectations" do |*adapter_info|
             it "fails if no request was executed" do
               expect {
                 expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_once
-              }.to raise_error
+              }.to raise_error RSpec::Expectations::ExpectationNotMetError
             end
 
             it "satisfies expectation if request was executed with the same uri and method once" do
@@ -322,14 +322,14 @@ shared_context "request expectations" do |*adapter_info|
             it "fails if no request was executed" do
               expect {
                 expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
-              }.to raise_error
+              }.to raise_error RSpec::Expectations::ExpectationNotMetError
             end
 
             it "fails if too few requests were executed" do
               expect {
                 http_request(:get, "http://www.example.com/")
                 expect(a_request(:get, "http://www.example.com")).to have_been_made.at_least_twice
-              }.to raise_error
+              }.to raise_error RSpec::Expectations::ExpectationNotMetError
             end
 
             it "satisfies expectation if request was executed with the same uri and method twice" do

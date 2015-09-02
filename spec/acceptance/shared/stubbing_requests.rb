@@ -68,17 +68,17 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     describe "based on method" do
       it "should return stubbed response" do
         stub_request(:get, "www.example.com")
-        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+        expect(http_request(:get, "http://www.example.com/").status).to match /200/
       end
 
       it "should match stubbed request when http request was made with method given as string" do
         stub_request(:get, "www.example.com")
-        expect(http_request('get', "http://www.example.com/").status).to eq("200")
+        expect(http_request('get', "http://www.example.com/").status).to match /200/
       end
 
       it "should raise error if stubbed request has different method" do
         stub_request(:get, "www.example.com")
-        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+        expect(http_request(:get, "http://www.example.com/").status).to match /200/
         expect {
           http_request(:delete, "http://www.example.com/")
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: DELETE http://www.example.com/)
@@ -91,14 +91,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:post, "www.example.com").with(:body => "abc")
         expect(http_request(
           :post, "http://www.example.com/",
-        :body => "abc").status).to eq("200")
+        :body => "abc").status).to match /200/
       end
 
       it "should match requests if body is not set in the stub" do
         stub_request(:post, "www.example.com")
         expect(http_request(
           :post, "http://www.example.com/",
-        :body => "abc").status).to eq("200")
+        :body => "abc").status).to match /200/
       end
 
       it "should not match requests if body is different" do
@@ -113,7 +113,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           stub_request(:post, "www.example.com").with(:body => /\d+abc$/)
           expect(http_request(
             :post, "http://www.example.com/",
-          :body => "123abc").status).to eq("200")
+          :body => "123abc").status).to match /200/
         end
 
         it "should not match requests if body doesn't match regexp" do
@@ -134,13 +134,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           it "should match request if hash matches body" do
             expect(http_request(
               :post, "http://www.example.com/",
-            :body => 'a=1&c[d][]=e&c[d][]=f&b=five+x').status).to eq("200")
+            :body => 'a=1&c[d][]=e&c[d][]=f&b=five+x').status).to match /200/
           end
 
           it "should match request if hash matches body in different order of params" do
             expect(http_request(
               :post, "http://www.example.com/",
-            :body => 'a=1&c[d][]=e&b=five+x&c[d][]=f').status).to eq("200")
+            :body => 'a=1&c[d][]=e&b=five+x&c[d][]=f').status).to match /200/
           end
 
           it "should not match if hash doesn't match url encoded body" do
@@ -157,13 +157,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           it "should match if hash matches body" do
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five x\"}").status).to eq("200")
+            :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five x\"}").status).to match /200/
           end
 
           it "should match if hash matches body in different form" do
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"a\":\"1\",\"b\":\"five x\",\"c\":{\"d\":[\"e\",\"f\"]}}").status).to eq("200")
+            :body => "{\"a\":\"1\",\"b\":\"five x\",\"c\":{\"d\":[\"e\",\"f\"]}}").status).to match /200/
           end
 
           it "should match if hash contains date string" do #Crack creates date object
@@ -172,7 +172,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
               with(:body => {"foo" => "2010-01-01"})
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"foo\":\"2010-01-01\"}").status).to eq("200")
+            :body => "{\"foo\":\"2010-01-01\"}").status).to match /200/
           end
 
           it "should match if any of the strings have spaces" do
@@ -180,7 +180,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             stub_request(:post, "www.example.com").with(:body => {"foo" => "a b c"})
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-            :body => "{\"foo\":\"a b c\"}").status).to eq("200")
+            :body => "{\"foo\":\"a b c\"}").status).to match /200/
           end
         end
 
@@ -194,13 +194,13 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           it "should match if hash matches body" do
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-            :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status).to eq("200")
+            :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status).to match /200/
           end
 
           it "should match if hash matches body in different form" do
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-            :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status).to eq("200")
+            :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n").status).to match /200/
           end
 
           it "should match if hash contains date string" do #Crack creates date object
@@ -209,7 +209,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
               with(:body => {"opt" => {"foo" => "2010-01-01"}})
             expect(http_request(
               :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-            :body => "<opt foo=\"2010-01-01\">\n</opt>\n").status).to eq("200")
+            :body => "<opt foo=\"2010-01-01\">\n</opt>\n").status).to match /200/
           end
         end
       end
@@ -229,11 +229,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
           describe "for request with url encoded body" do
             it "should match request if hash matches body" do
-              expect(request.status).to eq("200")
+              expect(request.status).to match /200/
             end
 
             it "should not match if hash doesn't match url encoded body" do
-              expect { wrong_request }.to raise_error
+              expect { wrong_request }.to raise_error WebMock::NetConnectNotAllowedError
             end
           end
 
@@ -241,7 +241,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             it "should match if hash matches body" do
               expect(http_request(
                 :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status).to eq("200")
+              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status).to match /200/
             end
           end
         end
@@ -254,11 +254,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
           describe "for request with url encoded body" do
             it "should match request if hash matches body" do
-              expect(request.status).to eq("200")
+              expect(request.status).to match /200/
             end
 
             it "should not match if hash doesn't match url encoded body" do
-              expect { wrong_request }.to raise_error
+              expect { wrong_request }.to raise_error WebMock::NetConnectNotAllowedError
             end
           end
 
@@ -266,7 +266,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             it "should match if hash matches body" do
               expect(http_request(
                 :post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status).to eq("200")
+              :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}").status).to match /200/
             end
           end
         end
@@ -279,14 +279,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, "www.example.com").with(:headers => SAMPLE_HEADERS )
         expect(http_request(
           :get, "http://www.example.com/",
-        :headers => SAMPLE_HEADERS).status).to eq("200")
+        :headers => SAMPLE_HEADERS).status).to match /200/
       end
 
       it "should match requests if headers are the same and declared as array" do
         stub_request(:get, "www.example.com").with(:headers => {"a" => ["b"]} )
         expect(http_request(
           :get, "http://www.example.com/",
-        :headers => {"a" => "b"}).status).to eq("200")
+        :headers => {"a" => "b"}).status).to match /200/
       end
 
       describe "when multiple headers with the same key are used" do
@@ -294,14 +294,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           stub_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
           expect(http_request(
             :get, "http://www.example.com/",
-          :headers => {"a" => ["b", "c"]}).status).to eq("200")
+          :headers => {"a" => ["b", "c"]}).status).to match /200/
         end
 
         it "should match requests if headers are the same  but in different order" do
           stub_request(:get, "www.example.com").with(:headers => {"a" => ["b", "c"]} )
           expect(http_request(
             :get, "http://www.example.com/",
-          :headers => {"a" => ["c", "b"]}).status).to eq("200")
+          :headers => {"a" => ["c", "b"]}).status).to match /200/
         end
 
         it "should not match requests if headers are different" do
@@ -319,7 +319,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, "www.example.com")
         expect(http_request(
           :get, "http://www.example.com/",
-        :headers => SAMPLE_HEADERS).status).to eq("200")
+        :headers => SAMPLE_HEADERS).status).to match /200/
       end
 
       it "should not match requests if headers are different" do
@@ -347,7 +347,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           stub_request(:get, "www.example.com").with(:headers => { :some_header => /^MyAppName$/ })
           expect(http_request(
             :get, "http://www.example.com/",
-          :headers => { 'some-header' => 'MyAppName' }).status).to eq("200")
+          :headers => { 'some-header' => 'MyAppName' }).status).to match /200/
         end
 
         it "should not match requests if headers values do not match regular expression" do
@@ -365,27 +365,27 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     describe "when stubbing request with basic authentication", :unless => (adapter_info.include?(:no_url_auth)) do
       it "should match if credentials are the same" do
         stub_request(:get, "user:pass@www.example.com")
-        expect(http_request(:get, "http://user:pass@www.example.com/").status).to eq("200")
+        expect(http_request(:get, "http://user:pass@www.example.com/").status).to match /200/
       end
 
       it "should not match if credentials are different" do
         stub_request(:get, "user:pass@www.example.com")
         expect {
-          expect(http_request(:get, "http://user:pazz@www.example.com/").status).to eq("200")
+          expect(http_request(:get, "http://user:pazz@www.example.com/").status).to match /200/
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/))
       end
 
       it "should not match if credentials are stubbed but not provided in the request" do
         stub_request(:get, "user:pass@www.example.com")
         expect {
-          expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+          expect(http_request(:get, "http://www.example.com/").status).to match /200/
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
       end
 
       it "should not match if credentials are not stubbed but exist in the request" do
         stub_request(:get, "www.example.com")
         expect {
-          expect(http_request(:get, "http://user:pazz@www.example.com/").status).to eq("200")
+          expect(http_request(:get, "http://user:pazz@www.example.com/").status).to match /200/
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/))
       end
     end
@@ -483,7 +483,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     describe "when stubbing request with a block evaluated on request" do
       it "should match if block returns true" do
         stub_request(:get, "www.example.com").with { |request| true }
-        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+        expect(http_request(:get, "http://www.example.com/").status).to match /200/
       end
 
       it "should not match if block returns false" do
@@ -497,7 +497,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:post, "www.example.com").with { |request| request.body == "wadus" }
         expect(http_request(
           :post, "http://www.example.com/",
-        :body => "wadus").status).to eq("200")
+        :body => "wadus").status).to match /200/
         expect {
           http_request(:post, "http://www.example.com/", :body => "jander")
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'jander'))
@@ -506,7 +506,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       it "should call the block only once per request" do
         call_count = 0
         stub_request(:get, "www.example.com").with { |request| call_count += 1; true }
-        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+        expect(http_request(:get, "http://www.example.com/").status).to match /200/
         expect(call_count).to eq(1)
       end
     end
