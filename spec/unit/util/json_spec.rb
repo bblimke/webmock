@@ -22,4 +22,12 @@ describe WebMock::Util::JSON do
       }.to raise_error WebMock::Util::JSON::ParseError
     end
   end
+
+  describe ".convert_json_to_yaml" do
+    it "parses multibyte characters" do
+      expect(WebMock::Util::JSON.convert_json_to_yaml(
+        "{\"name\":\"山田太郎\"\,\"job\":\"会社員\"}"
+      )).to eq "{\"name\": \"山田太郎\", \"job\": \"会社員\"}"
+    end
+  end
 end
