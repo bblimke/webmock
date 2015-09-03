@@ -1,20 +1,15 @@
+require_relative "headers/normalizer"
+
 module WebMock
-
   module Util
-
     class Headers
-
       def self.normalize_headers(headers)
         return nil unless headers
+
         array = headers.map { |name, value|
-          [name.to_s.split(/_|-/).map { |segment| segment.capitalize }.join("-"),
-           case value
-            when Regexp then value
-            when Array then (value.size == 1) ? value.first : value.map {|v| v.to_s}.sort
-            else value.to_s
-           end
-          ]
+          Normalizer.new(name, value).call
         }
+
         Hash[*array.inject([]) {|r,x| r + x}]
       end
 
@@ -35,9 +30,6 @@ module WebMock
       def self.decode_userinfo_from_header(header)
         header.sub(/^Basic /, "").unpack("m").first
       end
-
     end
-
   end
-
 end
