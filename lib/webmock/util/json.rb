@@ -8,10 +8,13 @@
 module WebMock
   module Util
     class JSON
+      class ParseError < StandardError; end
+
       def self.parse(json)
-        YAML.load(unescape(convert_json_to_yaml(json)))
-      rescue ArgumentError
-        raise ParseError, "Invalid JSON string"
+        yaml = unescape(convert_json_to_yaml(json))
+        YAML.load(yaml)
+      rescue ArgumentError => e
+        raise ParseError, "Invalid JSON string: #{yaml}, Error: #{e.inspect}"
       end
 
       protected
