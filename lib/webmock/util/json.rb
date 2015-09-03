@@ -8,10 +8,13 @@
 module WebMock
   module Util
     class JSON
+      class ParseError < StandardError; end
+
       def self.parse(json)
-        YAML.load(unescape(convert_json_to_yaml(json)))
-      rescue ArgumentError
-        raise ParseError, "Invalid JSON string"
+        yaml = unescape(convert_json_to_yaml(json))
+        YAML.load(yaml)
+      rescue ArgumentError => e
+        raise ParseError, "Invalid JSON string: #{yaml}, Error: #{e.inspect}"
       end
 
       protected
@@ -42,11 +45,27 @@ module WebMock
           json.gsub(/\\\//, '/')
         else
           left_pos  = [-1].push(*marks)
-          right_pos = marks << json.length
+          right_pos = marks << json.bytesize
           output    = []
-          left_pos.each_with_index do |left, i|
-            output << json[left.succ..right_pos[i]]
+
+          if RUBY_VERSION != "1.9.2"
+            left_pos.each_with_index do |left, i|
+              if json.respond_to?(:byteslice)
+                output << json.byteslice(left.succ..right_pos[i])
+              else
+                output << json[left.succ..right_pos[i]]
+              end
+            end
+          else
+            json_as_binary = json.force_encoding("binary")
+            left_pos.each_with_index do |left, i|
+              output << json_as_binary[left.succ..right_pos[i]]
+            end
+            output.map! do |binary_str|
+              binary_str.force_encoding("UTF-8")
+            end
           end
+
           output = output * " "
 
           times.each { |i| output[i-1] = ' ' }
