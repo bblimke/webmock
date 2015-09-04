@@ -196,7 +196,11 @@ module WebMock::Util
           end
           # Useful default for OAuth and caching.
           # Only to be used for non-Array inputs. Arrays should preserve order.
-          new_query_values.sort!
+          begin
+            new_query_values.sort! # may raise for non-comparable values
+          rescue ArgumentError => e
+            # ignore
+          end
         end
 
         buffer = ''
