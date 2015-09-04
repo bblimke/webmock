@@ -66,8 +66,9 @@ describe WebMock::Util::QueryMapper do
     it 'should transform array value' do
       expect(subject.to_query('a', ['b', 'c'])).to eq('a[0]=b&a[1]=c')
     end
-    it 'should transform TrueClass value' do
-      expect(subject.to_query('a', true)).to eq('a')
+    it 'should transform boolean values' do
+      expect(subject.to_query('a', true)).to eq('a=true')
+      expect(subject.to_query('a', false)).to eq('a=false')
     end
   end
 
