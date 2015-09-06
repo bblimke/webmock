@@ -273,8 +273,20 @@ module WebMock
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
 
-      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
+      # If you try and make a request with headers that are symbols,
+      # Net Http raises the following NoMethodError.
+      #
+      # WebMock normalizes headers when creating a RequestSignature,
+      # and will update all headers from symbols to strings.
+      # This means that you could have a test passing with WebMock, but failing in reality.
+      header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
+      if header_as_symbol
+        raise NoMethodError.new(
+          "undefined method `split' for :#{header_as_symbol}:Symbol (NoMethodError)`"
+        )
+      end
 
+      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
 
       if request.body_stream
         body = request.body_stream.read
