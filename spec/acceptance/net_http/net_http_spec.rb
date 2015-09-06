@@ -106,29 +106,38 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
-  it "preserves the same functionality as the Net Http library around headers as symbols" do
+  it "preserves the same functionality as the Net::HTTP library around headers as symbols" do
     uri = URI.parse("http://google.com/")
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
-    request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
 
+    # In ruby 1.8.7 and REE, setting request headers as a symbol
+    # causes a NoMethodError to be raised on downcase for Symbol
     begin
-      http.request(request)
+      request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
     rescue => e
-      error_with_webmock = e
+      expect(e.class).to be NoMethodError
+      error_raised_setting_headers = true
     end
 
-    WebMock.disable!
+    unless error_raised_setting_headers
+      begin
+        http.request(request)
+      rescue => e
+        error_with_webmock = e
+      end
 
-    begin
-      http.request(request)
-    rescue => e
-      error_without_webmock = e
+      WebMock.disable!
+
+      begin
+        http.request(request)
+      rescue => e
+        error_without_webmock = e
+      end
+
+      WebMock.enable!
+      expect(error_with_webmock.class).to be error_without_webmock.class
     end
-
-    WebMock.enable!
-
-    expect(error_with_webmock.class).to be error_without_webmock.class
   end
 
   it "should handle multiple values for the same response header" do
