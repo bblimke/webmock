@@ -198,7 +198,7 @@ module WebMock::Util
           # Only to be used for non-Array inputs. Arrays should preserve order.
           begin
             new_query_values.sort! # may raise for non-comparable values
-          rescue ArgumentError => e
+          rescue NoMethodError, ArgumentError
             # ignore
           end
         end
