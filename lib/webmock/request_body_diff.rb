@@ -1,5 +1,5 @@
 require "hashdiff"
-require "JSON"
+require "json"
 
 module WebMock
  class RequestBodyDiff
