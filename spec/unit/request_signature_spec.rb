@@ -114,4 +114,20 @@ describe WebMock::RequestSignature do
     end
   end
 
+  describe "#json_headers?" do
+    it "returns true if the headers are json" do
+      subject.headers = { "Content-Type" => "application/json" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns false if the headers are NOT json" do
+      subject.headers = { "Content-Type" => "application/made-up-format" }
+      expect(subject.json_headers?).to be false
+    end
+
+    it "returns false when no headers are set" do
+      subject.headers = nil
+      expect(subject.json_headers?).to be false
+    end
+  end
 end
