@@ -2,59 +2,62 @@ require "hashdiff"
 require "json"
 
 module WebMock
- class RequestBodyDiff
+  class RequestBodyDiff
 
-  def initialize(request_signature, request_stub)
-    @request_signature = request_signature
-    @request_stub = request_stub
-    @body_pattern = nil
-    @body_pattern_hash = nil
-  end
+    def initialize(request_signature, request_stub)
+      @request_signature = request_signature
+      @request_stub      = request_stub
+    end
 
-  def body_diff
-    request_pattern = @request_stub.request_pattern
-    return {} unless request_pattern
-    @body_pattern = request_pattern.body_pattern
-    return {} unless @body_pattern
-    return {} unless body_pattern_diffable?
-    @body_pattern_hash = @body_pattern.pattern
-    HashDiff.diff(request_signature_body_hash, stub_body_hash)
-  end
+    def body_diff
+      return {} unless request_signature_diffable? && request_stub_diffable?
 
-  private
+      HashDiff.diff(request_signature_body_hash, request_stub_body_hash)
+    end
 
-  def body_pattern_diffable?
-    @body_pattern.pattern.is_a?(Hash) || body_pattern_parseable_as_json?
-  end
+    private
 
-  def body_pattern_parseable_as_json?
-    return false unless @body_pattern.pattern.is_a?(String)
-    begin
-      JSON.parse(@body_pattern.pattern)
+    attr_reader :request_signature, :request_stub
+
+    def request_signature_diffable?
+      request_signature.json_headers? && request_signature_parseable_json?
+    end
+
+    def request_stub_diffable?
+      request_stub_body.is_a?(Hash) || request_stub_parseable_json?
+    end
+
+    def request_signature_body_hash
+      JSON.parse(request_signature.body)
+    end
+
+    def request_stub_body_hash
+      return request_stub_body if request_stub_body.is_a?(Hash)
+
+      JSON.parse(request_stub_body)
+    end
+
+    def request_stub_body
+      request_stub.request_pattern &&
+        request_stub.request_pattern.body_pattern &&
+        request_stub.request_pattern.body_pattern.pattern
+    end
+
+    def request_signature_parseable_json?
+      parseable_json?(request_signature.body)
+    end
+
+    def request_stub_parseable_json?
+      parseable_json?(request_stub_body)
+    end
+
+    def parseable_json?(body_pattern)
+      return false unless body_pattern.is_a?(String)
+
+      JSON.parse(body_pattern)
       true
     rescue JSON::ParserError
       false
     end
   end
-
-  def stub_body_hash
-    case @body_pattern_hash
-      when Hash
-        @body_pattern_hash
-      when String
-        JSON.parse(@body_pattern_hash)
-      else
-        raise "Don't know how to handle body pattern #{@body_pattern_hash.inspect}"
-    end
-  end
-
-  def request_signature_body_hash
-    case @request_signature.headers["Content-Type"]
-      when "application/json"
-        JSON.parse(@request_signature.body)
-      else
-        {}
-    end
-  end
- end
 end
