@@ -44,6 +44,17 @@ shared_examples_for "stubbing requests" do |*adapter_info|
     end
 
     describe "based on query params" do
+      it "should turn query values into strings before compairing" do
+        stub_request(:get, "www.example.com").with(:query => {"a" => [5, "c d"]}).to_return(:body => "abc")
+        expect(http_request(:get, "http://www.example.com/?a[]=5&a[]=c%20d").body).to eq("abc")
+
+        stub_request(:get, "www.example.com").with(:query => {"a" => [:j, "c d"]}).to_return(:body => "abc")
+        expect(http_request(:get, "http://www.example.com/?a[]=j&a[]=c%20d").body).to eq("abc")
+
+        stub_request(:get, "www.example.com").with(:query => {"a" => [true, "c d"]}).to_return(:body => "abc")
+        expect(http_request(:get, "http://www.example.com/?a[]=true&a[]=c%20d").body).to eq("abc")
+      end
+
       it "should return stubbed response when stub declares query params as a hash" do
         stub_request(:get, "www.example.com").with(:query => {"a" => ["b x", "c d"]}).to_return(:body => "abc")
         expect(http_request(:get, "http://www.example.com/?a[]=b+x&a[]=c%20d").body).to eq("abc")

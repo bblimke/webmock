@@ -1,3 +1,5 @@
+require "webmock/util/query_value_stringifier"
+
 module WebMock::Util
   class QueryMapper
     class << self
@@ -184,6 +186,9 @@ module WebMock::Util
           end
           new_query_values = new_query_values.to_hash
           new_query_values = new_query_values.inject([]) do |object, (key, value)|
+
+            value =  QueryValueStringifier.stringify(value)
+
             key = key.to_s if key.is_a?(::Symbol) || key.nil?
             if value.is_a?(Array)
               value.each { |v| object << [key.to_s + '[]', v] }
