@@ -107,14 +107,16 @@ describe "Net:HTTP" do
   end
 
   it "raises an ArgumentError if passed headers as symbols" do
-    uri = URI.parse("http://google.com/")
-    http = Net::HTTP.new(uri.host, uri.port)
-    request = Net::HTTP::Get.new(uri.request_uri)
-    request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
-
-    expect do
-      http.request(request)
-    end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+    # If we symbols can not be downcased, we can not assign request headers as symbols
+    if :symbol.respond_to?(:downcase)
+      uri = URI.parse("http://google.com/")
+      http = Net::HTTP.new(uri.host, uri.port)
+      request = Net::HTTP::Get.new(uri.request_uri)
+      request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
+      expect do
+        http.request(request)
+      end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+    end
   end
 
   it "should handle multiple values for the same response header" do
