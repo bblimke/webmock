@@ -9,7 +9,7 @@ include NetHTTPSpecHelper
 describe "Net:HTTP" do
   include_examples "with WebMock"
 
-  let(:port){ WebMockServer.instance.port }
+  let(:port) { WebMockServer.instance.port }
 
   describe "marshalling" do
     class TestMarshalingInWebMockNetHTTP
@@ -106,6 +106,28 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
+  it "raises an ArgumentError if passed headers as symbols" do
+    uri = URI.parse("http://google.com/")
+    http = Net::HTTP.new(uri.host, uri.port)
+    request = Net::HTTP::Get.new(uri.request_uri)
+
+    # Net::HTTP calls downcase on header keys assigned with []=
+    # In Ruby 1.8.7 symbols do not respond to downcase
+    #
+    # Meaning you can not assign header keys as symbols in ruby 1.8.7 using []=
+    if :symbol.respond_to?(:downcase)
+      request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
+    else
+      request.instance_eval do
+        @header = request.to_hash.merge({:InvalidHeaderSinceItsASymbol => "this will not be valid"})
+      end
+    end
+
+    expect do
+      http.request(request)
+    end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+  end
+
   it "should handle multiple values for the same response header" do
     stub_http_request(:get, "www.example.com").to_return(:headers => { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
     response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
@@ -169,6 +191,7 @@ describe "Net:HTTP" do
       @http.use_ssl = true
       @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
+
     describe "when net http is allowed" do
       it "should not connect to the server until the request", :net_connect => true do
         WebMock.allow_net_connect!

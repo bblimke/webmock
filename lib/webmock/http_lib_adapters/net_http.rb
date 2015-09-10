@@ -272,9 +272,8 @@ module WebMock
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
-
+      validate_headers(headers)
       headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
-
 
       if request.body_stream
         body = request.body_stream.read
@@ -290,6 +289,21 @@ module WebMock
       WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
     end
 
+    def self.validate_headers(headers)
+      # If you make a request with headers that are symbols Net::HTTP raises a NoMethodError
+      #
+      # WebMock normalizes headers when creating a RequestSignature,
+      # and will update all headers from symbols to strings.
+      #
+      # This could create a false positive in a test suite with WebMock.
+      #
+      # So before this point, WebMock raises an ArgumentError if any of the headers are symbols
+      # instead of the cryptic NoMethodError "undefined method `split' ...` from Net::HTTP
+      header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
+      if header_as_symbol
+        raise ArgumentError.new("Net:HTTP does not accept headers as symbols")
+      end
+    end
 
     def self.check_right_http_connection
       @was_right_http_connection_loaded = defined?(RightHttpConnection)
