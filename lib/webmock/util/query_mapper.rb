@@ -176,15 +176,13 @@ module WebMock::Util
       #
       # @param [Hash, #to_hash, Array] new_query_values The new query values.
       def values_to_query(new_query_values, options = {})
-        options[:notation] ||= :subscript
         return if new_query_values.nil?
+        options[:notation] ||= :subscript
 
-        unless new_query_values.is_a?(Array)
-          new_query_values = convert_query_string_into_array(new_query_values)
-        end
+        query_array = convert_query_hash_to_array(new_query_values)
 
         buffer = ''
-        new_query_values.each do |parent, value|
+        query_array.each do |parent, value|
           encoded_parent = ::Addressable::URI.encode_component(
             parent.dup, ::Addressable::URI::CharacterClasses::UNRESERVED
           )
@@ -256,15 +254,15 @@ module WebMock::Util
 
       private
 
-      def convert_query_string_into_array(new_query_values)
+      def convert_query_hash_to_array(new_query_values)
+        return new_query_values if new_query_values.is_a?(Array)
+
         unless new_query_values.respond_to?(:to_hash)
           raise TypeError,
             "Can't convert #{new_query_values.class} into Hash."
         end
 
-        new_query_values = new_query_values.to_hash
-
-        new_query_values = new_query_values.inject([]) do |object, (key, value)|
+        new_query_values = new_query_values.to_hash.inject([]) do |object, (key, value)|
           key  = key.to_s if key.is_a?(::Symbol) || key.nil?
 
           case value = QueryValueStringifier.stringify(value)
@@ -281,12 +279,9 @@ module WebMock::Util
 
         # Useful default for OAuth and caching.
         # Only to be used for non-Array inputs. Arrays should preserve order.
-        begin
-          new_query_values.sort! # may raise for non-comparable values
-        rescue NoMethodError, ArgumentError
-          # ignore
-        end
-
+        new_query_values.sort! # may raise for non-comparable values
+        new_query_values
+      rescue NoMethodError, ArgumentError
         new_query_values
       end
 
