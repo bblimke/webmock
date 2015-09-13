@@ -180,38 +180,13 @@ module WebMock::Util
         return if new_query_values.nil?
 
         unless new_query_values.is_a?(Array)
-          unless new_query_values.respond_to?(:to_hash)
-            raise TypeError,
-                  "Can't convert #{new_query_values.class} into Hash."
-          end
-          new_query_values = new_query_values.to_hash
-          new_query_values = new_query_values.inject([]) do |object, (key, value)|
-
-            value =  QueryValueStringifier.stringify(value)
-
-            key = key.to_s if key.is_a?(::Symbol) || key.nil?
-            if value.is_a?(Array)
-              value.each { |v| object << [key.to_s + '[]', v] }
-            elsif value.is_a?(Hash)
-              value.each { |k, v| object << ["#{key.to_s}[#{k}]", v]}
-            else
-              object << [key.to_s, value]
-            end
-            object
-          end
-          # Useful default for OAuth and caching.
-          # Only to be used for non-Array inputs. Arrays should preserve order.
-          begin
-            new_query_values.sort! # may raise for non-comparable values
-          rescue NoMethodError, ArgumentError
-            # ignore
-          end
+          new_query_values = convert_query_string_into_array(new_query_values)
         end
 
         buffer = ''
         new_query_values.each do |parent, value|
           encoded_parent = ::Addressable::URI.encode_component(
-              parent.dup, ::Addressable::URI::CharacterClasses::UNRESERVED
+            parent.dup, ::Addressable::URI::CharacterClasses::UNRESERVED
           )
           buffer << "#{to_query(encoded_parent, value, options)}&"
         end
@@ -250,7 +225,10 @@ module WebMock::Util
         when ::Hash
           value = value.map do |key, val|
             [
-              ::Addressable::URI.encode_component(key.to_s.dup, ::Addressable::URI::CharacterClasses::UNRESERVED),
+              ::Addressable::URI.encode_component(
+                key.to_s.dup,
+                ::Addressable::URI::CharacterClasses::UNRESERVED
+              ),
               val
             ]
           end
@@ -275,7 +253,43 @@ module WebMock::Util
           "#{parent}=#{encoded_value}"
         end
       end
-    end
 
+      private
+
+      def convert_query_string_into_array(new_query_values)
+        unless new_query_values.respond_to?(:to_hash)
+          raise TypeError,
+            "Can't convert #{new_query_values.class} into Hash."
+        end
+
+        new_query_values = new_query_values.to_hash
+
+        new_query_values = new_query_values.inject([]) do |object, (key, value)|
+          key  = key.to_s if key.is_a?(::Symbol) || key.nil?
+
+          case value = QueryValueStringifier.stringify(value)
+          when Array
+            value.each { |v| object << [key.to_s + '[]', v] }
+          when Hash
+            value.each { |k, v| object << ["#{key.to_s}[#{k}]", v]}
+          else
+            object << [key.to_s, value]
+          end
+
+          object
+        end
+
+        # Useful default for OAuth and caching.
+        # Only to be used for non-Array inputs. Arrays should preserve order.
+        begin
+          new_query_values.sort! # may raise for non-comparable values
+        rescue NoMethodError, ArgumentError
+          # ignore
+        end
+
+        new_query_values
+      end
+
+    end
   end
 end
