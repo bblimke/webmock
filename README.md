@@ -1,4 +1,4 @@
-WebMock [![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock) [![Dependency Status](https://gemnasium.com/bblimke/webmock.svg)](http://gemnasium.com/bblimke/webmock) [![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock)
+WebMock [![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock) [![Dependency Status](https://gemnasium.com/bblimke/webmock.svg)](http://gemnasium.com/bblimke/webmock) [![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock) [![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
 =======
 
 Library for stubbing and setting expectations on HTTP requests in Ruby.
