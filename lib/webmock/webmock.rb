@@ -75,6 +75,18 @@ module WebMock
     end
   end
 
+  def self.show_body_diff!
+    Config.instance.show_body_diff = true
+  end
+
+  def self.hide_body_diff!
+    Config.instance.show_body_diff = false
+  end
+
+  def self.show_body_diff?
+    Config.instance.show_body_diff
+  end
+
   def self.hide_stubbing_instructions!
     Config.instance.show_stubbing_instructions = false
   end

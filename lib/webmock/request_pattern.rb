@@ -200,6 +200,8 @@ module WebMock
       'text/plain'             => :plain
     }
 
+    attr_reader :pattern
+
     def initialize(pattern)
       @pattern = if pattern.is_a?(Hash)
         normalize_hash(pattern)
