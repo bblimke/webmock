@@ -28,6 +28,8 @@ require 'webmock/response'
 require 'webmock/rack_response'
 
 require 'webmock/stub_request_snippet'
+require 'webmock/request_signature_snippet'
+require 'webmock/request_body_diff'
 
 require 'webmock/assertion_failure'
 require 'webmock/request_execution_verifier'
