@@ -27,6 +27,7 @@ Supported HTTP libraries
 * Typhoeus (currently only Typhoeus::Hydra)
 * Excon
 * HTTP Gem
+* Manticore
 
 Supported Ruby Interpreters
 ---------------------------
