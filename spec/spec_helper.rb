@@ -6,6 +6,9 @@ unless RUBY_PLATFORM =~ /java/
   require 'em-http'
   require 'typhoeus'
 end
+if RUBY_PLATFORM =~ /java/
+  require 'manticore'
+end
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))

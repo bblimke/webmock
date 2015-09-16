@@ -9,12 +9,16 @@ rvm:
   - rbx-2
   - ruby-head
   - ree
+  - jruby-9.0.0.0
+  - jruby-9.0.1.0
   - jruby-18mode
   - jruby-19mode
   - jruby
   - jruby-head
 matrix:
   allow_failures:
+    - rvm: jruby-9.0.0.0
+    - rvm: jruby-9.0.1.0
     - rvm: jruby-18mode
     - rvm: jruby-head
     - rvm: ruby-head

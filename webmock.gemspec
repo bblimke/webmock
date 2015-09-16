@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'em-synchrony',    '>= 1.0.0' if RUBY_VERSION >= "1.9"
   s.add_development_dependency 'curb',            '<= 0.8.6' unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'typhoeus',        '>= 0.5.0' unless RUBY_PLATFORM =~ /java/
+  s.add_development_dependency 'manticore',       '>= 0.4.4' if RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'excon',           '>= 0.27.5'
   s.add_development_dependency 'minitest',        '~> 5.0.0'
   s.add_development_dependency 'rdoc',            ((RUBY_VERSION == '1.8.6') ? '<= 3.5.0' : '>3.5.0')
