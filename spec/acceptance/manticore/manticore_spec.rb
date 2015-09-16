@@ -18,25 +18,25 @@ if RUBY_PLATFORM =~ /java/
 
       it "handles POST" do
         stub_request(:post, "http://example-foo.com").to_return(:status => 201)
-        response = Manticore.post("http://example-foo.com", {hello: "world"})
+        response = Manticore.post("http://example-foo.com", {:hello => "world"})
         expect(response.code).to eq(201)
       end
 
       it "handles PUT" do
         stub_request(:put, "http://example-foo.com").to_return(:status => 409)
-        response = Manticore.put("http://example-foo.com", {hello: "world"})
+        response = Manticore.put("http://example-foo.com", {:hello => "world"})
         expect(response.code).to eq(409)
       end
 
       it "handles PATCH" do
         stub_request(:patch, "http://example-foo.com").to_return(:status => 409)
-        response = Manticore.patch("http://example-foo.com", {hello: "world"})
+        response = Manticore.patch("http://example-foo.com", {:hello => "world"})
         expect(response.code).to eq(409)
       end
 
       it "handles DELETE" do
         stub_request(:delete, "http://example-foo.com").to_return(:status => 204)
-        response = Manticore.delete("http://example-foo.com", {id: 1})
+        response = Manticore.delete("http://example-foo.com", {:id => 1})
         expect(response.code).to eq(204)
       end
 
