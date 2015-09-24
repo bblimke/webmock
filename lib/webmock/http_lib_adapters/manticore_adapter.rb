@@ -26,9 +26,6 @@ if defined?(Manticore)
 
         class WebMockManticoreClient < Manticore::Client
           def request(klass, url, options={}, &block)
-            @method = KLASS_TO_METHOD.fetch(klass)
-            @uri = url
-            @options = options
             super(klass, WebMock::Util::URI.normalize_uri(url).to_s, format_options(options))
           end
 
@@ -58,7 +55,20 @@ if defined?(Manticore)
           end
 
           def response_object_for(client, request, context, &block)
-            request_signature = generate_webmock_request_signature
+            if request.respond_to?(:entity) && !request.entity.nil?
+              body = Manticore::EntityConverter.new.read_entity(request.entity)
+            else
+              body = nil
+            end
+
+            headers = request.headers.each_with_object({}) do |(k, v), h|
+              h[k] = case v
+                     when /,/ then  v.split(',').map(&:strip)
+                     else v
+                     end
+            end
+
+            request_signature = generate_webmock_request_signature(request.method.downcase!, request.uri.to_s, body, headers)
             WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
             if webmock_response = registered_response_for(request_signature)
@@ -87,8 +97,8 @@ if defined?(Manticore)
             WebMock.net_connect_allowed?(uri)
           end
 
-          def generate_webmock_request_signature
-            WebMock::RequestSignature.new(@method, @uri, {:body => @options[:body], :headers => @options[:headers]})
+          def generate_webmock_request_signature(method, uri, body, headers)
+            WebMock::RequestSignature.new(method, uri, {:body => body, :headers => headers})
           end
 
           def generate_manticore_response(webmock_response)
