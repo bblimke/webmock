@@ -26,23 +26,10 @@ if defined?(Manticore)
 
         class WebMockManticoreClient < Manticore::Client
           def request(klass, url, options={}, &block)
-            @method = KLASS_TO_METHOD.fetch(klass)
-            @uri = url
-            @options = options
             super(klass, WebMock::Util::URI.normalize_uri(url).to_s, format_options(options))
           end
 
           private
-
-          KLASS_TO_METHOD = {
-            Java::OrgManticore::HttpGetWithEntity => :get,
-            Java::OrgApacheHttpClientMethods::HttpPut => :put,
-            Java::OrgApacheHttpClientMethods::HttpHead => :head,
-            Java::OrgApacheHttpClientMethods::HttpPost => :post,
-            Java::OrgApacheHttpClientMethods::HttpDelete => :delete,
-            Java::OrgApacheHttpClientMethods::HttpOptions => :options,
-            Java::OrgApacheHttpClientMethods::HttpPatch => :patch
-          }
 
           def format_options(options)
             return options unless headers = options[:headers]
@@ -58,7 +45,7 @@ if defined?(Manticore)
           end
 
           def response_object_for(client, request, context, &block)
-            request_signature = generate_webmock_request_signature
+            request_signature = generate_webmock_request_signature(request)
             WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
             if webmock_response = registered_response_for(request_signature)
@@ -87,8 +74,28 @@ if defined?(Manticore)
             WebMock.net_connect_allowed?(uri)
           end
 
-          def generate_webmock_request_signature
-            WebMock::RequestSignature.new(@method, @uri, {:body => @options[:body], :headers => @options[:headers]})
+          def generate_webmock_request_signature(request)
+            method = request.method.downcase
+            uri = request.uri.to_s
+            body = read_body(request)
+            headers = split_array_values(request.headers)
+
+            WebMock::RequestSignature.new(method, uri, {:body => body, :headers => headers})
+          end
+
+          def read_body(request)
+            if request.respond_to?(:entity) && !request.entity.nil?
+              Manticore::EntityConverter.new.read_entity(request.entity)
+            end
+          end
+
+          def split_array_values(headers = [])
+            headers.each_with_object({}) do |(k, v), h|
+              h[k] = case v
+                     when /,/ then v.split(',').map(&:strip)
+                     else v
+                     end
+            end
           end
 
           def generate_manticore_response(webmock_response)
