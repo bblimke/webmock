@@ -44,7 +44,7 @@ if defined?(Manticore)
             end
           end
 
-          def response_object_for(client, request, context, &block)
+          def response_object_for(request, context, &block)
             request_signature = generate_webmock_request_signature(request)
             WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -54,7 +54,7 @@ if defined?(Manticore)
               real_request = false
 
             elsif real_request_allowed?(request_signature.uri)
-              manticore_response = Manticore::Response.new(client, request, context, &block).call
+              manticore_response = Manticore::Response.new(self, request, context, &block).call
               webmock_response = generate_webmock_response(manticore_response)
               real_request = true
 
