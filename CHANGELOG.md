@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.22.0
+
+  * Adds [Manticore](https://github.com/cheald/manticore) support.
+
+      Thanks to [Mike Knepper](https://github.com/mikeknep), [David Abdemoulaie](https://github.com/hobodave)
+
+  * Update to Show a hash diff for requests that have stubs with a body.
+
+      Thanks to [yurivm](https://github.com/yurivm)
+
+  * Update to mirror Net::HTTP handling of headers as symbols
+
+  * Update to ignore non-comparable-values error when sorting
+    query values, because sorting is just a convience.
+
+      Thanks to [Magne Land](https://github.com/magneland)
+
+  * Covert Boolean values to Strings when using them to define
+    the body of a request.
+
+      Thanks to [Krzysztof Rygielski](https://github.com/riggy)
+
+  * Fixes WebMock's parsing Multibyte characters
+
+      Thanks to [Zhao Wen](https://github.com/VincentZhao)
+
+  * Updates to be compatible with httpclient 2.6.0
+
+  * Converts keys from symbols to strings when for QueryMapper.to_query
+
+      Thanks to [Ramon Tayag](https://github.com/ramontayag)
+
+  * Restricts http.rb version to 0.7.3 for Ruby 1.8.7
+
+  * Fixes issue emulating em-http-request's handling of multiple requests.
+
+      Thanks to [Matt Palmer](https://github.com/mpalmer)
+
 ## 1.21.0
 
   * Support for http.rb >= 0.8.0
