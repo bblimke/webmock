@@ -8,7 +8,12 @@ module WebMock
       end
 
       def ==(actual)
-        @expected.all? {|k,v| actual.has_key?(k) && v === actual[k]}
+        @expected.all? do |k,v|
+          actual_value = actual.respond_to?(:has_key?) ? actual[k] : actual
+          actual_value = WebMock::Util::QueryValueStringifier.stringify(actual_value)
+          actual.has_key?(k) && WebMock::Util::QueryValueStringifier.stringify(v) === actual_value
+       end
+
       rescue NoMethodError
         false
       end
