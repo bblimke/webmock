@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'addressable', '>= 2.3.6'
   s.add_dependency 'crack', '>=0.3.2'
   s.add_dependency 'hashdiff'
+  s.add_dependency 'rack'
 
   patron_version = (RUBY_VERSION <= '1.8.7') ? '0.4.18' : '>= 0.4.18'
 
