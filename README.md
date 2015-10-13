@@ -974,7 +974,16 @@ People who submitted patches and new features or suggested improvements. Many th
 * Steve Mitchell
 * Mattias Putman
 * Zachary Anker
-
+* Emmanuel Sambo
+* Ramon Tayag
+* Johannes Schlumberger
+* Siôn Le Roux
+* Matt Palmer
+* Zhao Wen
+* Krzysztof Rygielski
+* Magne Land
+* yurivm
+* Mike Knepper
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

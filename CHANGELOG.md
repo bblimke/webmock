@@ -2,6 +2,8 @@
 
 ## 1.22.0
 
+  All the credit for preparing this release go to [David Begin](https://github.com/davidbegin)!
+
   * Adds [Manticore](https://github.com/cheald/manticore) support.
 
       Thanks to [Mike Knepper](https://github.com/mikeknep), [David Abdemoulaie](https://github.com/hobodave)
@@ -37,6 +39,10 @@
   * Fixes issue emulating em-http-request's handling of multiple requests.
 
       Thanks to [Matt Palmer](https://github.com/mpalmer)
+
+  * WebMock requires only the necessary parts of crack to avoid pulling in safe_yaml
+
+      Thanks to [Johannes Schlumberger](https://github.com/spjsschl)
 
 ## 1.21.0
 
