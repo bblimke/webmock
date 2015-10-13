@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.22.1
+
+  * Adds Rack as a development dependency and removes require rack/utils in main lib.
+
+    Thanks to [Keenan Brock](https://github.com/kbrock)
+
 ## 1.22.0
 
   All the credit for preparing this release go to [David Begin](https://github.com/davidbegin)!
