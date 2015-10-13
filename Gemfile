@@ -10,7 +10,6 @@ group :development do
 end
 
 group :test do
-  gem 'rack'
   gem 'minitest_tu_shim', '1.3.2'
 end
 
