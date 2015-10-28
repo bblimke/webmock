@@ -79,7 +79,7 @@ module WebMock::Util
       def collect_query_hash(query_array, empty_accumulator, options)
         query_array.compact.inject(empty_accumulator.dup) do |accumulator, (key, value)|
           value = if value.nil?
-                    true
+                    nil
                   else
                     ::Addressable::URI.unencode_component(value.gsub(/\+/, ' '))
                   end
@@ -263,6 +263,8 @@ module WebMock::Util
             buffer << "#{to_query(new_parent, val, options)}&"
           end
           buffer.chop
+        when NilClass
+          parent
         else
           encoded_value = Addressable::URI.encode_component(
             value.to_s.dup, Addressable::URI::CharacterClasses::UNRESERVED
