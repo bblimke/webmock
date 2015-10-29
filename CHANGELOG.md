@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.22.2
+
+  * Fix: prevents adding an extra =true to urls with parameters without values
+
+    Thanks to [David Begin](https://github.com/davidbegin)
+
 ## 1.22.1
 
   * Adds Rack as a development dependency and removes require rack/utils in main lib.
