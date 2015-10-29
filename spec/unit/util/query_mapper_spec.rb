@@ -52,7 +52,7 @@ describe WebMock::Util::QueryMapper do
 
   context '#to_query' do
     it 'should transform nil value' do
-      expect(subject.to_query('a', nil)).to eq('a=')
+      expect(subject.to_query('a', nil)).to eq('a')
     end
     it 'should transform string value' do
       expect(subject.to_query('a', 'b')).to eq('a=b')
