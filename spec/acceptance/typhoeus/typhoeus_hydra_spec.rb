@@ -20,6 +20,18 @@ unless RUBY_PLATFORM =~ /java/
         WebMock.reset!
       end
 
+      describe "supposed response fields" do
+        it "present" do
+          stub_request(:get, "http://www.example.com").to_return(:headers => {'X-Test' => '1'})
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.code).not_to be_nil
+          expect(response.status_message).not_to be_nil
+          expect(response.body).not_to be_nil
+          expect(response.headers).not_to be_nil
+          expect(response.effective_url).not_to be_nil
+        end
+      end
+
       describe "when params are used" do
         it "should take into account params for POST request" do
           stub_request(:post, "www.example.com/?hello=world").with(:query => {:hello => 'world'})
