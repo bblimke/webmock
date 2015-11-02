@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.22.3
+
+  * Return "effective_url" attribute in Typhoeus::Response
+
+    Thanks to [Senya](https://github.com/cmrd-senya)
+
 ## 1.22.2
 
   * Fix: prevents adding an extra =true to urls with parameters without values
