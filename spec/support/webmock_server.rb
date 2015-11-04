@@ -52,7 +52,7 @@ class WebMockServer
 
     loop do
       begin
-        s = TCPSocket.new("localhost", port)
+        TCPSocket.new("localhost", port)
         sleep 0.1
         break
       rescue Errno::ECONNREFUSED

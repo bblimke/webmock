@@ -34,26 +34,26 @@ module WebMock
     end
 
     def description
-      "request #{request_pattern.to_s} #{quantity_phrase.strip}"
+      "request #{request_pattern} #{quantity_phrase.strip}"
     end
 
     def failure_message
-      failure_message_phrase(is_negated=false)
+      failure_message_phrase(false)
     end
 
     def failure_message_when_negated
-      failure_message_phrase(is_negated=true)
+      failure_message_phrase(true)
     end
 
     def self.executed_requests_message
-      "\n\nThe following requests were made:\n\n#{RequestRegistry.instance.to_s}\n" + "="*60
+      "\n\nThe following requests were made:\n\n#{RequestRegistry.instance}\n" + "="*60
     end
 
     private
 
     def failure_message_phrase(is_negated=false)
       negation = is_negated ? "was not" : "was"
-      text = "The request #{request_pattern.to_s} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}"
+      text = "The request #{request_pattern} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}"
       text << self.class.executed_requests_message
       text
     end

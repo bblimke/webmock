@@ -82,7 +82,6 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should call on_body for each chunk with chunked response" do
-        body = "on_body fired"
         stub_request(:any, "example.com").
           to_return(:body => ["first_chunk", "second_chunk"],
                     :headers => {"Transfer-Encoding" => "chunked"})
@@ -287,7 +286,6 @@ unless RUBY_PLATFORM =~ /java/
 
       context "when response does not include Content-Type header" do
         it "returns nil for content_type" do
-          content_type = "application/json"
 
           stub_request(:any, 'example.com').
             to_return(:body     => "abc",

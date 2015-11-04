@@ -164,7 +164,7 @@ unless RUBY_PLATFORM =~ /java/
             expect {
               EM.run do
                 fiber = Fiber.new do
-                  http = EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
+                  EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
                   EM.stop
                 end
                 fiber.resume
