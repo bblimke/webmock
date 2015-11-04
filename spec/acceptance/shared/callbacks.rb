@@ -1,6 +1,7 @@
 shared_context "callbacks" do |*adapter_info|
   describe "when after_request callback is declared" do
     before(:each) do
+      @called = nil
       WebMock.reset_callbacks
       stub_request(:get, "http://www.example.com")
     end

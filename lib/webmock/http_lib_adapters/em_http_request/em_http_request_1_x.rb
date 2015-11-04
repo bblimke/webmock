@@ -7,7 +7,6 @@ if defined?(EventMachine::HttpClient)
         OriginalHttpClient = EventMachine::HttpClient unless const_defined?(:OriginalHttpClient)
         OriginalHttpConnection = EventMachine::HttpConnection unless const_defined?(:OriginalHttpConnection)
 
-
         def self.enable!
           EventMachine.send(:remove_const, :HttpConnection)
           EventMachine.send(:const_set, :HttpConnection, EventMachine::WebMockHttpConnection)
@@ -26,7 +25,6 @@ if defined?(EventMachine::HttpClient)
   end
 
   module EventMachine
-
     if defined?(Synchrony) && HTTPMethods.instance_methods.include?(:aget)
       # have to make the callbacks fire on the next tick in order
       # to avoid the dreaded "double resume" exception
@@ -100,6 +98,7 @@ if defined?(EventMachine::HttpClient)
 
         if stubbed_webmock_response
           WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, stubbed_webmock_response)
+          @uri ||= nil
           EM.next_tick {
             setup(make_raw_response(stubbed_webmock_response), @uri,
                   stubbed_webmock_response.should_timeout ? "WebMock timeout error" : nil)
