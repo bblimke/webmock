@@ -14,6 +14,63 @@ describe WebMock::RequestStub do
     expect(@request_stub.response).to be_a(WebMock::Response)
   end
 
+  describe "requests" do
+
+    it "should have no requests" do
+      expect(@request_stub.requests).to eq([])
+    end
+
+    it "should have requests" do
+      signature = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(signature)
+      expect(@request_stub.requests).to eq([signature])
+    end
+
+    it "should only return matching requests" do
+      match = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(match)
+      non_match = WebMock::RequestSignature.new(:get, "www.example.org")
+      WebMock::RequestRegistry.instance.requested_signatures.put(non_match)
+
+      expect(@request_stub.requests).to eq([match])
+    end
+
+  end
+
+  describe "last_request" do
+
+    it "should be nil when there are no requests" do
+      expect(@request_stub.last_request).to be_nil
+    end
+
+    it "should be the last requests when there are multiple requests" do
+      first = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(first)
+      last = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(last)
+
+      expect(@request_stub.last_request).to eq(last)
+    end
+
+  end
+
+  describe "first_request" do
+
+    it "should be nil when there are no requests" do
+      expect(@request_stub.first_request).to be_nil
+    end
+
+    it "should be the first requests when there are multiple requests" do
+      first = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(first)
+      last = WebMock::RequestSignature.new(:get, "www.example.com")
+      WebMock::RequestRegistry.instance.requested_signatures.put(last)
+
+      expect(@request_stub.last_request).to eq(first)
+    end
+
+  end
+
   describe "with" do
 
     it "should assign body to request pattern" do
