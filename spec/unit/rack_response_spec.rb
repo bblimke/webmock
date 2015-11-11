@@ -24,8 +24,8 @@ describe WebMock::RackResponse do
 
   it "should shouldn't blow up when hitting a locked resource twice" do
     @locked_rack_response = WebMock::RackResponse.new(MyLockedRackApp)
-    request   = WebMock::RequestSignature.new(:get, 'www.example.com/locked')
-    response  = @locked_rack_response.evaluate(request)
+    request = WebMock::RequestSignature.new(:get, 'www.example.com/locked')
+    @locked_rack_response.evaluate(request)
     response2 = @locked_rack_response.evaluate(request)
 
     expect(response2.body).to include('Single threaded response.')
