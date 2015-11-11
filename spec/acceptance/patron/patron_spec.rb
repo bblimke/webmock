@@ -24,13 +24,12 @@ unless RUBY_PLATFORM =~ /java/
         before(:each) do
           @dir_path = Dir.mktmpdir('webmock-')
           @file_path = File.join(@dir_path, "webmock_temp_test_file")
-          FileUtils.rm_rf(@file_path) if File.exists?(@file_path)
+          FileUtils.rm_rf(@file_path) if File.exist?(@file_path)
         end
 
         after(:each) do
           FileUtils.rm_rf(@dir_path) if File.exist?(@dir_path)
         end
-
 
         it "should work with get_file" do
           stub_request(:get, "www.example.com").to_return(:body => "abc")
@@ -114,7 +113,6 @@ unless RUBY_PLATFORM =~ /java/
           it "should encode body based on encoding-attribute in body" do
             stub_request(:get, "www.example.com").
               to_return(:body => "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
-
 
             expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
           end
