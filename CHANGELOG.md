@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.22.4
+
+  * Fix the "can't add a new key into hash during iteration" message in hash_counter.rb in JRuby 1.7
+
+    Thanks to [kyrylo](https://github.com/kyrylo)
+
 ## 1.22.3
 
   * Return "effective_url" attribute in Typhoeus::Response

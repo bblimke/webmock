@@ -12,7 +12,8 @@ module WebMock
       end
       def put key, num=1
         @lock.synchronize do
-          hash[key] = (hash[key] || 0) + num
+          val = hash[key]
+          hash[key] = (val || 0) + num
           @order[key] = @max = @max + 1
         end
       end
