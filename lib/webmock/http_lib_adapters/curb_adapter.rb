@@ -54,8 +54,8 @@ if defined?(Curl)
 
   module Curl
     class WebMockCurlEasy < Curl::Easy
-      def curb_or_webmock
 
+      def curb_or_webmock
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -238,25 +238,25 @@ if defined?(Curl)
       end
 
       def body_str
-        @body_str || super
+        @body_str ||= super
       end
       alias body body_str
 
       def response_code
-        @response_code || super
+        @response_code ||= super
       end
 
       def header_str
-        @header_str || super
+        @header_str ||= super
       end
       alias head header_str
 
       def last_effective_url
-        @last_effective_url || super
+        @last_effective_url ||= super
       end
 
       def content_type
-        @content_type || super
+        @content_type ||= super
       end
 
       %w[ success failure missing header body complete progress ].each do |callback|

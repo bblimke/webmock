@@ -3,6 +3,7 @@ module HTTP
     def initialize(request, &perform)
       @request = request
       @perform = perform
+      @request_signature = nil
     end
 
     def exec
