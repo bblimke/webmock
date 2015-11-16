@@ -1,7 +1,9 @@
 begin
   require 'httpclient'
+  require 'jsonclient' # defined in 'httpclient' gem as well
 rescue LoadError
   # httpclient not found
+  # or jsonclient not defined (in old versions of httclient gem)
 end
 
 if defined?(::HTTPClient)
@@ -11,26 +13,36 @@ if defined?(::HTTPClient)
       class HTTPClientAdapter < HttpLibAdapter
         adapter_for :httpclient
 
-        OriginalHttpClient = ::HTTPClient unless const_defined?(:OriginalHttpClient)
+        unless const_defined?(:OriginalHttpClient)
+          OriginalHttpClient = ::HTTPClient
+        end
+
+        unless const_defined?(:OriginalJsonClient)
+          OriginalJsonClient = ::JSONClient if defined?(::JSONClient)
+        end
 
         def self.enable!
           Object.send(:remove_const, :HTTPClient)
           Object.send(:const_set, :HTTPClient, WebMockHTTPClient)
+          if defined? ::JSONClient
+            Object.send(:remove_const, :JSONClient)
+            Object.send(:const_set, :JSONClient, WebMockJSONClient)
+          end
         end
 
         def self.disable!
           Object.send(:remove_const, :HTTPClient)
           Object.send(:const_set, :HTTPClient, OriginalHttpClient)
+          if defined? ::JSONClient
+            Object.send(:remove_const, :JSONClient)
+            Object.send(:const_set, :JSONClient, OriginalJsonClient)
+          end
         end
       end
     end
   end
 
-
-  class WebMockHTTPClient < HTTPClient
-    alias_method :do_get_block_without_webmock, :do_get_block
-    alias_method :do_get_stream_without_webmock, :do_get_stream
-
+  module WebMockHTTPClients
     def do_get_block(req, proxy, conn, &block)
       do_get(req, proxy, conn, false, &block)
     end
@@ -102,6 +114,22 @@ if defined?(::HTTPClient)
       block.call(response, body) if block
 
       response
+    end
+  end
+
+  class WebMockHTTPClient < HTTPClient
+    alias_method :do_get_block_without_webmock, :do_get_block
+    alias_method :do_get_stream_without_webmock, :do_get_stream
+
+    include WebMockHTTPClients
+  end
+
+  if defined? ::JSONClient
+    class WebMockJSONClient < JSONClient
+      alias_method :do_get_block_without_webmock, :do_get_block
+      alias_method :do_get_stream_without_webmock, :do_get_stream
+
+      include WebMockHTTPClients
     end
   end
 

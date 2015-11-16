@@ -47,6 +47,16 @@ describe "HTTPClient" do
     expect(str).to eq('test')
   end
 
+  it "should work via JSONClient subclass" do
+    stub_request(:get, 'www.example.com').to_return(
+      :status => 200,
+      :body => '{"test": "foo"}',
+      :headers => {'Content-Type' => 'application/json'}
+    )
+    content = JSONClient.get('www.example.com').content
+    expect(content).to eq("test" => "foo")
+  end
+
   context "multipart bodies" do
     let(:header) {{
         'Accept' => 'application/json',
