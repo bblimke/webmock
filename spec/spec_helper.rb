@@ -5,6 +5,7 @@ unless RUBY_PLATFORM =~ /java/
   require 'patron'
   require 'em-http'
   require 'typhoeus'
+  require 'time'
 end
 if RUBY_PLATFORM =~ /java/
   require 'manticore'
