@@ -13,7 +13,7 @@ Features
 * Smart matching of the same URIs in different representations (also encoded and non encoded forms)
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit
-* Support for RSpec 1.x and RSpec 2.x
+* Support for RSpec
 * Support for MiniTest
 
 Supported HTTP libraries
