@@ -14,9 +14,17 @@ module HTTP
       status  = Status.new(webmock_response.status.first)
       headers = webmock_response.headers || {}
       body    = Body.new Streamer.new webmock_response.body
-      uri     = URI request_signature.uri.to_s if request_signature
+      uri     = URI.parse request_signature.uri.to_s if request_signature
 
-      new(status, "1.1", headers, body, uri)
+      return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
+
+      new({
+        :status   => status,
+        :version  => "1.1",
+        :headers  => headers,
+        :body     => body,
+        :uri      => uri
+      })
     end
   end
 end
