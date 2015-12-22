@@ -16,3 +16,7 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
+
+platforms :ruby_18 do
+  gem 'addressable', '< 2.4.0'
+end
