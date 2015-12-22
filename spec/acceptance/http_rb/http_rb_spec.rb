@@ -48,12 +48,26 @@ describe "HTTP.rb" do
     end
   end
 
-  it "restores request uri on replayed response object" do
-    uri = Addressable::URI.parse "http://example.com/foo"
+  context "restored request uri on replayed response object" do
+    it "keeps non-default port" do
+      stub_request :get, "example.com:1234/foo"
+      response = HTTP.get "http://example.com:1234/foo"
 
-    stub_request :get, "example.com/foo"
-    response = HTTP.get uri
+      expect(response.uri.to_s).to eq "http://example.com:1234/foo"
+    end
 
-    expect(response.uri.to_s).to eq uri.to_s
+    it "does not injects default port" do
+      stub_request :get, "example.com/foo"
+      response = HTTP.get "http://example.com/foo"
+
+      expect(response.uri.to_s).to eq "http://example.com/foo"
+    end
+
+    it "strips out default port even if it was explicitly given" do
+      stub_request :get, "example.com/foo"
+      response = HTTP.get "http://example.com:80/foo"
+
+      expect(response.uri.to_s).to eq "http://example.com/foo"
+    end
   end
 end
