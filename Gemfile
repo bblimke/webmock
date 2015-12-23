@@ -16,10 +16,3 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
-
-if (RUBY_VERSION > '1.8.7' && (defined?(RUBY_ENGINE) && RUBY_ENGINE == "ruby")) ||
-  (defined?(RUBY_ENGINE) && RUBY_ENGINE == "jruby")
-  gem 'addressable', '>= 2.3.6'
-else
-  gem 'addressable', '< 2.4.0'
-end

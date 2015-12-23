@@ -15,10 +15,12 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = 'webmock'
 
+  patron_version      = (RUBY_VERSION <= '1.8.7') ? '0.4.18'   : '>= 0.4.18'
+  addressable_version = (RUBY_VERSION) > '1.8.7'  ? '>= 2.3.6' : '< 2.4.0'
+
+  s.add_dependency 'addressable', addressable_version
   s.add_dependency 'crack', '>=0.3.2'
   s.add_dependency 'hashdiff'
-
-  patron_version = (RUBY_VERSION <= '1.8.7') ? '0.4.18' : '>= 0.4.18'
 
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
