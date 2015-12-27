@@ -15,11 +15,13 @@ Gem::Specification.new do |s|
 
   s.rubyforge_project = 'webmock'
 
-  s.add_dependency 'addressable', '>= 2.3.6'
+  patron_version      = (RUBY_VERSION <= '1.8.7') ? '0.4.18'   : '>= 0.4.18'
+  addressable_version = (RUBY_VERSION) > '1.8.7'  ? '>= 2.3.6' : '< 2.4.0'
+  manticore_version   = (RUBY_VERSION) > '1.8.7'  ? '>= 0.5.1' : '<= 0.5.1'
+
+  s.add_dependency 'addressable', addressable_version
   s.add_dependency 'crack', '>=0.3.2'
   s.add_dependency 'hashdiff'
-
-  patron_version = (RUBY_VERSION <= '1.8.7') ? '0.4.18' : '>= 0.4.18'
 
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
@@ -29,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'em-synchrony',    '>= 1.0.0' if RUBY_VERSION >= "1.9"
   s.add_development_dependency 'curb',            '<= 0.8.6' unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'typhoeus',        '>= 0.5.0' unless RUBY_PLATFORM =~ /java/
-  s.add_development_dependency 'manticore',       '>= 0.5.1' if RUBY_PLATFORM =~ /java/
+  s.add_development_dependency('manticore',       manticore_version) if RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'excon',           '>= 0.27.5'
   s.add_development_dependency 'minitest',        '~> 5.0.0'
   s.add_development_dependency 'rdoc',            ((RUBY_VERSION == '1.8.6') ? '<= 3.5.0' : '>3.5.0')

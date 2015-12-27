@@ -11,8 +11,17 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
       it "should make a real https request if request is not stubbed" do
         unless http_library == :httpclient
-          expect(http_request(:get, "https://www.google.com/").
-            body).to match(/.*google.*/)
+          result = http_request(:get, "https://www.google.com/").body
+          if result.respond_to? :encode
+            result = result.encode(
+              'UTF-8',
+              'binary',
+              :invalid => :replace,
+              :undef   => :replace,
+              :replace => ''
+            )
+          end
+          expect(result).to match(/.*google.*/)
         end
       end
 
