@@ -210,6 +210,18 @@ module WebMock
   end
 end
 
+# patch for StringIO behavior in Ruby 2.2.3
+# https://github.com/bblimke/webmock/issues/558
+class PatchedStringIO < StringIO #:nodoc:
+
+  alias_method :orig_read_nonblock, :read_nonblock
+
+  def read_nonblock(size, *args)
+    orig_read_nonblock(size)
+  end
+
+end
+
 class StubSocket #:nodoc:
 
   attr_accessor :read_timeout, :continue_timeout
@@ -235,10 +247,12 @@ module Net  #:nodoc: all
       @debug_output = debug_output
 
       @io = case io
-      when Socket, OpenSSL::SSL::SSLSocket, IO, StringIO
+      when Socket, OpenSSL::SSL::SSLSocket, IO
         io
+      when StringIO
+        PatchedStringIO.new(io.string)
       when String
-        StringIO.new(io)
+        PatchedStringIO.new(io)
       end
       raise "Unable to create local socket" unless @io
     end
