@@ -13,11 +13,13 @@ module HttpRbSpecHelper
   end
 
   def client_timeout_exception_class
-    Errno::ETIMEDOUT
+    return Errno::ETIMEDOUT if HTTP::VERSION < "1.0.0"
+    HTTP::ConnectionError
   end
 
   def connection_refused_exception_class
-    Errno::ECONNREFUSED
+    return Errno::ECONNREFUSED if HTTP::VERSION < "1.0.0"
+    HTTP::ConnectionError
   end
 
   def http_library

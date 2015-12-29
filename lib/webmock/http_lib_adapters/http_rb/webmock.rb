@@ -34,11 +34,16 @@ module HTTP
 
       return unless webmock_response
 
-      raise Errno::ETIMEDOUT if webmock_response.should_timeout
+      raise_timeout_error if webmock_response.should_timeout
       webmock_response.raise_error_if_any
 
       invoke_callbacks(webmock_response, :real_request => false)
       ::HTTP::Response.from_webmock webmock_response, request_signature
+    end
+
+    def raise_timeout_error
+      raise Errno::ETIMEDOUT if HTTP::VERSION < "1.0.0"
+      raise HTTP::ConnectionError, "connection error: #{Errno::ETIMEDOUT.new}"
     end
 
     def perform
