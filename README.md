@@ -39,6 +39,7 @@ Supported Ruby Interpreters
 * MRI 2.0.0
 * MRI 2.1
 * MRI 2.2
+* MRI 2.3
 * REE 1.8.7
 * JRuby
 * Rubinius
@@ -985,6 +986,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * yurivm
 * Mike Knepper
 * Charles Pence
+* Alexey Zapparov
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
