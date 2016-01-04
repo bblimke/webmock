@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.22.4
+
+  * Adds support for JSONClient (a subclass of HTTPClient)
+
+    Thanks to [Andrew Kozin](https://github.com/nepalez)
+
+  * Adds support for Ruby 2.3.0
+
+    Thanks to [Charles Pence](https://github.com/cpence)
+
+  * Adds support for [http](https://github.com/httprb/http) versions >= 1.0.0
+
+    Thanks to [Alexey Zapparov](https://github.com/ixti)
+
+  * Fixes support for Ruby 1.8.7 by restrciting Addressable version < 2.4.0
+
+    Thanks to [Matthew Rudy Jacobs](https://github.com/matthewrudy)
+
 ## 1.22.3
 
   * Return "effective_url" attribute in Typhoeus::Response
