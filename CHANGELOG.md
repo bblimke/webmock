@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.22.5
+
+  * Fixes [bug](https://github.com/bblimke/webmock/issues/565) where WebMock tries
+    to alias a method that is deprecated in Ruby Versions > 1.9.2 ('sysread' for class 'StringIO')
+
+    Thanks to [Marcos Acosta](https://github.com/mmaa) for discovering this bug.
+
 ## 1.22.4
 
   * Adds support for JSONClient (a subclass of HTTPClient)
