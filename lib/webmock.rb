@@ -53,4 +53,14 @@ require 'webmock/http_lib_adapters/manticore_adapter'
 
 require 'webmock/webmock'
 
+if RUBY_VERSION <= "1.8.7" && Addressable::VERSION::STRING >= "2.4.0"
+  raise StandardError,
+    <<-ERR
+    \n\e[31m
+    Addressable dropped support for Ruby 1.8.7 on version 2.4.0,
 
+    please add the following to your Gemfile to be able to use WebMock:
+
+    gem 'addressable', '< 2.4.0'\e[0m\n
+  ERR
+end
