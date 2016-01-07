@@ -2,7 +2,7 @@ source 'http://rubygems.org/'
 
 gemspec
 
-gem 'addressable', '>= 2.3.6'
+gem 'addressable', '< 2.4.0'
 
 if ENV["EM_HTTP_REQUEST_0_X"]
   gem 'em-http-request', '~> 0.3.0'
@@ -19,3 +19,4 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
+

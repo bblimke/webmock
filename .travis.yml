@@ -1,5 +1,4 @@
 rvm:
-  - 1.8.7
   - 1.9.2
   - 1.9.3
   - 2.0.0
@@ -9,14 +8,19 @@ rvm:
   - 2.3.0
   - rbx-2
   - ruby-head
-  - ree
   - jruby-9.0.0.0
   - jruby-9.0.1.0
-  - jruby-18mode
   - jruby-19mode
   - jruby
   - jruby-head
 matrix:
+  include:
+    - rvm: 1.8.7
+      gemfile: ruby1.8.7.gemfile
+    - rvm: ree
+      gemfile: ruby1.8.7.gemfile
+    - rvm: jruby-18mode
+      gemfile: ruby1.8.7.gemfile
   allow_failures:
     - rvm: jruby-9.0.0.0
     - rvm: jruby-18mode
