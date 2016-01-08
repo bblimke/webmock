@@ -2,7 +2,7 @@
 
 source "http://rubygems.org/"
 
-gem "addressable", "< 2.4.0"
+gem "addressable", ">= 2.3.6", "< 2.4.0"
 
 group :development do
   gem "rake"
