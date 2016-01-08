@@ -25,6 +25,7 @@ pkg
 *.gem
 .bundle
 Gemfile.lock
+gemfiles/*.gemfile.lock
 pkg/*
 tmp/*
 *.rbc
