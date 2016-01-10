@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.22.6
+
+  * Fixes [issue](https://github.com/bblimke/webmock/issues/568) around
+    WebMock restricting [Addressable](https://github.com/sporkmonger/addressable)
+    version, based on Ruby 1.8.7 for all versions of Ruby.
+
+    This change inverts that, and forces Ruby 1.8.7 users to specify in thier
+    Gemfile an Addressable version < 2.4.0.
+
+    Thanks to [PikachuEXE](https://github.com/PikachuEXE) and
+    [Matthew Rudy Jacobs](https://github.com/matthewrudy).
+
 ## 1.22.5
 
   * Fixes [bug](https://github.com/bblimke/webmock/issues/565) where WebMock tries
