@@ -53,6 +53,28 @@ module WebMock
       end
     end
 
+    # Fetch all requests from `WebMock::RequestRegistry` which match this stubs `@request_pattern`
+    # @return [Array] the requested `WebMock::RequestSignature`s which match this stubs `@request_pattern`
+    def requests
+      request_registry = WebMock::RequestRegistry.instance
+      signatures = request_registry.requested_signatures.ary
+      return signatures.select { |signature|
+        @request_pattern.matches?(signature)
+      }
+    end
+
+    # Fetch the first request made for this stub
+    # @return [WebMock::RequestSignature|nil] the first request signature for this stub, or nil if none were made
+    def first_request
+      return requests[0]
+    end
+
+    # Fetch the last request made for this stub
+    # @return [WebMock::RequestSignature|nil] the last request signature for this stub, or nil if none were made
+    def last_request
+      return requests[-1]
+    end
+
     def has_responses?
       !@responses_sequences.empty?
     end
