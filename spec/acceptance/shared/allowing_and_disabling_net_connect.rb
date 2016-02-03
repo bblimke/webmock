@@ -192,9 +192,40 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
         end
       end
 
+      describe "allowing by a callable" do
+        before :each do
+          WebMock.disable_net_connect!(:allow => ->(url){ url.to_str.include?('httpstat') })
+        end
+
+        context "when the host is not allowed" do
+          it "should return stubbed response if request was stubbed" do
+            stub_request(:get, 'disallowed.example.com/foo').to_return(:body => "abc")
+            expect(http_request(:get, 'http://disallowed.example.com/foo').body).to eq("abc")
+          end
+
+          it "should raise exception if request was not stubbed" do
+            expect {
+              http_request(:get, 'http://disallowed.example.com/')
+            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://disallowed.example.com))
+          end
+        end
+
+        context "when the host is allowed" do
+          it "should return stubbed response if request was stubbed" do
+            stub_request(:get, 'httpstat.us/200').to_return(:body => "abc")
+            expect(http_request(:get, "http://httpstat.us/200").body).to eq("abc")
+          end
+
+          # WARNING: this makes a real HTTP request!
+          it "should make a real request to allowed host", :net_connect => true do
+            expect(http_request(:get, "http://httpstat.us/200").status).to eq('200')
+          end
+        end
+      end
+
       describe "allowing by a list of the above" do
         before :each do
-          WebMock.disable_net_connect!(:allow => [%r{foobar}, 'httpstat.us'])
+          WebMock.disable_net_connect!(:allow => [->(_){ false }, %r{foobar}, 'httpstat.us'])
         end
 
         context "when the host is not allowed" do
