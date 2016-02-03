@@ -194,7 +194,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
       describe "allowing by a callable" do
         before :each do
-          WebMock.disable_net_connect!(:allow => ->(url){ url.to_str.include?('httpstat') })
+          WebMock.disable_net_connect!(:allow => lambda{|url| url.to_str.include?('httpstat') })
         end
 
         context "when the host is not allowed" do
@@ -225,7 +225,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
       describe "allowing by a list of the above" do
         before :each do
-          WebMock.disable_net_connect!(:allow => [->(_){ false }, %r{foobar}, 'httpstat.us'])
+          WebMock.disable_net_connect!(:allow => [lambda{|_| false }, %r{foobar}, 'httpstat.us'])
         end
 
         context "when the host is not allowed" do
