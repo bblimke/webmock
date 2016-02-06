@@ -462,22 +462,67 @@ Net::HTTP.get('www.something.com', '/')    # ===> Failure
 Net::HTTP.get('localhost:9887', '/')    # ===> Allowed. Perhaps to Selenium?
 ```
 
-### External requests can be disabled while allowing any hostname or port or parts thereof
+### External requests can be disabled while allowing specific requests
+
+Allowed requests can be specified in a number of ways.
+
+With a `String` specifying a host name:
 
 ```ruby
-WebMock.disable_net_connect!(:allow => "www.example.org:8080")
+WebMock.disable_net_connect!(:allow => 'www.example.org')
 
 RestClient.get('www.something.com', '/')    # ===> Failure
+RestClient.get('www.example.org', '/')      # ===> Allowed
+RestClient.get('www.example.org:8080', '/') # ===> Allowed
+```
 
-RestClient.get('www.example.org', '/')    # ===> Failure.
+With a `String` specifying a host name and a port:
 
-RestClient.get('www.example.org:8080', '/')    # ===> Allowed
+```ruby
+WebMock.disable_net_connect!(:allow => 'www.example.org:8080')
 
-WebMock.disable_net_connect!(:allow => /ample.org/)
+RestClient.get('www.something.com', '/')    # ===> Failure
+RestClient.get('www.example.org', '/')      # ===> Failure
+RestClient.get('www.example.org:8080', '/') # ===> Allowed
+```
 
-WebMock.disable_net_connect!(:allow => [/ample.org/, /googl/])
+With a `Regexp` matching the URI:
 
-RestClient.get('www.example.org', '/')    # ===> Allowed
+```ruby
+WebMock.disable_net_connect!(:allow => %r{ample.org/foo})
+
+RestClient.get('www.example.org', '/foo/bar') # ===> Allowed
+RestClient.get('sample.org', '/foo')          # ===> Allowed
+RestClient.get('sample.org', '/bar')          # ===> Failure
+```
+
+With an object that responds to `#call`, receiving a `URI` object and returning a boolean:
+
+```ruby
+blacklist = ['google.com', 'facebook.com', 'apple.com']
+allowed_sites = lambda{|uri|
+  blacklist.none?{|site| uri.host.include?(site) }
+}
+WebMock.disable_net_connect!(:allow => allowed_sites)
+
+RestClient.get('www.example.org', '/')  # ===> Allowed
+RestClient.get('www.facebook.com', '/') # ===> Failure
+RestClient.get('apple.com', '/')        # ===> Failure
+```
+
+With an `Array` of any of the above:
+
+```ruby
+WebMock.disable_net_connect!(:allow => [
+  lambda{|uri| uri.host.length % 2 == 0 },
+  /ample.org/,
+  'bbc.co.uk',
+])
+
+RestClient.get('www.example.org', '/') # ===> Allowed
+RestClient.get('bbc.co.uk', '/')       # ===> Allowed
+RestClient.get('bbc.com', '/')         # ===> Allowed
+RestClient.get('www.bbc.com', '/')     # ===> Failure
 ```
 
 ## Connecting on Net::HTTP.start

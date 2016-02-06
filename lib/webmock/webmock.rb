@@ -72,6 +72,10 @@ module WebMock
     when String
       allowed == uri.host ||
       allowed == "#{uri.host}:#{uri.port}"
+    else
+      if allowed.respond_to?(:call)
+        allowed.call(uri)
+      end
     end
   end
 
