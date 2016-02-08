@@ -139,7 +139,6 @@ describe "HTTPClient" do
   end
 
   context 'session headers' do
-
     it "client sends a User-Agent header when given an agent_name explicitly to the client" do
       user_agent = "Client/0.1"
       stub_request(:get, "www.example.com").with(:headers => { 'User-agent' => "#{user_agent} #{HTTPClient::LIB_NAME}" })
@@ -161,7 +160,6 @@ describe "HTTPClient" do
       stub_request(:get, "www.example.com").with(:headers => headers)
       HTTPClient.new.get("www.example.com", nil, headers)
     end
-
   end
 
   context 'httpclient response header' do
@@ -169,6 +167,23 @@ describe "HTTPClient" do
       stub_request :get, 'www.example.com'
       message = HTTPClient.new.get 'www.example.com'
       expect(message.header.request_uri.to_s).to eq('www.example.com')
+    end
+  end
+
+  context 'httpclient streams response' do
+    before do
+      WebMock.allow_net_connect!
+      WebMock.after_request(:except => [:other_lib])  do |_, response|
+        @response = response
+      end
+    end
+
+    it 'sets the full body on the webmock response' do
+      body = ''
+      result = HTTPClient.new.request(:get, 'http://www.example.com/') do |http_res, chunk|
+        body += chunk
+      end
+      expect(@response.body).to eq body
     end
   end
 end
