@@ -72,13 +72,19 @@ if defined?(::HTTPClient)
 
         res = if stream
           do_get_stream_without_webmock(req, proxy, conn, &block)
+        elsif block
+          body = ''
+          do_get_block_without_webmock(req, proxy, conn) do |http_res, chunk|
+            body += chunk
+            block.call(http_res, chunk)
+          end
         else
-          do_get_block_without_webmock(req, proxy, conn, &block)
+          do_get_block_without_webmock(req, proxy, conn)
         end
         res = conn.pop
         conn.push(res)
         if WebMock::CallbackRegistry.any_callbacks?
-          webmock_response = build_webmock_response(res)
+          webmock_response = build_webmock_response(res, body)
           WebMock::CallbackRegistry.invoke_callbacks(
             {:lib => :httpclient, :real_request => true}, request_signature,
             webmock_response)
@@ -133,7 +139,7 @@ if defined?(::HTTPClient)
     end
   end
 
-  def build_webmock_response(httpclient_response)
+  def build_webmock_response(httpclient_response, body = nil)
     webmock_response = WebMock::Response.new
     webmock_response.status = [httpclient_response.status, httpclient_response.reason]
 
@@ -147,7 +153,9 @@ if defined?(::HTTPClient)
       end
     end
 
-    if  httpclient_response.content.respond_to?(:read)
+    if body
+      webmock_response.body = body
+    elsif httpclient_response.content.respond_to?(:read)
       webmock_response.body = httpclient_response.content.read
       body = HTTP::Message::Body.new
       body.init_response(StringIO.new(webmock_response.body))
