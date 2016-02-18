@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.23.0
+
+  * `WebMock.disable_net_connect` accepts `:allow` option with an object that responds to `#call`, receiving a `URI` object and returning a boolean:
+
+
+        blacklist = ['google.com', 'facebook.com', 'apple.com']
+        allowed_sites = lambda{|uri|
+          blacklist.none?{|site| uri.host.include?(site) }
+        }
+        WebMock.disable_net_connect!(:allow => allowed_sites)
+
+        RestClient.get('www.example.org', '/')  # ===> Allowed
+        RestClient.get('www.facebook.com', '/') # ===> Failure
+        RestClient.get('apple.com', '/')        # ===> Failure
+
+    Thanks to [Pablo Brasero](https://github.com/pablobm)
+
+  * Support for HTTPClient stream responses with body chunks
+
+    Thanks to [Cedric Pimenta](https://github.com/cedricpim)
+
+
 ## 1.22.6
 
   * Fixes [issue](https://github.com/bblimke/webmock/issues/568) around
