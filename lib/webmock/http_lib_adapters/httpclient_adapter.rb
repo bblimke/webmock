@@ -186,10 +186,33 @@ if defined?(::HTTPClient)
     end
     headers = headers_from_session(uri).merge(headers)
 
-    if (auth_cred = auth.get(req)) && auth.scheme == 'Basic'
+    auth_cred = nil
+    auth_cred = auth.get(req) if auth.scheme == 'Basic'
+    headers.each do |k,v|
+      if k =~ /[Aa]uthorization/
+        if v.is_a? Array
+          v.each do |v|
+            auth_cred ||= v if v =~ /^Basic /
+          end
+        elsif v.is_a? String
+          auth_cred ||= v if v =~ /^Basic /
+        end
+      end
+    end
+
+    if auth_cred
       userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
       userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
-      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v =~ /^Basic / } #we added it to url userinfo
+      headers.reject! do |k, v|
+        if k =~ /[Aa]uthorization/
+          if v.is_a? Array
+            v.reject! { |v| v =~ /^Basic / }
+            v.length == 0
+          elsif v.is_a? String
+            v =~ /^Basic /
+          end
+        end
+      end
       uri.userinfo = userinfo
     end
 
