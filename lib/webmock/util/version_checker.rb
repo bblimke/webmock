@@ -24,9 +24,10 @@
 
 module WebMock
   class VersionChecker
-    def initialize(library_name, library_version, min_patch_level, max_minor_version = nil)
+    def initialize(library_name, library_version, min_patch_level, max_minor_version = nil, unsupported_versions = [])
       @library_name, @library_version = library_name, library_version
       @min_patch_level, @max_minor_version = min_patch_level, max_minor_version
+      @unsupported_versions = unsupported_versions || []
 
       @major,     @minor,     @patch     = parse_version(library_version)
       @min_major, @min_minor, @min_patch = parse_version(min_patch_level)
@@ -38,6 +39,7 @@ module WebMock
     def check_version!
       warn_about_too_low if too_low?
       warn_about_too_high if too_high?
+      warn_about_unsupported_version if unsupported_version?
     end
 
   private
@@ -50,6 +52,10 @@ module WebMock
       @comparison_result == :too_high
     end
 
+    def unsupported_version?
+      @unsupported_versions.include?(@library_version)
+    end
+
     def warn_about_too_low
       warn_in_red "You are using #{@library_name} #{@library_version}. " +
                   "WebMock supports version #{version_requirement}."
@@ -59,6 +65,12 @@ module WebMock
       warn_in_red "You are using #{@library_name} #{@library_version}. " +
                   "WebMock is known to work with #{@library_name} #{version_requirement}. " +
                   "It may not work with this version."
+    end
+
+    def warn_about_unsupported_version
+      warn_in_red "You are using #{@library_name} #{@library_version}. " +
+                  "WebMock does not support this version. " +
+                  "WebMock supports versions #{version_requirement}."
     end
 
     def warn_in_red(text)
@@ -80,6 +92,7 @@ module WebMock
     def version_requirement
       req = ">= #{@min_patch_level}"
       req += ", < #{@max_major}.#{@max_minor + 1}" if @max_minor
+      req += ", except versions #{@unsupported_versions.join(',')}" unless @unsupported_versions.empty?
       req
     end
 

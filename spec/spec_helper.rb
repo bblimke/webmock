@@ -48,7 +48,6 @@ RSpec.configure do |config|
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
 end
-RSpec::Expectations.configuration.warn_about_potential_false_positives = false
 
 def fail()
   raise_error(RSpec::Expectations::ExpectationNotMetError)
