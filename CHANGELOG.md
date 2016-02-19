@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.24.0
+
+  * Enabled support for Curb > 0.8.6
+
 ## 1.23.0
 
   * `WebMock.disable_net_connect` accepts `:allow` option with an object that responds to `#call`, receiving a `URI` object and returning a boolean:
