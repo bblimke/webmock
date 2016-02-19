@@ -55,5 +55,11 @@ module WebMock
       expect(Kernel).not_to receive(:warn)
       checker.check_version!
     end
+
+    it "prints warning if version is unsupported" do
+      checker = VersionChecker.new('foo', '2.0.0', '1.0.0', '3.0', ['2.0.0'])
+      expect(Kernel).to receive(:warn).with(%r{You are using foo 2.0.0. WebMock does not support this version. WebMock supports versions >= 1.0.0, < 3.1, except versions 2.0.0.})
+      checker.check_version!
+    end
   end
 end
