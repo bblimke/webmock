@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.1
+
+  * HTTPClient adapter supports reading basic authentication credentials directly from Authorization header.
+
+    Thanks to [Michiel Karnebeek](https://github.com/mkarnebeek)
+
 ## 1.24.0
 
   * Enabled support for Curb > 0.8.6

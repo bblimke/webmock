@@ -1034,6 +1034,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Alexey Zapparov
 * Pablo Brasero
 * Cedric Pimenta
+* Michiel Karnebeek
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
