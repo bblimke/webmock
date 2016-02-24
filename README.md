@@ -538,7 +538,7 @@ so when there is no request, `Net::HTTP.start` doesn't do anything.
 **This means that WebMock breaks the Net::HTTP behaviour by default!**
 
 To workaround this issue, WebMock offers `:net_http_connect_on_start` option,
-which can be passed to `WebMock.allow_net_connect!` and `WebMock#disable_net_connect!` methods, i.e.
+which can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` methods, i.e.
 
 ```ruby
 WebMock.allow_net_connect!(:net_http_connect_on_start => true)
