@@ -391,6 +391,24 @@ describe WebMock::RequestPattern do
             expect(WebMock::RequestPattern.new(:post, "www.example.com", :body => {:a => /^\d+$/, :b => {:c => /^\d{3}$/}})).
               not_to match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a=abcde&b[c]=123'))
           end
+
+          context 'body is an hash with an array of hashes' do
+            let(:body_hash) { {:a => [{'b' => '1'}, {'b' => '2'}]} }
+
+            it "should match when hash matches body" do
+              expect(WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash)).
+                to match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a[][b]=1&a[][b]=2'))
+            end
+          end
+
+          context 'body is an hash with an array of hashes with multiple keys' do
+            let(:body_hash) { {:a => [{'b' => '1', 'a' => '2'}, {'b' => '3'}]} }
+
+            it "should match when hash matches body" do
+              expect(WebMock::RequestPattern.new(:post, 'www.example.com', :body => body_hash)).
+                to match(WebMock::RequestSignature.new(:post, "www.example.com", :body => 'a[][b]=1&a[][a]=2&a[][b]=3'))
+            end
+          end
         end
 
         describe "for request with json body and content type is set to json" do

@@ -143,12 +143,12 @@ module WebMock::Util
         array_value = !!(last_key =~ /\[\]$/)
         last_key = last_key.gsub(/[\[\]]/, '')
         if current_node.is_a? Array
-          container = current_node.find { |n| n.is_a?(Hash) && n.has_key?(last_key) }
-          if container
+          last_container = current_node.select { |n| n.is_a?(Hash) }.last
+          if last_container && !last_container.has_key?(last_key)
             if array_value
-              container[last_key] << value
+              last_container[last_key] << value
             else
-              container[last_key] = value
+              last_container[last_key] = value
             end
           else
             if array_value
