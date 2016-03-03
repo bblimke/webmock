@@ -106,9 +106,16 @@ describe WebMock::Util::QueryMapper do
     expect(subject.query_to_values query).to eq values
   end
 
-  it 'converts complex nested values, vice versa' do
+  it 'converts complex nested hashes, vice versa' do
     query = "one%5B%5D[foo]=bar&one%5B%5D[zoo]=car" # one[][foo]=bar&one[][zoo]=car
-    values = {"one" => [{"foo" => "bar"}, {"zoo" => "car"}]}
+    values = {"one" => [{"foo" => "bar", "zoo" => "car"}]}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
+
+  it 'converts complex nested array of hashes, vice versa' do
+    query = "one%5B%5D[foo]=bar&one%5B%5D[foo]=bar&one%5B%5D[zoo]=car" # one[][foo]=bar&one[][foo]=bar&one[][zoo]=car
+    values = {"one" => [{"foo" => "bar"}, {"foo" => "bar", "zoo" => "car"}]}
     expect(subject.values_to_query values).to eq query
     expect(subject.query_to_values query).to eq values
   end
