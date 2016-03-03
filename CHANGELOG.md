@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.24.2
+
+  * Improve parsing of params on request
+
+    Thanks to [Cedric Pimenta](https://github.com/cedricpim)
+
 ## 1.24.1
 
   * HTTPClient adapter supports reading basic authentication credentials directly from Authorization header.
