@@ -304,7 +304,8 @@ module WebMock
     end
 
     def self.validate_headers(headers)
-      # If you make a request with headers that are symbols Net::HTTP raises a NoMethodError
+      # For Ruby versions < 2.3.0, if you make a request with headers that are symbols
+      # Net::HTTP raises a NoMethodError
       #
       # WebMock normalizes headers when creating a RequestSignature,
       # and will update all headers from symbols to strings.
@@ -313,9 +314,11 @@ module WebMock
       #
       # So before this point, WebMock raises an ArgumentError if any of the headers are symbols
       # instead of the cryptic NoMethodError "undefined method `split' ...` from Net::HTTP
-      header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
-      if header_as_symbol
-        raise ArgumentError.new("Net:HTTP does not accept headers as symbols")
+      if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.3.0')
+        header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
+        if header_as_symbol
+          raise ArgumentError.new("Net:HTTP does not accept headers as symbols")
+        end
       end
     end
 
