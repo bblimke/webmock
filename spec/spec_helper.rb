@@ -23,11 +23,9 @@ require 'support/my_rack_app'
 CURL_EXAMPLE_OUTPUT_PATH = File.expand_path('../support/example_curl_output.txt', __FILE__)
 
 RSpec.configure do |config|
-  unless NetworkConnection.is_network_available?
+  no_network_connection = ENV["NO_CONNECTION"] || ! NetworkConnection.is_network_available?
+  if no_network_connection
     warn("No network connectivity. Only examples which do not make real network connections will run.")
-    no_network_connection = true
-  end
-  if ENV["NO_CONNECTION"] || no_network_connection
     config.filter_run_excluding :net_connect => true
   end
 
