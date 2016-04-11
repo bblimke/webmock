@@ -19,4 +19,4 @@ platforms :jruby do
 end
 
 
-gem 'curb', '< 0.9.2' #https://github.com/taf2/curb/issues/296
+gem 'curb', '< 0.9.2'  unless RUBY_PLATFORM =~ /java/ #https://github.com/taf2/curb/issues/296
