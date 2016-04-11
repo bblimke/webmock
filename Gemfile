@@ -6,7 +6,8 @@ if ENV["EM_HTTP_REQUEST_0_X"]
 end
 
 group :development do
-  gem 'rake'
+  gem 'rake', '~> 10.5.0' if RUBY_VERSION < '1.9.3'
+  gem 'rake' if RUBY_VERSION >= '1.9.3'
 end
 
 group :test do
@@ -16,3 +17,5 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
+
+gem 'curb', '< 0.9.2'  unless RUBY_PLATFORM =~ /java/ #https://github.com/taf2/curb/issues/296
