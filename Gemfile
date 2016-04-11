@@ -17,3 +17,6 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
+
+
+gem 'curb', '< 0.9.2' #https://github.com/taf2/curb/issues/296
