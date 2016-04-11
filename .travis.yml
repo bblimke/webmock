@@ -30,3 +30,5 @@ matrix:
 # Send builds to container-based infrastructure
 # http://docs.travis-ci.com/user/workers/container-based-infrastructure/
 sudo: false
+language: ruby
+cache: bundler
