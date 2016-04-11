@@ -32,3 +32,5 @@ matrix:
 sudo: false
 language: ruby
 cache: bundler
+before_script:
+  - bundle update
