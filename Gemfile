@@ -16,7 +16,7 @@ end
 
 platforms :jruby do
   gem 'jruby-openssl'
-  gem "ruby-maven"
+  gem 'manticore', '< 0.5.5'
 end
 
 
