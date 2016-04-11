@@ -16,7 +16,7 @@ end
 
 platforms :jruby do
   gem 'jruby-openssl'
-  gem 'manticore', '< 0.5.5'
+  gem 'manticore', '< 0.5.4'
 end
 
 
