@@ -68,7 +68,8 @@ module WebMock
     when Array
       allowed.any? { |allowed_item| net_connect_explicit_allowed?(allowed_item, uri) }
     when Regexp
-      uri.to_s =~ allowed
+      uri.to_s =~ allowed ||
+      uri.omit(:port).to_s =~ allowed && uri.port == uri.default_port
     when String
       allowed == uri.to_s ||
       allowed == uri.host ||

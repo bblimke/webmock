@@ -235,6 +235,11 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
           it "should make a real request to allowed host", :net_connect => true do
             expect(http_request(:get, "http://httpstat.us/200").status).to eq('200')
           end
+
+          it "should make a real request if request is allowed by path regexp and url contains default port", :net_connect => true do
+            WebMock.disable_net_connect!(allow: %r{github.com/bblimke/webmock})
+            expect(http_request(:get, 'https://github.com:443/bblimke/webmock').status).to eq('200')
+          end
         end
       end
 
