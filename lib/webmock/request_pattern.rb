@@ -213,6 +213,8 @@ module WebMock
     end
 
     def matches?(body, content_type = "")
+      assert_non_multipart_body(content_type)
+
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
         matching_hashes?(body_as_hash(body, content_type), @pattern)
@@ -238,6 +240,12 @@ module WebMock
         Crack::XML.parse(body)
       else
         WebMock::Util::QueryMapper.query_to_values(body, :notation => Config.instance.query_values_notation)
+      end
+    end
+
+    def assert_non_multipart_body(content_type)
+      if content_type =~ %r{^multipart/form-data}
+        raise ArgumentError.new("WebMock does not support matching body for multipart/form-data requests yet :(")
       end
     end
 

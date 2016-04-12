@@ -14,6 +14,14 @@ describe "HTTPClient" do
 
   include_examples "with WebMock"
 
+  it "should raise a clearly readable error if request with multipart body is sent" do
+    stub_request(:post, 'www.example.com').with(body: {type: 'image'})
+
+    expect {
+      HTTPClient.new.post_content('www.example.com', type: 'image', file: File.new('spec/fixtures/test.txt'))
+    }.to raise_error(ArgumentError, "WebMock does not support matching body for multipart/form-data requests yet :(")
+  end
+
   it "should yield block on response if block provided" do
     stub_request(:get, "www.example.com").to_return(:body => "abc")
     response_body = ""

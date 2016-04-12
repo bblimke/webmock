@@ -106,6 +106,15 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
+  it "should handle requests with raw binary data" do
+    body = "\x14\x00\x00\x00\x70\x69\x6e\x67\x00\x00"
+    stub_http_request(:post, "www.example.com").with(:body => body).to_return(:body => "abc")
+    req = Net::HTTP::Post.new("/")
+    req.body = body
+    req.content_type = "application/octet-stream"
+    expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
+  end
+
   it "raises an ArgumentError if passed headers as symbols if RUBY_VERSION < 2.3.0" do
     uri = URI.parse("http://google.com/")
     http = Net::HTTP.new(uri.host, uri.port)
