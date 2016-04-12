@@ -106,7 +106,7 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
-  it "raises an ArgumentError if passed headers as symbols" do
+  it "raises an ArgumentError if passed headers as symbols if RUBY_VERSION < 2.3.0" do
     uri = URI.parse("http://google.com/")
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
@@ -123,9 +123,15 @@ describe "Net:HTTP" do
       end
     end
 
-    expect do
-      http.request(request)
-    end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.3.0')
+      expect do
+        http.request(request)
+      end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+    else
+      expect do
+        http.request(request)
+      end.to_not raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+    end
   end
 
   it "should handle multiple values for the same response header" do
