@@ -70,8 +70,11 @@ module WebMock
     when Regexp
       uri.to_s =~ allowed
     when String
+      allowed == uri.to_s ||
       allowed == uri.host ||
-      allowed == "#{uri.host}:#{uri.port}"
+      allowed == "#{uri.host}:#{uri.port}" ||
+      allowed == "#{uri.scheme}://#{uri.host}:#{uri.port}" ||
+      allowed == "#{uri.scheme}://#{uri.host}" && uri.port == uri.default_port
     else
       if allowed.respond_to?(:call)
         allowed.call(uri)
