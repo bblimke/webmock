@@ -180,13 +180,13 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
           it "should raise exception if request was made to different port" do
             expect {
-              http_request(:get, 'https://www.google.pl:80')
+              http_request(:get, 'https://www.google.pl:80/')
             }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET https://www.google.pl:80))
           end
 
           it "should raise exception if request was made to different scheme" do
             expect {
-              http_request(:get, 'http://www.google.pl')
+              http_request(:get, 'http://www.google.pl/')
             }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.google.pl))
           end
         end
@@ -194,15 +194,15 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
             stub_request(:get, 'https://www.google.pl').to_return(:body => "abc")
-            expect(http_request(:get, "https://www.google.pl").body).to eq("abc")
+            expect(http_request(:get, "https://www.google.pl/").body).to eq("abc")
           end
 
           it "should make a real request to allowed host with scheme", :net_connect => true do
-            expect(http_request(:get, "https://www.google.pl").status).to eq('200')
+            expect(http_request(:get, "https://www.google.pl/").status).to eq('200')
           end
 
           it "should make a real request to allowed host with scheme and port", :net_connect => true do
-            expect(http_request(:get, "https://www.google.pl:443").status).to eq('200')
+            expect(http_request(:get, "https://www.google.pl:443/").status).to eq('200')
           end
         end
       end
