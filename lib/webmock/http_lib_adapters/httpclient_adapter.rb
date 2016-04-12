@@ -209,13 +209,13 @@ if defined?(::HTTPClient)
   end
 
   def remove_authorization_header headers
-    headers.reject! do |k, v|
-      next unless k =~ /[Aa]uthorization/
-      if v.is_a? Array
-        v.reject! { |v| v =~ /^Basic / }
-        v.length == 0
-      elsif v.is_a? String
-        v =~ /^Basic /
+    headers.reject! do |name, value|
+      next unless name =~ /[Aa]uthorization/
+      if value.is_a? Array
+        value.reject! { |v| v =~ /^Basic / }
+        value.length == 0
+      elsif value.is_a? String
+        value =~ /^Basic /
       end
     end
   end
