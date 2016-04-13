@@ -19,6 +19,7 @@ require 'webmock/rspec'
 require 'support/network_connection'
 require 'support/webmock_server'
 require 'support/my_rack_app'
+require 'support/failures'
 
 CURL_EXAMPLE_OUTPUT_PATH = File.expand_path('../support/example_curl_output.txt', __FILE__)
 
@@ -45,12 +46,7 @@ RSpec.configure do |config|
 
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
+
+  config.include Failures
 end
 
-def fail()
-  raise_error(RSpec::Expectations::ExpectationNotMetError)
-end
-
-def fail_with(message)
-  raise_error(RSpec::Expectations::ExpectationNotMetError, message)
-end

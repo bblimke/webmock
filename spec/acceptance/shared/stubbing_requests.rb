@@ -233,7 +233,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             end
 
             it "should not match if hash doesn't match url encoded body" do
-              expect { wrong_request }.to raise_error
+              expect { wrong_request }.to raise_error(WebMock::NetConnectNotAllowedError)
             end
           end
 
@@ -258,7 +258,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             end
 
             it "should not match if hash doesn't match url encoded body" do
-              expect { wrong_request }.to raise_error
+              expect { wrong_request }.to raise_error(WebMock::NetConnectNotAllowedError)
             end
           end
 
