@@ -17,5 +17,3 @@ end
 platforms :jruby do
   gem 'jruby-openssl'
 end
-
-gem 'curb', '< 0.9.2'  unless RUBY_PLATFORM =~ /java/ #https://github.com/taf2/curb/issues/296
