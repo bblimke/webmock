@@ -95,6 +95,10 @@ require 'webmock'
 include WebMock::API
 ```
 
+### Automatically enabled
+
+`require 'webmock'` loads the library AND enables `WebMock`.  Add `WebMock.disable!` after loading the gem to disable this behavior.
+
 ## Examples
 
 
