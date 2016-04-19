@@ -166,23 +166,17 @@ if defined?(EventMachine::HttpClient)
 
         method = @req.method
         uri = @req.uri.clone
-        auth = @req.headers[:'proxy-authorization']
         query = @req.query
-
-        if auth
-          userinfo = auth.join(':')
-          userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
-          if @req
-            @req.proxy.reject! {|k,v| t.to_s == 'authorization' }
-          else
-            options.reject! {|k,v| k.to_s == 'authorization' } #we added it to url userinfo
-          end
-          uri.userinfo = userinfo
-        end
 
         uri.query = encode_query(@req.uri, query).slice(/\?(.*)/, 1)
 
         body = form_encode_body(body) if body.is_a?(Hash)
+
+        headers = @req.headers
+
+        if headers['authorization']
+          headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(headers.delete('authorization'))
+        end
 
         WebMock::RequestSignature.new(
           method.downcase.to_sym,

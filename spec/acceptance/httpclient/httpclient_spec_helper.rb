@@ -7,8 +7,11 @@ module HTTPClientSpecHelper
     uri = Addressable::URI.heuristic_parse(uri)
     c = options.fetch(:client) { HTTPClient.new }
     c.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    c.set_basic_auth(nil, uri.user, uri.password) if uri.user
-    params = [method, "#{uri.omit(:userinfo, :query).normalize.to_s}",
+    if options[:basic_auth]
+      c.force_basic_auth = true
+      c.set_basic_auth(nil, options[:basic_auth][0], options[:basic_auth][1])
+    end
+    params = [method, uri.normalize.to_s,
       WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => WebMock::Config.instance.query_values_notation), options[:body], options[:headers] || {}]
     if HTTPClientSpecHelper.async_mode
       connection = c.request_async(*params)

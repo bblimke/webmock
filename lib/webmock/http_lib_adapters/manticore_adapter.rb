@@ -45,7 +45,7 @@ if defined?(Manticore)
           end
 
           def response_object_for(request, context, &block)
-            request_signature = generate_webmock_request_signature(request)
+            request_signature = generate_webmock_request_signature(request, context)
             WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
             if webmock_response = registered_response_for(request_signature)
@@ -74,11 +74,15 @@ if defined?(Manticore)
             WebMock.net_connect_allowed?(uri)
           end
 
-          def generate_webmock_request_signature(request)
+          def generate_webmock_request_signature(request, context)
             method = request.method.downcase
             uri = request.uri.to_s
             body = read_body(request)
             headers = split_array_values(request.headers)
+
+            if context.get_credentials_provider && credentials = context.get_credentials_provider.get_credentials(AuthScope::ANY)
+              headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(credentials.get_user_name,credentials.get_password)
+            end
 
             WebMock::RequestSignature.new(method, uri, {:body => body, :headers => headers})
           end

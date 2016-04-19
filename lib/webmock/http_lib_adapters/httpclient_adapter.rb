@@ -170,7 +170,6 @@ if defined?(::HTTPClient)
     uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
     uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, :notation => WebMock::Config.instance.query_values_notation) if req.header.request_query
     uri.port = req.header.request_uri.port
-    uri = uri.omit(:userinfo)
 
     @request_filter.each do |filter|
       filter.filter_request(req)
@@ -182,11 +181,6 @@ if defined?(::HTTPClient)
       hdrs
     end
     headers = headers_from_session(uri).merge(headers)
-
-    if auth_cred = auth_cred_from_www_auth(req) || auth_cred_from_headers(headers)
-      remove_authorization_header headers
-      uri.userinfo = userinfo_from_auth_cred auth_cred
-    end
 
     signature = WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
@@ -201,38 +195,6 @@ if defined?(::HTTPClient)
     end
 
     signature
-  end
-
-  def userinfo_from_auth_cred auth_cred
-    userinfo = WebMock::Util::Headers.decode_userinfo_from_header(auth_cred)
-    WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo)
-  end
-
-  def remove_authorization_header headers
-    headers.reject! do |name, value|
-      next unless name =~ /[Aa]uthorization/
-      if value.is_a? Array
-        value.reject! { |v| v =~ /^Basic / }
-        value.length == 0
-      elsif value.is_a? String
-        value =~ /^Basic /
-      end
-    end
-  end
-
-  def auth_cred_from_www_auth(req)
-    auth = www_auth.basic_auth
-    auth.challenge(req.header.request_uri, nil)
-    auth.get(req) if auth.scheme == 'Basic'
-  end
-
-  def auth_cred_from_headers(headers)
-    headers.each do |k,v|
-      next unless k =~ /[Aa]uthorization/
-      return v if v.is_a?(String) && v =~ /^Basic /
-      v.each { |v| return v if v =~ /^Basic / } if v.is_a? Array
-    end
-    nil
   end
 
   def webmock_responses

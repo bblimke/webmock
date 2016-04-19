@@ -275,19 +275,11 @@ module WebMock
 
       path = WebMock::Util::URI.heuristic_parse(path).request_uri if path =~ /^http/
 
-      if request["authorization"] =~ /^Basic /
-        userinfo = WebMock::Util::Headers.decode_userinfo_from_header(request["authorization"])
-        userinfo = WebMock::Util::URI.encode_unsafe_chars_in_userinfo(userinfo) + "@"
-      else
-        userinfo = ""
-      end
-
-      uri = "#{protocol}://#{userinfo}#{net_http.address}:#{net_http.port}#{path}"
+      uri = "#{protocol}://#{net_http.address}:#{net_http.port}#{path}"
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
       validate_headers(headers)
-      headers.reject! {|k,v| k =~ /[Aa]uthorization/ && v.first =~ /^Basic / } #we added it to url userinfo
 
       if request.body_stream
         body = request.body_stream.read

@@ -50,10 +50,25 @@ module WebMock
 
     def assign_options(options)
       options = WebMock::Util::HashKeysStringifier.stringify_keys!(options, :deep => true)
-      HashValidator.new(options).validate_keys('body', 'headers', 'query')
+      HashValidator.new(options).validate_keys('body', 'headers', 'query', 'basic_auth')
+      set_basic_auth_as_headers!(options)
       @body_pattern = BodyPattern.new(options['body']) if options.has_key?('body')
       @headers_pattern = HeadersPattern.new(options['headers']) if options.has_key?('headers')
       @uri_pattern.add_query_params(options['query']) if options.has_key?('query')
+    end
+
+    def set_basic_auth_as_headers!(options)
+      if basic_auth = options.delete('basic_auth')
+        validate_basic_auth!(basic_auth)
+        options['headers'] ||= {}
+        options['headers']['Authorization'] = WebMock::Util::Headers.basic_auth_header(basic_auth[0],basic_auth[1])
+      end
+    end
+
+    def validate_basic_auth!(basic_auth)
+      if !basic_auth.is_a?(Array) || basic_auth.map{|e| e.is_a?(String)}.uniq != [true]
+        raise "The basic_auth option value should be an array which contains 2 strings: username and password"
+      end
     end
 
     def create_uri_pattern(uri)

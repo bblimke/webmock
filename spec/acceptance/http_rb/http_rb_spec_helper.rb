@@ -2,7 +2,13 @@ require "ostruct"
 
 module HttpRbSpecHelper
   def http_request(method, uri, options = {})
-    response = HTTP.request(method, normalize_uri(uri), options)
+    chain = HTTP
+
+    if basic_auth = options.delete(:basic_auth)
+      chain = chain.basic_auth(user: basic_auth[0], pass: basic_auth[1])
+    end
+
+    response = chain.request(method, normalize_uri(uri), options)
 
     OpenStruct.new({
       :body       => response.body.to_s,
