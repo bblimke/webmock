@@ -1,12 +1,5 @@
 require "pathname"
 
-#compatibility with Ruby 1.9.2 preview1 to allow reading raw responses
-if RUBY_VERSION <= "1.9.2"
-  class StringIO
-    alias_method :read_nonblock, :sysread
-  end
-end
-
 module WebMock
 
   class ResponseFactory

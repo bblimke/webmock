@@ -32,15 +32,11 @@ Supported HTTP libraries
 Supported Ruby Interpreters
 ---------------------------
 
-* MRI 1.8.7
-* MRI 1.9.1
-* MRI 1.9.2
 * MRI 1.9.3
 * MRI 2.0.0
 * MRI 2.1
 * MRI 2.2
 * MRI 2.3
-* REE 1.8.7
 * JRuby
 * Rubinius
 
@@ -852,45 +848,6 @@ I'm particularly interested in how the DSL could be improved.
 In order to work on Webmock you first need to fork and clone the repo.
 Please do any work on a dedicated branch and rebase against master
 before sending a pull request.
-
-#### Running Tests
-
-We use RVM in order to test WebMock against 1.8.6, REE, 1.8.7, 1.9.2 and
-jRuby.  You can get RVM setup for WebMock development using the
-following commands (if you don't have these version of Ruby installed
-use `rvm install` to install each of them).
-
-    rvm use --create 1.8.6@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create ree@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create 1.8.7@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create 1.9.2@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create jruby@webmock
-    gem install jeweler bundler
-    bundle install
-
-These commands will create a gemset named WebMock for each of the
-supported versions of Ruby and `bundle install` all dependencies.
-
-With the supported versions of Ruby installed RVM will run specs across
-all version with just one command.
-
-    bundle exec rvm 1.8.6@webmock,ree@webmock,1.8.7@webmock,1.9.2@webmock,jruby@webmock rspec spec/**/*_spec.rb
-
-This command is wrapped up in to a rake task and can be invoked like so:
-
-  rake rvm:specs
 
 ## Credits
 
