@@ -50,6 +50,10 @@ Supported Ruby Interpreters
     cd webmock
     rake install
 
+## Upgrading from v1.x to v2.x
+
+WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
+
 ### Test::Unit
 
 Add the following code to `test/test_helper.rb`

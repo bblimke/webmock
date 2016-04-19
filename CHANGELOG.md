@@ -1,5 +1,44 @@
 # Changelog
 
+## 2.0.0
+
+  * require 'webmock' does not enable WebMock anymore. `gem 'webmock'` can be now safely added to the Gemfile without modifying http clients. Call `WebMock.enable!` to enable it.
+
+    Please note that `require 'webmock/rspec'`, `require 'webmock/test_unit'`, `require 'webmock/minitest'` and `require 'webmock/cucumber'` still do enable WebMock.
+
+  * Dropped support for Ruby < 1.9.3
+
+  * Dropped support for em-http-request < 1.0.0
+
+  * WebMock 2.0 does not match basic auth credentials in the userinfo part of the url, with credentials passed in `Authorization: Basic ...` header.
+  It now treats the Authorization header and credentials in userinfo in the url as completely separate attributes of the request.
+
+  The following stub declaration, which used to work in WebMock 1.x, is not going to work anymore
+
+        stub_request(:get, "user:pass@www.example.com")
+
+        Net::HTTP.start('www.example.com') do |http|
+          req = Net::HTTP::Get.new('/')
+          req.basic_auth 'user', 'pass'
+          http.request(req)
+        end    # ===> Failure
+
+  In order to stub a request with basic authentication credentials provided in the Authorization header, please use the following code:
+
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+
+  or
+
+        stub_request(:get, "www.example.com").
+          with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
+
+  In order to stub a request with basic authentication credentials provided in the url please use the following code:
+
+        stub_request(:get, "user:pass@www.example.com")
+
+        RestClient.get('user:pass@www.example.com')    # ===> Success
+
+
 ## 1.24.3
 
   * Allow Net:HTTP headers keys to be provided as symbols if `RUBY_VERSION` >= 2.3.0
