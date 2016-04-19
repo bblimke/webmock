@@ -93,6 +93,8 @@ You can also use WebMock outside a test framework:
 ```ruby
 require 'webmock'
 include WebMock::API
+
+WebMock.enable!
 ```
 
 ## Examples

@@ -153,6 +153,4 @@ module WebMock
                           end
     ))
   end
-
-  self.enable!
 end

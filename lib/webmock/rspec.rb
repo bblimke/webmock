@@ -20,6 +20,8 @@ end
 
 require 'webmock/rspec/matchers'
 
+WebMock.enable!
+
 RSPEC_CONFIGURER.configure { |config|
 
   config.include WebMock::API

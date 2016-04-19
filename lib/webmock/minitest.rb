@@ -10,6 +10,8 @@ end
 
 require 'webmock'
 
+WebMock.enable!
+
 test_class.class_eval do
   include WebMock::API
 
