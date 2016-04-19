@@ -5,9 +5,12 @@ module PatronSpecHelper
     method = method.to_sym
     uri = Addressable::URI.heuristic_parse(uri)
     sess = Patron::Session.new
-    sess.base_url = "#{uri.omit(:userinfo, :path, :query).normalize.to_s}".gsub(/\/$/,"")
-    sess.username = uri.user
-    sess.password = uri.password
+    sess.base_url = "#{uri.omit(:path, :query).normalize.to_s}".gsub(/\/$/,"")
+
+    if options[:basic_auth]
+      sess.username = options[:basic_auth][0]
+      sess.password = options[:basic_auth][1]
+    end
 
     sess.connect_timeout = 30
     sess.timeout = 30

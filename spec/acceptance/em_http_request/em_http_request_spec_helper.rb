@@ -8,6 +8,9 @@ module EMHttpRequestSpecHelper
   def http_request(method, uri, options = {}, &block)
     @http = nil
     head = options[:headers] || {}
+    if options[:basic_auth]
+      head.merge!('authorization' => options[:basic_auth])
+    end
     response = nil
     error = nil
     error_set = false
@@ -19,7 +22,7 @@ module EMHttpRequestSpecHelper
         :body => options[:body],
         :file => options[:file],
         :query => options[:query],
-        :head => head.merge('authorization' => [uri.user, uri.password])
+        :head => head
       }, &block)
       http.errback {
         error_set = true

@@ -18,7 +18,10 @@ module NetHTTPSpecHelper
       end
     end if options[:headers]
 
-    req.basic_auth uri.user, uri.password if uri.user
+    if options[:basic_auth]
+      req.basic_auth(options[:basic_auth][0], options[:basic_auth][1])
+    end
+
     http = Net::HTTP.new(uri.host, uri.port)
     if uri.scheme == "https"
       http.use_ssl = true

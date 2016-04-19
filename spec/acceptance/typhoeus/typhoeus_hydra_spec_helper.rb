@@ -7,14 +7,17 @@ module TyphoeusHydraSpecHelper
 
   def http_request(method, uri, options = {}, &block)
     uri.gsub!(" ", "%20") #typhoeus doesn't like spaces in the uri
-    request = Typhoeus::Request.new(uri,
-      {
-        :method  => method,
-        :body    => options[:body],
-        :headers => options[:headers],
-        :timeout => 25000
-      }
-    )
+    request_options =  {
+      :method  => method,
+      :body    => options[:body],
+      :headers => options[:headers],
+      :timeout => 25000
+    }
+    if options[:basic_auth]
+      request_options[:userpwd] = options[:basic_auth].join(':')
+    end
+    request = Typhoeus::Request.new(uri, request_options)
+
     hydra = Typhoeus::Hydra.new
     hydra.queue(request)
     hydra.run

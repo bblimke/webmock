@@ -36,6 +36,10 @@ module WebMock
         header.sub(/^Basic /, "").unpack("m").first
       end
 
+      def self.basic_auth_header(*credentials)
+        "Basic #{Base64.encode64(credentials.join(':')).chomp}"
+      end
+
     end
 
   end

@@ -7,7 +7,7 @@ require 'acceptance/net_http/net_http_shared'
 include NetHTTPSpecHelper
 
 describe "Net:HTTP" do
-  include_examples "with WebMock"
+  include_examples "with WebMock", :no_url_auth
 
   let(:port) { WebMockServer.instance.port }
 

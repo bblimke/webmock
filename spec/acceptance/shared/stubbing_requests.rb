@@ -362,7 +362,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       end
     end
 
-    describe "when stubbing request with basic authentication", :unless => (adapter_info.include?(:no_url_auth)) do
+    describe "when stubbing request with userinfo in url", :unless => (adapter_info.include?(:no_url_auth)) do
       it "should match if credentials are the same" do
         stub_request(:get, "user:pass@www.example.com")
         expect(http_request(:get, "http://user:pass@www.example.com/").status).to eq("200")
@@ -387,6 +387,56 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         expect {
           expect(http_request(:get, "http://user:pazz@www.example.com/").status).to eq("200")
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://user:pazz@www.example.com/))
+      end
+
+      it "should not match if request has credentials provided in basic authentication herader" do
+        stub_request(:get, "user:pass@www.example.com")
+        expect {
+          expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass']).status).to eq("200")
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers))
+      end
+    end
+
+    describe "when stubbing request with basic authentication header" do
+      it "should match if credentials are the same" do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+        expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass']).status).to eq("200")
+      end
+
+      it "should match if credentials are the same and were provided directly as authentication headers in request" do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+        expect(http_request(:get, "http://www.example.com/", headers: {'Authorization'=>'Basic dXNlcjpwYXNz'}).status).to eq("200")
+      end
+
+      it "should match if credentials are the same and have been declared in the stub as encoded header" do
+        stub_request(:get, "www.example.com").with(headers: {'Authorization'=>'Basic dXNlcjpwYXNz'})
+        expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass']).status).to eq("200")
+      end
+
+      it "should not match if credentials are different" do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+        expect {
+          expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pazz']).status).to eq("200")
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers))
+      end
+
+      it "should not match if credentials are stubbed but not provided in the request" do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+        expect {
+          expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+      end
+
+      it "should match if credentials are not stubbed but exist in the request" do
+        stub_request(:get, "www.example.com")
+        expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass']).status).to eq("200")
+      end
+
+      it "should not match if request has credentials provides in userinfo", :unless => (adapter_info.include?(:no_url_auth)) do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+        expect {
+          expect(http_request(:get, "http://user:pass@www.example.com/").status).to eq("200")
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://user:pass@www.example.com/))
       end
     end
 

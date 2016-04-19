@@ -201,16 +201,29 @@ stub_request(:post, "www.example.com").with { |request| request.body == "abc" }
 RestClient.post('www.example.com', 'abc')    # ===> Success
 ```
 
-### Request with basic authentication
+### Request with basic authentication header
 
 ```ruby
-stub_request(:get, "user:pass@www.example.com")
+stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+# or
+# stub_request(:get, "www.example.com").
+#   with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
 
 Net::HTTP.start('www.example.com') do |http|
   req = Net::HTTP::Get.new('/')
   req.basic_auth 'user', 'pass'
   http.request(req)
 end    # ===> Success
+```
+
+##### Important! Since version 2.0.0, WebMock does not match credentials provided in Authorization header and credentials provided in the userinfo of a url. I.e. `stub_request(:get, "user:pass@www.example.com")` does not match a request with credentials provided in the Athoriation header.
+
+### Request with basic authentication in the url
+
+```ruby
+stub_request(:get, "user:pass@www.example.com")
+
+RestClient.get('user:pass@www.example.com')    # ===> Success
 ```
 
 ### Matching uris using regular expressions
@@ -735,7 +748,7 @@ I.e all the following representations of the URI are equal:
 "http://www.example.com:80/"
 ```
 
-The following URIs with basic authentication are also equal for WebMock
+The following URIs with userinfo are also equal for WebMock
 
 ```ruby
 "a b:pass@www.example.com"
