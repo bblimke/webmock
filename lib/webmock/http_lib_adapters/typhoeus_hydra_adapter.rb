@@ -53,8 +53,16 @@ if defined?(Typhoeus)
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
-          if req.options[:userpwd]
-            uri.user, uri.password = req.options[:userpwd].split(':')
+
+          headers = req.options[:headers]
+          if authorization = req.options[:userpwd] ||
+                             headers.find { |name, value|
+                               if /\A[Aa]uthorization\z/ =~ name.to_s && /\ABasic / =~ value
+                                 headers = headers.reject { |key, | key == name }
+                                 break WebMock::Util::Headers.decode_userinfo_from_header(value)
+                               end
+                             }
+            uri.userinfo = authorization
           end
 
           body = req.options[:body]
@@ -67,7 +75,7 @@ if defined?(Typhoeus)
             req.options[:method] || :get,
             uri.to_s,
             :body => body,
-            :headers => req.options[:headers]
+            :headers => headers
           )
 
           req.instance_variable_set(:@__webmock_request_signature, request_signature)
