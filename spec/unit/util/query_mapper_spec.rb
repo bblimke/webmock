@@ -48,6 +48,22 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a'][0]['b'][0]['c'][0]['d'][0]).to eq('1')
       expect(hsh['a'][0]['b'][0]['c'][0]['d'][1]['e']).to eq('2')
     end
+
+    it "should parse nested repeated correctly" do
+      query = "a[][b][]=one&a[][b][]=two"
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to be_a(Array)
+      expect(hsh['a'][0]).to eq({"b" => ['one']})
+      expect(hsh['a'][1]).to eq({"b" => ['two']})
+    end
+
+    it "should parse nested non-repeated correctly" do
+      query = "a[][b][]=one&a[][c][]=two"
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to be_a(Array)
+      expect(hsh['a'][0]['b']).to eq(['one'])
+      expect(hsh['a'][0]['c']).to eq(['two'])
+    end
   end
 
   context '#to_query' do
