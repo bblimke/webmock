@@ -1,15 +1,17 @@
 # Changelog
 
-## 1.24.3
-
-  * Allow Net:HTTP headers keys to be provided as symbols if `RUBY_VERSION` >= 2.3.0
-
-    Thanks to [Alex Kestner](https://github.com/akestner)
+## 1.24.4
 
   * Fixed the issue with parsing query to a hash with nested array i.e. `a[][b][]=one&a[][c][]=two`
 
     Thanks to [Tim Diggins](https://github.com/timdiggins) for reporting the issue.
     Thanks to [Cedric Pimenta](https://github.com/cedricpim) for finding the solution.
+
+## 1.24.3
+
+  * Allow Net:HTTP headers keys to be provided as symbols if `RUBY_VERSION` >= 2.3.0
+
+    Thanks to [Alex Kestner](https://github.com/akestner)
 
   * Added a clear message on an attept to match a multipart encoded request body.
     WebMock does't support requests with multipart body... yet.
