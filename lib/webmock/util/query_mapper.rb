@@ -146,6 +146,7 @@ module WebMock::Util
           last_container = current_node.select { |n| n.is_a?(Hash) }.last
           if last_container && !last_container.has_key?(last_key)
             if array_value
+              last_container[last_key] ||= []
               last_container[last_key] << value
             else
               last_container[last_key] = value
@@ -159,7 +160,7 @@ module WebMock::Util
           end
         else
           if array_value
-            current_node[last_key] = [] unless current_node[last_key]
+            current_node[last_key] ||= []
             current_node[last_key] << value
           else
             current_node[last_key] = value
