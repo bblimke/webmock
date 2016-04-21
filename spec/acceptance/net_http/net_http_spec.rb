@@ -132,7 +132,7 @@ describe "Net:HTTP" do
       end
     end
 
-    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.3.0')
+    if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
       expect do
         http.request(request)
       end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"

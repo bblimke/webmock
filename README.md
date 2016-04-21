@@ -1015,6 +1015,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Manfred Stienstra
 * Tim Diggins
 * Gabriel Chaney
+* Chris Griego
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

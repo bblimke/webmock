@@ -38,6 +38,12 @@
 
         RestClient.get('user:pass@www.example.com')    # ===> Success
 
+## 1.24.5
+
+  * Fixed issue with RUBY_VERSION comparison using old RubyGems.
+
+    Thanks to [Chris Griego](https://github.com/cgriego).
+
 ## 1.24.4
 
   * Fixed the issue with parsing query to a hash with nested array i.e. `a[][b][]=one&a[][c][]=two`
