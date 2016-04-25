@@ -30,9 +30,12 @@ module CurbSpecHelper
 
   def setup_request(uri, curl, options={})
     curl          ||= Curl::Easy.new
-    curl.url      = uri.omit(:userinfo).to_s
-    curl.username = uri.user
-    curl.password = uri.password
+    curl.url      = uri.to_s
+    if options[:basic_auth]
+      curl.http_auth_types = :basic
+      curl.username = options[:basic_auth][0]
+      curl.password = options[:basic_auth][1]
+    end
     curl.timeout  = 30
     curl.connect_timeout = 30
 

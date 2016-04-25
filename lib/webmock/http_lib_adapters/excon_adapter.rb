@@ -102,6 +102,8 @@ if defined?(Excon)
 
         def self.build_request(params)
           params = params.dup
+          params.delete(:user)
+          params.delete(:password)
           method  = (params.delete(:method) || :get).to_s.downcase.to_sym
           params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
           uri = Addressable::URI.new(params).to_s

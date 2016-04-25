@@ -96,6 +96,14 @@ shared_context "request expectations" do |*adapter_info|
         }.not_to raise_error
       end
 
+      it "should satisfy expectations even if requests were executed in different order than expectations were declared" do
+        stub_request(:post, "http://www.example.com")
+        http_request(:post, "http://www.example.com/", :body => "def")
+        http_request(:post, "http://www.example.com/", :body => "abc")
+        expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "abc")
+        expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "def")
+      end
+
       describe "when matching requests with escaped or unescaped uris" do
         before(:each) do
           WebMock.disable_net_connect!
@@ -630,7 +638,7 @@ shared_context "request expectations" do |*adapter_info|
         end
       end
 
-      describe "with authentication", :unless => (adapter_info.include?(:no_url_auth)) do
+      describe "with userinfo", :unless => (adapter_info.include?(:no_url_auth)) do
         before(:each) do
           stub_request(:any, "http://user:pass@www.example.com")
           stub_request(:any, "http://user:pazz@www.example.com")
@@ -664,12 +672,61 @@ shared_context "request expectations" do |*adapter_info|
           }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
         end
 
-        it "should satisfy expectations even if requests were executed in different order than expectations were declared" do
-          stub_request(:post, "http://www.example.com")
-          http_request(:post, "http://www.example.com/", :body => "def")
-          http_request(:post, "http://www.example.com/", :body => "abc")
-          expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "abc")
-          expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "def")
+        it "should fail if request was executed with basic auth header but expected with credentials in userinfo" do
+          expect {
+            http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass'])
+            expect(a_request(:get, "http://user:pass@www.example.com")).to have_been_made.once
+          }.to fail_with(%r(The request GET http://user:pass@www.example.com/ was expected to execute 1 time but it executed 0 times))
+        end
+      end
+
+      describe "with basic authentication header" do
+        before(:each) do
+          stub_request(:any, "http://www.example.com").with(basic_auth: ['user', 'pass'])
+          stub_request(:any, "http://www.example.com").with(basic_auth: ['user', 'pazz'])
+        end
+
+        it "should satisfy expectation if request was executed with expected credentials" do
+          expect {
+            http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass'])
+            expect(a_request(:get, "http://www.example.com").with(basic_auth: ['user', 'pass'])).to have_been_made.once
+          }.not_to raise_error
+        end
+
+        it "should satisfy expectation if request was executed with expected credentials passed directly as header" do
+          expect {
+            http_request(:get, "http://www.example.com/", headers: {'Authorization'=>'Basic dXNlcjpwYXNz'})
+            expect(a_request(:get, "http://www.example.com").with(basic_auth: ['user', 'pass'])).to have_been_made.once
+          }.not_to raise_error
+        end
+
+        it "should fail if request was executed with different credentials than expected" do
+          expect {
+            http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass'])
+            expect(a_request(:get, "http://www.example.com").with(basic_auth: ['user', 'pazz'])).to have_been_made.once
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXp6'} was expected to execute 1 time but it executed 0 times))
+        end
+
+        it "should fail if request was executed without credentials and credentials were expected" do
+          expect {
+            http_request(:get, "http://www.example.com/")
+            expect(a_request(:get, "http://www.example.com").with(basic_auth: ['user', 'pass'])).to have_been_made.once
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXNz'} was expected to execute 1 time but it executed 0 times))
+        end
+
+        it "should not fail if request was executed with credentials but expected despite credentials" do
+          expect {
+            http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass'])
+            expect(a_request(:get, "http://www.example.com")).to have_been_made.once
+          }.not_to raise_error
+        end
+
+        it "should fail if request was executed with basic auth header and credentials were provided in url", :unless => (adapter_info.include?(:no_url_auth)) do
+          expect {
+            stub_request(:any, "http://user:pass@www.example.com")
+            http_request(:get, "http://user:pass@www.example.com/")
+            expect(a_request(:get, "http://www.example.com").with(basic_auth: ['user', 'pass'])).to have_been_made.once
+          }.to fail_with(%r(The request GET http://www.example.com/ with headers {'Authorization'=>'Basic dXNlcjpwYXNz'} was expected to execute 1 time but it executed 0 times))
         end
       end
 

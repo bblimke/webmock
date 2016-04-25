@@ -1,8 +1,12 @@
 module ManticoreSpecHelper
   def http_request(method, uri, options = {})
     client = Manticore::Client.new
-    response = client.http(method, uri, options)
 
+    if basic_auth = options[:basic_auth]
+      options = options.merge(auth: {user: basic_auth[0], pass: basic_auth[1]})
+    end
+
+    response = client.http(method, uri, options)
     OpenStruct.new({
       :body => response.body || '',
       :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),

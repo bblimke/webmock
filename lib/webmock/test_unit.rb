@@ -1,6 +1,8 @@
 require 'test/unit'
 require 'webmock'
 
+WebMock.enable!
+
 module Test
   module Unit
     class TestCase

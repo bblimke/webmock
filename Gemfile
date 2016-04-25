@@ -1,13 +1,9 @@
 source 'http://rubygems.org/'
 
 gemspec
-if ENV["EM_HTTP_REQUEST_0_X"]
-  gem 'em-http-request', '~> 0.3.0'
-end
 
 group :development do
-  gem 'rake', '~> 10.5.0' if RUBY_VERSION < '1.9.3'
-  gem 'rake' if RUBY_VERSION >= '1.9.3'
+  gem 'rake'
 end
 
 group :test do

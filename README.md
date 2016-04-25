@@ -32,15 +32,11 @@ Supported HTTP libraries
 Supported Ruby Interpreters
 ---------------------------
 
-* MRI 1.8.7
-* MRI 1.9.1
-* MRI 1.9.2
 * MRI 1.9.3
 * MRI 2.0.0
 * MRI 2.1
 * MRI 2.2
 * MRI 2.3
-* REE 1.8.7
 * JRuby
 * Rubinius
 
@@ -53,6 +49,10 @@ Supported Ruby Interpreters
     git clone http://github.com/bblimke/webmock.git
     cd webmock
     rake install
+
+## Upgrading from v1.x to v2.x
+
+WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
 
 ### Test::Unit
 
@@ -93,11 +93,9 @@ You can also use WebMock outside a test framework:
 ```ruby
 require 'webmock'
 include WebMock::API
+
+WebMock.enable!
 ```
-
-### Automatically enabled
-
-`require 'webmock'` loads the library AND enables `WebMock`.  Add `WebMock.disable!` after loading the gem to disable this behavior.
 
 ## Examples
 
@@ -205,16 +203,29 @@ stub_request(:post, "www.example.com").with { |request| request.body == "abc" }
 RestClient.post('www.example.com', 'abc')    # ===> Success
 ```
 
-### Request with basic authentication
+### Request with basic authentication header
 
 ```ruby
-stub_request(:get, "user:pass@www.example.com")
+stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+# or
+# stub_request(:get, "www.example.com").
+#   with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
 
 Net::HTTP.start('www.example.com') do |http|
   req = Net::HTTP::Get.new('/')
   req.basic_auth 'user', 'pass'
   http.request(req)
 end    # ===> Success
+```
+
+##### Important! Since version 2.0.0, WebMock does not match credentials provided in Authorization header and credentials provided in the userinfo of a url. I.e. `stub_request(:get, "user:pass@www.example.com")` does not match a request with credentials provided in the Athoriation header.
+
+### Request with basic authentication in the url
+
+```ruby
+stub_request(:get, "user:pass@www.example.com")
+
+RestClient.get('user:pass@www.example.com')    # ===> Success
 ```
 
 ### Matching uris using regular expressions
@@ -739,7 +750,7 @@ I.e all the following representations of the URI are equal:
 "http://www.example.com:80/"
 ```
 
-The following URIs with basic authentication are also equal for WebMock
+The following URIs with userinfo are also equal for WebMock
 
 ```ruby
 "a b:pass@www.example.com"
@@ -841,45 +852,6 @@ I'm particularly interested in how the DSL could be improved.
 In order to work on Webmock you first need to fork and clone the repo.
 Please do any work on a dedicated branch and rebase against master
 before sending a pull request.
-
-#### Running Tests
-
-We use RVM in order to test WebMock against 1.8.6, REE, 1.8.7, 1.9.2 and
-jRuby.  You can get RVM setup for WebMock development using the
-following commands (if you don't have these version of Ruby installed
-use `rvm install` to install each of them).
-
-    rvm use --create 1.8.6@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create ree@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create 1.8.7@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create 1.9.2@webmock
-    gem install jeweler bundler
-    bundle install
-
-    rvm use --create jruby@webmock
-    gem install jeweler bundler
-    bundle install
-
-These commands will create a gemset named WebMock for each of the
-supported versions of Ruby and `bundle install` all dependencies.
-
-With the supported versions of Ruby installed RVM will run specs across
-all version with just one command.
-
-    bundle exec rvm 1.8.6@webmock,ree@webmock,1.8.7@webmock,1.9.2@webmock,jruby@webmock rspec spec/**/*_spec.rb
-
-This command is wrapped up in to a rake task and can be invoked like so:
-
-  rake rvm:specs
 
 ## Credits
 

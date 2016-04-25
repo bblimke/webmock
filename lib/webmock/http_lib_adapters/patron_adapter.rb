@@ -68,8 +68,6 @@ if defined?(::Patron)
         def self.build_request_signature(req)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
-          uri.user = req.username
-          uri.password = req.password
 
           if [:put, :post].include?(req.action)
             if req.file_name
@@ -84,11 +82,17 @@ if defined?(::Patron)
             end
           end
 
+          headers = req.headers
+
+          if req.credentials
+            headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(req.credentials)
+          end
+
           request_signature = WebMock::RequestSignature.new(
             req.action,
             uri.to_s,
             :body => request_body,
-            :headers => req.headers
+            :headers => headers
           )
           request_signature
         end

@@ -1,5 +1,43 @@
 # Changelog
 
+## 2.0.0
+
+  * `require 'webmock'` does not enable WebMock anymore. `gem 'webmock'` can be now safely added to a Gemfile without modifying http client libs. Call `WebMock.enable!` to enable WebMock.
+
+    Please note that `require 'webmock/rspec'`, `require 'webmock/test_unit'`, `require 'webmock/minitest'` and `require 'webmock/cucumber'` still do enable WebMock.
+
+  * Dropped support for Ruby < 1.9.3
+
+  * Dropped support for em-http-request < 1.0.0
+
+  * WebMock 2.0 does not match basic authentication credentials in the userinfo part of the url, with credentials passed in `Authorization: Basic ...` header anymore.
+  It now treats the Authorization header and credentials in the userinfo part of a url as two completely separate attributes of a request.
+
+  The following stub declaration, which used to work in WebMock 1.x, is not going to work anymore
+
+        stub_request(:get, "user:pass@www.example.com")
+
+        Net::HTTP.start('www.example.com') do |http|
+          req = Net::HTTP::Get.new('/')
+          req.basic_auth 'user', 'pass'
+          http.request(req)
+        end    # ===> Failure
+
+  In order to stub a request with basic authentication credentials provided in the Authorization header, please use the following code:
+
+        stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
+
+  or
+
+        stub_request(:get, "www.example.com").
+          with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
+
+  In order to stub a request with basic authentication credentials provided in the url, please use the following code:
+
+        stub_request(:get, "user:pass@www.example.com")
+
+        RestClient.get('user:pass@www.example.com')    # ===> Success
+
 ## 1.24.6
 
   * Fixed issue with RUBY_VERSION comparison using old RubyGems.
@@ -31,7 +69,6 @@
         WebMock.disable_net_connect!(:allow => 'https://www.google.pl')
 
     Thanks to [Gabriel Chaney](https://github.com/gabrieljoelc) for reporting the issue.
-
 
 ## 1.24.2
 

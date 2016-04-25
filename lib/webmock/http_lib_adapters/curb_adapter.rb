@@ -84,8 +84,6 @@ if defined?(Curl)
 
         uri = WebMock::Util::URI.heuristic_parse(self.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
-        uri.user = self.username
-        uri.password = self.password
 
         request_body = case method
         when :post
@@ -100,9 +98,17 @@ if defined?(Curl)
           method,
           uri.to_s,
           :body => request_body,
-          :headers => self.headers
+          :headers => self.headers.merge(basic_auth_headers)
         )
         request_signature
+      end
+
+      def basic_auth_headers
+        if self.username
+          {'Authorization' => WebMock::Util::Headers.basic_auth_header(self.username, self.password)}
+        else
+          {}
+        end
       end
 
       def build_curb_response(webmock_response)
