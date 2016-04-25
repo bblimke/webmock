@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-  * require 'webmock' does not enable WebMock anymore. `gem 'webmock'` can be now safely added to the Gemfile without modifying http clients. Call `WebMock.enable!` to enable it.
+  * `require 'webmock'` does not enable WebMock anymore. `gem 'webmock'` can be now safely added to a Gemfile without modifying http client libs. Call `WebMock.enable!` to enable WebMock.
 
     Please note that `require 'webmock/rspec'`, `require 'webmock/test_unit'`, `require 'webmock/minitest'` and `require 'webmock/cucumber'` still do enable WebMock.
 
@@ -10,8 +10,8 @@
 
   * Dropped support for em-http-request < 1.0.0
 
-  * WebMock 2.0 does not match basic auth credentials in the userinfo part of the url, with credentials passed in `Authorization: Basic ...` header.
-  It now treats the Authorization header and credentials in userinfo in the url as completely separate attributes of the request.
+  * WebMock 2.0 does not match basic authentication credentials in the userinfo part of the url, with credentials passed in `Authorization: Basic ...` header anymore.
+  It now treats the Authorization header and credentials in the userinfo part of a url as two completely separate attributes of a request.
 
   The following stub declaration, which used to work in WebMock 1.x, is not going to work anymore
 
@@ -32,7 +32,7 @@
         stub_request(:get, "www.example.com").
           with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
 
-  In order to stub a request with basic authentication credentials provided in the url please use the following code:
+  In order to stub a request with basic authentication credentials provided in the url, please use the following code:
 
         stub_request(:get, "user:pass@www.example.com")
 
