@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-  * `require 'webmock'` does not enable WebMock anymore. `gem 'webmock'` can be now safely added to a Gemfile and no http client libs will be modified when it's loaded. Call `WebMock.enable!` to enable WebMock.
+  * `require 'webmock'` does not enable WebMock anymore. `gem 'webmock'` can now be safely added to a Gemfile and no http client libs will be modified when it's loaded. Call `WebMock.enable!` to enable WebMock.
 
     Please note that `require 'webmock/rspec'`, `require 'webmock/test_unit'`, `require 'webmock/minitest'` and `require 'webmock/cucumber'` still do enable WebMock.
 
