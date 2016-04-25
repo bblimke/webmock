@@ -306,7 +306,7 @@ module WebMock
       #
       # So before this point, WebMock raises an ArgumentError if any of the headers are symbols
       # instead of the cryptic NoMethodError "undefined method `split' ...` from Net::HTTP
-      if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.3.0')
+      if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
         header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
         if header_as_symbol
           raise ArgumentError.new("Net:HTTP does not accept headers as symbols")

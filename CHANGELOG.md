@@ -38,11 +38,13 @@
 
         RestClient.get('user:pass@www.example.com')    # ===> Success
 
-## 1.24.5
+## 1.24.6
 
   * Fixed issue with RUBY_VERSION comparison using old RubyGems.
 
     Thanks to [Chris Griego](https://github.com/cgriego).
+
+  * Support for http.rb >= 2.0.0
 
 ## 1.24.4
 

@@ -33,7 +33,7 @@ module HTTP
       def normalize_uri(uri)
         return unless uri
 
-        uri = URI.parse uri
+        uri = Addressable::URI.parse uri
         uri.port = nil if uri.default_port && uri.port == uri.default_port
 
         uri
