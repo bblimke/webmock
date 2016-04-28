@@ -1,3 +1,5 @@
+require 'base64'
+
 module WebMock
 
   module Util
