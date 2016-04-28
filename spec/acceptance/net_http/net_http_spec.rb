@@ -137,9 +137,10 @@ describe "Net:HTTP" do
         http.request(request)
       end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
     else
+      stub_http_request(:get, "google.com").with(headers: { InvalidHeaderSinceItsASymbol: "this will not be valid" })
       expect do
         http.request(request)
-      end.to_not raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
+      end.not_to raise_error
     end
   end
 
