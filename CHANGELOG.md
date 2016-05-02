@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.1
+
+  * Added code responsible for loading em-http-request if available, which has been removed by mistake.
+
+    Thanks to [Vasiliy](https://github.com/304)
+
+  * WebMock loads "base64" if it's not yet loaded.
+
+    Thanks to [Taiki Ono](https://github.com/taiki45).
+
 ## 2.0.0
 
   * `require 'webmock'` does not enable WebMock anymore. `gem 'webmock'` can now be safely added to a Gemfile and no http client libs will be modified when it's loaded. Call `WebMock.enable!` to enable WebMock.
