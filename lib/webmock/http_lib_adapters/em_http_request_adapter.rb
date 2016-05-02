@@ -1,3 +1,9 @@
+begin
+  require 'em-http-request'
+rescue LoadError
+  # em-http-request not found
+end
+
 if defined?(EventMachine::HttpClient)
   module WebMock
     module HttpLibAdapters
