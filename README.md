@@ -97,6 +97,14 @@ include WebMock::API
 WebMock.enable!
 ```
 
+### Using Codeclimate?
+
+ Add this to your helper file (wherever you added the above):
+ 
+ ```ruby
+ WebMock.disable_net_connect!(allow: 'codeclimate.com')
+ ```
+
 ## Examples
 
 
