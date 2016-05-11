@@ -40,7 +40,7 @@
   or
 
         stub_request(:get, "www.example.com").
-          with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
+          with(headers: 'Authorization' => "Basic #{ Base64.strict_encode64('user:pass').chomp}")
 
   In order to stub a request with basic authentication credentials provided in the url, please use the following code:
 

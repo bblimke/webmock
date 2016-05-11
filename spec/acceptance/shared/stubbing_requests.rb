@@ -403,6 +403,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         expect(http_request(:get, "http://www.example.com/", basic_auth: ['user', 'pass']).status).to eq("200")
       end
 
+      it "should match if credentials are the same and encode to more than one line" do
+        stub_request(:get, "www.example.com").with(basic_auth: ['user' * 5, 'pass' * 5])
+        expect(http_request(:get, "http://www.example.com/", basic_auth: ['user' * 5, 'pass' * 5]).status).to eq("200")
+      end
+
       it "should match if credentials are the same and were provided directly as authentication headers in request" do
         stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
         expect(http_request(:get, "http://www.example.com/", headers: {'Authorization'=>'Basic dXNlcjpwYXNz'}).status).to eq("200")
