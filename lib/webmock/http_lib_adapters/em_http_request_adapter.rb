@@ -180,7 +180,7 @@ if defined?(EventMachine::HttpClient)
 
         headers = @req.headers
 
-        if headers['authorization']
+        if headers['authorization'] && headers['authorization'].is_a?(Array)
           headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(headers.delete('authorization'))
         end
 
