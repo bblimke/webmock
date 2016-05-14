@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.2
+
+  * Using `Base64.strict_encode64` instead of `Base64.encode64` to handle long user:pass basic auth credentials
+
+    Thanks to [Jonathan Schatz](https://github.com/modosc)
+
+  * Fixed handling of Authorisation header provided as string instead of array when using em-http-request.
+
+    Thanks to [Michael Richardson](https://github.com/TTransmit) for reporing the issue.
+
+  * Ensured `WebMock.net_connect_explicit_allowed?` always returns boolean.
+
+    Thanks tp [Jose Luis Honorato](https://github.com/jlhonora)
+
 ## 2.0.1
 
   * Added code responsible for loading em-http-request if available, which has been removed by mistake.
