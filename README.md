@@ -209,7 +209,7 @@ RestClient.post('www.example.com', 'abc')    # ===> Success
 stub_request(:get, "www.example.com").with(basic_auth: ['user', 'pass'])
 # or
 # stub_request(:get, "www.example.com").
-#   with(headers: 'Authorization' => "Basic #{ Base64.encode64('user:pass').chomp}")
+#   with(headers: 'Authorization' => "Basic #{ Base64.strict_encode64('user:pass').chomp}")
 
 Net::HTTP.start('www.example.com') do |http|
   req = Net::HTTP::Get.new('/')
