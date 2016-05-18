@@ -188,7 +188,7 @@ describe "HTTPClient" do
 
     it 'sets the full body on the webmock response' do
       body = ''
-      result = HTTPClient.new.request(:get, 'http://www.example.com/') do |http_res, chunk|
+      HTTPClient.new.request(:get, 'http://www.example.com/') do |http_res, chunk|
         body += chunk
       end
       expect(@response.body).to eq body
