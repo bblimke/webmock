@@ -19,6 +19,11 @@ if defined?(Excon)
 
         adapter_for :excon
 
+        instance_exec do
+          @original_excon_mock_default = nil
+          @stub = nil
+        end
+
         def self.enable!
           self.add_excon_stub
         end
