@@ -104,8 +104,8 @@ unless RUBY_PLATFORM =~ /java/
           test_body = nil
           test_complete = nil
           skip("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_body)
-          @request.on_body do |body, response|
-            test_body = body
+          @request.on_body do |body_chunk, response|
+            test_body = body_chunk
           end
           @request.on_complete do |response|
             test_complete = response.body

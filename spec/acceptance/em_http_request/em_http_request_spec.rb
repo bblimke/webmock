@@ -274,12 +274,12 @@ unless RUBY_PLATFORM =~ /java/
           err = :success_from_timeout
           EM.stop
         end.errback do |resp|
-          conn.get(:path => "/foo").callback do |resp|
-            expect(resp.response_header.status).to eq(200)
-            body = resp.response
+          conn.get(:path => "/foo").callback do |retry_resp|
+            expect(retry_resp.response_header.status).to eq(200)
+            body = retry_resp.response
             EM.stop
-          end.errback do |resp|
-            err = resp.error
+          end.errback do |retry_resp|
+            err = retry_resp.error
             EM.stop
           end
         end
