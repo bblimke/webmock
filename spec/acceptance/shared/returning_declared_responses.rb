@@ -1,5 +1,11 @@
 class MyException < StandardError; end;
 
+class Responder
+  def call(request)
+    {:body => request.body}
+  end
+end
+
 shared_context "declared responses" do |*adapter_info|
   describe "when request stub declares that request should raise exception" do
     it "should raise exception" do
@@ -128,12 +134,6 @@ shared_context "declared responses" do |*adapter_info|
     end
 
     describe "when response was declared as lambda" do
-      class Responder
-        def call(request)
-          {:body => request.body}
-        end
-      end
-
       it "should return evaluated response body" do
         stub_request(:post, "www.example.com").to_return(lambda {|request|
                                                                 {:body => request.body}
