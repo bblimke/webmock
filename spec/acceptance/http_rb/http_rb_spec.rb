@@ -36,7 +36,7 @@ describe "HTTP.rb" do
   end
 
   context "following redirects" do
-    let(:options)  { { :follow => true } }
+    let(:options)  { { follow: true } }
     let(:response) { http_request(:get, "http://example.com", options) }
     let(:headers)  { response.headers }
 

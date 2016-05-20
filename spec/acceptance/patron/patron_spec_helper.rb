@@ -18,7 +18,7 @@ module PatronSpecHelper
     uri = "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}"
     uri.gsub!(' ','%20')
     response = sess.request(method, uri, options[:headers] || {}, {
-      :data => options[:body]
+      data: options[:body]
     })
     headers = {}
     if response.headers
@@ -32,10 +32,10 @@ module PatronSpecHelper
     message = response.status_line.match(status_line_pattern)[3] || ""
 
     OpenStruct.new({
-      :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(headers),
-      :status => response.status.to_s,
-      :message => message
+      body: response.body,
+      headers: WebMock::Util::Headers.normalize_headers(headers),
+      status: response.status.to_s,
+      message: message
     })
   end
 

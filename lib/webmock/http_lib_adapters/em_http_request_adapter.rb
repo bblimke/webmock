@@ -103,7 +103,7 @@ if defined?(EventMachine::HttpClient)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
         if stubbed_webmock_response
-          WebMock::CallbackRegistry.invoke_callbacks({:lib => :em_http_request}, request_signature, stubbed_webmock_response)
+          WebMock::CallbackRegistry.invoke_callbacks({lib: :em_http_request}, request_signature, stubbed_webmock_response)
           @uri ||= nil
           EM.next_tick {
             setup(make_raw_response(stubbed_webmock_response), @uri,
@@ -121,7 +121,7 @@ if defined?(EventMachine::HttpClient)
         if !stubbed_webmock_response && WebMock::CallbackRegistry.any_callbacks?
           webmock_response = build_webmock_response
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :em_http_request, :real_request => true},
+            {lib: :em_http_request, real_request: true},
             request_signature,
             webmock_response)
         end
@@ -187,8 +187,8 @@ if defined?(EventMachine::HttpClient)
         WebMock::RequestSignature.new(
           method.downcase.to_sym,
           uri.to_s,
-          :body => body || (@req.file && File.read(@req.file)),
-          :headers => headers
+          body: body || (@req.file && File.read(@req.file)),
+          headers: headers
         )
       end
 

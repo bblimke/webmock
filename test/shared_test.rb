@@ -30,13 +30,13 @@ module SharedTest
 
   def test_verification_that_expected_request_occured
     http_request(:get, "http://www.example.com/")
-    assert_requested(:get, "http://www.example.com", :times => 1)
+    assert_requested(:get, "http://www.example.com", times: 1)
     assert_requested(:get, "http://www.example.com")
   end
 
   def test_verification_that_expected_stub_occured
     http_request(:get, "http://www.example.com/")
-    assert_requested(@stub_http, :times => 1)
+    assert_requested(@stub_http, times: 1)
     assert_requested(@stub_http)
   end
 
@@ -58,16 +58,16 @@ module SharedTest
 
   def test_verification_that_expected_request_occured_with_body_and_headers
     http_request(:get, "http://www.example.com/",
-      :body => "abc", :headers => {'A' => 'a'})
+      body: "abc", headers: {'A' => 'a'})
     assert_requested(:get, "http://www.example.com",
-      :body => "abc", :headers => {'A' => 'a'})
+      body: "abc", headers: {'A' => 'a'})
   end
 
   def test_verification_that_expected_request_occured_with_query_params
-    stub_request(:any, "http://www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))
+    stub_request(:any, "http://www.example.com").with(query: hash_including({"a" => ["b", "c"]}))
     http_request(:get, "http://www.example.com/?a[]=b&a[]=c&x=1")
     assert_requested(:get, "http://www.example.com",
-      :query => hash_including({"a" => ["b", "c"]}))
+      query: hash_including({"a" => ["b", "c"]}))
   end
 
   def test_verification_that_non_expected_request_didnt_occur

@@ -13,7 +13,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
 
   let(:request_pattern) {
     WebMock::RequestPattern.new(
-      method, uri, {:body => request_signature_body}
+      method, uri, {body: request_signature_body}
     )
   }
 
@@ -48,7 +48,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
 
   describe "#request_stubs" do
     before :each do
-      WebMock.stub_request(:get, "https://www.example.com").with(:body => {"a" => "b"})
+      WebMock.stub_request(:get, "https://www.example.com").with(body: {"a" => "b"})
     end
 
     context "when showing the body diff is turned off" do

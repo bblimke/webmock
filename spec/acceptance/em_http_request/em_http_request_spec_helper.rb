@@ -18,11 +18,11 @@ module EMHttpRequestSpecHelper
     EventMachine.run {
       request = EventMachine::HttpRequest.new("#{uri.normalize.to_s}")
       http = request.send(method, {
-        :timeout => 30,
-        :body => options[:body],
-        :file => options[:file],
-        :query => options[:query],
-        :head => head
+        timeout: 30,
+        body: options[:body],
+        file: options[:file],
+        query: options[:query],
+        head: head
       }, &block)
       http.errback {
         error_set = true
@@ -35,10 +35,10 @@ module EMHttpRequestSpecHelper
       }
       http.callback {
         response = OpenStruct.new({
-          :body => http.response,
-          :headers => WebMock::Util::Headers.normalize_headers(extract_response_headers(http)),
-          :message => http.response_header.http_reason,
-          :status => http.response_header.status.to_s
+          body: http.response,
+          headers: WebMock::Util::Headers.normalize_headers(extract_response_headers(http)),
+          message: http.response_header.http_reason,
+          status: http.response_header.status.to_s
         })
         EventMachine.stop
       }

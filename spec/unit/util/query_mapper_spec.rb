@@ -6,7 +6,7 @@ describe WebMock::Util::QueryMapper do
   context '#query_to_values' do
     it 'should raise on invalid notation' do
       query = 'a=&b=c'
-      expect { subject.query_to_values(query, {:notation => 'foo'}) }.to raise_error(
+      expect { subject.query_to_values(query, {notation: 'foo'}) }.to raise_error(
         ArgumentError,
         'Invalid notation. Must be one of: [:flat, :dot, :subscript, :flat_array].'
       )
@@ -77,7 +77,7 @@ describe WebMock::Util::QueryMapper do
       expect(subject.to_query('a', {'key' => 'value'})).to eq('a[key]=value')
     end
     it 'should transform hash value with keys that are symbols' do
-      expect(subject.to_query('a', {:key => 'value'})).to eq('a[key]=value')
+      expect(subject.to_query('a', {key: 'value'})).to eq('a[key]=value')
     end
     it 'should transform array value' do
       expect(subject.to_query('a', ['b', 'c'])).to eq('a[0]=b&a[1]=c')

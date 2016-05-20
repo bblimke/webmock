@@ -30,14 +30,14 @@ module WebMock
 
     def to_raise(*exceptions)
       @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
-        ResponseFactory.response_for(:exception => e)
+        ResponseFactory.response_for(exception: e)
       })
       self
     end
     alias_method :and_raise, :to_raise
 
     def to_timeout
-      @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(:should_timeout => true)])
+      @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(should_timeout: true)])
       self
     end
     alias_method :and_timeout, :to_timeout
@@ -84,15 +84,15 @@ module WebMock
 
       if signature.body.to_s != ''
         body = if signature.url_encoded?
-          WebMock::Util::QueryMapper.query_to_values(signature.body, :notation => Config.instance.query_values_notation)
+          WebMock::Util::QueryMapper.query_to_values(signature.body, notation: Config.instance.query_values_notation)
         else
           signature.body
         end
-        stub.with(:body => body)
+        stub.with(body: body)
       end
 
       if (signature.headers && !signature.headers.empty?)
-        stub.with(:headers => signature.headers)
+        stub.with(headers: signature.headers)
       end
       stub
     end

@@ -17,20 +17,20 @@ describe WebMock::RequestStub do
   describe "with" do
 
     it "should assign body to request pattern" do
-      @request_stub.with(:body => "abc")
-      expect(@request_stub.request_pattern.to_s).to eq(WebMock::RequestPattern.new(:get, "www.example.com", :body => "abc").to_s)
+      @request_stub.with(body: "abc")
+      expect(@request_stub.request_pattern.to_s).to eq(WebMock::RequestPattern.new(:get, "www.example.com", body: "abc").to_s)
     end
 
     it "should assign normalized headers to request pattern" do
-      @request_stub.with(:headers => {'A' => 'a'})
+      @request_stub.with(headers: {'A' => 'a'})
       expect(@request_stub.request_pattern.to_s).to eq(
-        WebMock::RequestPattern.new(:get, "www.example.com", :headers => {'A' => 'a'}).to_s
+        WebMock::RequestPattern.new(:get, "www.example.com", headers: {'A' => 'a'}).to_s
       )
     end
 
     it "should assign given block to request profile" do
       @request_stub.with { |req| req.body == "abc" }
-      expect(@request_stub.request_pattern.matches?(WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc"))).to be_truthy
+      expect(@request_stub.request_pattern.matches?(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc"))).to be_truthy
     end
 
   end
@@ -38,13 +38,13 @@ describe WebMock::RequestStub do
   describe "to_return" do
 
     it "should assign response with provided options" do
-      @request_stub.to_return(:body => "abc", :status => 500)
+      @request_stub.to_return(body: "abc", status: 500)
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.status).to eq([500, ""])
     end
 
     it "should assign responses with provided options" do
-      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.to_return([{body: "abc"}, {body: "def"}])
       expect([@request_stub.response.body, @request_stub.response.body]).to eq(["abc", "def"])
     end
 
@@ -59,26 +59,26 @@ describe WebMock::RequestStub do
   describe "response" do
 
     it "should return responses in a sequence passed as array" do
-      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.to_return([{body: "abc"}, {body: "def"}])
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
     end
 
     it "should repeat returning last response" do
-      @request_stub.to_return([{:body => "abc"}, {:body => "def"}])
+      @request_stub.to_return([{body: "abc"}, {body: "def"}])
       @request_stub.response
       @request_stub.response
       expect(@request_stub.response.body).to eq("def")
     end
 
     it "should return responses in a sequence passed as comma separated params" do
-      @request_stub.to_return({:body => "abc"}, {:body => "def"})
+      @request_stub.to_return({body: "abc"}, {body: "def"})
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
     end
 
     it "should return responses declared in multiple to_return declarations" do
-      @request_stub.to_return({:body => "abc"}).to_return({:body => "def"})
+      @request_stub.to_return({body: "abc"}).to_return({body: "def"})
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
     end
@@ -95,7 +95,7 @@ describe WebMock::RequestStub do
     end
 
     it "should assign sequence of responses with response with exception to be thrown" do
-      @request_stub.to_return(:body => "abc").then.to_raise(ArgumentError)
+      @request_stub.to_return(body: "abc").then.to_raise(ArgumentError)
       expect(@request_stub.response.body).to eq("abc")
       expect {
         @request_stub.response.raise_error_if_any
@@ -132,13 +132,13 @@ describe WebMock::RequestStub do
      end
 
      it "should assign sequence of responses with response with timeout" do
-       @request_stub.to_return(:body => "abc").then.to_timeout
+       @request_stub.to_return(body: "abc").then.to_timeout
        expect(@request_stub.response.body).to eq("abc")
        expect(@request_stub.response.should_timeout).to be_truthy
      end
 
      it "should allow multiple timeouts to be declared" do
-       @request_stub.to_timeout.then.to_timeout.then.to_return(:body => "abc")
+       @request_stub.to_timeout.then.to_timeout.then.to_return(body: "abc")
        expect(@request_stub.response.should_timeout).to be_truthy
        expect(@request_stub.response.should_timeout).to be_truthy
        expect(@request_stub.response.body).to eq("abc")
@@ -156,21 +156,21 @@ describe WebMock::RequestStub do
     end
 
     it "should repeat returning last declared response declared number of times" do
-      @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
+      @request_stub.to_return({body: "abc"}).times(2).then.to_return({body: "def"})
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
     end
 
     it "should repeat raising last declared exception declared number of times" do
-      @request_stub.to_return({:body => "abc"}).times(2).then.to_return({:body => "def"})
+      @request_stub.to_return({body: "abc"}).times(2).then.to_return({body: "def"})
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
     end
 
     it "should repeat returning last declared sequence of responses declared number of times" do
-      @request_stub.to_return({:body => "abc"}, {:body => "def"}).times(2).then.to_return({:body => "ghj"})
+      @request_stub.to_return({body: "abc"}, {body: "def"}).times(2).then.to_return({body: "ghj"})
       expect(@request_stub.response.body).to eq("abc")
       expect(@request_stub.response.body).to eq("def")
       expect(@request_stub.response.body).to eq("abc")
@@ -179,18 +179,18 @@ describe WebMock::RequestStub do
     end
 
     it "should return self" do
-      expect(@request_stub.to_return({:body => "abc"}).times(1)).to eq(@request_stub)
+      expect(@request_stub.to_return({body: "abc"}).times(1)).to eq(@request_stub)
     end
 
     it "should raise error if argument is not integer" do
       expect {
-         @request_stub.to_return({:body => "abc"}).times("not number")
+         @request_stub.to_return({body: "abc"}).times("not number")
       }.to raise_error("times(N) accepts integers >= 1 only")
     end
 
     it "should raise error if argument is < 1" do
       expect {
-        @request_stub.to_return({:body => "abc"}).times(0)
+        @request_stub.to_return({body: "abc"}).times(0)
       }.to raise_error("times(N) accepts integers >= 1 only")
     end
 

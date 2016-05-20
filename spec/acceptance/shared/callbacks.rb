@@ -22,7 +22,7 @@ shared_context "callbacks" do |*adapter_info|
     end
 
     it "should not invoke a callback if this http library should be ignored" do
-      WebMock.after_request(:except => [http_library()]) {
+      WebMock.after_request(except: [http_library()]) {
         @called = true
       }
       http_request(:get, "http://www.example.com/")
@@ -30,7 +30,7 @@ shared_context "callbacks" do |*adapter_info|
     end
 
     it "should invoke a callback even if other http libraries should be ignored" do
-      WebMock.after_request(:except => [:other_lib]) {
+      WebMock.after_request(except: [:other_lib]) {
         @called = true
       }
       http_request(:get, "http://www.example.com/")
@@ -38,7 +38,7 @@ shared_context "callbacks" do |*adapter_info|
     end
 
     it "should pass request signature to the callback" do
-      WebMock.after_request(:except => [:other_lib])  do |request_signature, _|
+      WebMock.after_request(except: [:other_lib])  do |request_signature, _|
         @request_signature = request_signature
       end
       http_request(:get, "http://www.example.com/")
@@ -69,11 +69,11 @@ shared_context "callbacks" do |*adapter_info|
         before(:each) do
           stub_request(:get, "http://www.example.com").
           to_return(
-            :status => [200, "hello"],
-            :headers => {'Content-Length' => '666', 'Hello' => 'World'},
-            :body => "foo bar"
+            status: [200, "hello"],
+            headers: {'Content-Length' => '666', 'Hello' => 'World'},
+            body: "foo bar"
           )
-          WebMock.after_request(:except => [:other_lib])  do |_, response|
+          WebMock.after_request(except: [:other_lib])  do |_, response|
             @response = response
           end
           http_request(:get, "http://www.example.com/")
@@ -95,11 +95,11 @@ shared_context "callbacks" do |*adapter_info|
         end
       end
 
-      describe "when request is not stubbed", :net_connect => true do
+      describe "when request is not stubbed", net_connect: true do
         before(:each) do
           WebMock.reset!
           WebMock.allow_net_connect!
-          WebMock.after_request(:except => [:other_lib])  do |_, response|
+          WebMock.after_request(except: [:other_lib])  do |_, response|
             @response = response
           end
           http_request(:get, "http://httpstat.us/201")
@@ -127,8 +127,8 @@ shared_context "callbacks" do |*adapter_info|
       expect(@called).to eq(2)
     end
 
-    it "should invoke callbacks only for real requests if requested", :net_connect => true do
-      WebMock.after_request(:real_requests_only => true) { @called = true }
+    it "should invoke callbacks only for real requests if requested", net_connect: true do
+      WebMock.after_request(real_requests_only: true) { @called = true }
       http_request(:get, "http://www.example.com/")
       expect(@called).to eq(nil)
       WebMock.allow_net_connect!

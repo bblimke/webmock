@@ -21,10 +21,10 @@ module CurbSpecHelper
     end
 
     OpenStruct.new(
-      :body => curl.body_str,
-      :headers => WebMock::Util::Headers.normalize_headers(response_headers),
-      :status => curl.response_code.to_s,
-      :message => status
+      body: curl.body_str,
+      headers: WebMock::Util::Headers.normalize_headers(response_headers),
+      status: curl.response_code.to_s,
+      message: status
     )
   end
 

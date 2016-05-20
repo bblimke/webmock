@@ -13,7 +13,7 @@ unless RUBY_PLATFORM =~ /java/
 
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)
-      context 'when a real request is made and redirects are followed', :net_connect => true do
+      context 'when a real request is made and redirects are followed', net_connect: true do
         before { WebMock.allow_net_connect! }
 
         # This url redirects to the https URL.
@@ -22,7 +22,7 @@ unless RUBY_PLATFORM =~ /java/
 
         def make_request
           EM.run do
-            request = EM::HttpRequest.new(http_url).get(:redirects => 1)
+            request = EM::HttpRequest.new(http_url).get(redirects: 1)
             request.callback { EM.stop }
           end
         end
@@ -49,7 +49,7 @@ unless RUBY_PLATFORM =~ /java/
       describe "with middleware" do
 
         it "should work with request middleware" do
-          stub_request(:get, "www.example.com").with(:body => 'bar')
+          stub_request(:get, "www.example.com").with(body: 'bar')
 
           middleware = Class.new do
             def request(client, head, body)
@@ -62,10 +62,10 @@ unless RUBY_PLATFORM =~ /java/
 
             conn.use middleware
 
-            http = conn.get(:body => 'foo')
+            http = conn.get(body: 'foo')
 
             http.callback do
-              expect(WebMock).to have_requested(:get, "www.example.com").with(:body => 'bar')
+              expect(WebMock).to have_requested(:get, "www.example.com").with(body: 'bar')
               EM.stop
             end
           end
@@ -80,7 +80,7 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         it "should work with response middleware" do
-          stub_request(:get, "www.example.com").to_return(:body => 'foo')
+          stub_request(:get, "www.example.com").to_return(body: 'foo')
 
           EM.run do
             conn = EventMachine::HttpRequest.new('http://www.example.com/')
@@ -116,13 +116,13 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
-        context 'making a real request', :net_connect => true do
+        context 'making a real request', net_connect: true do
           before { WebMock.allow_net_connect! }
           include_examples "em-http-request middleware/after_request hook integration"
         end
 
         context 'when the request is stubbed' do
-          before { stub_request(:get, webmock_server_url).to_return(:body => 'hello world') }
+          before { stub_request(:get, webmock_server_url).to_return(body: 'hello world') }
           include_examples "em-http-request middleware/after_request hook integration"
         end
       end
@@ -160,11 +160,11 @@ unless RUBY_PLATFORM =~ /java/
           end
 
           it "should work" do
-            stub_request(:post, /.*.testserver.com*/).to_return(:status => 200, :body => 'ok')
+            stub_request(:post, /.*.testserver.com*/).to_return(status: 200, body: 'ok')
             expect {
               EM.run do
                 fiber = Fiber.new do
-                  EM::HttpRequest.new("http://www.testserver.com").post :body => "foo=bar&baz=bang", :timeout => 60
+                  EM::HttpRequest.new("http://www.testserver.com").post body: "foo=bar&baz=bang", timeout: 60
                   EM.stop
                 end
                 fiber.resume
@@ -187,7 +187,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with streaming" do
-      stub_request(:get, "www.example.com").to_return(:body => "abc")
+      stub_request(:get, "www.example.com").to_return(body: "abc")
       response = ""
       EM.run {
         http = EventMachine::HttpRequest.new('http://www.example.com/').get
@@ -197,41 +197,41 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with responses that use chunked transfer encoding" do
-      stub_request(:get, "www.example.com").to_return(:body => "abc", :headers => { 'Transfer-Encoding' => 'chunked' })
+      stub_request(:get, "www.example.com").to_return(body: "abc", headers: { 'Transfer-Encoding' => 'chunked' })
       expect(http_request(:get, "http://www.example.com").body).to eq("abc")
     end
 
     it "should work with optional query params" do
-      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      expect(http_request(:get, "http://www.example.com/?x=3", :query => {"a" => ["b", "c"]}).body).to eq("abc")
+      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(body: "abc")
+      expect(http_request(:get, "http://www.example.com/?x=3", query: {"a" => ["b", "c"]}).body).to eq("abc")
     end
 
     it "should work with optional query params declared as string" do
-      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(:body => "abc")
-      expect(http_request(:get, "http://www.example.com/?x=3", :query => "a[]=b&a[]=c").body).to eq("abc")
+      stub_request(:get, "www.example.com/?x=3&a[]=b&a[]=c").to_return(body: "abc")
+      expect(http_request(:get, "http://www.example.com/?x=3", query: "a[]=b&a[]=c").body).to eq("abc")
     end
 
     it "should work when the body is passed as a Hash" do
-      stub_request(:post, "www.example.com").with(:body => {:a => "1", :b => "2"}).to_return(:body => "ok")
-      expect(http_request(:post, "http://www.example.com", :body => {:a => "1", :b => "2"}).body).to eq("ok")
+      stub_request(:post, "www.example.com").with(body: {a: "1", b: "2"}).to_return(body: "ok")
+      expect(http_request(:post, "http://www.example.com", body: {a: "1", b: "2"}).body).to eq("ok")
     end
 
     if defined?(EventMachine::HttpConnection)
       it "should work when a file is passed as body" do
-        stub_request(:post, "www.example.com").with(:body => File.read(__FILE__)).to_return(:body => "ok")
-        expect(http_request(:post, "http://www.example.com", :file => __FILE__).body).to eq("ok")
+        stub_request(:post, "www.example.com").with(body: File.read(__FILE__)).to_return(body: "ok")
+        expect(http_request(:post, "http://www.example.com", file: __FILE__).body).to eq("ok")
       end
     end
 
     it "should work with UTF-8 strings" do
       body = "Привет, Мир!"
-      stub_request(:post, "www.example.com").to_return(:body => body)
+      stub_request(:post, "www.example.com").to_return(body: body)
       expect(http_request(:post, "http://www.example.com").body.bytesize).to eq(body.bytesize)
     end
 
     it "should work with multiple requests to the same connection" do
-      stub_request(:get, "www.example.com/foo").to_return(:body => "bar")
-      stub_request(:get, "www.example.com/baz").to_return(:body => "wombat")
+      stub_request(:get, "www.example.com/foo").to_return(body: "bar")
+      stub_request(:get, "www.example.com/baz").to_return(body: "wombat")
       err1  = nil
       err2  = nil
       body1 = nil
@@ -240,7 +240,7 @@ unless RUBY_PLATFORM =~ /java/
 
       EM.run do
         conn = EM::HttpRequest.new("http://www.example.com")
-        conn.get(:path => "/foo").callback do |resp|
+        conn.get(path: "/foo").callback do |resp|
           body1 = resp.response
           i += 1; EM.stop if i == 2
         end.errback do |resp|
@@ -248,7 +248,7 @@ unless RUBY_PLATFORM =~ /java/
           i += 1; EM.stop if i == 2
         end
 
-        conn.get(:path => "/baz").callback do |resp|
+        conn.get(path: "/baz").callback do |resp|
           body2 = resp.response
           i += 1; EM.stop if i == 2
         end.errback do |resp|
@@ -264,17 +264,17 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with multiple requests to the same connection when the first request times out" do
-      stub_request(:get, "www.example.com/foo").to_timeout.then.to_return(:status => 200, :body => "wombat")
+      stub_request(:get, "www.example.com/foo").to_timeout.then.to_return(status: 200, body: "wombat")
       err  = nil
       body = nil
 
       EM.run do
         conn = EM::HttpRequest.new("http://www.example.com")
-        conn.get(:path => "/foo").callback do |resp|
+        conn.get(path: "/foo").callback do |resp|
           err = :success_from_timeout
           EM.stop
         end.errback do |resp|
-          conn.get(:path => "/foo").callback do |retry_resp|
+          conn.get(path: "/foo").callback do |retry_resp|
             expect(retry_resp.response_header.status).to eq(200)
             body = retry_resp.response
             EM.stop
@@ -319,7 +319,7 @@ unless RUBY_PLATFORM =~ /java/
 
       context "with a query" do
         let(:uri) { "http://www.example.com/?a=1&b=2" }
-        subject { client("http://www.example.com/?a=1", :query => { 'b' => 2 }) }
+        subject { client("http://www.example.com/?a=1", query: { 'b' => 2 }) }
 
         it "#request_signature doesn't mutate the original uri" do
           expect(subject.uri).to eq(Addressable::URI.parse("http://www.example.com/?a=1"))
@@ -333,9 +333,9 @@ unless RUBY_PLATFORM =~ /java/
         before(:each) do
           stub_request(:get, "http://example.org/").
           to_return(
-            :status => 200,
-            :body => "",
-            :headers => { 'Set-Cookie' => cookie_string }
+            status: 200,
+            body: "",
+            headers: { 'Set-Cookie' => cookie_string }
           )
         end
 

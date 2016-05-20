@@ -62,7 +62,7 @@ if defined?(Curl)
         if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :curb}, request_signature, webmock_response)
+            {lib: :curb}, request_signature, webmock_response)
           invoke_curb_callbacks
           true
         elsif WebMock.net_connect_allowed?(request_signature.uri)
@@ -70,7 +70,7 @@ if defined?(Curl)
           if WebMock::CallbackRegistry.any_callbacks?
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
-              {:lib => :curb, :real_request => true}, request_signature,
+              {lib: :curb, real_request: true}, request_signature,
                 webmock_response)
           end
           res
@@ -97,8 +97,8 @@ if defined?(Curl)
         request_signature = WebMock::RequestSignature.new(
           method,
           uri.to_s,
-          :body => request_body,
-          :headers => headers_as_hash(self.headers).merge(basic_auth_headers)
+          body: request_body,
+          headers: headers_as_hash(self.headers).merge(basic_auth_headers)
         )
         request_signature
       end

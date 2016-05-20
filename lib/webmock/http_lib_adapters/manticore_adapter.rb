@@ -34,7 +34,7 @@ if defined?(Manticore)
           def format_options(options)
             return options unless headers = options[:headers]
 
-            options.merge(:headers => join_array_values(headers))
+            options.merge(headers: join_array_values(headers))
           end
 
           def join_array_values(headers)
@@ -62,7 +62,7 @@ if defined?(Manticore)
               raise WebMock::NetConnectNotAllowedError.new(request_signature)
             end
 
-            WebMock::CallbackRegistry.invoke_callbacks({:lib => :manticore, :real_request => real_request}, request_signature, webmock_response)
+            WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: real_request}, request_signature, webmock_response)
             manticore_response
           end
 
@@ -84,7 +84,7 @@ if defined?(Manticore)
               headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(credentials.get_user_name,credentials.get_password)
             end
 
-            WebMock::RequestSignature.new(method, uri, {:body => body, :headers => headers})
+            WebMock::RequestSignature.new(method, uri, {body: body, headers: headers})
           end
 
           def read_body(request)
@@ -106,10 +106,10 @@ if defined?(Manticore)
             raise Manticore::ConnectTimeout if webmock_response.should_timeout
 
             Manticore::StubbedResponse.stub(
-              :code => webmock_response.status[0],
-              :body => webmock_response.body,
-              :headers => webmock_response.headers,
-              :cookies => {}
+              code: webmock_response.status[0],
+              body: webmock_response.body,
+              headers: webmock_response.headers,
+              cookies: {}
             )
           end
 

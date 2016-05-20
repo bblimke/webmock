@@ -69,8 +69,8 @@ if defined?(Typhoeus)
           request_signature = WebMock::RequestSignature.new(
             req.options[:method] || :get,
             uri.to_s,
-            :body => body,
-            :headers => headers
+            body: body,
+            headers: headers
           )
 
           req.instance_variable_set(:@__webmock_request_signature, request_signature)
@@ -90,19 +90,19 @@ if defined?(Typhoeus)
         def self.generate_typhoeus_response(request_signature, webmock_response)
           response = if webmock_response.should_timeout
             ::Typhoeus::Response.new(
-              :code         => 0,
-              :status_message => "",
-              :body         => "",
-              :headers => {},
-              :return_code => :operation_timedout
+              code: 0,
+              status_message: "",
+              body: "",
+              headers: {},
+              return_code: :operation_timedout
             )
           else
             ::Typhoeus::Response.new(
-              :code         => webmock_response.status[0],
-              :status_message => webmock_response.status[1],
-              :body         => webmock_response.body,
-              :headers => webmock_response.headers,
-              :effective_url => request_signature.uri
+              code: webmock_response.status[0],
+              status_message: webmock_response.status[1],
+              body: webmock_response.body,
+              headers: webmock_response.headers,
+              effective_url: request_signature.uri
             )
           end
           response.mock = :webmock
@@ -126,13 +126,13 @@ if defined?(Typhoeus)
               build_webmock_response(response)
           if response.mock
             WebMock::CallbackRegistry.invoke_callbacks(
-              {:lib => :typhoeus},
+              {lib: :typhoeus},
               request_signature,
               webmock_response
             )
           else
             WebMock::CallbackRegistry.invoke_callbacks(
-              {:lib => :typhoeus, :real_request => true},
+              {lib: :typhoeus, real_request: true},
               request_signature,
               webmock_response
             )

@@ -4,7 +4,7 @@ describe WebMock::StubRequestSnippet do
   describe "to_s" do
     describe "GET" do
       before(:each) do
-        @request_signature = WebMock::RequestSignature.new(:get, "www.example.com/?a=b&c=d", :headers => {})
+        @request_signature = WebMock::RequestSignature.new(:get, "www.example.com/?a=b&c=d", headers: {})
       end
 
       it "should print stub request snippet with url with params and method and empty successful response" do
@@ -53,7 +53,7 @@ describe WebMock::StubRequestSnippet do
       it "should not print to_return part if not wanted" do
         expected = 'stub_request(:get, "http://www.example.com/").'+
         "\n  with(:body => \"abcdef\")"
-        stub = WebMock::RequestStub.new(:get, "www.example.com").with(:body => "abcdef").to_return(:body => "hello")
+        stub = WebMock::RequestStub.new(:get, "www.example.com").with(body: "abcdef").to_return(body: "hello")
         expect(WebMock::StubRequestSnippet.new(stub).to_s(false)).to eq(expected)
       end
     end
@@ -63,8 +63,8 @@ describe WebMock::StubRequestSnippet do
       let(:multipart_form_body) { 'complicated stuff--ABC123--goes here' }
       it "should print stub request snippet with body as a hash using rails conventions on form posts" do
         @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
-                   :headers => {'Content-Type' => 'application/x-www-form-urlencoded'},
-                   :body => form_body)
+                   headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                   body: form_body)
         @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
@@ -77,8 +77,8 @@ stub_request(:post, "http://www.example.com/").
 
       it "should print stub request snippet leaving body as string when not a urlencoded form" do
         @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
-                   :headers => {'Content-Type' => 'multipart/form-data; boundary=ABC123'},
-                   :body => multipart_form_body)
+                   headers: {'Content-Type' => 'multipart/form-data; boundary=ABC123'},
+                   body: multipart_form_body)
         @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").

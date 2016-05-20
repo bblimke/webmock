@@ -10,9 +10,9 @@ module WebMock
       status, headers, response = @app.call(env)
 
       Response.new(
-        :body => body_from_rack_response(response),
-        :headers => headers,
-        :status => status
+        body: body_from_rack_response(response),
+        headers: headers,
+        status: status
       )
     end
 

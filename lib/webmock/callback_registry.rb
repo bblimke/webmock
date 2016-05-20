@@ -3,7 +3,7 @@ module WebMock
     @@callbacks = []
 
     def self.add_callback(options, block)
-      @@callbacks << {:options => options, :block => block}
+      @@callbacks << {options: options, block: block}
     end
 
     def self.callbacks

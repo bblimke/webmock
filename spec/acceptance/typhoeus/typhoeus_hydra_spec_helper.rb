@@ -8,10 +8,10 @@ module TyphoeusHydraSpecHelper
   def http_request(method, uri, options = {}, &block)
     uri.gsub!(" ", "%20") #typhoeus doesn't like spaces in the uri
     request_options =  {
-      :method  => method,
-      :body    => options[:body],
-      :headers => options[:headers],
-      :timeout => 25000
+      method: method,
+      body: options[:body],
+      headers: options[:headers],
+      timeout: 25000
     }
     if options[:basic_auth]
       request_options[:userpwd] = options[:basic_auth].join(':')
@@ -26,10 +26,10 @@ module TyphoeusHydraSpecHelper
     raise FakeTyphoeusHydraConnectError.new if response.return_code == :couldnt_connect
     raise FakeTyphoeusHydraTimeoutError.new if response.timed_out?
     OpenStruct.new({
-      :body => response.body,
-      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),
-      :status => response.code.to_s,
-      :message => response.status_message
+      body: response.body,
+      headers: WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),
+      status: response.code.to_s,
+      message: response.status_message
     })
   end
 

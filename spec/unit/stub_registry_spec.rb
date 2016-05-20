@@ -51,21 +51,21 @@ describe WebMock::StubRegistry do
   describe "response for request" do
 
     it "should report registered evaluated response for request pattern" do
-      @request_stub.to_return(:body => "abc")
+      @request_stub.to_return(body: "abc")
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
       expect(WebMock::StubRegistry.instance.response_for_request(@request_signature)).
-        to eq(WebMock::Response.new(:body => "abc"))
+        to eq(WebMock::Response.new(body: "abc"))
     end
 
     it "should report evaluated response" do
-      @request_stub.to_return {|request| {:body => request.method.to_s} }
+      @request_stub.to_return {|request| {body: request.method.to_s} }
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
       response1 = WebMock::StubRegistry.instance.response_for_request(@request_signature)
-      expect(response1).to eq(WebMock::Response.new(:body => "get"))
+      expect(response1).to eq(WebMock::Response.new(body: "get"))
     end
 
     it "should report clone of the response" do
-      @request_stub.to_return(:body => lambda{|r| r.method.to_s})
+      @request_stub.to_return(body: lambda{|r| r.method.to_s})
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
       response1 = WebMock::StubRegistry.instance.response_for_request(@request_signature)
       response2 = WebMock::StubRegistry.instance.response_for_request(@request_signature)
@@ -73,7 +73,7 @@ describe WebMock::StubRegistry do
     end
 
     it "should report clone of the dynamic response" do
-      @request_stub.to_return {|request| {:body => request.method.to_s} }
+      @request_stub.to_return {|request| {body: request.method.to_s} }
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)
       response1 = WebMock::StubRegistry.instance.response_for_request(@request_signature)
       response2 = WebMock::StubRegistry.instance.response_for_request(@request_signature)
@@ -86,16 +86,16 @@ describe WebMock::StubRegistry do
 
     it "should always return last registered matching response" do
       @request_stub1 = WebMock::RequestStub.new(:get, "www.example.com")
-      @request_stub1.to_return(:body => "abc")
+      @request_stub1.to_return(body: "abc")
       @request_stub2 = WebMock::RequestStub.new(:get, "www.example.com")
-      @request_stub2.to_return(:body => "def")
+      @request_stub2.to_return(body: "def")
       @request_stub3 = WebMock::RequestStub.new(:get, "www.example.org")
-      @request_stub3.to_return(:body => "ghj")
+      @request_stub3.to_return(body: "ghj")
       WebMock::StubRegistry.instance.register_request_stub(@request_stub1)
       WebMock::StubRegistry.instance.register_request_stub(@request_stub2)
       WebMock::StubRegistry.instance.register_request_stub(@request_stub3)
       expect(WebMock::StubRegistry.instance.response_for_request(@request_signature)).
-        to eq(WebMock::Response.new(:body => "def"))
+        to eq(WebMock::Response.new(body: "def"))
     end
 
   end

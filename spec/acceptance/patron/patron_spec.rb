@@ -32,7 +32,7 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         it "should work with get_file" do
-          stub_request(:get, "www.example.com").to_return(:body => "abc")
+          stub_request(:get, "www.example.com").to_return(body: "abc")
           @sess.get_file("/", @file_path)
           expect(File.read(@file_path)).to eq("abc")
         end
@@ -53,18 +53,18 @@ unless RUBY_PLATFORM =~ /java/
 
         it "should work with put_file" do
           File.open(@file_path, "w") {|f| f.write "abc"}
-          stub_request(:put, "www.example.com").with(:body => "abc")
+          stub_request(:put, "www.example.com").with(body: "abc")
           @sess.put_file("/", @file_path)
         end
 
         it "should work with post_file" do
           File.open(@file_path, "w") {|f| f.write "abc"}
-          stub_request(:post, "www.example.com").with(:body => "abc")
+          stub_request(:post, "www.example.com").with(body: "abc")
           @sess.post_file("/", @file_path)
         end
 
         it "should raise same error as Patron if file is not readable for post request" do
-          stub_request(:post, "www.example.com").with(:body => "abc")
+          stub_request(:post, "www.example.com").with(body: "abc")
           expect {
             @sess.post_file("/", "/path/to/non/existing/file")
           }.to raise_error(ArgumentError, "Unable to open specified file.")
@@ -82,7 +82,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should work with WebDAV copy request" do
-        stub_request(:copy, "www.example.com/abc").with(:headers => {'Destination' => "/def"})
+        stub_request(:copy, "www.example.com/abc").with(headers: {'Destination' => "/def"})
         @sess.copy("/abc", "/def")
       end
 
@@ -97,22 +97,22 @@ unless RUBY_PLATFORM =~ /java/
 
           it "should encode body with default encoding" do
             stub_request(:get, "www.example.com").
-              to_return(:body => "Øl")
+              to_return(body: "Øl")
 
             expect(@sess.get("").body.encoding).to eq(Encoding::UTF_8)
           end
 
           it "should encode body to default internal" do
             stub_request(:get, "www.example.com").
-              to_return(:headers => {'Content-Type' => 'text/html; charset=iso-8859-1'},
-                        :body => "Øl".encode("iso-8859-1"))
+              to_return(headers: {'Content-Type' => 'text/html; charset=iso-8859-1'},
+                        body: "Øl".encode("iso-8859-1"))
 
             expect(@sess.get("").body.encoding).to eq(Encoding.default_internal)
           end
 
           it "should encode body based on encoding-attribute in body" do
             stub_request(:get, "www.example.com").
-              to_return(:body => "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
+              to_return(body: "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
 
             expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
           end
@@ -120,7 +120,7 @@ unless RUBY_PLATFORM =~ /java/
 
           it "should encode body based on Session#default_response_charset" do
             stub_request(:get, "www.example.com").
-              to_return(:body => "Øl".encode("iso-8859-1"))
+              to_return(body: "Øl".encode("iso-8859-1"))
 
             @sess.default_response_charset = "iso-8859-1"
 

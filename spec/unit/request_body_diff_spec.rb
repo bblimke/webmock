@@ -14,7 +14,7 @@ RSpec.describe WebMock::RequestBodyDiff do
 
   let(:request_pattern) {
     WebMock::RequestPattern.new(
-      method, uri, {:body => request_stub_body}
+      method, uri, {body: request_stub_body}
     )
   }
 

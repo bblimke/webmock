@@ -8,9 +8,9 @@ module ManticoreSpecHelper
 
     response = client.http(method, uri, options)
     OpenStruct.new({
-      :body => response.body || '',
-      :headers => WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),
-      :status => response.code.to_s
+      body: response.body || '',
+      headers: WebMock::Util::Headers.normalize_headers(join_array_values(response.headers)),
+      status: response.code.to_s
     })
   end
 

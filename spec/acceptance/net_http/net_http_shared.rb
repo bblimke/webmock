@@ -1,17 +1,17 @@
 shared_examples_for "Net::HTTP" do
-  describe "when making real requests", :net_connect => true do
+  describe "when making real requests", net_connect: true do
     let(:port){ WebMockServer.instance.port }
 
     before(:each) do
       @http = Net::HTTP.new("localhost", port)
     end
 
-    it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body", :net_connect => true do
+    it "should return a Net::ReadAdapter from response.body when a real request is made with a block and #read_body", net_connect: true do
       response = Net::HTTP.new("localhost", port).request_get('/') { |r| r.read_body { } }
       expect(response.body).to be_a(Net::ReadAdapter)
     end
 
-    it "should handle requests with block passed to read_body", :net_connect => true do
+    it "should handle requests with block passed to read_body", net_connect: true do
       body = ""
       req = Net::HTTP::Get.new("/")
       Net::HTTP.start("localhost", port) do |http|
@@ -24,7 +24,7 @@ shared_examples_for "Net::HTTP" do
       expect(body).to match(/hello world/)
     end
 
-    it "should connect only once when connected on start", :net_connect => true do
+    it "should connect only once when connected on start", net_connect: true do
       @http = Net::HTTP.new('localhost', port)
       socket_id_before_request = socket_id_after_request = nil
       @http.start {|conn|

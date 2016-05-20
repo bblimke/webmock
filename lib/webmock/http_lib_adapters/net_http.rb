@@ -79,7 +79,7 @@ module WebMock
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
             @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
-              {:lib => :net_http}, request_signature, webmock_response)
+              {lib: :net_http}, request_signature, webmock_response)
             build_net_http_response(webmock_response, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
             check_right_http_connection
@@ -87,7 +87,7 @@ module WebMock
               if WebMock::CallbackRegistry.any_callbacks?
                 webmock_response = build_webmock_response(response)
                 WebMock::CallbackRegistry.invoke_callbacks(
-                  {:lib => :net_http, :real_request => true}, request_signature, webmock_response)
+                  {lib: :net_http, real_request: true}, request_signature, webmock_response)
               end
               response.extend Net::WebMockHTTPResponse
               block.call response if block
@@ -292,7 +292,7 @@ module WebMock
         request.set_body_internal body
       end
 
-      WebMock::RequestSignature.new(method, uri, :body => request.body, :headers => headers)
+      WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
     end
 
     def self.validate_headers(headers)

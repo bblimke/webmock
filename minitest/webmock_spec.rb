@@ -25,20 +25,20 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
     it "should verify that expected request occured" do
       http_request(:get, "http://www.example.com/")
-      assert_requested(:get, "http://www.example.com", :times => 1)
+      assert_requested(:get, "http://www.example.com", times: 1)
       assert_requested(:get, "http://www.example.com")
     end
 
     it "should verify that expected http stub occured" do
       http_request(:get, "http://www.example.com/")
-      assert_requested(@stub_http, :times => 1)
+      assert_requested(@stub_http, times: 1)
       assert_requested(@stub_http)
     end
 
     it "should verify that expected https stub occured" do
       http_request(:get, "https://www.example.com/")
       http_request(:get, "https://www.example.com/")
-      assert_requested(@stub_https, :times => 2)
+      assert_requested(@stub_https, times: 2)
     end
 
     it  "should verify that expect request didn't occur" do

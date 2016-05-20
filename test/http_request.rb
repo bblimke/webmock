@@ -17,8 +17,8 @@ module HttpRequestTestHelper
       http.request(req, options[:body])
     }
     OpenStruct.new({
-      :body => response.body,
-      :headers => response,
-      :status => response.code })
+      body: response.body,
+      headers: response,
+      status: response.code })
   end
 end

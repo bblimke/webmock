@@ -19,7 +19,7 @@ shared_context "enabled and disabled webmock" do |*adapter_info|
 
   describe "when webmock is disabled except this lib" do
     before(:each) do
-      WebMock.disable!(:except => [http_library])
+      WebMock.disable!(except: [http_library])
     end
     after(:each) do
       WebMock.enable!
@@ -30,7 +30,7 @@ shared_context "enabled and disabled webmock" do |*adapter_info|
   describe "when webmock is enabled except this lib" do
     before(:each) do
       WebMock.disable!
-      WebMock.enable!(:except => [http_library])
+      WebMock.enable!(except: [http_library])
     end
     after(:each) do
       WebMock.enable!
@@ -52,7 +52,7 @@ shared_context "disabled WebMock" do
   end
 
   it "should return real response even if there are stubs" do
-    stub_request(:get, /.*/).to_return(:body => "x")
+    stub_request(:get, /.*/).to_return(body: "x")
     expect(http_request(:get, webmock_server_url).body).to eq("hello world")
   end
 
@@ -80,7 +80,7 @@ shared_context "enabled WebMock" do
   end
 
   it "should return stubbed response" do
-    stub_request(:get, /.*/).to_return(:body => "x")
+    stub_request(:get, /.*/).to_return(body: "x")
     expect(http_request(:get, "http://www.example.com/").body).to eq("x")
   end
 

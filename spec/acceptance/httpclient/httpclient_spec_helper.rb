@@ -12,7 +12,7 @@ module HTTPClientSpecHelper
       c.set_basic_auth(nil, options[:basic_auth][0], options[:basic_auth][1])
     end
     params = [method, uri.normalize.to_s,
-      WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => WebMock::Config.instance.query_values_notation), options[:body], options[:headers] || {}]
+      WebMock::Util::QueryMapper.query_to_values(uri.query, notation: WebMock::Config.instance.query_values_notation), options[:body], options[:headers] || {}]
     if HTTPClientSpecHelper.async_mode
       connection = c.request_async(*params)
       connection.join
@@ -22,10 +22,10 @@ module HTTPClientSpecHelper
     end
     headers = merge_headers(response)
     OpenStruct.new({
-      :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
-      :headers => headers,
-      :status => response.code.to_s,
-      :message => response.reason
+      body: HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
+      headers: headers,
+      status: response.code.to_s,
+      message: response.reason
     })
   end
 

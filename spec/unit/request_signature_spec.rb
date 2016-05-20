@@ -20,23 +20,23 @@ describe WebMock::RequestSignature do
     it "assigns normalized headers" do
       expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
       expect(
-        WebMock::RequestSignature.new(:get, "www.example.com", :headers => {'A' => 'a'}).headers
+        WebMock::RequestSignature.new(:get, "www.example.com", headers: {'A' => 'a'}).headers
       ).to eq({'B' => 'b'})
     end
 
     it "assign the body" do
-      expect(WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc").body).to eq("abc")
+      expect(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc").body).to eq("abc")
     end
 
     it "symbolizes the method" do
-      expect(WebMock::RequestSignature.new('get', "www.example.com", :body => "abc").method).to eq(:get)
+      expect(WebMock::RequestSignature.new('get', "www.example.com", body: "abc").method).to eq(:get)
     end
   end
 
   describe "#to_s" do
     it "describes itself" do
       expect(WebMock::RequestSignature.new(:get, "www.example.com",
-        :body => "abc", :headers => {'A' => 'a', 'B' => 'b'}).to_s).to eq(
+        body: "abc", headers: {'A' => 'a', 'B' => 'b'}).to_s).to eq(
       "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
       )
     end
@@ -45,9 +45,9 @@ describe WebMock::RequestSignature do
   describe "#hash" do
     it "reporst same hash for two signatures with the same values" do
       signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+        body: "abc", headers: {'A' => 'a', 'B' => 'b'})
       signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+        body: "abc", headers: {'A' => 'a', 'B' => 'b'})
       expect(signature1.hash).to eq(signature2.hash)
     end
 
@@ -64,16 +64,16 @@ describe WebMock::RequestSignature do
     end
 
     it "reports different hash for two signatures with different body" do
-      signature1 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc")
-      signature2 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "def")
+      signature1 = WebMock::RequestSignature.new(:get, "www.example.com", body: "abc")
+      signature2 = WebMock::RequestSignature.new(:get, "www.example.com", body: "def")
       expect(signature1.hash).not_to eq(signature2.hash)
     end
 
     it "reports different hash for two signatures with different headers" do
       signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :headers => {'A' => 'a'})
+        headers: {'A' => 'a'})
       signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-        :headers => {'A' => 'A'})
+        headers: {'A' => 'A'})
       expect(signature1.hash).not_to eq(signature2.hash)
     end
   end
@@ -82,9 +82,9 @@ describe WebMock::RequestSignature do
     describe method do
       it "is true for two signatures with the same values" do
         signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-          :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+          body: "abc", headers: {'A' => 'a', 'B' => 'b'})
         signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-          :body => "abc", :headers => {'A' => 'a', 'B' => 'b'})
+          body: "abc", headers: {'A' => 'a', 'B' => 'b'})
 
         expect(signature1.send(method, signature2)).to be_truthy
       end
@@ -102,16 +102,16 @@ describe WebMock::RequestSignature do
       end
 
       it "is false for two signatures with different body" do
-        signature1 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "abc")
-        signature2 = WebMock::RequestSignature.new(:get, "www.example.com", :body => "def")
+        signature1 = WebMock::RequestSignature.new(:get, "www.example.com", body: "abc")
+        signature2 = WebMock::RequestSignature.new(:get, "www.example.com", body: "def")
         expect(signature1.send(method, signature2)).to be_falsey
       end
 
       it "is false for two signatures with different headers" do
         signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
-          :headers => {'A' => 'a'})
+          headers: {'A' => 'a'})
         signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
-          :headers => {'A' => 'A'})
+          headers: {'A' => 'A'})
         expect(signature1.send(method, signature2)).to be_falsey
       end
     end

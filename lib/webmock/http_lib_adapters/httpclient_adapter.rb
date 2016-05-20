@@ -64,7 +64,7 @@ if defined?(::HTTPClient)
         end
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
-          {:lib => :httpclient}, request_signature, webmock_response)
+          {lib: :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         # in case there is a nil entry in the hash...
@@ -86,7 +86,7 @@ if defined?(::HTTPClient)
         if WebMock::CallbackRegistry.any_callbacks?
           webmock_response = build_webmock_response(res, body)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {:lib => :httpclient, :real_request => true}, request_signature,
+            {lib: :httpclient, real_request: true}, request_signature,
             webmock_response)
         end
         res
@@ -168,7 +168,7 @@ if defined?(::HTTPClient)
 
   def build_request_signature(req, reuse_existing = false)
     uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
-    uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, :notation => WebMock::Config.instance.query_values_notation) if req.header.request_query
+    uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation) if req.header.request_query
     uri.port = req.header.request_uri.port
 
     @request_filter.each do |filter|
@@ -185,8 +185,8 @@ if defined?(::HTTPClient)
     signature = WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
       uri.to_s,
-      :body => req.http_body.dump,
-      :headers => headers
+      body: req.http_body.dump,
+      headers: headers
     )
 
     # reuse a previous identical signature object if we stored one for later use

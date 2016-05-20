@@ -206,7 +206,7 @@ describe WebMock::Util::URI do
       it "should successfully handle repeated paramters" do
         uri_string = "http://www.example.com:80/path?target=host1&target=host2"
         uri = WebMock::Util::URI.normalize_uri(uri_string)
-        expect(WebMock::Util::QueryMapper.query_to_values(uri.query, :notation => WebMock::Config.instance.query_values_notation)).to eq([['target', 'host1'], ['target', 'host2']])
+        expect(WebMock::Util::QueryMapper.query_to_values(uri.query, notation: WebMock::Config.instance.query_values_notation)).to eq([['target', 'host1'], ['target', 'host2']])
       end
     end
   end

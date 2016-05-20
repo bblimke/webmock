@@ -14,10 +14,10 @@ module ExconSpecHelper
     end
 
     if Gem::Version.new(Excon::VERSION) < Gem::Version.new("0.29.0")
-      options  = options.merge(:method => method, :nonblock => false) # Dup and merge
+      options  = options.merge(method: method, nonblock: false) # Dup and merge
       response = Excon.new(uri, excon_options).request(options, &block)
     else
-      options  = options.merge(:method => method) # Dup and merge
+      options  = options.merge(method: method) # Dup and merge
       response = Excon.new(uri, excon_options.merge(nonblock: false)).request(options, &block)
     end
 
@@ -28,10 +28,10 @@ module ExconSpecHelper
     end
 
     OpenStruct.new \
-      :body => response.body,
-      :headers => headers,
-      :status  => response.status.to_s,
-      :message => ""
+      body: response.body,
+      headers: headers,
+      status: response.status.to_s,
+      message: ""
   end
 
   def client_timeout_exception_class

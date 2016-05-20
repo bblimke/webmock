@@ -23,7 +23,7 @@ class WebMockServer
 
   def start
     @started = true
-    server = WEBrick::GenericServer.new(:Port => 0, :Logger => Logger.new("/dev/null"))
+    server = WEBrick::GenericServer.new(Port: 0, Logger: Logger.new("/dev/null"))
     server.logger.level = 0
     @port = server.config[:Port]
 

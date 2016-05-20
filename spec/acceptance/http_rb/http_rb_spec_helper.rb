@@ -11,10 +11,10 @@ module HttpRbSpecHelper
     response = chain.request(method, normalize_uri(uri), options)
 
     OpenStruct.new({
-      :body       => response.body.to_s,
-      :headers    => normalize_headers(response.headers.to_h),
-      :status     => response.code.to_s,
-      :message    => response.reason
+      body: response.body.to_s,
+      headers: normalize_headers(response.headers.to_h),
+      status: response.code.to_s,
+      message: response.reason
     })
   end
 
@@ -43,9 +43,9 @@ module HttpRbSpecHelper
 
   def stub_simple_request(host, status = 200, headers = {}, body = nil)
     stub_request(:any, host).to_return({
-      :status   => status,
-      :headers  => headers.merge({ "Host" => host }),
-      :body     => body
+      status: status,
+      headers: headers.merge({ "Host" => host }),
+      body: body
     })
   end
 end

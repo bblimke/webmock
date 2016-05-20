@@ -25,7 +25,7 @@ if defined?(::Patron)
               res = WebMock::HttpLibAdapters::PatronAdapter.
                 build_patron_response(webmock_response, default_response_charset)
               WebMock::CallbackRegistry.invoke_callbacks(
-                {:lib => :patron}, request_signature, webmock_response)
+                {lib: :patron}, request_signature, webmock_response)
               res
             elsif WebMock.net_connect_allowed?(request_signature.uri)
               res = super
@@ -33,7 +33,7 @@ if defined?(::Patron)
                 webmock_response = WebMock::HttpLibAdapters::PatronAdapter.
                   build_webmock_response(res)
                 WebMock::CallbackRegistry.invoke_callbacks(
-                  {:lib => :patron, :real_request => true}, request_signature,
+                  {lib: :patron, real_request: true}, request_signature,
                     webmock_response)
               end
               res
@@ -91,8 +91,8 @@ if defined?(::Patron)
           request_signature = WebMock::RequestSignature.new(
             req.action,
             uri.to_s,
-            :body => request_body,
-            :headers => headers
+            body: request_body,
+            headers: headers
           )
           request_signature
         end

@@ -6,7 +6,7 @@ require 'stringio'
 require 'acceptance/net_http/net_http_shared'
 require 'support/webmock_server'
 
-describe "Real Net:HTTP without webmock", :without_webmock => true do
+describe "Real Net:HTTP without webmock", without_webmock: true do
   before(:all) do
     raise "WebMock has no access here!!!" if defined?(WebMock::NetHTTPUtility)
     WebMockServer.instance.start

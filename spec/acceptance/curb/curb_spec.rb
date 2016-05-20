@@ -11,8 +11,8 @@ unless RUBY_PLATFORM =~ /java/
 
     describe "when doing PUTs" do
       it "should stub them" do
-        stub_request(:put, "www.example.com").with(:body => "01234")
-        expect(http_request(:put, "http://www.example.com", :body => "01234").
+        stub_request(:put, "www.example.com").with(body: "01234")
+        expect(http_request(:put, "http://www.example.com", body: "01234").
           status).to eq("200")
       end
     end
@@ -32,7 +32,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it "should call on_success with 2xx response" do
         body = "on_success fired"
-        stub_request(:any, "example.com").to_return(:body => body)
+        stub_request(:any, "example.com").to_return(body: body)
 
         test = nil
         @curl.on_success do |c|
@@ -45,7 +45,7 @@ unless RUBY_PLATFORM =~ /java/
       it "should call on_missing with 4xx response" do
         response_code = 403
         stub_request(:any, "example.com").
-          to_return(:status => [response_code, "None shall pass"])
+          to_return(status: [response_code, "None shall pass"])
 
         test = nil
         @curl.on_missing do |c, code|
@@ -58,7 +58,7 @@ unless RUBY_PLATFORM =~ /java/
       it "should call on_failure with 5xx response" do
         response_code = 599
         stub_request(:any, "example.com").
-          to_return(:status => [response_code, "Server On Fire"])
+          to_return(status: [response_code, "Server On Fire"])
 
         test = nil
         @curl.on_failure do |c, code|
@@ -71,7 +71,7 @@ unless RUBY_PLATFORM =~ /java/
       it "should call on_body when response body is read" do
         body = "on_body fired"
         stub_request(:any, "example.com").
-          to_return(:body => body)
+          to_return(body: body)
 
         test = nil
         @curl.on_body do |data|
@@ -83,8 +83,8 @@ unless RUBY_PLATFORM =~ /java/
 
       it "should call on_body for each chunk with chunked response" do
         stub_request(:any, "example.com").
-          to_return(:body => ["first_chunk", "second_chunk"],
-                    :headers => {"Transfer-Encoding" => "chunked"})
+          to_return(body: ["first_chunk", "second_chunk"],
+                    headers: {"Transfer-Encoding" => "chunked"})
 
         test = []
         @curl.on_body do |data|
@@ -96,7 +96,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it "should call on_header when response headers are read" do
         stub_request(:any, "example.com").
-          to_return(:headers => {:one => 1})
+          to_return(headers: {one: 1})
 
         test = []
         @curl.on_header do |data|
@@ -111,7 +111,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it "should call on_complete when request is complete" do
         body = "on_complete fired"
-        stub_request(:any, "example.com").to_return(:body => body)
+        stub_request(:any, "example.com").to_return(body: body)
 
         test = nil
         @curl.on_complete do |curl|
@@ -122,7 +122,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should call on_progress when portion of response body is read" do
-        stub_request(:any, "example.com").to_return(:body => "01234")
+        stub_request(:any, "example.com").to_return(body: "01234")
 
         test = nil
         @curl.on_progress do |*args|
@@ -150,7 +150,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should call callbacks in correct order on failed request" do
-        stub_request(:any, "example.com").to_return(:status => [500, ""])
+        stub_request(:any, "example.com").to_return(status: [500, ""])
         order = []
         @curl.on_success {|*args| order << :on_success }
         @curl.on_missing {|*args| order << :on_missing }
@@ -165,7 +165,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should call callbacks in correct order on missing request" do
-        stub_request(:any, "example.com").to_return(:status => [403, ""])
+        stub_request(:any, "example.com").to_return(status: [403, ""])
         order = []
         @curl.on_success {|*args| order << :on_success }
         @curl.on_missing {|*args| order << :on_missing }
@@ -191,9 +191,9 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should be the same as #url even with a location header' do
           stub_request(:any, 'example.com').
-            to_return(:body    => "abc",
-                      :status  => 302,
-                      :headers => { 'Location' => 'http://www.example.com' })
+            to_return(body: "abc",
+                      status: 302,
+                      headers: { 'Location' => 'http://www.example.com' })
 
           @curl.http_get
           expect(@curl.last_effective_url).to eq('http://example.com')
@@ -211,7 +211,7 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should be the value of the location header when present' do
           stub_request(:any, 'example.com').
-            to_return(:headers => { 'Location' => 'http://www.example.com' })
+            to_return(headers: { 'Location' => 'http://www.example.com' })
           stub_request(:any, 'www.example.com')
 
           @curl.http_get
@@ -220,9 +220,9 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should work with more than one redirect' do
           stub_request(:any, 'example.com').
-            to_return(:headers => { 'Location' => 'http://www.example.com' })
+            to_return(headers: { 'Location' => 'http://www.example.com' })
           stub_request(:any, 'www.example.com').
-            to_return(:headers => { 'Location' => 'http://blog.example.com' })
+            to_return(headers: { 'Location' => 'http://blog.example.com' })
           stub_request(:any, 'blog.example.com')
 
           @curl.http_get
@@ -231,7 +231,7 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should maintain the original url' do
           stub_request(:any, 'example.com').
-            to_return(:headers => { 'Location' => 'http://www.example.com' })
+            to_return(headers: { 'Location' => 'http://www.example.com' })
           stub_request(:any, 'www.example.com')
 
           @curl.http_get
@@ -240,10 +240,10 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should have the redirected-to attrs (body, response code)' do
           stub_request(:any, 'example.com').
-            to_return(:body => 'request A',
-                      :status => 302,
-                      :headers => { 'Location' => 'http://www.example.com' })
-          stub_request(:any, 'www.example.com').to_return(:body => 'request B')
+            to_return(body: 'request A',
+                      status: 302,
+                      headers: { 'Location' => 'http://www.example.com' })
+          stub_request(:any, 'www.example.com').to_return(body: 'request B')
 
           @curl.http_get
           expect(@curl.body_str).to eq('request B')
@@ -252,10 +252,10 @@ unless RUBY_PLATFORM =~ /java/
 
         it 'should follow more than one redirect' do
           stub_request(:any, 'example.com').
-            to_return(:headers => { 'Location' => 'http://www.example.com' })
+            to_return(headers: { 'Location' => 'http://www.example.com' })
           stub_request(:any, 'www.example.com').
-            to_return(:headers => { 'Location' => 'http://blog.example.com' })
-          stub_request(:any, 'blog.example.com').to_return(:body => 'blog post')
+            to_return(headers: { 'Location' => 'http://blog.example.com' })
+          stub_request(:any, 'blog.example.com').to_return(body: 'blog post')
 
           @curl.http_get
           expect(@curl.url).to eq('http://example.com')
@@ -275,9 +275,9 @@ unless RUBY_PLATFORM =~ /java/
           content_type = "application/json"
 
           stub_request(:any, 'example.com').
-            to_return(:body     => "abc",
-                      :status   => 200,
-                      :headers  => { 'Content-Type' => content_type })
+            to_return(body: "abc",
+                      status: 200,
+                      headers: { 'Content-Type' => content_type })
 
           @curl.http_get
           expect(@curl.content_type).to eq(content_type)
@@ -288,8 +288,8 @@ unless RUBY_PLATFORM =~ /java/
         it "returns nil for content_type" do
 
           stub_request(:any, 'example.com').
-            to_return(:body     => "abc",
-                      :status   => 200 )
+            to_return(body: "abc",
+                      status: 200 )
 
           @curl.http_get
           expect(@curl.content_type).to be_nil
@@ -305,9 +305,9 @@ unless RUBY_PLATFORM =~ /java/
 
       it "is true when Transfer-Encoding is 'chunked' and body responds to each" do
         stub_request(:any, 'example.com').
-          to_return(:body     => ["abc", "def"],
-                    :status   => 200,
-                    :headers  => { 'Transfer-Encoding' => 'chunked' })
+          to_return(body: ["abc", "def"],
+                    status: 200,
+                    headers: { 'Transfer-Encoding' => 'chunked' })
 
         @curl.http_get
         expect(@curl).to be_chunked_response
@@ -315,8 +315,8 @@ unless RUBY_PLATFORM =~ /java/
 
       it "is false when Transfer-Encoding is not 'chunked'" do
         stub_request(:any, 'example.com').
-          to_return(:body     => ["abc", "def"],
-                    :status   => 200)
+          to_return(body: ["abc", "def"],
+                    status: 200)
 
         @curl.http_get
         expect(@curl).not_to be_chunked_response
@@ -324,8 +324,8 @@ unless RUBY_PLATFORM =~ /java/
 
       it "is false when Transfer-Encoding is 'chunked' but body does not respond to each" do
         stub_request(:any, 'example.com').
-          to_return(:body     => "abc",
-                    :status   => 200)
+          to_return(body: "abc",
+                    status: 200)
 
         @curl.http_get
         expect(@curl).not_to be_chunked_response
@@ -339,7 +339,7 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::DynamicHttp
 
       it "should work with uppercase arguments" do
-        stub_request(:get, "www.example.com").to_return(:body => "abc")
+        stub_request(:get, "www.example.com").to_return(body: "abc")
 
         c = Curl::Easy.new
         c.url = "http://www.example.com"
@@ -348,7 +348,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should alias body to body_str" do
-        stub_request(:get, "www.example.com").to_return(:body => "abc")
+        stub_request(:get, "www.example.com").to_return(body: "abc")
 
         c = Curl::Easy.new
         c.url = "http://www.example.com"
@@ -357,7 +357,7 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "supports array headers passed to Curl::Easy" do
-        stub_request(:get, "www.example.com").with(headers: {'X-One' => '1'}).to_return(:body => "abc")
+        stub_request(:get, "www.example.com").with(headers: {'X-One' => '1'}).to_return(body: "abc")
 
         c = Curl::Easy.new
         c.url = "http://www.example.com"
@@ -372,7 +372,7 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::NamedHttp
 
       it "should work with blank arguments for post" do
-        stub_request(:post, "www.example.com").with(:body => "01234")
+        stub_request(:post, "www.example.com").with(body: "01234")
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.post_body = "01234"
@@ -381,13 +381,13 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should work with several body arguments for post using the class method" do
-        stub_request(:post, "www.example.com").with(:body => {:user => {:first_name=>'Bartosz', :last_name=>'Blimke'}})
+        stub_request(:post, "www.example.com").with(body: {user: {first_name: 'Bartosz', last_name: 'Blimke'}})
         c = Curl::Easy.http_post "http://www.example.com", 'user[first_name]=Bartosz', 'user[last_name]=Blimke'
         expect(c.response_code).to eq(200)
       end
 
       it "should work with blank arguments for put" do
-        stub_request(:put, "www.example.com").with(:body => "01234")
+        stub_request(:put, "www.example.com").with(body: "01234")
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.put_data = "01234"
@@ -396,9 +396,9 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "should work with multiple arguments for post" do
-        data = { :name => "john", :address => "111 example ave" }
+        data = { name: "john", address: "111 example ave" }
 
-        stub_request(:post, "www.example.com").with(:body => data)
+        stub_request(:post, "www.example.com").with(body: data)
         c = Curl::Easy.new
         c.url = "http://www.example.com"
         c.http_post Curl::PostField.content('name', data[:name]),  Curl::PostField.content('address', data[:address])

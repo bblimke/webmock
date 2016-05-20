@@ -37,7 +37,7 @@ module HTTP
       raise_timeout_error if webmock_response.should_timeout
       webmock_response.raise_error_if_any
 
-      invoke_callbacks(webmock_response, :real_request => false)
+      invoke_callbacks(webmock_response, real_request: false)
       ::HTTP::Response.from_webmock webmock_response, request_signature
     end
 
@@ -49,7 +49,7 @@ module HTTP
     def perform
       return unless ::WebMock.net_connect_allowed?(request_signature.uri)
       response = @perform.call
-      invoke_callbacks(response.to_webmock, :real_request => true)
+      invoke_callbacks(response.to_webmock, real_request: true)
       response
     end
 
@@ -59,7 +59,7 @@ module HTTP
 
     def invoke_callbacks(webmock_response, options = {})
       ::WebMock::CallbackRegistry.invoke_callbacks(
-        options.merge({ :lib => :http_rb }),
+        options.merge({ lib: :http_rb }),
         request_signature,
         webmock_response
       )

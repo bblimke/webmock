@@ -54,14 +54,14 @@ if defined?(Excon)
           WebMock::RequestRegistry.instance.requested_signatures.put(mock_request)
 
           if mock_response = WebMock::StubRegistry.instance.response_for_request(mock_request)
-            self.perform_callbacks(mock_request, mock_response, :real_request => false)
+            self.perform_callbacks(mock_request, mock_response, real_request: false)
             response = self.real_response(mock_response)
             response
           elsif WebMock.net_connect_allowed?(mock_request.uri)
             conn = new_excon_connection(params)
-            real_response = conn.request(request_params_from(params.merge(:mock => false)))
+            real_response = conn.request(request_params_from(params.merge(mock: false)))
 
-            ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response), :real_request => true)
+            ExconAdapter.perform_callbacks(mock_request, ExconAdapter.mock_response(real_response), real_request: true)
 
             real_response.data
           else
@@ -73,7 +73,7 @@ if defined?(Excon)
           # Ensure the connection is constructed with the exact same args
           # that the orginal connection was constructed with.
           args = params.fetch(:__construction_args)
-          ::Excon::Connection.new(connection_params_from args.merge(:mock => false))
+          ::Excon::Connection.new(connection_params_from args.merge(mock: false))
         end
 
         def self.connection_params_from(hash)
@@ -112,7 +112,7 @@ if defined?(Excon)
           method  = (params.delete(:method) || :get).to_s.downcase.to_sym
           params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
           uri = Addressable::URI.new(params).to_s
-          WebMock::RequestSignature.new method, uri, :body => body_from(params), :headers => params[:headers]
+          WebMock::RequestSignature.new method, uri, body: body_from(params), headers: params[:headers]
         end
 
         def self.body_from(params)
@@ -128,9 +128,9 @@ if defined?(Excon)
           raise Excon::Errors::Timeout if mock.should_timeout
           mock.raise_error_if_any
           {
-            :body    => mock.body,
-            :status  => mock.status[0].to_i,
-            :headers => mock.headers || {}
+            body: mock.body,
+            status: mock.status[0].to_i,
+            headers: mock.headers || {}
           }
         end
 
@@ -144,7 +144,7 @@ if defined?(Excon)
 
         def self.perform_callbacks(request, response, options = {})
           return unless WebMock::CallbackRegistry.any_callbacks?
-          WebMock::CallbackRegistry.invoke_callbacks(options.merge(:lib => :excon), request, response)
+          WebMock::CallbackRegistry.invoke_callbacks(options.merge(lib: :excon), request, response)
         end
       end
     end

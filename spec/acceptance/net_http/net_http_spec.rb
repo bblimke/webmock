@@ -102,13 +102,13 @@ describe "Net:HTTP" do
   end
 
   it "should work with block provided" do
-    stub_http_request(:get, "www.example.com").to_return(:body => "abc"*100000)
+    stub_http_request(:get, "www.example.com").to_return(body: "abc"*100000)
     expect(Net::HTTP.start("www.example.com") { |query| query.get("/") }.body).to eq("abc"*100000)
   end
 
   it "should handle requests with raw binary data" do
     body = "\x14\x00\x00\x00\x70\x69\x6e\x67\x00\x00"
-    stub_http_request(:post, "www.example.com").with(:body => body).to_return(:body => "abc")
+    stub_http_request(:post, "www.example.com").with(body: body).to_return(body: "abc")
     req = Net::HTTP::Post.new("/")
     req.body = body
     req.content_type = "application/octet-stream"
@@ -128,7 +128,7 @@ describe "Net:HTTP" do
       request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
     else
       request.instance_eval do
-        @header = request.to_hash.merge({:InvalidHeaderSinceItsASymbol => "this will not be valid"})
+        @header = request.to_hash.merge({InvalidHeaderSinceItsASymbol: "this will not be valid"})
       end
     end
 
@@ -145,13 +145,13 @@ describe "Net:HTTP" do
   end
 
   it "should handle multiple values for the same response header" do
-    stub_http_request(:get, "www.example.com").to_return(:headers => { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
+    stub_http_request(:get, "www.example.com").to_return(headers: { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
     response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
     expect(response.get_fields('Set-Cookie')).to eq(['bar=bazz', 'foo=bar'])
   end
 
   it "should yield block on response" do
-    stub_http_request(:get, "www.example.com").to_return(:body => "abc")
+    stub_http_request(:get, "www.example.com").to_return(body: "abc")
     response_body = ""
     http_request(:get, "http://www.example.com/") do |response|
       response_body = response.body
@@ -160,21 +160,21 @@ describe "Net:HTTP" do
   end
 
   it "should handle Net::HTTP::Post#body" do
-    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")
     req.body = "my_params"
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
   it "should handle Net::HTTP::Post#body_stream" do
-    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")
     req.body_stream = StringIO.new("my_params")
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
   it "should behave like Net::HTTP and raise error if both request body and body argument are set" do
-    stub_http_request(:post, "www.example.com").with(:body => "my_params").to_return(:body => "abc")
+    stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")
     req.body = "my_params"
     expect {
@@ -183,12 +183,12 @@ describe "Net:HTTP" do
   end
 
   it "should return a Net::ReadAdapter from response.body when a stubbed request is made with a block and #read_body" do
-    WebMock.stub_request(:get, 'http://example.com/').to_return(:body => "the body")
+    WebMock.stub_request(:get, 'http://example.com/').to_return(body: "the body")
     response = Net::HTTP.new('example.com', 80).request_get('/') { |r| r.read_body { } }
     expect(response.body).to be_a(Net::ReadAdapter)
   end
 
-  it "should have request 1 time executed in registry after 1 real request", :net_connect => true do
+  it "should have request 1 time executed in registry after 1 real request", net_connect: true do
     WebMock.allow_net_connect!
     http = Net::HTTP.new('localhost', port)
     http.get('/') {}
@@ -197,7 +197,7 @@ describe "Net:HTTP" do
   end
 
   it "should work with Addressable::URI passed to Net::HTTP.get_response" do
-    stub_request(:get, 'http://www.example.com/hello?a=1').to_return(:body => "abc")
+    stub_request(:get, 'http://www.example.com/hello?a=1').to_return(body: "abc")
     expect(Net::HTTP.get_response(Addressable::URI.parse('http://www.example.com/hello?a=1')).body).to eq("abc")
   end
 
@@ -209,15 +209,15 @@ describe "Net:HTTP" do
     end
 
     describe "when net http is allowed" do
-      it "should not connect to the server until the request", :net_connect => true do
+      it "should not connect to the server until the request", net_connect: true do
         WebMock.allow_net_connect!
         @http.start {|conn|
           expect(conn.peer_cert).to be_nil
         }
       end
 
-      it "should connect to the server on start", :net_connect => true do
-        WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+      it "should connect to the server on start", net_connect: true do
+        WebMock.allow_net_connect!(net_http_connect_on_start: true)
         @http.start {|conn|
           cert = OpenSSL::X509::Certificate.new conn.peer_cert
           expect(cert).to be_a(OpenSSL::X509::Certificate)
@@ -227,28 +227,28 @@ describe "Net:HTTP" do
     end
 
     describe "when net http is disabled and allowed only for some hosts" do
-      it "should not connect to the server until the request", :net_connect => true do
-        WebMock.disable_net_connect!(:allow => "www.google.com")
+      it "should not connect to the server until the request", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com")
         @http.start {|conn|
           expect(conn.peer_cert).to be_nil
         }
       end
 
-      it "should connect to the server on start", :net_connect => true do
-        WebMock.disable_net_connect!(:allow => "www.google.com", :net_http_connect_on_start => true)
+      it "should connect to the server on start", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com", net_http_connect_on_start: true)
         @http.start {|conn|
           cert = OpenSSL::X509::Certificate.new conn.peer_cert
           expect(cert).to be_a(OpenSSL::X509::Certificate)
         }
       end
 
-      it "should connect to the server if the URI matches an regex", :net_connect => true do
-        WebMock.disable_net_connect!(:allow => /google.com/)
+      it "should connect to the server if the URI matches an regex", net_connect: true do
+        WebMock.disable_net_connect!(allow: /google.com/)
         Net::HTTP.get('www.google.com','/')
       end
 
-      it "should connect to the server if the URI matches any regex the array", :net_connect => true do
-        WebMock.disable_net_connect!(:allow => [/google.com/, /yahoo.com/])
+      it "should connect to the server if the URI matches any regex the array", net_connect: true do
+        WebMock.disable_net_connect!(allow: [/google.com/, /yahoo.com/])
         Net::HTTP.get('www.google.com','/')
       end
 
@@ -258,19 +258,19 @@ describe "Net:HTTP" do
 
   describe "when net_http_connect_on_start is true" do
     before(:each) do
-      WebMock.allow_net_connect!(:net_http_connect_on_start => true)
+      WebMock.allow_net_connect!(net_http_connect_on_start: true)
     end
     it_should_behave_like "Net::HTTP"
   end
 
   describe "when net_http_connect_on_start is false" do
     before(:each) do
-      WebMock.allow_net_connect!(:net_http_connect_on_start => false)
+      WebMock.allow_net_connect!(net_http_connect_on_start: false)
     end
     it_should_behave_like "Net::HTTP"
   end
 
-  describe 'after_request callback support', :net_connect => true do
+  describe 'after_request callback support', net_connect: true do
     let(:expected_body_regex) { /hello world/ }
 
     before(:each) do

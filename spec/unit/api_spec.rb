@@ -4,7 +4,7 @@ describe WebMock::API do
   describe '#hash_including' do
 
     subject { klass.new.hash_including(args) }
-    let(:args) { {:data => :one} }
+    let(:args) { {data: :one} }
 
     context 'when mixed into a class that does not define `hash_including`' do
       let(:klass) do
@@ -35,7 +35,7 @@ describe WebMock::API do
       end
 
       context "when args are both keys and key/value pairs" do
-        subject {klass.new.hash_including(:foo, :bar, :data => :one)}
+        subject {klass.new.hash_including(:foo, :bar, data: :one)}
         let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
         it "creates 'HashIncludingMatcher' with keys anythingized" do

@@ -27,4 +27,4 @@ Rake::TestTask.new(:minitest) do |test|
   test.warning = false
 end
 
-task :default => [:spec, :spec_http_without_webmock, :test, :minitest]
+task default: [:spec, :spec_http_without_webmock, :test, :minitest]

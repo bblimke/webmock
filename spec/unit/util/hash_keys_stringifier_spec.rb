@@ -4,10 +4,10 @@ describe WebMock::Util::HashKeysStringifier do
 
   it "should recursively stringify all symbol keys" do
     hash = {
-      :a => {
-        :b => [
+      a: {
+        b: [
           {
-            :c => [{:d => "1"}]
+            c: [{d: "1"}]
           }
         ]
       }
@@ -21,7 +21,7 @@ describe WebMock::Util::HashKeysStringifier do
         ]
       }
     }
-    expect(WebMock::Util::HashKeysStringifier.stringify_keys!(hash, :deep => true)).to eq(stringified)
+    expect(WebMock::Util::HashKeysStringifier.stringify_keys!(hash, deep: true)).to eq(stringified)
   end
 
 end

@@ -43,7 +43,7 @@ describe WebMock::RackResponse do
 
   it "should send along POST params" do
     request = WebMock::RequestSignature.new(:post, 'www.example.com/greet',
-      :body => 'name=Jimmy'
+      body: 'name=Jimmy'
     )
 
     response = @rack_response.evaluate(request)
@@ -52,7 +52,7 @@ describe WebMock::RackResponse do
 
   it "should send params with proper content length if params have non-ascii symbols" do
     request = WebMock::RequestSignature.new(:post, 'www.example.com/greet',
-      :body => 'name=Олег'
+      body: 'name=Олег'
     )
 
     response = @rack_response.evaluate(request)

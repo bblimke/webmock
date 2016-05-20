@@ -56,7 +56,7 @@ shared_context "request expectations" do |*adapter_info|
 
       it "should fail if request was executed with different method" do
         expect {
-          http_request(:post, "http://www.example.com/", :body => "abc")
+          http_request(:post, "http://www.example.com/", body: "abc")
           expect(a_request(:get, "http://www.example.com")).to have_been_made
         }.to fail_with(%r(The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times))
       end
@@ -98,10 +98,10 @@ shared_context "request expectations" do |*adapter_info|
 
       it "should satisfy expectations even if requests were executed in different order than expectations were declared" do
         stub_request(:post, "http://www.example.com")
-        http_request(:post, "http://www.example.com/", :body => "def")
-        http_request(:post, "http://www.example.com/", :body => "abc")
-        expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "abc")
-        expect(WebMock).to have_requested(:post, "www.example.com").with(:body => "def")
+        http_request(:post, "http://www.example.com/", body: "def")
+        http_request(:post, "http://www.example.com/", body: "abc")
+        expect(WebMock).to have_requested(:post, "www.example.com").with(body: "abc")
+        expect(WebMock).to have_requested(:post, "www.example.com").with(body: "def")
       end
 
       describe "when matching requests with escaped or unescaped uris" do
@@ -141,28 +141,28 @@ shared_context "request expectations" do |*adapter_info|
         it "should satisfy expectation if the request was executed with query params declared as a hash in a query option" do
           expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-            expect(a_request(:get, "www.example.com").with(:query => {"a" => ["b", "c"]})).to have_been_made
+            expect(a_request(:get, "www.example.com").with(query: {"a" => ["b", "c"]})).to have_been_made
           }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with query params declared as string in query option" do
           expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c")
-            expect(a_request(:get, "www.example.com").with(:query => "a[]=b&a[]=c")).to have_been_made
+            expect(a_request(:get, "www.example.com").with(query: "a[]=b&a[]=c")).to have_been_made
           }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with query params both in uri and in query option" do
           expect {
             http_request(:get, "http://www.example.com/?x=3&a[]=b&a[]=c")
-            expect(a_request(:get, "www.example.com/?x=3").with(:query => {"a" => ["b", "c"]})).to have_been_made
+            expect(a_request(:get, "www.example.com/?x=3").with(query: {"a" => ["b", "c"]})).to have_been_made
           }.not_to raise_error
         end
 
         it "should satisfy expectation if the request was executed with only part query params declared as a hash in a query option" do
           expect {
             http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1")
-            expect(a_request(:get, "www.example.com").with(:query => hash_including({"a" => ["b", "c"]}))).to have_been_made
+            expect(a_request(:get, "www.example.com").with(query: hash_including({"a" => ["b", "c"]}))).to have_been_made
           }.not_to raise_error
         end
       end
@@ -384,32 +384,32 @@ shared_context "request expectations" do |*adapter_info|
 
       it "should satisfy expectation if request was executed with the same body" do
         expect {
-          http_request(:post, "http://www.example.com/", :body => "abc")
-          expect(a_request(:post, "www.example.com").with(:body => "abc")).to have_been_made
+          http_request(:post, "http://www.example.com/", body: "abc")
+          expect(a_request(:post, "www.example.com").with(body: "abc")).to have_been_made
         }.not_to raise_error
       end
 
       it "should fail if request was executed with different body" do
         expect {
-          http_request(:post, "http://www.example.com/", :body => "abc")
+          http_request(:post, "http://www.example.com/", body: "abc")
           expect(a_request(:post, "www.example.com").
-          with(:body => "def")).to have_been_made
+          with(body: "def")).to have_been_made
         }.to fail_with(%r(The request POST http://www.example.com/ with body "def" was expected to execute 1 time but it executed 0 times))
       end
 
       describe "when expected request body is declared as a regexp" do
         it "should satisfy expectation if request was executed with body matching regexp" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc")
-            expect(a_request(:post, "www.example.com").with(:body => /^abc$/)).to have_been_made
+            http_request(:post, "http://www.example.com/", body: "abc")
+            expect(a_request(:post, "www.example.com").with(body: /^abc$/)).to have_been_made
           }.not_to raise_error
         end
 
         it "should fail if request was executed with body not matching regexp" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc")
+            http_request(:post, "http://www.example.com/", body: "abc")
             expect(a_request(:post, "www.example.com").
-            with(:body => /^xabc/)).to have_been_made
+            with(body: /^xabc/)).to have_been_made
           }.to fail_with(%r(The request POST http://www.example.com/ with body /\^xabc/ was expected to execute 1 time but it executed 0 times))
         end
 
@@ -422,22 +422,22 @@ shared_context "request expectations" do |*adapter_info|
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
             expect {
-              http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", body: 'a=1&c[d][]=e&c[d][]=f&b=five')
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if url encoded params have different order" do
             expect {
-              http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&b=five&c[d][]=f')
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", body: 'a=1&c[d][]=e&b=five&c[d][]=f')
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should fail if request is executed with url encoded body not matching hash" do
             expect {
-              http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", body: 'c[d][]=f&a=1&c[d][]=e')
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.to fail_with(fail_message)
           end
         end
@@ -445,25 +445,25 @@ shared_context "request expectations" do |*adapter_info|
         describe "when request is executed with json body matching hash and Content-Type is set to json" do
           it "should satisfy expectation" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-                           :body => "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+                           body: "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}")
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if json body is in different form" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-                           :body => "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+                           body: "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}")
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if json body contains date string" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/json'},
-                           :body => "{\"foo\":\"2010-01-01\"}")
-              expect(a_request(:post, "www.example.com").with(:body => {"foo" => "2010-01-01"})).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+                           body: "{\"foo\":\"2010-01-01\"}")
+              expect(a_request(:post, "www.example.com").with(body: {"foo" => "2010-01-01"})).to have_been_made
             }.not_to raise_error
           end
         end
@@ -474,25 +474,25 @@ shared_context "request expectations" do |*adapter_info|
 
           it "should satisfy expectation" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-                           :body => "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/xml'},
+                           body: "<opt a=\"1\" b=\"five\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if xml body is in different form" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-                           :body => "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/xml'},
+                           body: "<opt b=\"five\" a=\"1\">\n  <c>\n    <d>e</d>\n    <d>f</d>\n  </c>\n</opt>\n")
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if xml body contains date string" do
             expect {
-              http_request(:post, "http://www.example.com/", :headers => {'Content-Type' => 'application/xml'},
-                           :body => "<opt foo=\"2010-01-01\">\n</opt>\n")
-              expect(a_request(:post, "www.example.com").with(:body => {"opt" => {"foo" => "2010-01-01"}})).to have_been_made
+              http_request(:post, "http://www.example.com/", headers: {'Content-Type' => 'application/xml'},
+                           body: "<opt foo=\"2010-01-01\">\n</opt>\n")
+              expect(a_request(:post, "www.example.com").with(body: {"opt" => {"foo" => "2010-01-01"}})).to have_been_made
             }.not_to raise_error
           end
         end
@@ -505,15 +505,15 @@ shared_context "request expectations" do |*adapter_info|
         describe "when request is made with url encoded body matching hash" do
           it "should satisfy expectation" do
             expect {
-              http_request(:post, "http://www.example.com/", :body => 'a=1&c[d][]=e&c[d][]=f&b=five')
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", body: 'a=1&c[d][]=e&c[d][]=f&b=five')
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.not_to raise_error
           end
 
           it "should fail if request is executed with url encoded body not matching hash" do
             expect {
-              http_request(:post, "http://www.example.com/", :body => 'c[d][]=f&a=1&c[d][]=e')
-              expect(a_request(:post, "www.example.com").with(:body => body_hash)).to have_been_made
+              http_request(:post, "http://www.example.com/", body: 'c[d][]=f&a=1&c[d][]=e')
+              expect(a_request(:post, "www.example.com").with(body: body_hash)).to have_been_made
             }.to fail_with(fail_message)
           end
         end
@@ -522,77 +522,77 @@ shared_context "request expectations" do |*adapter_info|
       describe "when request with headers is expected" do
         it "should satisfy expectation if request was executed with the same headers" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
+            http_request(:get, "http://www.example.com/", headers: SAMPLE_HEADERS)
             expect(a_request(:get, "www.example.com").
-            with(:headers => SAMPLE_HEADERS)).to have_been_made
+            with(headers: SAMPLE_HEADERS)).to have_been_made
           }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with the same headers but with header value declared as array" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => {"a" => "b"})
+            http_request(:get, "http://www.example.com/", headers: {"a" => "b"})
             expect(a_request(:get, "www.example.com").
-            with(:headers => {"a" => ["b"]})).to have_been_made
+            with(headers: {"a" => ["b"]})).to have_been_made
           }.not_to raise_error
         end
 
         describe "when multiple headers with the same key are passed" do
           it "should satisfy expectation" do
             expect {
-              http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+              http_request(:get, "http://www.example.com/", headers: {"a" => ["b", "c"]})
               expect(a_request(:get, "www.example.com").
-              with(:headers =>  {"a" => ["b", "c"]})).to have_been_made
+              with(headers: {"a" => ["b", "c"]})).to have_been_made
             }.not_to raise_error
           end
 
           it "should satisfy expectation even if request was executed with the same headers but different order" do
             expect {
-              http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+              http_request(:get, "http://www.example.com/", headers: {"a" => ["b", "c"]})
               expect(a_request(:get, "www.example.com").
-              with(:headers =>  {"a" => ["c", "b"]})).to have_been_made
+              with(headers: {"a" => ["c", "b"]})).to have_been_made
             }.not_to raise_error
           end
 
           it "should fail if request was executed with different headers" do
             expect {
-              http_request(:get, "http://www.example.com/", :headers => {"a" => ["b", "c"]})
+              http_request(:get, "http://www.example.com/", headers: {"a" => ["b", "c"]})
               expect(a_request(:get, "www.example.com").
-              with(:headers => {"a" => ["b", "d"]})).to have_been_made
+              with(headers: {"a" => ["b", "d"]})).to have_been_made
             }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>\['b', 'd'\]\} was expected to execute 1 time but it executed 0 times))
           end
         end
 
         it "should fail if request was executed with different headers" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => SAMPLE_HEADERS)
+            http_request(:get, "http://www.example.com/", headers: SAMPLE_HEADERS)
             expect(a_request(:get, "www.example.com").
-            with(:headers => { 'Content-Length' => '9999'})).to have_been_made
+            with(headers: { 'Content-Length' => '9999'})).to have_been_made
           }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'Content-Length'=>'9999'\} was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was executed with less headers" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => {'A' => 'a'})
+            http_request(:get, "http://www.example.com/", headers: {'A' => 'a'})
             expect(a_request(:get, "www.example.com").
-            with(:headers => {'A' => 'a', 'B' => 'b'})).to have_been_made
+            with(headers: {'A' => 'a', 'B' => 'b'})).to have_been_made
           }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'A'=>'a', 'B'=>'b'\} was expected to execute 1 time but it executed 0 times))
         end
 
         it "should satisfy expectation if request was executed with more headers" do
           expect {
             http_request(:get, "http://www.example.com/",
-                         :headers => {'A' => 'a', 'B' => 'b'}
+                         headers: {'A' => 'a', 'B' => 'b'}
                          )
             expect(a_request(:get, "www.example.com").
-            with(:headers => {'A' => 'a'})).to have_been_made
+            with(headers: {'A' => 'a'})).to have_been_made
           }.not_to raise_error
         end
 
         it "should satisfy expectation if request was executed with body and headers but they were not specified in expectantion" do
           expect {
             http_request(:post, "http://www.example.com/",
-                         :body => "abc",
-                         :headers => SAMPLE_HEADERS
+                         body: "abc",
+                         headers: SAMPLE_HEADERS
                          )
             expect(a_request(:post, "www.example.com")).to have_been_made
           }.not_to raise_error
@@ -600,17 +600,17 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should satisfy expectation if request was executed with headers matching regular expressions" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'MyAppName' })
+            http_request(:get, "http://www.example.com/", headers: { 'some-header' => 'MyAppName' })
             expect(a_request(:get, "www.example.com").
-            with(:headers => { :some_header => /^MyAppName$/ })).to have_been_made
+            with(headers: { some_header: /^MyAppName$/ })).to have_been_made
           }.not_to raise_error
         end
 
         it "should fail if request was executed with headers not matching regular expression" do
           expect {
-            http_request(:get, "http://www.example.com/", :headers => { 'some-header' => 'xMyAppName' })
+            http_request(:get, "http://www.example.com/", headers: { 'some-header' => 'xMyAppName' })
             expect(a_request(:get, "www.example.com").
-            with(:headers => { :some_header => /^MyAppName$/ })).to have_been_made
+            with(headers: { some_header: /^MyAppName$/ })).to have_been_made
           }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'Some-Header'=>/\^MyAppName\$/\} was expected to execute 1 time but it executed 0 times))
         end
       end
@@ -618,27 +618,27 @@ shared_context "request expectations" do |*adapter_info|
       describe "when expectation contains a request matching block" do
         it "should satisfy expectation if request was executed and block evaluated to true" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).to have_been_made
           }.not_to raise_error
         end
 
         it "should fail if request was executed and block evaluated to false" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc")
+            http_request(:post, "http://www.example.com/", body: "abc")
             expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).to have_been_made
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was not expected but it executed and block matched request" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             expect(a_request(:post, "www.example.com").with { |req| req.body == "wadus" }).not_to have_been_made
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
       end
 
-      describe "with userinfo", :unless => (adapter_info.include?(:no_url_auth)) do
+      describe "with userinfo", unless: (adapter_info.include?(:no_url_auth)) do
         before(:each) do
           stub_request(:any, "http://user:pass@www.example.com")
           stub_request(:any, "http://user:pazz@www.example.com")
@@ -721,7 +721,7 @@ shared_context "request expectations" do |*adapter_info|
           }.not_to raise_error
         end
 
-        it "should fail if request was executed with basic auth header and credentials were provided in url", :unless => (adapter_info.include?(:no_url_auth)) do
+        it "should fail if request was executed with basic auth header and credentials were provided in url", unless: (adapter_info.include?(:no_url_auth)) do
           expect {
             stub_request(:any, "http://user:pass@www.example.com")
             http_request(:get, "http://user:pass@www.example.com/")
@@ -740,8 +740,8 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should satisfy expectation if request with body and headers was expected and request was made" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-            expect(WebMock).to have_requested(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'}).once
+            http_request(:post, "http://www.example.com/", body: "abc", headers: {'A' => 'a'})
+            expect(WebMock).to have_requested(:post, "http://www.example.com").with(body: "abc", headers: {'A' => 'a'}).once
           }.not_to raise_error
         end
 
@@ -754,21 +754,21 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should satisfy expectation if request was executed and expectation had block which evaluated to true" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
           }.not_to raise_error
         end
 
         it "should fail if request was executed and expectation had block which evaluated to false" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc")
+            http_request(:post, "http://www.example.com/", body: "abc")
             expect(WebMock).to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
 
         it "should fail if request was expected not to be made but was made and block matched request" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             expect(WebMock).not_to have_requested(:post, "www.example.com").with { |req| req.body == "wadus" }
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
@@ -778,15 +778,15 @@ shared_context "request expectations" do |*adapter_info|
         it "should satisfy expectation if requests was made" do
           expect {
             http_request(:get, "http://www.example.com/")
-            assert_requested(:get, "http://www.example.com", :times => 1)
+            assert_requested(:get, "http://www.example.com", times: 1)
             assert_requested(:get, "http://www.example.com")
           }.not_to raise_error
         end
 
         it "should satisfy expectation if request was made with body and headers" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
-            assert_requested(:post, "http://www.example.com", :body => "abc", :headers => {'A' => 'a'})
+            http_request(:post, "http://www.example.com/", body: "abc", headers: {'A' => 'a'})
+            assert_requested(:post, "http://www.example.com", body: "abc", headers: {'A' => 'a'})
           }.not_to raise_error
         end
 
@@ -799,21 +799,21 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should fail if request expected not to be made was made and expectation block evaluated to true" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             assert_not_requested(:post, "www.example.com") { |req| req.body == "wadus" }
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
         end
 
         it "should satisfy expectation if request was made and expectation block evaluated to true" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "wadus")
+            http_request(:post, "http://www.example.com/", body: "wadus")
             assert_requested(:post, "www.example.com") { |req| req.body == "wadus" }
           }.not_to raise_error
         end
 
         it "should fail if request was made and expectation block evaluated to false" do
           expect {
-            http_request(:post, "http://www.example.com/", :body => "abc")
+            http_request(:post, "http://www.example.com/", body: "abc")
             assert_requested(:post, "www.example.com") { |req| req.body == "wadus" }
           }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
         end
@@ -824,7 +824,7 @@ shared_context "request expectations" do |*adapter_info|
           stub_http = stub_http_request(:get, "http://www.example.com")
           expect {
             http_request(:get, "http://www.example.com/")
-            assert_requested(stub_http, :times => 1)
+            assert_requested(stub_http, times: 1)
             assert_requested(stub_http)
           }.not_to raise_error
         end
@@ -856,8 +856,8 @@ shared_context "request expectations" do |*adapter_info|
       end
 
       it "should satisfy expectation if expected request with body and headers was made" do
-        stub = stub_request(:post, "http://www.example.com").with(:body => "abc", :headers => {'A' => 'a'})
-        http_request(:post, "http://www.example.com/", :body => "abc", :headers => {'A' => 'a'})
+        stub = stub_request(:post, "http://www.example.com").with(body: "abc", headers: {'A' => 'a'})
+        http_request(:post, "http://www.example.com/", body: "abc", headers: {'A' => 'a'})
         expect(stub).to have_been_requested.once
       end
 
@@ -872,14 +872,14 @@ shared_context "request expectations" do |*adapter_info|
       it "should fail request not expected to be made was made and expectation block evaluated to true" do
         expect {
           stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
-          http_request(:post, "http://www.example.com/", :body => "wadus")
+          http_request(:post, "http://www.example.com/", body: "wadus")
           expect(stub).not_to have_been_requested
         }.to fail_with(%r(The request POST http://www.example.com/ with given block was not expected to execute but it executed 1 time))
       end
 
       it "should satisfy expectation if request was made and expectation block evaluated to true" do
         stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
-        http_request(:post, "http://www.example.com/", :body => "wadus")
+        http_request(:post, "http://www.example.com/", body: "wadus")
         expect(stub).to have_been_requested
       end
 
@@ -887,13 +887,13 @@ shared_context "request expectations" do |*adapter_info|
         expect {
           stub_request(:any, /.+/) #stub any request
           stub = stub_request(:post, "www.example.com").with { |req| req.body == "wadus" }
-          http_request(:post, "http://www.example.com/", :body => "abc")
+          http_request(:post, "http://www.example.com/", body: "abc")
           expect(stub).to have_been_requested
         }.to fail_with(%r(The request POST http://www.example.com/ with given block was expected to execute 1 time but it executed 0 times))
       end
     end
 
-    describe "when net connect is allowed", :net_connect => true do
+    describe "when net connect is allowed", net_connect: true do
       before(:each) do
         WebMock.allow_net_connect!
       end

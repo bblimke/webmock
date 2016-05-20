@@ -20,11 +20,11 @@ module HTTP
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
 
         new({
-          :status   => status,
-          :version  => "1.1",
-          :headers  => headers,
-          :body     => body,
-          :uri      => uri
+          status: status,
+          version: "1.1",
+          headers: headers,
+          body: body,
+          uri: uri
         })
       end
 
