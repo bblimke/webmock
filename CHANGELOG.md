@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.3
+
+  * Handling headers passed as an Array to Curl::Easy
+
+    Thanks to [Chelsea](https://github.com/grosscr) for reporting the issue.
+
+  * Removed Ruby warnings.
+
+    Thanks to [Aaron Kromer](https://github.com/cupakromer)
+
 ## 2.0.2
 
   * Using `Base64.strict_encode64` instead of `Base64.encode64` to handle long user:pass basic auth credentials
