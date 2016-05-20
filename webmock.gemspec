@@ -31,8 +31,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'typhoeus',        '>= 0.5.0' unless RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'manticore',       '>= 0.5.1' if RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'excon',           '>= 0.27.5'
-  s.add_development_dependency 'minitest',        '~> 5.0.0'
-  s.add_development_dependency 'rdoc',            '>3.5.0'
+  s.add_development_dependency 'minitest',        '>= 5.0.0'
+  s.add_development_dependency 'test-unit',       '>= 3.0.0'
+  s.add_development_dependency 'rdoc',            '>  3.5.0'
   s.add_development_dependency 'rack'
 
   s.files         = `git ls-files`.split("\n")
