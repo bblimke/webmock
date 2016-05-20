@@ -355,6 +355,16 @@ unless RUBY_PLATFORM =~ /java/
         c.http(:GET)
         expect(c.body).to eq("abc")
       end
+
+      it "supports array headers passed to Curl::Easy" do
+        stub_request(:get, "www.example.com").with(headers: {'X-One' => '1'}).to_return(:body => "abc")
+
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.headers = ["X-One: 1"]
+        c.http(:GET)
+        expect(c.body).to eq("abc")
+      end
     end
 
     describe "using #http_* methods for requests" do

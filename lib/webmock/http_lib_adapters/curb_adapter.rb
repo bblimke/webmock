@@ -98,9 +98,21 @@ if defined?(Curl)
           method,
           uri.to_s,
           :body => request_body,
-          :headers => self.headers.merge(basic_auth_headers)
+          :headers => headers_as_hash(self.headers).merge(basic_auth_headers)
         )
         request_signature
+      end
+
+      def headers_as_hash(headers)
+        if headers.is_a?(Array)
+          headers.inject({}) {|hash, header|
+            name, value = header.split(":").map(&:strip)
+            hash[name] = value
+            hash
+          }
+        else
+          headers
+        end
       end
 
       def basic_auth_headers
