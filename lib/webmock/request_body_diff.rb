@@ -15,9 +15,10 @@ module WebMock
       HashDiff.diff(request_signature_body_hash, request_stub_body_hash)
     end
 
-    private
-
     attr_reader :request_signature, :request_stub
+    private :request_signature, :request_stub
+
+    private
 
     def request_signature_diffable?
       request_signature.json_headers? && request_signature_parseable_json?

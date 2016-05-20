@@ -10,8 +10,8 @@ module NetHTTPSpecHelper
     req = clazz.new("#{uri.path}#{uri.query ? '?' : ''}#{uri.query}", nil)
     options[:headers].each do |k,v|
       if v.is_a?(Array)
-        v.each_with_index do |v,i|
-          i == 0 ? (req[k] = v) : req.add_field(k, v)
+        v.each_with_index do |e,i|
+          i == 0 ? (req[k] = e) : req.add_field(k, e)
         end
       else
         req[k] = v
@@ -31,8 +31,8 @@ module NetHTTPSpecHelper
       http.read_timeout = 60
     end
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    response = http.start {|http|
-      http.request(req, options[:body], &block)
+    response = http.start {|open_http|
+      open_http.request(req, options[:body], &block)
     }
     headers = {}
     response.each_header {|name, value| headers[name] = value}

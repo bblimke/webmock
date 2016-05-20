@@ -31,7 +31,11 @@ module WebMock
 
       @major,     @minor,     @patch     = parse_version(library_version)
       @min_major, @min_minor, @min_patch = parse_version(min_patch_level)
-      @max_major, @max_minor             = parse_version(max_minor_version) if max_minor_version
+      if max_minor_version
+        @max_major, @max_minor           = parse_version(max_minor_version)
+      else
+        @max_major, @max_minor           = nil, nil
+      end
 
       @comparison_result = compare_version
     end

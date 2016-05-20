@@ -20,14 +20,7 @@ module HTTPClientSpecHelper
     else
       response = c.request(*params, &block)
     end
-    headers = response.header.all.inject({}) do |headers, header|
-      if !headers.has_key?(header[0])
-        headers[header[0]] = header[1]
-      else
-        headers[header[0]] = [headers[header[0]], header[1]].join(', ')
-      end
-      headers
-    end
+    headers = merge_headers(response)
     OpenStruct.new({
       :body => HTTPClientSpecHelper.async_mode ? response.content.read : response.content,
       :headers => headers,
@@ -48,4 +41,16 @@ module HTTPClientSpecHelper
     :httpclient
   end
 
+private
+
+  def merge_headers(response)
+    response.header.all.inject({}) do |headers, header|
+      if !headers.has_key?(header[0])
+        headers[header[0]] = header[1]
+      else
+        headers[header[0]] = [headers[header[0]], header[1]].join(', ')
+      end
+      headers
+    end
+  end
 end
