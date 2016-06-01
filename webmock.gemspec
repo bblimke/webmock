@@ -35,7 +35,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'test-unit',       '>= 3.0.0'
   s.add_development_dependency 'rdoc',            '>  3.5.0'
   s.add_development_dependency 'rack'
-  s.add_development_dependency 'byebug'
   s.add_development_dependency 'simplecov'
 
   s.files         = `git ls-files`.split("\n")
