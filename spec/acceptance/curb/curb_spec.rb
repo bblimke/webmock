@@ -16,6 +16,14 @@ unless RUBY_PLATFORM =~ /java/
           status).to eq("200")
       end
     end
+
+    describe "when doing PATCHs" do
+      it "should stub them" do
+        stub_request(:patch, "www.example.com").with(body: "01234")
+        expect(http_request(:patch, "http://www.example.com", body: "01234").
+          status).to eq("200")
+      end
+    end
   end
 
   describe "Curb features" do
