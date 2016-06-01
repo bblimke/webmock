@@ -90,6 +90,8 @@ if defined?(Curl)
           self.post_body || @post_body
         when :put
           @put_data
+        when :patch
+          @patch_data
         else
           nil
         end
@@ -222,6 +224,13 @@ if defined?(Curl)
       end
       alias put http_put
 
+      def http_patch data = nil
+        @webmock_method = :patch
+        @patch_data = data if data
+        super
+      end
+      alias patch http_patch
+
       def http_post *data
         @webmock_method = :post
         @post_body = data.join('&') if data && !data.empty?
@@ -237,6 +246,12 @@ if defined?(Curl)
       def put_data= data
         @webmock_method = :put
         @put_data = data
+        super
+      end
+
+      def patch_data= data
+        @webmock_method = :patch
+        @patch_data = data
         super
       end
 
