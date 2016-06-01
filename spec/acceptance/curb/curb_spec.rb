@@ -16,14 +16,6 @@ unless RUBY_PLATFORM =~ /java/
           status).to eq("200")
       end
     end
-
-    describe "when doing PATCHs" do
-      it "should stub them" do
-        stub_request(:patch, "www.example.com").with(body: "01234")
-        expect(http_request(:patch, "http://www.example.com", body: "01234").
-          status).to eq("200")
-      end
-    end
   end
 
   describe "Curb features" do
@@ -36,6 +28,23 @@ unless RUBY_PLATFORM =~ /java/
       before(:each) do
         @curl = Curl::Easy.new
         @curl.url = "http://example.com"
+      end
+
+      describe 'on_debug' do
+        it "should call on_debug" do
+          stub_request(:any, "example.com").
+            to_return(status: 200, headers: { 'Server' => 'nginx' }, body: { hello: :world }.to_json)
+
+          test = []
+
+          @curl.on_debug do |message, operation|
+            test << "#{operation} -> #{message}"
+          end
+          @curl.headers['Content-Type'] = 'application/json'
+          @curl.http_post({ hello: :world }.to_json)
+
+          expect(test).to_not be_empty
+        end
       end
 
       it "should call on_success with 2xx response" do
