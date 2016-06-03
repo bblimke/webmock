@@ -77,8 +77,6 @@ if defined?(Curl)
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
-
-        build_webmock_response if defined?( @on_debug )
       end
 
       def build_request_signature
