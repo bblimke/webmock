@@ -65,8 +65,8 @@ module CurbSpecHelper
       case method
       when :post
         curl.post_body = body
-      when :put, :patch
-        curl.send( "#{method}_data=", body )
+      when :put
+        curl.put_data = body
       end
 
       curl.http(method.to_s.upcase)
@@ -79,7 +79,7 @@ module CurbSpecHelper
       curl = setup_request(uri, nil, options)
 
       case method
-      when :put, :post, :patch
+      when :put, :post
         curl.send( "http_#{method}", body )
       else
         curl.send( "http_#{method}" )
@@ -95,8 +95,8 @@ module CurbSpecHelper
       case method
       when :post
         curl.post_body = body
-      when :put, :patch
-        curl.send( "#{method}_data=", body )
+      when :put
+        curl.put_data = body
       when :head
         curl.head = true
       when :delete
@@ -111,7 +111,7 @@ module CurbSpecHelper
   module ClassNamedHttp
     def curb_http_request(uri, method, body, options)
       args = ["http_#{method}", uri]
-      args << body if [:post, :put, :patch].include? method
+      args << body if method == :post || method == :put
 
       c = Curl::Easy.send(*args) do |curl|
         setup_request(uri, curl, options)
@@ -124,7 +124,7 @@ module CurbSpecHelper
   module ClassPerform
     def curb_http_request(uri, method, body, options)
       args = ["http_#{method}", uri]
-      args << body if [:post, :put, :patch].include? method
+      args << body if method == :post || method == :put
 
       c = Curl::Easy.send(*args) do |curl|
         setup_request(uri, curl, options)
@@ -132,8 +132,8 @@ module CurbSpecHelper
         case method
         when :post
           curl.post_body = body
-        when :put, :patch
-          curl.send( "#{method}_data=", body )
+        when :put
+          curl.put_data = body
         when :head
           curl.head = true
         when :delete

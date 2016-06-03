@@ -85,6 +85,8 @@ if defined?(Curl)
         uri = WebMock::Util::URI.heuristic_parse(self.url)
         uri.path = uri.normalized_path.gsub("[^:]//","/")
 
+        headers = headers_as_hash(self.headers).merge(basic_auth_headers)
+
         request_body = case method
         when :post
           self.post_body || @post_body
@@ -96,11 +98,32 @@ if defined?(Curl)
           nil
         end
 
+        if defined?( @on_debug )
+          @on_debug.call("Trying 127.0.0.1...\r\n", 0)
+          @on_debug.call('Connected to ' + uri.hostname + "\r\n", 0)
+          @debug_method = method.upcase
+          @debug_path = uri.path
+          @debug_host = uri.hostname
+          http_request = ["#{@debug_method} #{@debug_path} HTTP/1.1"]
+          http_request << "Host: #{uri.hostname}"
+          headers.each do |name, value|
+            http_request << "#{name}: #{value}"
+          end
+          @on_debug.call(http_request.join("\r\n") + "\r\n\r\n", 2)
+          if request_body
+            @on_debug.call(request_body + "\r\n", 4)
+            @on_debug.call(
+              "upload completely sent off: #{request_body.bytesize}"\
+              " out of #{request_body.bytesize} bytes\r\n", 0
+            )
+          end
+        end
+
         request_signature = WebMock::RequestSignature.new(
           method,
           uri.to_s,
           body: request_body,
-          headers: headers_as_hash(self.headers).merge(basic_auth_headers)
+          headers: headers
         )
         request_signature
       end
@@ -133,10 +156,16 @@ if defined?(Curl)
         @response_code = webmock_response.status[0]
 
         @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
+
+        @on_debug.call(@header_str, 1) if defined?( @on_debug )
+
         if webmock_response.headers
           @header_str << webmock_response.headers.map do |k,v|
-            "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
+            header = "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
+            @on_debug.call(header + "\r\n", 1) if defined?( @on_debug )
+            header
           end.join("\r\n")
+          @on_debug.call("\r\n", 1) if defined?( @on_debug )
 
           location = webmock_response.headers['Location']
           if self.follow_location? && location
@@ -193,6 +222,16 @@ if defined?(Curl)
       def build_webmock_response
         status, headers =
          WebMock::HttpLibAdapters::CurbAdapter.parse_header_string(self.header_str)
+
+        if defined?( @on_debug )
+          http_response = ["HTTP/1.0 #{@debug_method} #{@debug_path}"]
+          headers.each do |name, value|
+            http_response << "#{name}: #{value}"
+          end
+          http_response << self.body_str
+          @on_debug.call(http_response.join("\r\n") + "\r\n", 3)
+          @on_debug.call("Connection #0 to host #{@debug_host} left intact\r\n", 0)
+        end
 
         webmock_response = WebMock::Response.new
         webmock_response.status = [self.response_code, status]
@@ -270,6 +309,14 @@ if defined?(Curl)
         super
       end
 
+      def verbose=(verbose)
+        @verbose = verbose
+      end
+
+      def verbose?
+        @verbose ||= false
+      end
+
       def body_str
         @body_str ||= super
       end
@@ -292,7 +339,7 @@ if defined?(Curl)
         @content_type ||= super
       end
 
-      %w[ success failure missing header body complete progress ].each do |callback|
+      %w[ success failure missing header body complete progress debug ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
           def on_#{callback} &block
             @on_#{callback} = block
