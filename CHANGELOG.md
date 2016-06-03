@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0
+
+  * Added support for `on_debug` callback in Curb.
+
+    Thanks to [Pavel Jurašek](https://github.com/pavel-jurasek-bcgdv-com)
+
+  * Added support for PATCH requests using Curb.
+
+    Thanks to [Pavel Jurašek](https://github.com/pavel-jurasek-bcgdv-com)
+
 ## 2.0.3
 
   * Handling headers passed as an Array to Curl::Easy
