@@ -218,7 +218,7 @@ Net::HTTP.start('www.example.com') do |http|
 end    # ===> Success
 ```
 
-##### Important! Since version 2.0.0, WebMock does not match credentials provided in Authorization header and credentials provided in the userinfo of a url. I.e. `stub_request(:get, "user:pass@www.example.com")` does not match a request with credentials provided in the Athoriation header.
+##### Important! Since version 2.0.0, WebMock does not match credentials provided in Authorization header and credentials provided in the userinfo of a url. I.e. `stub_request(:get, "user:pass@www.example.com")` does not match a request with credentials provided in the Authorization header.
 
 ### Request with basic authentication in the url
 
