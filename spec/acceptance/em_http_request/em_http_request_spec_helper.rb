@@ -23,7 +23,7 @@ module EMHttpRequestSpecHelper
         file: options[:file],
         query: options[:query],
         head: head,
-        decoding: false
+        compressed: false
       }, &block)
       http.errback {
         error_set = true
