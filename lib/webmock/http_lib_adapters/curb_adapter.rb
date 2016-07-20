@@ -88,7 +88,7 @@ if defined?(Curl)
         headers = headers_as_hash(self.headers).merge(basic_auth_headers)
 
         request_body = case method
-        when :post
+        when :post, :patch
           self.post_body || @post_body
         when :put
           @put_data
