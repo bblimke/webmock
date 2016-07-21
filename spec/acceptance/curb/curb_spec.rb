@@ -382,6 +382,22 @@ unless RUBY_PLATFORM =~ /java/
         c.http(:GET)
         expect(c.body).to eq("abc")
       end
+
+      describe 'match request body' do
+        it 'for post' do
+          stub_request(:post, "www.example.com").with(body: 'foo=nhe').to_return(body: "abc")
+
+          response = Curl.post("http://www.example.com", {foo: :nhe})
+          expect(response.body_str).to eq("abc")
+        end
+
+        it 'for patch' do
+          stub_request(:patch, "www.example.com").with(body: 'foo=nhe').to_return(body: "abc")
+
+          response = Curl.patch("http://www.example.com", {foo: :nhe})
+          expect(response.body_str).to eq("abc")
+        end
+      end
     end
 
     describe "using #http_* methods for requests" do

@@ -90,7 +90,7 @@ if defined?(Curl)
         request_body = case method
         when :post
           self.post_body || @post_body
-        when :put
+        when :put, :patch
           @put_data
         else
           nil
