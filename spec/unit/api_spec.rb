@@ -43,7 +43,7 @@ describe WebMock::API do
         end
       end
 
-      context "when args are an emtpy hash" do
+      context "when args are an empty hash" do
         subject {klass.new.hash_including({})}
 
         it "creates 'HashIncludingMatcher' with an empty hash" do
