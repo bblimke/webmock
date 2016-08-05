@@ -14,6 +14,16 @@ describe WebMock::RackResponse do
     expect(response.body).to include('This is my root!')
   end
 
+  it "should set the reason phrase based on the status code" do
+    request = WebMock::RequestSignature.new(:get, 'www.example.com')
+    response = @rack_response.evaluate(request)
+    expect(response.status).to eq([200, "OK"])
+
+    request = WebMock::RequestSignature.new(:get, 'www.example.com/error')
+    response = @rack_response.evaluate(request)
+    expect(response.status).to eq([500, "Internal Server Error"])
+  end
+
   it "should behave correctly when the rack response is not a simple array of strings" do
     request = WebMock::RequestSignature.new(:get, 'www.example.com/non_array_response')
     response = @rack_response.evaluate(request)
