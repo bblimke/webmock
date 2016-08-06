@@ -12,7 +12,7 @@ module WebMock
       Response.new(
         body: body_from_rack_response(response),
         headers: headers,
-        status: status
+        status: [status, Rack::Utils::HTTP_STATUS_CODES[status]]
       )
     end
 
