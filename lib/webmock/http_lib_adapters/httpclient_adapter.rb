@@ -182,6 +182,10 @@ if defined?(::HTTPClient)
     end
     headers = headers_from_session(uri).merge(headers)
 
+    req.http_body.positions.each do |file, position|
+      req.http_body.positions[file] = 0
+    end
+
     signature = WebMock::RequestSignature.new(
       req.header.request_method.downcase.to_sym,
       uri.to_s,
