@@ -29,6 +29,7 @@ module WebMock
     def matches?(request_signature)
       content_type = request_signature.headers['Content-Type'] if request_signature.headers
       content_type = content_type.split(';').first if content_type
+
       @method_pattern.matches?(request_signature.method) &&
         @uri_pattern.matches?(request_signature.uri) &&
         (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, content_type || "")) &&
@@ -235,6 +236,17 @@ module WebMock
         matching_hashes?(body_as_hash(body, content_type), @pattern)
       elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
         @pattern == body_as_hash(body, content_type)
+      elsif @pattern.is_a?(String) && BODY_FORMATS[content_type] == :json
+        begin
+          # Would have used WebMock::Util::JSON.parse in the #body_as_hash method,
+          # but it doesn't raise on invalid JSON, e.g. "foo bar".
+          actual = normalize_hash(JSON.parse(body))
+          expected = normalize_hash(JSON.parse(@pattern))
+        rescue JSON::ParserError
+          return matches?(body)
+        end
+
+        matching_hashes?(actual, expected)
       else
         empty_string?(@pattern) && empty_string?(body) ||
           @pattern == body ||

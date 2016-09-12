@@ -2,6 +2,10 @@ require 'spec_helper'
 
 describe WebMock::RequestPattern do
 
+  before(:all) do
+    WebMock::RequestPattern.send(:alias_method, :match, :matches?)
+  end
+
   describe "describing itself" do
     it "should report string describing itself" do
       expect(WebMock::RequestPattern.new(:get, "www.example.com",
@@ -59,13 +63,6 @@ describe WebMock::RequestPattern do
 
     it "should raise an error if neither options or block is provided" do
       expect { @request_pattern.with() }.to raise_error('#with method invoked with no arguments. Either options hash or block must be specified.')
-    end
-  end
-
-
-  class WebMock::RequestPattern
-    def match(request_signature)
-      self.matches?(request_signature)
     end
   end
 
@@ -504,6 +501,50 @@ describe WebMock::RequestPattern do
           expect(WebMock::RequestPattern.new(:post, "www.example.com",
           body: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({:x => '1', 'c' => {'d' => ['e', 'f']}}))).
             not_to match(signature)
+        end
+      end
+
+      describe "when body in pattern is declared as a JSON string" do
+        let(:body_json) do
+          JSON.generate({ :a => '1', :b => 'five', 'c' => { 'd' => ['e', 'f'] } })
+        end
+
+        describe "for request with json body and content type is set to json" do
+          it "should match if JSON body matches body" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_json)).
+              to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'},
+                                                     body: '{"a":"1","b":"five","c":{"d":["e","f"]}}'))
+          end
+
+          it "should match when JSON body matches body in different order" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_json)).
+              to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'},
+                                                     body: '{"a":"1","c":{"d":["e","f"]},"b":"five"}'))
+          end
+
+          it "should not match when body is not json" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_json)).
+              not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                                                         headers: {content_type: 'application/json'}, body: "foo bar"))
+          end
+
+          it "should not match if request body is different" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: JSON.generate({a: 1, b: 2}))).
+              not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                                                         headers: {content_type: 'application/json'}, body: '{"a":1,"c":null}'))
+          end
+
+          it "should not match if request body is has less params than pattern" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: JSON.generate({a: 1, b: 2}))).
+              not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                                                         headers: {content_type: 'application/json'}, body: '{"a":1}'))
+          end
+
+          it "should not match if request body is has more params than pattern" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: JSON.generate({a: 1}))).
+              not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                                                         headers: {content_type: 'application/json'}, body: '{"a":1,"c":1}'))
+          end
         end
       end
     end
