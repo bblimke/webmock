@@ -121,6 +121,92 @@ if defined?(::HTTPClient)
 
       response
     end
+
+    def build_webmock_response(httpclient_response, body = nil)
+      webmock_response = WebMock::Response.new
+      webmock_response.status = [httpclient_response.status, httpclient_response.reason]
+
+      webmock_response.headers = {}.tap do |hash|
+        httpclient_response.header.all.each do |(key, value)|
+          if hash.has_key?(key)
+            hash[key] = Array(hash[key]) + [value]
+          else
+            hash[key] = value
+          end
+        end
+      end
+
+      if body
+        webmock_response.body = body
+      elsif httpclient_response.content.respond_to?(:read)
+        webmock_response.body = httpclient_response.content.read
+        body = HTTP::Message::Body.new
+        body.init_response(StringIO.new(webmock_response.body))
+        httpclient_response.body = body
+      else
+        webmock_response.body = httpclient_response.content
+      end
+      webmock_response
+    end
+
+    def build_request_signature(req, reuse_existing = false)
+      uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
+      uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation) if req.header.request_query
+      uri.port = req.header.request_uri.port
+
+      @request_filter.each do |filter|
+        filter.filter_request(req)
+      end
+
+      headers = req.header.all.inject({}) do |hdrs, header|
+        hdrs[header[0]] ||= []
+        hdrs[header[0]] << header[1]
+        hdrs
+      end
+      headers = headers_from_session(uri).merge(headers)
+
+      signature = WebMock::RequestSignature.new(
+        req.header.request_method.downcase.to_sym,
+        uri.to_s,
+        body: req.http_body.dump,
+        headers: headers
+      )
+
+      # reuse a previous identical signature object if we stored one for later use
+      if reuse_existing && previous_signature = previous_signature_for(signature)
+        return previous_signature
+      end
+
+      signature
+    end
+
+    def webmock_responses
+      @webmock_responses ||= Hash.new do |hash, request_signature|
+        hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
+      end
+    end
+
+    def webmock_request_signatures
+      @webmock_request_signatures ||= []
+    end
+
+    def previous_signature_for(signature)
+      return nil unless index = webmock_request_signatures.index(signature)
+      webmock_request_signatures.delete_at(index)
+    end
+
+    private
+
+    # some of the headers sent by HTTPClient are derived from
+    # the client session
+    def headers_from_session(uri)
+      session_headers = HTTP::Message::Headers.new
+      @session_manager.send(:open, uri).send(:set_header, MessageMock.new(session_headers))
+      session_headers.all.inject({}) do |hdrs, header|
+        hdrs[header[0]] = header[1]
+        hdrs
+      end
+    end
   end
 
   class WebMockHTTPClient < HTTPClient
@@ -139,91 +225,6 @@ if defined?(::HTTPClient)
     end
   end
 
-  def build_webmock_response(httpclient_response, body = nil)
-    webmock_response = WebMock::Response.new
-    webmock_response.status = [httpclient_response.status, httpclient_response.reason]
-
-    webmock_response.headers = {}.tap do |hash|
-      httpclient_response.header.all.each do |(key, value)|
-        if hash.has_key?(key)
-          hash[key] = Array(hash[key]) + [value]
-        else
-          hash[key] = value
-        end
-      end
-    end
-
-    if body
-      webmock_response.body = body
-    elsif httpclient_response.content.respond_to?(:read)
-      webmock_response.body = httpclient_response.content.read
-      body = HTTP::Message::Body.new
-      body.init_response(StringIO.new(webmock_response.body))
-      httpclient_response.body = body
-    else
-      webmock_response.body = httpclient_response.content
-    end
-    webmock_response
-  end
-
-  def build_request_signature(req, reuse_existing = false)
-    uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
-    uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation) if req.header.request_query
-    uri.port = req.header.request_uri.port
-
-    @request_filter.each do |filter|
-      filter.filter_request(req)
-    end
-
-    headers = req.header.all.inject({}) do |hdrs, header|
-      hdrs[header[0]] ||= []
-      hdrs[header[0]] << header[1]
-      hdrs
-    end
-    headers = headers_from_session(uri).merge(headers)
-
-    signature = WebMock::RequestSignature.new(
-      req.header.request_method.downcase.to_sym,
-      uri.to_s,
-      body: req.http_body.dump,
-      headers: headers
-    )
-
-    # reuse a previous identical signature object if we stored one for later use
-    if reuse_existing && previous_signature = previous_signature_for(signature)
-      return previous_signature
-    end
-
-    signature
-  end
-
-  def webmock_responses
-    @webmock_responses ||= Hash.new do |hash, request_signature|
-      hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
-    end
-  end
-
-  def webmock_request_signatures
-    @webmock_request_signatures ||= []
-  end
-
-  def previous_signature_for(signature)
-    return nil unless index = webmock_request_signatures.index(signature)
-    webmock_request_signatures.delete_at(index)
-  end
-
-  private
-
-  # some of the headers sent by HTTPClient are derived from
-  # the client session
-  def headers_from_session(uri)
-    session_headers = HTTP::Message::Headers.new
-    @session_manager.send(:open, uri).send(:set_header, MessageMock.new(session_headers))
-    session_headers.all.inject({}) do |hdrs, header|
-      hdrs[header[0]] = header[1]
-      hdrs
-    end
-  end
 
   # Mocks a HTTPClient HTTP::Message
   class MessageMock
