@@ -95,38 +95,22 @@ unless RUBY_PLATFORM =~ /java/
             Encoding.default_internal = @encoding
           end
 
-          it "should encode body with default encoding" do
+          it "should not encode body with default encoding" do
             stub_request(:get, "www.example.com").
               to_return(body: "Øl")
 
-            expect(@sess.get("").body.encoding).to eq(Encoding::UTF_8)
+            expect(@sess.get("").body.encoding).to eq(Encoding::ASCII_8BIT)
+            expect(@sess.get("").inspectable_body.encoding).to eq(Encoding::UTF_8)
           end
 
-          it "should encode body to default internal" do
+          it "should not encode body to default internal" do
             stub_request(:get, "www.example.com").
               to_return(headers: {'Content-Type' => 'text/html; charset=iso-8859-1'},
                         body: "Øl".encode("iso-8859-1"))
 
-            expect(@sess.get("").body.encoding).to eq(Encoding.default_internal)
+            expect(@sess.get("").body.encoding).to eq(Encoding::ASCII_8BIT)
+            expect(@sess.get("").decoded_body.encoding).to eq(Encoding.default_internal)
           end
-
-          it "should encode body based on encoding-attribute in body" do
-            stub_request(:get, "www.example.com").
-              to_return(body: "<?xml encoding=\"iso-8859-1\">Øl</xml>".encode("iso-8859-1"))
-
-            expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
-          end
-
-
-          it "should encode body based on Session#default_response_charset" do
-            stub_request(:get, "www.example.com").
-              to_return(body: "Øl".encode("iso-8859-1"))
-
-            @sess.default_response_charset = "iso-8859-1"
-
-            expect(@sess.get("").body.encoding).to eq(Encoding::ISO_8859_1)
-          end
-
         end
       end
     end
