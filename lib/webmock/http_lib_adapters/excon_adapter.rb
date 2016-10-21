@@ -130,13 +130,14 @@ if defined?(Excon)
           {
             body: mock.body,
             status: mock.status[0].to_i,
+            reason_phrase: mock.status[1],
             headers: mock.headers || {}
           }
         end
 
         def self.mock_response(real)
           mock = WebMock::Response.new
-          mock.status  = real.status
+          mock.status  = [real.status, real.reason_phrase]
           mock.headers = real.headers
           mock.body    = real.body.dup
           mock

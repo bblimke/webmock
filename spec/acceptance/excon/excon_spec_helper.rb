@@ -31,7 +31,7 @@ module ExconSpecHelper
       body: response.body,
       headers: headers,
       status: response.status.to_s,
-      message: ""
+      message: response.reason_phrase
   end
 
   def client_timeout_exception_class
