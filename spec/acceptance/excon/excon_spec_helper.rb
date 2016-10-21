@@ -4,6 +4,7 @@ module ExconSpecHelper
 
   def http_request(method, uri, options = {}, &block)
     Excon.defaults[:ssl_verify_peer] = false
+    Excon.defaults[:ciphers] = 'DEFAULT'
     uri      = Addressable::URI.heuristic_parse(uri)
     uri      = uri.to_s.gsub(' ', '%20')
 
