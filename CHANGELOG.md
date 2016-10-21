@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+  * Added support for handling status messages in Excon responses.
+
+    Thanks to [Tero Marttila](https://github.com/SpComb) for reporting the issue.
+
 ## 2.1.0
 
   * Added support for `on_debug` callback in Curb.
