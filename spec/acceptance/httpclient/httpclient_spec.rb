@@ -125,6 +125,10 @@ describe "HTTPClient" do
     before { WebMock.allow_net_connect! }
 
     it 'invokes the global_stub_request hook for each request' do
+      # Mock time to ensure that date headers match
+      now = Time.now
+      allow(Time).to receive(:now).and_return(now)
+
       request_signatures = []
       WebMock.globally_stub_request do |request_sig|
         request_signatures << request_sig
