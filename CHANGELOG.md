@@ -109,8 +109,8 @@
 
     Thanks to [Alex Kestner](https://github.com/akestner)
 
-  * Added a clear message on an attept to match a multipart encoded request body.
-    WebMock does't support requests with multipart body... yet.
+  * Added a clear message on an attempt to match a multipart encoded request body.
+    WebMock doesn't support requests with multipart body... yet.
 
   * `WebMock.disable_net_connect` `:allow` option, provided as regexp, matches https URIs correctly.
 
