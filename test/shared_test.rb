@@ -22,7 +22,6 @@ module SharedTest
   end
 
   def test_error_on_non_stubbed_request
-    default_ruby_headers = (RUBY_VERSION >= "1.9.1") ? "{'Accept'=>'*/*', 'User-Agent'=>'Ruby'}" : "{'Accept'=>'*/*'}"
     assert_raise_with_message(WebMock::NetConnectNotAllowedError, %r{Real HTTP connections are disabled. Unregistered request: GET http://www.example.net/ with headers}) do
       http_request(:get, "http://www.example.net/")
     end
@@ -48,7 +47,7 @@ module SharedTest
     end
   end
 
-  def test_verification_that_expected_request_didnt_occur
+  def test_verification_that_expected_stub_didnt_occur
     expected_message = "The request ANY http://www.example.com/ was expected to execute 1 time but it executed 0 times"
     expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
     assert_fail(expected_message) do
@@ -75,6 +74,14 @@ module SharedTest
     assert_fail(expected_message) do
       http_request(:get, "http://www.example.com/")
       assert_not_requested(:get, "http://www.example.com")
+    end
+  end
+
+  def test_refute_requested_alias
+    expected_message = %r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time\n\nThe following requests were made:\n\nGET http://www.example.com/ with headers .+ was made 1 time\n\n============================================================)
+    assert_fail(expected_message) do
+      http_request(:get, "http://www.example.com/")
+      refute_requested(:get, "http://www.example.com")
     end
   end
 

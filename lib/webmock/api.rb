@@ -34,6 +34,7 @@ module WebMock
       end
       assert_request_not_requested(*args)
     end
+    alias refute_requested assert_not_requested
 
     # Similar to RSpec::Mocks::ArgumentMatchers#hash_including()
     #
