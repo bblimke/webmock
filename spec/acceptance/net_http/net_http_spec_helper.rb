@@ -45,7 +45,13 @@ module NetHTTPSpecHelper
   end
 
   def client_timeout_exception_class
-    Timeout::Error
+    if defined?(Net::OpenTimeout)
+      Net::OpenTimeout
+    elsif defined?(Net::HTTP::OpenTimeout)
+      Net::HTTP::OpenTimeout
+    else
+      Timeout::Error
+    end
   end
 
   def connection_refused_exception_class
