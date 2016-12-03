@@ -248,6 +248,9 @@ class StubSocket #:nodoc:
     @closed ||= true
   end
 
+  def close
+  end
+
   def readuntil(*args)
   end
 
@@ -256,7 +259,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, debug_output = nil)
+    def initialize(io, read_timeout: 60, continue_timeout: nil, debug_output: nil)
       @read_timeout = 60
       @rbuf = ''
       @debug_output = debug_output
