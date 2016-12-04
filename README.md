@@ -1021,6 +1021,11 @@ People who submitted patches and new features or suggested improvements. Many th
 * Jose Luis Honorato
 * Aaron Kromer
 * Pavel Jurašek
+* Jake Worth
+* Gabe Martin-Dempesy
+* Michael Grosser
+* Aleksei Maridashvili
+* Ville Lautanala
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

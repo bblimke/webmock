@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.2.0
+
+  * Added `refute_requested` as an alias for `assert_not_requested`
+
+    Thanks to [Michael Grosser](https://github.com/grosser)
+
+  * Raising `Net::OpenTimeout` instead of `Timeout::Error` if available when a request stub is declared `to_timeout`
+
+    Thanks to [Gabe Martin-Dempesy](https://github.com/gabetax)
+
 ## 2.1.1
 
   * Added support for handling status messages in Excon responses.
