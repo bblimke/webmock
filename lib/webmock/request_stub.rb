@@ -62,7 +62,7 @@ module WebMock
     end
 
     def times(number)
-      raise "times(N) accepts integers >= 1 only" if !number.is_a?(Fixnum) || number < 1
+      raise "times(N) accepts integers >= 1 only" if !number.is_a?(Integer) || number < 1
       if @responses_sequences.empty?
         raise "Invalid WebMock stub declaration." +
           " times(N) can be declared only after response declaration."
