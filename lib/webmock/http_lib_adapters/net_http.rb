@@ -183,9 +183,6 @@ module WebMock
           if defined?(Net::OpenTimeout)
             # Ruby 2.x
             Net::OpenTimeout
-          elsif defined?(Net::HTTP::OpenTimeout)
-            # Ruby 1.9
-            Net::HTTP::OpenTimeout
           else
             # Fallback, if things change
             Timeout::Error
