@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0
+
+  * Added support for Ruby 2.4
+
+    Thanks to [Koichi ITO](https://github.com/koic)
+
+  * Dropped support for Ruby 1.9.3
+
 ## 2.2.0
 
   * Added `refute_requested` as an alias for `assert_not_requested`
