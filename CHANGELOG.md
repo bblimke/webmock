@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.3.0
+## 2.3.1
 
   * Added support for Ruby 2.4
 
