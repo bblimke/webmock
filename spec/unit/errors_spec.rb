@@ -118,6 +118,28 @@ describe "errors" do
           expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
         end
       end
+
+      context "WebMock.show_registered_request_stubs? is false" do
+        before do
+          WebMock.hide_registered_request_stubs!
+        end
+
+        it "should not should not show registered stubs" do
+          allow(WebMock::StubRegistry.instance).to receive(:request_stubs).and_return([request_stub])
+          allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
+          allow(WebMock::StubRequestSnippet).to receive(:new).
+            with(request_stub).and_return(stub_result)
+          allow(request_stub).to receive(:request_pattern).and_return(body_pattern)
+          expected =  \
+            "Real HTTP connections are disabled. Unregistered request: #{request_signature}" \
+            "\n\n============================================================"
+          expect(WebMock::NetConnectNotAllowedError.new(request_signature).message).to eq(expected)
+        end
+
+        after do
+          WebMock.show_registered_request_stubs!
+        end
+      end
     end
 
     let(:request_signature) { double(:request_signature, to_s: rand(10**20).to_s) }

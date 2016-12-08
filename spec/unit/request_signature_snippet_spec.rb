@@ -79,6 +79,28 @@ RSpec.describe WebMock::RequestSignatureSnippet do
       end
     end
 
+    context "when showing registered stubs is turned off" do
+      before :each do
+        WebMock.hide_registered_request_stubs!
+      end
+
+      it "returns nil" do
+        expect(subject.request_stubs).to be nil
+      end
+
+      after :each do
+        WebMock.show_registered_request_stubs!
+      end
+    end
+
+    context "when showing registered stubs is turned on" do
+      it "returns the registered stubs" do
+        expect(subject.request_stubs).to include(
+          "registered request stubs:"
+        )
+      end
+    end
+
     context "with no request stubs" do
       it "returns nil" do
         WebMock.reset!

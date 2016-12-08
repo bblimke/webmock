@@ -18,6 +18,7 @@ module WebMock
     end
 
     def request_stubs
+      return unless WebMock.show_registered_request_stubs?
       return if WebMock::StubRegistry.instance.request_stubs.empty?
 
       text = "registered request stubs:\n"
