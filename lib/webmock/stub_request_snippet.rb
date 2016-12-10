@@ -16,17 +16,17 @@ module WebMock
       with = ""
 
       if (request_pattern.body_pattern)
-        with << ":body => #{request_pattern.body_pattern.to_s}"
+        with << "body: #{request_pattern.body_pattern.to_s}"
       end
 
       if (request_pattern.headers_pattern)
         with << ",\n       " unless with.empty?
 
-        with << ":headers => #{request_pattern.headers_pattern.to_s}"
+        with << "headers: #{request_pattern.headers_pattern.to_s}"
       end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response
-        string << ".\n  to_return(:status => 200, :body => \"\", :headers => {})"
+        string << ".\n  to_return(status: 200, body: \"\", headers: {})"
       end
       string
     end
