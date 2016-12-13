@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.name        = 'webmock'
   s.version     = WebMock::VERSION
   s.platform    = Gem::Platform::RUBY
+  s.license     = 'MIT'
   s.authors     = ['Bartosz Blimke']
   s.email       = ['bartosz.blimke@gmail.com']
   s.homepage    = 'http://github.com/bblimke/webmock'
