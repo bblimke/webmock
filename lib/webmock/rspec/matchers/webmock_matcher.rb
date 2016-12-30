@@ -15,17 +15,17 @@ module WebMock
       @request_execution_verifier.expected_times_executed = 2
       self
     end
-    
+
     def at_least_once
       @request_execution_verifier.at_least_times_executed = 1
       self
     end
-    
+
     def at_least_twice
       @request_execution_verifier.at_least_times_executed = 2
       self
     end
-    
+
     def at_least_times(times)
       @request_execution_verifier.at_least_times_executed = times
       self
