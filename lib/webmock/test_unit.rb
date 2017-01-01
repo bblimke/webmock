@@ -18,5 +18,3 @@ module Test
     end
   end
 end
-
-WebMock::AssertionFailure.error_class = Test::Unit::AssertionFailedError
