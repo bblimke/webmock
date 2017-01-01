@@ -7,6 +7,7 @@ module HTTPClientSpecHelper
     uri = Addressable::URI.heuristic_parse(uri)
     c = options.fetch(:client) { HTTPClient.new }
     c.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    c.reset_all
     if options[:basic_auth]
       c.force_basic_auth = true
       c.set_basic_auth(nil, options[:basic_auth][0], options[:basic_auth][1])
