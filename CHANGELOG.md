@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.2
+
+  * Restored support for Ruby 1.9.3 to comply with semantic versioning.
+
+    Thanks to [Jordan Harband](https://github.com/ljharb) for reporting the problem.
+
 ## 2.3.1
 
   * Added support for Ruby 2.4
