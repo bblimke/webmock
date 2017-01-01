@@ -18,7 +18,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         expect(http_request(:get, "http://www.example.com/hello+/?#{NOT_ESCAPED_PARAMS}").body).to eq("abc")
       end
 
-      it "should return stubbed response for url with non utf query params" do
+      it "should return stubbed response for url with non utf query params", "ruby>1.9" => true do
         param = 'aäoöuü'.encode('iso-8859-1')
         param = CGI.escape(param)
         stub_request(:get, "www.example.com/?#{param}").to_return(body: "abc")
