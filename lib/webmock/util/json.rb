@@ -48,21 +48,11 @@ module WebMock
           right_pos = marks << json.bytesize
           output    = []
 
-          if RUBY_VERSION != "1.9.2"
-            left_pos.each_with_index do |left, i|
-              if json.respond_to?(:byteslice)
-                output << json.byteslice(left.succ..right_pos[i])
-              else
-                output << json[left.succ..right_pos[i]]
-              end
-            end
-          else
-            json_as_binary = json.force_encoding("binary")
-            left_pos.each_with_index do |left, i|
-              output << json_as_binary[left.succ..right_pos[i]]
-            end
-            output.map! do |binary_str|
-              binary_str.force_encoding("UTF-8")
+          left_pos.each_with_index do |left, i|
+            if json.respond_to?(:byteslice)
+              output << json.byteslice(left.succ..right_pos[i])
+            else
+              output << json[left.succ..right_pos[i]]
             end
           end
 
