@@ -256,21 +256,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    if RUBY_VERSION <= '1.9.3'
-      class_eval <<-DEFINE_METHOD
-        def initialize(io, debug_output = nil)
-          common_initialize(io, debug_output)
-        end
-      DEFINE_METHOD
-    else
-      class_eval <<-DEFINE_METHOD
-        def initialize(io, read_timeout: 60, continue_timeout: nil, debug_output: nil)
-          common_initialize(io, debug_output)
-        end
-      DEFINE_METHOD
-    end
-
-    def common_initialize(io, debug_output = nil)
+    def initialize(io, read_timeout: 60, continue_timeout: nil, debug_output: nil)
       @read_timeout = 60
       @rbuf = ''
       @debug_output = debug_output
