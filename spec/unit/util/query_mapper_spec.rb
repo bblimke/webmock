@@ -64,6 +64,12 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a'][0]['b']).to eq(['one'])
       expect(hsh['a'][0]['c']).to eq(['two'])
     end
+
+    it 'should not attempt to mutate its query argument' do
+      query = "a=foo".freeze
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq('foo')
+    end
   end
 
   context '#to_query' do
