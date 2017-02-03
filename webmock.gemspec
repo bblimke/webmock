@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency 'typhoeus', '>= 0.5.0'
   end
 
-  s.add_development_dependency 'http',            '>= 0.8.0'
+  s.add_development_dependency 'http',            '>= 2.2.0'
   s.add_development_dependency 'manticore',       '>= 0.5.1' if RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'rack',            ((RUBY_VERSION < '2.2.2') ? '1.6.0' : '> 1.6')
   s.add_development_dependency 'rspec',           '>= 3.1.0'
