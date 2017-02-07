@@ -182,7 +182,7 @@ describe "HTTPClient" do
     end
   end
 
-  context 'httpclient streams response' do
+  context 'httpclient streams response', net_connect: true do
     before do
       WebMock.allow_net_connect!
       WebMock.after_request(except: [:other_lib])  do |_, response|
@@ -201,7 +201,8 @@ describe "HTTPClient" do
 
   context 'credentials' do
     it 'are detected when manually specifying Authorization header' do
-      stub_request(:get, 'username:password@www.example.com').to_return(status: 200)
+      stub_request(:get, "http://www.example.com/").with(basic_auth: ['username', 'password']).to_return(status: 200)
+
       headers = {'Authorization' => 'Basic dXNlcm5hbWU6cGFzc3dvcmQ='}
       expect(http_request(:get, 'http://www.example.com/', {headers: headers}).status).to eql('200')
     end
