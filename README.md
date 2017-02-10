@@ -131,7 +131,7 @@ end    # ===> Success
 
 ```ruby
 stub_request(:post, "www.example.com").
-  with(body: /^.*world$/, headers: {"Content-Type" => /image\/.+/}).
+  with(body: /world$/, headers: {"Content-Type" => /image\/.+/}).
   to_return(body: "abc")
 
 uri = URI.parse('http://www.example.com/')
@@ -231,7 +231,7 @@ RestClient.get('user:pass@www.example.com')    # ===> Success
 ### Matching uris using regular expressions
 
 ```ruby
-stub_request(:any, /.*example.*/)
+stub_request(:any, /example/)
 
 Net::HTTP.get('www.example.com', '/')    # ===> Success
 ```
@@ -786,7 +786,7 @@ or these
 
 If you provide Regexp to match URI, WebMock will try to match it against every valid form of the same url.
 
-I.e `/.*my path.*/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
+I.e `/my path/` will match `www.example.com/my%20path` because it is equivalent of `www.example.com/my path`
 
 ## Matching with URI Templates
 
