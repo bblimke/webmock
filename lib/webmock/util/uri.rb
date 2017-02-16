@@ -87,7 +87,9 @@ module WebMock
 
       def self.uris_encoded_and_unencoded(uris)
         uris.map do |uri|
-          [ uri.to_s, Addressable::URI.unencode(uri, String).freeze ]
+          unencoded = Addressable::URI.unencode(uri, String)
+          unencoded.force_encoding(Encoding::ASCII_8BIT) if unencoded.respond_to?(:force_encoding)
+          [ uri.to_s, unencoded.freeze ]
         end.flatten
       end
 
