@@ -88,8 +88,19 @@ stub_request(:post, "http://www.example.com/").
         STUB
         expect(WebMock::StubRequestSnippet.new(@request_stub).to_s).to eq(expected.strip)
       end
-    end
 
+      it "should print stub request snippet with valid JSON body when request header contains 'Accept'=>'application/json' " do
+        @request_signature = WebMock::RequestSignature.new(:post, "www.example.com",
+                   headers: {'Accept' => 'application/json'})
+        @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
+        expected = <<-STUB
+stub_request(:post, "http://www.example.com/").
+  with(headers: {'Accept'=>'application/json'}).
+  to_return(status: 200, body: \"{}\", headers: {})
+        STUB
+        expect(WebMock::StubRequestSnippet.new(@request_stub).to_s).to eq(expected.strip)
+      end
+    end
 
   end
 end
