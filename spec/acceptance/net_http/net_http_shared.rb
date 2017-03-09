@@ -43,6 +43,17 @@ shared_examples_for "Net::HTTP" do
       end
     end
 
+    it "should pass the read_timeout value on", net_connect: true do
+      @http = Net::HTTP.new('localhost', port)
+      read_timeout = @http.read_timeout + 1
+      @http.read_timeout = read_timeout
+      @http.start {|conn|
+        conn.request(Net::HTTP::Get.new("/"))
+        socket = conn.instance_variable_get(:@socket)
+        expect(socket.read_timeout).to eq(read_timeout)
+      }
+    end
+
     describe "without start" do
       it "should close connection after a real request" do
         @http.get('/') { }
