@@ -22,6 +22,13 @@ module WebMock
         end
       end
 
+      def select(&block)
+        return unless block_given?
+        @lock.synchronize do
+          hash.select &block
+        end
+      end
+
       def each(&block)
         @order.to_a.sort {|a, b| a[1] <=> b[1]}.each do |a|
           block.call(a[0], hash[a[0]])

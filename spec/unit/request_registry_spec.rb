@@ -43,6 +43,25 @@ describe WebMock::RequestRegistry do
     it "should report number of times all matching pattern were requested" do
       expect(WebMock::RequestRegistry.instance.times_executed(WebMock::RequestPattern.new(:get, /.*example.*/))).to eq(3)
     end
+
+    describe "multithreading" do
+      let(:request_pattern) { WebMock::RequestPattern.new(:get, "www.example.com") }
+
+      # Reproduce a multithreading issue that causes a RuntimeError:
+      #   can't add a new key into hash during iteration.
+      it "works normally iterating on the requested signature hash while another thread is setting it" do
+        thread_injected = false
+        allow(request_pattern).to receive(:matches?).and_wrap_original do |m, *args|
+          unless thread_injected
+            thread_injected = true
+            Thread.new { WebMock::RequestRegistry.instance.requested_signatures.put(:abc) }.join(0.1)
+          end
+          m.call(*args)
+        end
+        expect(WebMock::RequestRegistry.instance.times_executed(request_pattern)).to eq(2)
+        sleep 0.1 while !WebMock::RequestRegistry.instance.requested_signatures.hash.key?(:abc)
+      end
+    end
   end
 
   describe "request_signatures" do
