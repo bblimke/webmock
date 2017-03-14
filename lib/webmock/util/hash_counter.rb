@@ -4,6 +4,7 @@ module WebMock
   module Util
     class Util::HashCounter
       attr_accessor :hash
+      attr_accessor :lock
       def initialize
         self.hash = {}
         @order = {}
