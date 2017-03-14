@@ -4,7 +4,6 @@ module WebMock
   module Util
     class Util::HashCounter
       attr_accessor :hash
-      attr_accessor :lock
       def initialize
         self.hash = {}
         @order = {}
@@ -20,6 +19,13 @@ module WebMock
       def get key
         @lock.synchronize do
           hash[key] || 0
+        end
+      end
+
+      def select(&block)
+        return unless block_given?
+        @lock.synchronize do
+          hash.select &block
         end
       end
 

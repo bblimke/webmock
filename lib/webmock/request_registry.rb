@@ -14,11 +14,9 @@ module WebMock
     end
 
     def times_executed(request_pattern)
-      self.requested_signatures.lock.synchronize do
-        self.requested_signatures.hash.select { |request_signature, times_executed|
-          request_pattern.matches?(request_signature)
-        }.inject(0) {|sum, (_, times_executed)| sum + times_executed }
-      end
+      self.requested_signatures.select do |request_signature|
+        request_pattern.matches?(request_signature)
+      end.inject(0) { |sum, (_, times_executed)| sum + times_executed }
     end
 
     def to_s
