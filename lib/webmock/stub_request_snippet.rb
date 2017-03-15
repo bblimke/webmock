@@ -26,7 +26,7 @@ module WebMock
       end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response
-        if request_pattern && request_pattern.headers_pattern && request_pattern.headers_pattern.matches?({ 'Accept' => "application/json" })
+        if request_pattern.headers_pattern && request_pattern.headers_pattern.matches?({ 'Accept' => "application/json" })
           string << ".\n  to_return(status: 200, body: \"{}\", headers: {})"
         else
           string << ".\n  to_return(status: 200, body: \"\", headers: {})"
