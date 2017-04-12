@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1
+
+  * Suppressed \`warning: \`&' interpreted as argument prefix\`
+
+    Thanks to [Koichi ITO](https://github.com/koic)
+
 ## 3.0.0
 
   * Dropped support for Ruby 1.9.3
