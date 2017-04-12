@@ -1028,6 +1028,13 @@ People who submitted patches and new features or suggested improvements. Many th
 * Ville Lautanala
 * Koichi ITO
 * Jordan Harband
+* Tarmo Tänav
+* Joe Marty
+* Chris Thomson
+* Vít Ondruch
+* George Ulmer
+* Christof Koenig
+* Chung-Yi Chi
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

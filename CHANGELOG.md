@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.0.0
+
+  * Dropped support for Ruby 1.9.3
+
+  * Using Ruby >= 1.9 hash key syntax in stub suggestions
+
+    Thanks to [Tarmo Tänav](https://github.com/tarmo)
+
+  * Add at_least matchers for fakeweb-style expectations
+
+    Thanks to [Joe Marty](https://github.com/mltsy)
+
+  * Fix against "can't modify frozen String' error when Ruby option `frozen_string_literal` is enabled.
+
+    Thanks to [Chris Thomson](https://github.com/christhomson)
+
+  * Handling `read_timeout` option in Net::HTTP in Ruby >= 2.4
+
+    Thanks to [Christof Koenig](https://github.com/ckoenig)
+
+  * `RequestRegistry` fix for `RuntimeError - can't add a new key into hash during iteration`
+
+    Thanks to [Chung-Yi Chi](https://github.com/starsirius)
+
 ## 2.3.2
 
   * Restored support for Ruby 1.9.3 to comply with semantic versioning.
