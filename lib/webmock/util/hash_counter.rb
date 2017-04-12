@@ -25,7 +25,7 @@ module WebMock
       def select(&block)
         return unless block_given?
         @lock.synchronize do
-          hash.select &block
+          hash.select(&block)
         end
       end
 
