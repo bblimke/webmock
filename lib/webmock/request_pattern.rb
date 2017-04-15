@@ -233,6 +233,9 @@ module WebMock
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
         matching_hashes?(body_as_hash(body, content_type), @pattern)
+      elsif (@pattern).is_a?(Array)
+        return true if @pattern.empty?
+        matching_arrays?(body_as_hash(body, content_type), @pattern)
       elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
         @pattern == body_as_hash(body, content_type)
       else
@@ -297,6 +300,21 @@ module WebMock
           return false unless matching_hashes?(actual, expected)
         else
           return false unless expected === actual
+        end
+      end
+      true
+    end
+
+    def matching_arrays?(query_parameters, pattern)
+      return false unless query_parameters.is_a?(Array)
+      return false unless query_parameters.length == pattern.length
+      query_parameters.each_with_index do |actual, index|
+        expected = pattern[index]
+
+        if actual.is_a?(Hash)
+          return false unless matching_hashes?(actual, expected)
+        else
+          return false unless actual === expected
         end
       end
       true
