@@ -86,6 +86,14 @@ Create a file `features/support/webmock.rb` with the following contents:
 require 'webmock/cucumber'
 ```
 
+### Bacon
+
+Add the following to your spec:
+
+```ruby
+require 'webmock/bacon'
+```
+
 ### Outside a test framework
 
 You can also use WebMock outside a test framework:
