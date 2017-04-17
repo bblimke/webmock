@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'addressable', '>= 2.3.6'
   s.add_dependency 'crack', '>= 0.3.2'
   s.add_dependency 'hashdiff'
+  s.add_dependency 'rack'
 
   unless RUBY_PLATFORM =~ /java/
     s.add_development_dependency 'patron',   '>= 0.4.18'
