@@ -4,6 +4,10 @@ module WebMock
     def rSpecHashIncludingMatcher?(matcher)
       matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashIncludingMatcher/
     end
+
+    def rSpecHashExcludingMatcher?(matcher)
+      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashExcludingMatcher/
+    end
   end
 
   class RequestPattern
@@ -115,10 +119,13 @@ module WebMock
     def add_query_params(query_params)
       @query_params = if query_params.is_a?(Hash)
         query_params
-      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher)
+      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher) \
+              || query_params.is_a?(WebMock::Matchers::HashExcludingMatcher)
         query_params
       elsif rSpecHashIncludingMatcher?(query_params)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
+      elsif rSpecHashExcludingMatcher?(query_params)
+        WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(query_params)
       else
         WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation)
       end

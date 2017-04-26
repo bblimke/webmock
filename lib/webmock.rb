@@ -18,7 +18,10 @@ require 'webmock/util/json'
 require 'webmock/util/version_checker'
 require 'webmock/util/hash_validator'
 
+require 'webmock/matchers/hash_argument_matcher'
+require 'webmock/matchers/hash_excluding_matcher'
 require 'webmock/matchers/hash_including_matcher'
+require 'webmock/matchers/any_arg_matcher'
 
 require 'webmock/request_pattern'
 require 'webmock/request_signature'

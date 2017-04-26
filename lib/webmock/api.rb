@@ -54,6 +54,14 @@ module WebMock
       end
     end
 
+    def hash_excluding(*args)
+      if defined?(super)
+        super
+      else
+        WebMock::Matchers::HashExcludingMatcher.new(anythingize_lonely_keys(*args))
+      end
+    end
+
     def remove_request_stub(stub)
       WebMock::StubRegistry.instance.remove_request_stub(stub)
     end
