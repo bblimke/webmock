@@ -63,6 +63,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, "www.example.com").with(query: hash_including({"a" => ["b", "c"]})).to_return(body: "abc")
         expect(http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1").body).to eq("abc")
       end
+
+      it 'should return stubbed response when stub expects exclude part of query params' do
+        stub_request(:get, 'www.example.com').with(query: hash_excluding(a: ['b', 'c'])).to_return(body: 'abc')
+        expect(http_request(:get, 'http://www.example.com/?a[]=c&a[]=d&b=1').body).to eq('abc')
+      end
     end
 
     describe "based on method" do

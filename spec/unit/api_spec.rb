@@ -89,8 +89,22 @@ describe WebMock::API do
       #  by testing equality for HashIncludingMatcher (which stringifies the passed hash) we are
       #  testing HashIncludingMatcher.initialize behavior as well
       context 'when args correspond to an hash' do
-        it 'creates "HashExcludingMatcher"' do
-          expect(subject).not_to eq('data' => :one)
+        context 'creates "HashExcludingMatcher"' do
+          it 'equals hash with similar key but different value' do
+            expect(subject).to eq('data' => :two)
+          end
+
+          it 'equals hash with similar value but different key' do
+            expect(subject).to eq('data2' => :one)
+          end
+
+          it 'equals hash with defferent value and key' do
+            expect(subject).to eq('data2' => :two)
+          end
+
+          it 'not equals with similar value and key' do
+            expect(subject).not_to eq('data' => :one)
+          end
         end
       end
 

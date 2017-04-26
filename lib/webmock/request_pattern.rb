@@ -119,7 +119,8 @@ module WebMock
     def add_query_params(query_params)
       @query_params = if query_params.is_a?(Hash)
         query_params
-      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher)
+      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher) \
+              || query_params.is_a?(WebMock::Matchers::HashExcludingMatcher)
         query_params
       elsif rSpecHashIncludingMatcher?(query_params)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
