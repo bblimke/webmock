@@ -2,9 +2,8 @@ require 'spec_helper'
 
 describe WebMock::API do
   describe '#hash_including' do
-
     subject { klass.new.hash_including(args) }
-    let(:args) { {data: :one} }
+    let(:args) { { data: :one } }
 
     context 'when mixed into a class that does not define `hash_including`' do
       let(:klass) do
@@ -54,7 +53,7 @@ describe WebMock::API do
 
 
     context 'when mixed into a class with a parent that defines `hash_including`' do
-      subject {klass.new.hash_including(*args)}
+      subject { klass.new.hash_including(*args) }
       let(:args) { %w(:foo, :bar, {:data => :one}) }
       let(:klass) do
         Class.new(
@@ -70,6 +69,74 @@ describe WebMock::API do
         expect(subject).to eq(args)
       end
     end
+  end
 
+  describe '#hash_excluding' do
+    subject { klass.new.hash_excluding(args) }
+    let(:args) { { data: :one } }
+
+    context 'when mixed into a class that does not define `hash_including`' do
+      let(:klass) do
+        Class.new do
+          include WebMock::API
+        end
+      end
+
+      it 'uses WebMock::Matchers::HashIncludingMatcher' do
+        expect(subject).to be_a(WebMock::Matchers::HashExcludingMatcher)
+      end
+
+      #  by testing equality for HashIncludingMatcher (which stringifies the passed hash) we are
+      #  testing HashIncludingMatcher.initialize behavior as well
+      context 'when args correspond to an hash' do
+        it 'creates "HashExcludingMatcher"' do
+          expect(subject).not_to eq('data' => :one)
+        end
+      end
+
+      context 'when args are one or many keys' do
+        subject { klass.new.hash_excluding(:foo, :bar) }
+        let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
+
+        it "creates 'HashExcludingMatcher' with keys anythingized" do
+          expect(subject).not_to eq('foo' => anything, 'bar' => anything )
+        end
+      end
+
+      context 'when args are both keys and key/value pairs' do
+        subject { klass.new.hash_excluding(:foo, :bar, data: :one) }
+        let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
+
+        it 'creates "HashExcludingMatcher" with keys anythingized' do
+          expect(subject).not_to eq('foo' => anything, 'bar' => anything, 'data' => :one)
+        end
+      end
+
+      context 'when args are an empty hash' do
+        subject { klass.new.hash_excluding({}) }
+
+        it 'creates "HashExcludingMatcher" with an empty hash' do
+          expect(subject).to eq({})
+        end
+      end
+    end
+
+    context 'when mixed into a class with a parent that defines `hash_excluding`' do
+      subject { klass.new.hash_excluding(*args) }
+      let(:args) { %w(:foo, :bar, {:data => :one}) }
+      let(:klass) do
+        Class.new(
+          Class.new do
+            def hash_excluding(*args)
+              args
+            end
+          end
+        ) { include WebMock::API }
+      end
+
+      it 'uses super and passes the args untampered' do
+        expect(subject).to eq(args)
+      end
+    end
   end
 end
