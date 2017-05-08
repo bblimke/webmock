@@ -56,6 +56,16 @@ describe WebMock::StubRequestSnippet do
         stub = WebMock::RequestStub.new(:get, "www.example.com").with(body: "abcdef").to_return(body: "hello")
         expect(WebMock::StubRequestSnippet.new(stub).to_s(false)).to eq(expected)
       end
+
+      it "should print rest-client example if environment variable declared" do
+        ENV.stub(:[]).with('RESTCLIENT_EXAMPLE').and_return('true')
+        expected = 'stub_request(:get, "http://www.example.com/").'+
+        "\n  with(:body => \"abcdef\")"+
+        "\n You can run this manually and get the response with rest-client like so:"+
+        "\n RestClient.get 'http://www.example.com/', \"abcdef\""
+        stub = WebMock::RequestStub.new(:get, "www.example.com").with(:body => "abcdef").to_return(:body => "hello")
+        WebMock::StubRequestSnippet.new(stub).to_s(false).should == expected
+      end
     end
 
     describe "POST" do
