@@ -9,3 +9,19 @@ describe "WebMock version" do
     expect(defined?SafeYAML).to eq(nil)
   end
 end
+
+describe "Enabling" do
+  it "should reflect when it is enabled" do
+    WebMock.enable!
+    expect(WebMock.enabled?).to eq true
+  end
+end
+
+describe "Disabling" do
+  it "should reflect when it is enabled" do
+    WebMock.enable!
+    WebMock.disable!
+    expect(WebMock.enabled?).to eq false
+  end
+end
+
