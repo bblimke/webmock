@@ -1,5 +1,7 @@
 module WebMock
 
+  @@enabled = false
+
   def self.included(clazz)
     WebMock::Deprecation.warning("include WebMock is deprecated. Please include WebMock::API instead")
     if clazz.instance_methods.map(&:to_s).include?('request')
@@ -30,6 +32,7 @@ module WebMock
     HttpLibAdapterRegistry.instance.each_adapter do |name, adapter|
       adapter.enable!
       adapter.disable! unless except.include?(name)
+      @@enabled = false
     end
   end
 
@@ -38,7 +41,12 @@ module WebMock
     HttpLibAdapterRegistry.instance.each_adapter do |name, adapter|
       adapter.disable!
       adapter.enable! unless except.include?(name)
+      @@enabled = true
     end
+  end
+
+  def self.enabled?
+    @@enabled
   end
 
   def self.allow_net_connect!(options = {})
