@@ -17,6 +17,10 @@ module HTTP
         @io.read size
       end
 
+      def close
+        @io.close
+      end
+
       def sequence_id
         -1
       end
