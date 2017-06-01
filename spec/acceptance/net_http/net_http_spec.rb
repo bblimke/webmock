@@ -252,6 +252,26 @@ describe "Net:HTTP" do
         Net::HTTP.get('www.google.com','/')
       end
 
+      it "should allow adding to an empty list of allowed hosts", :net_connect => true do
+        WebMock.disable_net_connect!
+        WebMock.net_connect_allow!(/google.com/)
+        response = Net::HTTP.get('www.google.com','/')
+      end
+
+      it "should allow adding to a single allowed host", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => /google.com/)
+        WebMock.net_connect_allow!(/yahoo.com/)
+        response = Net::HTTP.get('www.google.com','/')
+        response = Net::HTTP.get('www.yahoo.com','/')
+      end
+
+      it "should allow adding to a list of allowed hosts", :net_connect => true do
+        WebMock.disable_net_connect!(:allow => [/google.com/, /yahoo.com/])
+        WebMock.net_connect_allow!(/facebook.com/)
+        response = Net::HTTP.get('www.google.com','/')
+        response = Net::HTTP.get('www.facebook.com','/')
+      end
+
     end
 
   end

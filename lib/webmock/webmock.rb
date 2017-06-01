@@ -53,6 +53,10 @@ module WebMock
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
 
+  def self.net_connect_allow!(allowed)
+    Config.instance.allow = Array(Config.instance.allow) + Array(allowed)
+  end
+
   def self.net_connect_allowed?(uri = nil)
     if uri.is_a?(String)
       uri = WebMock::Util::URI.normalize_uri(uri)
