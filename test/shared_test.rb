@@ -1,3 +1,4 @@
+require 'active_support'
 require File.expand_path(File.dirname(__FILE__) + '/http_request')
 
 module SharedTest
@@ -60,6 +61,17 @@ module SharedTest
       body: "abc", headers: {'A' => 'a'})
     assert_requested(:get, "http://www.example.com",
       body: "abc", headers: {'A' => 'a'})
+  end
+
+  def test_verification_that_expected_request_occured_with_utf8_body_and_headers
+    body1 = File.read(File.expand_path('test/dumpfile.pg_dump'))
+    http_request(:post, "http://www.example.com/",
+      body: body1, headers: {'A' => 'a'})
+    body2 = ActiveSupport::Gzip.compress("").force_encoding('ASCII-8BIT')
+    http_request(:post, "http://www.example.com/",
+      body: body2, headers: {'A' => 'a'})
+    assert_requested(:post, "http://www.example.com",
+      body: body1, headers: {'A' => 'b'})
   end
 
   def test_verification_that_expected_request_occured_with_query_params
