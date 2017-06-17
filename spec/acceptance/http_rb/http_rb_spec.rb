@@ -70,4 +70,13 @@ describe "HTTP.rb" do
       expect(response.uri.to_s).to eq "http://example.com/foo"
     end
   end
+
+  context "streamer" do
+    it "can be closed" do
+      stub_request :get, "example.com/foo"
+      response = HTTP.get "http://example.com/foo"
+
+      response.connection.close
+    end
+  end
 end
