@@ -1,4 +1,3 @@
-require 'active_support'
 require File.expand_path(File.dirname(__FILE__) + '/http_request')
 
 module SharedTest
@@ -8,6 +7,8 @@ module SharedTest
     super
     @stub_http = stub_http_request(:any, "http://www.example.com")
     @stub_https = stub_http_request(:any, "https://www.example.com")
+    @body1 = File.read(File.expand_path('test/support/body1'))
+    @body2 = File.read(File.expand_path('test/support/body2')).force_encoding('ASCII-8BIT')
   end
 
   def test_assert_requested_with_stub_and_block_raises_error
@@ -64,14 +65,17 @@ module SharedTest
   end
 
   def test_verification_that_expected_request_occured_with_utf8_body_and_headers
-    body1 = File.read(File.expand_path('test/dumpfile.pg_dump'))
     http_request(:post, "http://www.example.com/",
-      body: body1, headers: {'A' => 'a'})
-    body2 = ActiveSupport::Gzip.compress("").force_encoding('ASCII-8BIT')
+      body: @body1, headers: {'A' => 'a'})
     http_request(:post, "http://www.example.com/",
-      body: body2, headers: {'A' => 'a'})
-    assert_requested(:post, "http://www.example.com",
-      body: body1, headers: {'A' => 'b'})
+      body: @body2, headers: {'A' => 'a'})
+    assert_fail(/.*/) do
+      # we know this will fail, but it shouldn't cause an exception
+      assert_requested(:post, "http://www.example.com",
+        body: @body1, headers: {'A' => 'b'})
+    end
+  rescue Encoding::CompatibilityError => e
+    flunk e.message
   end
 
   def test_verification_that_expected_request_occured_with_query_params
