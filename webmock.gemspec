@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Bartosz Blimke']
   s.email       = ['bartosz.blimke@gmail.com']
-  s.homepage    = 'http://github.com/bblimke/webmock'
+  s.homepage    = 'https://github.com/bblimke/webmock'
   s.summary     = %q{Library for stubbing HTTP requests in Ruby.}
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.license     = "MIT"
