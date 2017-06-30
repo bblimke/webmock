@@ -26,6 +26,46 @@ module WebMock
           expect(HashIncludingMatcher.new(a: 1)).to eq("a" => 1, "b" => 2)
         end
 
+        it "matches a hash for its types" do
+          expect(HashIncludingMatcher.new(a: Fixnum, b: String, c: /f\w+/)).to eq("a" => 1, "b" => "string", "c" => "foo")
+        end
+
+        it "matches a hash nested inside another hash" do
+          expect(HashIncludingMatcher.new(a: { a: 1 })).to eq("a" => { "a" => 1 })
+        end
+
+        it "matches a hash nested deep inside another hash" do
+          expect(HashIncludingMatcher.new(a: { a: { a: 1 } })).to eq("a" => { "a" => { "a" => 1 } })
+        end
+
+        it "matches a hash nested inside an array of hashes" do
+          expect(HashIncludingMatcher.new(a: [{ a: 1 }])).to eq("a" => [{ "a" => 1 }])
+        end
+
+        it "matches a hash with more stuff nested inside an array of hashes" do
+          expect(HashIncludingMatcher.new(a: [{ a: 1 }])).to eq("a" => [{ "a" => 1, "b" => 1 }, { "a" => 2, "b" => 2 }])
+        end
+
+        it "matches a hash for its types nested inside an array of hashes" do
+          expect(HashIncludingMatcher.new(a: [{ a: Fixnum, b: String, c: /f\w+/ }])).to eq("a" => [{ "a" => 1, "b" => "string", "c" => "foo" }])
+        end
+
+        it "matches a hash inside a hash inside an array of hashes" do
+          expect(HashIncludingMatcher.new(a: [{ a: { a: 1 } }])).to eq("a" => [{ "a" => { "a" => 1 } }])
+        end
+
+        it "matches a hash with more stuff inside a hash inside an array of hashes" do
+          expect(HashIncludingMatcher.new(a: [{ a: { a: 1 } }])).to eq("a" => [{ "a" => { "a" => 1, "b" => 2 } }])
+        end
+
+        it "matches complex structures" do
+          expect(HashIncludingMatcher.new(a: [{ a: [{ a: 1 }] }])).to eq("a" => [{ "a" => [{ "a" => 1 }] }])
+        end
+
+        it "matches complex structures with more stuff" do
+          expect(HashIncludingMatcher.new(a: [{ a: [{ a: 1 }] }])).to eq("a" => [{ "a" => [{ "a" => 1, "b" => 2 }] }])
+        end
+
         describe "when matching anythingized keys" do
           let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
