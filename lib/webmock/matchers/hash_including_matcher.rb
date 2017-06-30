@@ -4,7 +4,17 @@ module WebMock
     # https://github.com/rspec/rspec-mocks/blob/master/lib/rspec/mocks/argument_matchers.rb
     class HashIncludingMatcher < HashArgumentMatcher
       def ==(actual)
-        super { |key, value| actual.key?(key) && value === actual[key] }
+        super do |key, value|
+          case value
+          when Array
+            zipped = value.zip(actual[key])
+            zipped.any? { |expected, actual| HashIncludingMatcher.new(expected) === actual }
+          when Hash
+            HashIncludingMatcher.new(value) === actual[key]
+          else
+            actual.key?(key) && value === actual[key]
+          end
+        end
       rescue NoMethodError
         false
       end
