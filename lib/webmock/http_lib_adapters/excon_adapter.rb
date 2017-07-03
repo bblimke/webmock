@@ -92,7 +92,7 @@ if defined?(Excon)
         end
 
         def self.to_query(hash)
-          string = ""
+          string = "".dup
           for key, values in hash
             if values.nil?
               string << key.to_s << '&'

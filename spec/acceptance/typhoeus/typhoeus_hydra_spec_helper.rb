@@ -6,7 +6,7 @@ module TyphoeusHydraSpecHelper
 
 
   def http_request(method, uri, options = {}, &block)
-    uri.gsub!(" ", "%20") #typhoeus doesn't like spaces in the uri
+    uri = uri.gsub(" ", "%20") #typhoeus doesn't like spaces in the uri
     request_options =  {
       method: method,
       body: options[:body],

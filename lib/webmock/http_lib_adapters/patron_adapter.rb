@@ -106,11 +106,11 @@ if defined?(::Patron)
           header_data   = ([status_line] + header_fields).join("\r\n")
 
           ::Patron::Response.new(
-            "",
+            "".dup,
             webmock_response.status[0],
             0,
             header_data,
-            webmock_response.body,
+            webmock_response.body.dup,
             default_response_charset
           )
         end

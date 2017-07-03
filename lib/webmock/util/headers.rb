@@ -22,7 +22,7 @@ module WebMock
 
       def self.sorted_headers_string(headers)
         headers = WebMock::Util::Headers.normalize_headers(headers)
-        str = '{'
+        str = '{'.dup
         str << headers.map do |k,v|
           v = case v
             when Regexp then v.inspect

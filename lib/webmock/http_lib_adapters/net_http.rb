@@ -258,7 +258,7 @@ module Net  #:nodoc: all
   class WebMockNetBufferedIO < BufferedIO
     def initialize(io, read_timeout: 60, continue_timeout: nil, debug_output: nil)
       @read_timeout = read_timeout
-      @rbuf = ''
+      @rbuf = ''.dup
       @debug_output = debug_output
 
       @io = case io

@@ -293,7 +293,7 @@ describe "Net:HTTP" do
     end
 
     it "should support the after_request callback on an request with block and read_body" do
-      response_body = ''
+      response_body = ''.dup
       http_request(:get, "http://localhost:#{port}/") do |response|
         response.read_body { |fragment| response_body << fragment }
       end

@@ -153,7 +153,7 @@ if defined?(Curl)
         @body_str = webmock_response.body
         @response_code = webmock_response.status[0]
 
-        @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n"
+        @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n".dup
 
         @on_debug.call(@header_str, 1) if defined?( @on_debug )
 

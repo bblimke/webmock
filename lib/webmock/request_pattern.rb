@@ -41,7 +41,7 @@ module WebMock
     end
 
     def to_s
-      string = "#{@method_pattern.to_s.upcase}"
+      string = "#{@method_pattern.to_s.upcase}".dup
       string << " #{@uri_pattern.to_s}"
       string << " with body #{@body_pattern.to_s}" if @body_pattern
       string << " with headers #{@headers_pattern.to_s}" if @headers_pattern
