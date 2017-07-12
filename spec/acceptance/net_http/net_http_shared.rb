@@ -12,7 +12,7 @@ shared_examples_for "Net::HTTP" do
     end
 
     it "should handle requests with block passed to read_body", net_connect: true do
-      body = ""
+      body = "".dup
       req = Net::HTTP::Get.new("/")
       Net::HTTP.start("localhost", port) do |http|
         http.request(req) do |res|

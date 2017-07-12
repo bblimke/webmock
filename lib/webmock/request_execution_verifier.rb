@@ -53,9 +53,8 @@ module WebMock
 
     def failure_message_phrase(is_negated=false)
       negation = is_negated ? "was not" : "was"
-      text = "The request #{request_pattern} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}"
-      text << self.class.executed_requests_message
-      text
+      "The request #{request_pattern} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}" +
+        self.class.executed_requests_message
     end
 
     def quantity_phrase(is_negated=false)

@@ -13,14 +13,14 @@ module WebMock
     def stubbing_instructions
       return unless WebMock.show_stubbing_instructions?
 
-      text = "You can stub this request with the following snippet:\n\n"
-      text << WebMock::StubRequestSnippet.new(request_stub).to_s
+      "You can stub this request with the following snippet:\n\n" +
+        WebMock::StubRequestSnippet.new(request_stub).to_s
     end
 
     def request_stubs
       return if WebMock::StubRegistry.instance.request_stubs.empty?
 
-      text = "registered request stubs:\n"
+      text = "registered request stubs:\n".dup
       WebMock::StubRegistry.instance.request_stubs.each do |stub|
         text << "\n#{WebMock::StubRequestSnippet.new(stub).to_s(false)}"
         add_body_diff(stub, text) if WebMock.show_body_diff?
@@ -50,7 +50,7 @@ module WebMock
     end
 
     def pretty_print_to_string(string_to_print)
-      StringIO.open("") do |stream|
+      StringIO.open("".dup) do |stream|
         PP.pp(string_to_print, stream)
         stream.rewind
         stream.read

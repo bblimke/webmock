@@ -17,7 +17,7 @@ module WebMock
     end
 
     def body_from_rack_response(response)
-      body = ""
+      body = "".dup
       response.each { |line| body << line }
       response.close if response.respond_to?(:close)
       return body

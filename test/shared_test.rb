@@ -41,7 +41,7 @@ module SharedTest
 
   def test_verification_that_expected_request_didnt_occur
     expected_message = "The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times"
-    expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
+    expected_message += "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
     assert_fail(expected_message) do
       assert_requested(:get, "http://www.example.com")
     end
@@ -49,7 +49,7 @@ module SharedTest
 
   def test_verification_that_expected_stub_didnt_occur
     expected_message = "The request ANY http://www.example.com/ was expected to execute 1 time but it executed 0 times"
-    expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
+    expected_message += "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
     assert_fail(expected_message) do
       assert_requested(@stub_http)
     end

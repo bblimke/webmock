@@ -204,7 +204,7 @@ module WebMock::Util
           end
         end
 
-        buffer = ''
+        buffer = ''.dup
         new_query_values.each do |parent, value|
           encoded_parent = ::Addressable::URI.encode_component(
               parent.dup, ::Addressable::URI::CharacterClasses::UNRESERVED
@@ -251,14 +251,14 @@ module WebMock::Util
             ]
           end
           value.sort!
-          buffer = ''
+          buffer = ''.dup
           value.each do |key, val|
             new_parent = options[:notation] != :flat_array ? "#{parent}[#{key}]" : parent
             buffer << "#{to_query(new_parent, val, options)}&"
           end
           buffer.chop
         when ::Array
-          buffer = ''
+          buffer = ''.dup
           value.each_with_index do |val, i|
             new_parent = options[:notation] != :flat_array ? "#{parent}[#{i}]" : parent
             buffer << "#{to_query(new_parent, val, options)}&"

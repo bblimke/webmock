@@ -43,7 +43,7 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
     it  "should verify that expect request didn't occur" do
      expected_message = "The request GET http://www.example.com/ was expected to execute 1 time but it executed 0 times"
-     expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
+     expected_message += "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
      assert_fail(expected_message) do
        assert_requested(:get, "http://www.example.com")
      end
@@ -51,7 +51,7 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
     it  "should verify that expect stub didn't occur" do
      expected_message = "The request ANY http://www.example.com/ was expected to execute 1 time but it executed 0 times"
-     expected_message << "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
+     expected_message += "\n\nThe following requests were made:\n\nNo requests were made.\n============================================================"
      assert_fail(expected_message) do
        assert_requested(@stub_http)
      end

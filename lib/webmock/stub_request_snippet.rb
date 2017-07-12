@@ -10,10 +10,10 @@ module WebMock
 
     def to_s(with_response = true)
       request_pattern = @request_stub.request_pattern
-      string = "stub_request(:#{request_pattern.method_pattern.to_s},"
+      string = "stub_request(:#{request_pattern.method_pattern.to_s},".dup
       string << " \"#{request_pattern.uri_pattern.to_s}\")"
 
-      with = ""
+      with = "".dup
 
       if (request_pattern.body_pattern)
         with << "body: #{request_pattern.body_pattern.to_s}"

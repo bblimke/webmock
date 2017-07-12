@@ -12,7 +12,7 @@ module WebMock
     end
 
     def to_s
-      string = "#{self.method.to_s.upcase}"
+      string = "#{self.method.to_s.upcase}".dup
       string << " #{WebMock::Util::URI.strip_default_port_from_uri_string(self.uri.to_s)}"
       string << " with body '#{body.to_s}'" if body && body.to_s != ''
       if headers && !headers.empty?

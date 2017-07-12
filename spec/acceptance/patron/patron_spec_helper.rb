@@ -16,7 +16,7 @@ module PatronSpecHelper
     sess.timeout = 30
     sess.max_redirects = 0
     uri = "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}"
-    uri.gsub!(' ','%20')
+    uri = uri.gsub(' ','%20')
     response = sess.request(method, uri, options[:headers] || {}, {
       data: options[:body]
     })
