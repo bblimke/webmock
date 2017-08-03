@@ -43,7 +43,7 @@ module HTTP
 
     def raise_timeout_error
       raise Errno::ETIMEDOUT if HTTP::VERSION < "1.0.0"
-      raise HTTP::ConnectionError, "connection error: #{Errno::ETIMEDOUT.new}"
+      raise HTTP::TimeoutError, "connection error: #{Errno::ETIMEDOUT.new}"
     end
 
     def perform

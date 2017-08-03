@@ -20,7 +20,7 @@ module HttpRbSpecHelper
 
   def client_timeout_exception_class
     return Errno::ETIMEDOUT if HTTP::VERSION < "1.0.0"
-    HTTP::ConnectionError
+    HTTP::TimeoutError
   end
 
   def connection_refused_exception_class
