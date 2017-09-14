@@ -31,6 +31,13 @@ describe "HTTPClient" do
     expect(response_body).to eq("abc")
   end
 
+  it "should not yield block on empty response if block provided" do
+    stub_request(:get, "www.example.com").to_return(body: "")
+    response_body = ""
+    http_request(:get, "http://www.example.com/"){ raise }
+    expect(response_body).to eq("")
+  end
+
   it "should match requests if headers are the same  but in different order" do
     stub_request(:get, "www.example.com").with(headers: {"a" => ["b", "c"]} )
     expect(http_request(
