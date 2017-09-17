@@ -127,7 +127,7 @@ unless RUBY_PLATFORM =~ /java/
           end
           hydra.queue @request
           hydra.run
-          expect(test_headers).to include('X-Test' => '1')
+          expect(test_headers.to_h).to include('X-Test' => '1')
         end
       end
     end
