@@ -75,8 +75,10 @@ if defined?(::HTTPClient)
         elsif block
           body = ''
           do_get_block_without_webmock(req, proxy, conn) do |http_res, chunk|
-            body += chunk
-            block.call(http_res, chunk)
+            if chunk && chunk.bytesize > 0
+              body += chunk
+              block.call(http_res, chunk)
+            end
           end
         else
           do_get_block_without_webmock(req, proxy, conn)
@@ -117,7 +119,7 @@ if defined?(::HTTPClient)
       raise HTTPClient::TimeoutError if webmock_response.should_timeout
       webmock_response.raise_error_if_any
 
-      block.call(response, body) if block
+      block.call(response, body) if block && body && body.bytesize > 0
 
       response
     end
