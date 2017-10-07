@@ -154,7 +154,7 @@ module WebMock
         def build_net_http_response(webmock_response, &block)
           response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
           body = webmock_response.body
-          body = nil if body.to_s == ''
+          body = nil if webmock_response.status[0].to_s == '204'
 
           response.instance_variable_set(:@body, body)
           webmock_response.headers.to_a.each do |name, values|
