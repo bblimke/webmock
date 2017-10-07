@@ -314,4 +314,18 @@ describe "Net:HTTP" do
       expect(@callback_invocation_count).to eq(1)
     end
   end
+
+  it "should match http headers, even if their values have been set in a request as numbers" do
+    WebMock.disable_net_connect!
+
+    stub_request(:post, "www.example.com").with(headers: {"My-Header" => 99})
+
+    uri = URI.parse('http://www.example.com/')
+    req = Net::HTTP::Post.new(uri.path)
+    req['My-Header'] = 99
+
+    res = Net::HTTP.start(uri.host, uri.port) do |http|
+      http.request(req, '')
+    end
+  end
 end

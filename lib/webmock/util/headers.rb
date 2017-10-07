@@ -12,7 +12,7 @@ module WebMock
           [name.to_s.split(/_|-/).map { |segment| segment.capitalize }.join("-"),
            case value
             when Regexp then value
-            when Array then (value.size == 1) ? value.first : value.map {|v| v.to_s}.sort
+            when Array then (value.size == 1) ? value.first.to_s : value.map {|v| v.to_s}.sort
             else value.to_s
            end
           ]
