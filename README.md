@@ -270,13 +270,14 @@ stub_request(:get, "www.example.com").
 
 RestClient.get("http://www.example.com/?a[]=b&a[]=c&x=1")    # ===> Success
 ```
-### Matching partial query params using hash
+
+### Matching partial query params using hash_excluding
 
 ```ruby
 stub_request(:get, "www.example.com").
   with(query: hash_excluding({"a" => "b"}))
 
-RestClient.get("http://www.example.com/?a=b")    # ===> Error
+RestClient.get("http://www.example.com/?a=b")    # ===> Failure
 RestClient.get("http://www.example.com/?a=c")    # ===> Success
 ```
 
