@@ -1,5 +1,50 @@
 # Changelog
 
+## 3.1.0
+
+  * http.rb 3.0.0 compatibility
+
+    Thanks to [Piotr Boniecki](https://github.com/Bonias)
+
+  * Typhoeus 1.3.0 support
+
+    Thanks to [NARUSE, Yui](https://github.com/nurse)
+
+  * Added support for matching partial query params using hash_excluding
+
+        stub_request(:get, "www.example.com").
+          with(query: hash_excluding({"a" => "b"}))
+
+        RestClient.get("http://www.example.com/?a=b")    # ===> Failure
+        RestClient.get("http://www.example.com/?a=c")    # ===> Success
+
+    Thanks to [Olexandr Hoshylyk](https://github.com/Warrior109)
+
+  * Added MRI 2.3+ frozen string literal compatibility
+
+    Thanks to [Pat Allan](https://github.com/pat)
+
+  * Ensured that HTTPClient adapter does not yield block on empty response body if a block is provided
+
+    Thanks to [NARUSE, Yui](https://github.com/nurse)
+
+  * Fixed issue with `to_timeout` incorrectly raising `HTTP::ConnectionError` instead of `HTTP::TimeoutError` when using http.rb
+
+    Thanks to [Rick Song](https://github.com/RickCSong)
+
+  * Fixed problem with `response.connection.close` method being undefined when using http.rb
+
+    Thanks to [Janko Marohnić](https://github.com/janko-m)
+
+  * Fixed problem with matching Net::HTTP request header values assigned as numbers.
+
+    Thanks to [Felipe Constantino de Oliveira](https://github.com/felipecdo) for reporting the issue.
+
+  * Fixed problem with Net::HTTP adapter converting empty response body to nil for non 204 responses.
+
+    Thanks to [Jeffrey Charles](https://github.com/jeffcharles) for reporting the issue.
+
+
 ## 3.0.1
 
   * Suppressed \`warning: \`&' interpreted as argument prefix\`
