@@ -152,7 +152,7 @@ if defined?(Excon)
   end
 
   Excon::Connection.class_eval do
-    def self.new(args)
+    def self.new(args = {})
       args.delete(:__construction_args)
       super(args).tap do |instance|
         instance.data[:__construction_args] = args
