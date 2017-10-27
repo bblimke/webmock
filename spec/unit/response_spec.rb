@@ -135,6 +135,10 @@ describe WebMock::Response do
         raise_error(WebMock::Response::InvalidBody)
     end
 
+    it "should not error if given hash and accept header" do
+      expect { WebMock::Response.new(body: Hash.new, headers: {'content-type'=>'application/json'} ) }.not_to \
+        raise_error
+    end
   end
 
   describe "from raw response" do

@@ -111,6 +111,7 @@ module WebMock
       valid_types = [Proc, IO, Pathname, String, Array]
       return if @body.nil?
       return if valid_types.any? { |c| @body.is_a?(c) }
+      return if @body.is_a?(Hash) && @headers && @headers['Content-Type'] == 'application/json'
       raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
     end
 
