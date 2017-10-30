@@ -197,6 +197,26 @@ shared_context "declared responses" do |*adapter_info|
       end
     end
 
+    describe 'when the response was declared as a hash' do
+      context 'when Content-Type is JSON' do
+        before(:each) do
+          stub_request(:get, "www.example.com").to_return(headers: {'Content-Type': 'application/json'}, body: {abc: 'def'})
+          @response = http_request(:get, "http://www.example.com/")
+        end
+
+        it "should return recorded status" do
+          expect(@response.status).to eq("200")
+        end
+      end
+
+      context 'when content-type is not JSON' do
+        it 'gets descriptive error' do
+          expect { stub_request(:get, "www.example.com").to_return(body: {abc: 'def'}) }.to raise_error(WebMock::Response::InvalidBody)
+          expect { stub_request(:get, "www.example.com").to_return(body: {abc: 'def'}) }.to raise_error("Body is a Hash, explicitly supported types are: [Proc, IO, Pathname, String, Array]. JSON is supported with a 'Content-Type': 'application/json' header")
+        end
+      end
+    end
+
     describe "when response was declared as a string with a raw response" do
       before(:each) do
         @input = File.read(CURL_EXAMPLE_OUTPUT_PATH)

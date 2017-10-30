@@ -112,6 +112,7 @@ module WebMock
       return if @body.nil?
       return if valid_types.any? { |c| @body.is_a?(c) }
       return if @body.is_a?(Hash) && @headers && @headers['Content-Type'] == 'application/json'
+      raise InvalidBody, "Body is a Hash, explicitly supported types are: #{valid_types}. JSON is supported with a 'Content-Type': 'application/json' header" if @body.is_a?(Hash)
       raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
     end
 

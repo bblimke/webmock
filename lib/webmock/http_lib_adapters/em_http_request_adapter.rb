@@ -201,7 +201,7 @@ if defined?(EventMachine::HttpClient)
         response_string = []
         response_string << "HTTP/1.1 #{status[0]} #{status[1]}"
 
-        headers["Content-Length"] = body.bytesize unless headers["Content-Length"]
+        headers["Content-Length"] = body.to_s.bytesize unless headers["Content-Length"]
         headers.each do |header, value|
           if header =~ /set-cookie/i
             [value].flatten.each do |cookie|

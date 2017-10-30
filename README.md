@@ -291,6 +291,16 @@ stub_request(:any, "www.example.com").
 Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 ```
 
+### Stubbing with custom JSON response
+
+```ruby
+stub_request(:any, "www.example.com").
+  to_return(body: {abc: 'def'}, status: 200,
+    headers: { 'Content-Type' => 'application/json' })
+
+Net::HTTP.get("www.example.com", '/')    # ===> "{abc: 'def'}"
+```
+
 ### Response with body specified as IO object
 
 ```ruby

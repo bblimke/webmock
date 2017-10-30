@@ -110,7 +110,7 @@ if defined?(::HTTPClient)
     end
 
     def build_httpclient_response(webmock_response, stream = false, req_header = nil, &block)
-      body = stream ? StringIO.new(webmock_response.body) : webmock_response.body
+      body = stream ? StringIO.new(webmock_response.body.to_s) : webmock_response.body
       response = HTTP::Message.new_response(body, req_header)
       response.header.init_response(webmock_response.status[0])
       response.reason=webmock_response.status[1]

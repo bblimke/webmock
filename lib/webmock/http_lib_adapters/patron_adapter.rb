@@ -110,7 +110,7 @@ if defined?(::Patron)
             webmock_response.status[0],
             0,
             header_data,
-            webmock_response.body.dup,
+            webmock_response.body.to_s.dup,
             default_response_charset
           )
         end

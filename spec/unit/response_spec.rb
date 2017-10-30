@@ -133,10 +133,14 @@ describe WebMock::Response do
     it "should error if not given one of the allowed types" do
       expect { WebMock::Response.new(body: Hash.new) }.to \
         raise_error(WebMock::Response::InvalidBody)
+      expect { WebMock::Response.new(body: Hash.new) }.to \
+        raise_error("Body is a Hash, explicitly supported types are: [Proc, IO, Pathname, String, Array]. JSON is supported with a 'Content-Type': 'application/json' header")
     end
 
     it "should not error if given hash and accept header" do
       expect { WebMock::Response.new(body: Hash.new, headers: {'content-type'=>'application/json'} ) }.not_to \
+        raise_error
+      expect { WebMock::Response.new(body: {abc: 'def'}, headers: {'content-type'=>'application/json'} ) }.not_to \
         raise_error
     end
   end

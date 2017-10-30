@@ -82,8 +82,8 @@ if defined?(Typhoeus)
         def self.build_webmock_response(typhoeus_response)
           webmock_response = WebMock::Response.new
           webmock_response.status = [typhoeus_response.code, typhoeus_response.status_message]
-          webmock_response.body = typhoeus_response.body
           webmock_response.headers = typhoeus_response.headers
+          webmock_response.body = typhoeus_response.body
           webmock_response
         end
 
