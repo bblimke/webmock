@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+  * Warning message is displayed only once when adding query params to URIAddressablePattern.
+
 ## 3.1.0
 
   * http.rb 3.0.0 compatibility
