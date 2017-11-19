@@ -164,7 +164,11 @@ module WebMock
     end
 
     def add_query_params(query_params)
-      warn "WebMock warning: ignoring query params in RFC 6570 template and checking them with WebMock"
+      @@add_query_params_warned ||= false
+      if not @@add_query_params_warned
+        @@add_query_params_warned = true
+        warn "WebMock warning: ignoring query params in RFC 6570 template and checking them with WebMock"
+      end
       super(query_params)
     end
 
