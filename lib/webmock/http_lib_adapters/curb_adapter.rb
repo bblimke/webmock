@@ -183,7 +183,7 @@ if defined?(Curl)
         self.url = location
 
         curb_or_webmock do
-          send( "http_#{@webmock_method}_without_webmock" )
+          send( :http, {'method' => @webmock_method} )
         end
 
         self.url = first_url
