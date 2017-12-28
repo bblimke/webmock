@@ -39,7 +39,7 @@ module WebMock
     end
 
     def json_headers?
-      !!(headers && headers['Content-Type'] == 'application/json')
+      !!(headers && ['application/vnd.api+json', 'application/json'].include?(headers['Content-Type']))
     end
 
     private

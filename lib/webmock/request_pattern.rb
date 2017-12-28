@@ -214,16 +214,17 @@ module WebMock
     include RSpecMatcherDetector
 
     BODY_FORMATS = {
-      'text/xml'               => :xml,
-      'application/xml'        => :xml,
-      'application/json'       => :json,
-      'text/json'              => :json,
-      'application/javascript' => :json,
-      'text/javascript'        => :json,
-      'text/html'              => :html,
-      'application/x-yaml'     => :yaml,
-      'text/yaml'              => :yaml,
-      'text/plain'             => :plain
+      'text/xml'                 => :xml,
+      'application/xml'          => :xml,
+      'application/json'         => :json,
+      'application/vnd.api+json' => :json,
+      'text/json'                => :json,
+      'application/javascript'   => :json,
+      'text/javascript'          => :json,
+      'text/html'                => :html,
+      'application/x-yaml'       => :yaml,
+      'text/yaml'                => :yaml,
+      'text/plain'               => :plain
     }
 
     attr_reader :pattern
