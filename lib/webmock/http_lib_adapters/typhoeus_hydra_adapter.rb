@@ -102,6 +102,7 @@ if defined?(Typhoeus)
               status_message: webmock_response.status[1],
               body: webmock_response.body,
               headers: webmock_response.headers,
+              return_code: :ok,
               effective_url: request_signature.uri
             )
           end
