@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.2.0
+
+ * Automatically disable WebMock after Rspec suite
+
+    Thanks to [Michał Matyas](https://github.com/d4rky-pl)
+
+ * Fixed bug when handling redirection using Curb.
+
+    Thanks to [Olia Kremmyda](https://github.com/Olia-Kremmyda)
+
+
 ## 3.1.1
 
   * Warning message is displayed only once when adding query params to URIAddressablePattern.
