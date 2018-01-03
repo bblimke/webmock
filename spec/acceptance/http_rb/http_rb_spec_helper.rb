@@ -8,7 +8,10 @@ module HttpRbSpecHelper
       chain = chain.basic_auth(user: basic_auth[0], pass: basic_auth[1])
     end
 
-    response = chain.request(method, normalize_uri(uri), options)
+    ssl_ctx = OpenSSL::SSL::SSLContext.new
+    ssl_ctx.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+    response = chain.request(method, normalize_uri(uri), options.merge(ssl_context: ssl_ctx))
 
     OpenStruct.new({
       body: response.body.to_s,
