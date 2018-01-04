@@ -24,13 +24,12 @@ module WebMock
 
       # Ensure that ":" and "," are always followed by a space
       def self.convert_json_to_yaml(json) #:nodoc:
-        scanner, quoting, marks, pos, times = StringScanner.new(json), false, [], nil, []
+        scanner, quoting, marks, times = StringScanner.new(json), false, [], []
         while scanner.scan_until(/(\\['"]|['":,\\]|\\.)/)
           case char = scanner[1]
           when '"', "'"
             if !quoting
               quoting = char
-              pos = scanner.pos
             elsif quoting == char
               quoting = false
             end
