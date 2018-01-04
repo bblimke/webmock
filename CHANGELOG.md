@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.2.1
+
+ *  Fixed Ruby warning under Ruby 2.5
+
+    Thanks to [Matt Brictson](https://github.com/mattbrictson)
+
+
 ## 3.2.0
 
  * Automatically disable WebMock after Rspec suite

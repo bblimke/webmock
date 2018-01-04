@@ -35,6 +35,7 @@ Supported Ruby Interpreters
 * MRI 2.2
 * MRI 2.3
 * MRI 2.4
+* MRI 2.5
 * JRuby
 * Rubinius
 
@@ -1051,6 +1052,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Piotr Boniecki
 * Olia Kremmyda
 * Michał Matyas
+* Matt Brictson
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
