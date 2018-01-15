@@ -16,13 +16,13 @@ module WebMock
       with = "".dup
 
       if (request_pattern.body_pattern)
-        with << "body: #{request_pattern.body_pattern.to_s}"
+        with << "\n    body: #{request_pattern.body_pattern.to_s}"
       end
 
       if (request_pattern.headers_pattern)
-        with << ",\n       " unless with.empty?
+        with << ",\n  " unless with.empty?
 
-        with << "headers: #{request_pattern.headers_pattern.to_s}"
+        with << "  headers: #{request_pattern.headers_pattern.pp_to_s}"
       end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response

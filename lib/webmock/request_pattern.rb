@@ -344,6 +344,10 @@ module WebMock
       WebMock::Util::Headers.sorted_headers_string(@pattern)
     end
 
+    def pp_to_s
+      WebMock::Util::Headers.pp_headers_string(@pattern)
+    end
+
     private
 
     def empty_headers?(headers)

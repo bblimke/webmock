@@ -34,6 +34,21 @@ module WebMock
         str << '}'
       end
 
+      def self.pp_headers_string(headers)
+        headers = WebMock::Util::Headers.normalize_headers(headers)
+        seperator = "\n\t "
+        str = "{#{seperator} ".dup
+        str << headers.map do |k,v|
+          v = case v
+            when Regexp then v.inspect
+            when Array then "["+v.map{|w| "'#{w.to_s}'"}.join(", ")+"]"
+            else "'#{v.to_s}'"
+          end
+          "'#{k}'=>#{v}"
+        end.sort.join(",#{seperator} ")
+        str << "\n    }"
+      end
+
       def self.decode_userinfo_from_header(header)
         header.sub(/^Basic /, "").unpack("m").first
       end
