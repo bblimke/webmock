@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.0
+
+ *  Better formatting of outputted request stub snippets, displayed on failures due to unstubbed requests.
+
+    Thanks to [Olia Kremmyda](https://github.com/Olia-Kremmyda)
+
+
 ## 3.2.1
 
  *  Fixed Ruby warning under Ruby 2.5
