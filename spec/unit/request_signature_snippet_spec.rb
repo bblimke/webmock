@@ -60,7 +60,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
         result = subject.request_stubs
         result.sub!("registered request stubs:\n\n", "")
         expect(result).to eq(
-          "stub_request(:get, \"https://www.example.com/\").\n  with(body: {\"a\"=>\"b\"})"
+          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: {\"a\"=>\"b\"})"
         )
       end
 
@@ -74,7 +74,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
         result = subject.request_stubs
         result.sub!("registered request stubs:\n\n", "")
         expect(result).to eq(
-          "stub_request(:get, \"https://www.example.com/\").\n  with(body: {\"a\"=>\"b\"})\n\nBody diff:\n [[\"-\", \"key\", \"different value\"], [\"+\", \"a\", \"b\"]]\n"
+          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: {\"a\"=>\"b\"})\n\nBody diff:\n [[\"-\", \"key\", \"different value\"], [\"+\", \"a\", \"b\"]]\n"
         )
       end
     end
