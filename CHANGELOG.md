@@ -4,7 +4,7 @@
 
  *  Better formatting of outputted request stub snippets, displayed on failures due to unstubbed requests.
 
-    Thanks to [Olia Kremmyda](https://github.com/Olia-Kremmyda)
+    Thanks to [Olia Kremmyda](https://github.com/oliakremmyda)
 
 
 ## 3.2.1
@@ -22,7 +22,7 @@
 
  * Fixed bug when handling redirection using Curb.
 
-    Thanks to [Olia Kremmyda](https://github.com/Olia-Kremmyda)
+    Thanks to [Olia Kremmyda](https://github.com/oliakremmyda)
 
 
 ## 3.1.1
