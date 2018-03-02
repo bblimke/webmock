@@ -20,9 +20,9 @@ module WebMock
       end
 
       if (request_pattern.headers_pattern)
-        with << ",\n  " unless with.empty?
+        with << "," unless with.empty?
 
-        with << "  headers: #{request_pattern.headers_pattern.pp_to_s}"
+        with << "\n    headers: #{request_pattern.headers_pattern.pp_to_s}"
       end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response

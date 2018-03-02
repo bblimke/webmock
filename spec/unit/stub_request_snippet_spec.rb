@@ -34,7 +34,7 @@ describe WebMock::StubRequestSnippet do
       it "should print stub request snippet with headers if any" do
         @request_signature.headers = {'B' => 'b', 'A' => 'a'}
         expected = 'stub_request(:get, "http://www.example.com/?a=b&c=d").'+
-        "\n  with(  headers: {\n\t\  'A\'=>\'a\',\n\t  \'B\'=>\'b\'\n    })." +
+        "\n  with(\n    headers: {\n\t\  'A\'=>\'a\',\n\t  \'B\'=>\'b\'\n    })." +
         "\n  to_return(status: 200, body: \"\", headers: {})"
         @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expect(WebMock::StubRequestSnippet.new(@request_stub).to_s).to eq(expected)
@@ -101,7 +101,10 @@ stub_request(:post, "http://www.example.com/").
         @request_stub = WebMock::RequestStub.from_request_signature(@request_signature)
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
-  with(headers: {'Accept'=>'application/json'}).
+  with(
+    headers: {
+\t  'Accept'=>'application/json'
+    }).
   to_return(status: 200, body: \"{}\", headers: {})
         STUB
         expect(WebMock::StubRequestSnippet.new(@request_stub).to_s).to eq(expected.strip)
