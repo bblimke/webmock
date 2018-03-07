@@ -462,5 +462,20 @@ unless RUBY_PLATFORM =~ /java/
       it_should_behave_like "Curb"
       include CurbSpecHelper::ClassPerform
     end
+
+    describe "using .reset" do
+      before do
+        @curl = Curl::Easy.new
+        @curl.url = "http://example.com"
+        body = "on_success fired"
+        stub_request(:any, "example.com").to_return(body: body)
+        @curl.http_get
+      end
+
+      it "should clear the body_str" do
+        @curl.reset
+        expect(@curl.body_str).to eq(nil)
+      end
+    end
   end
 end

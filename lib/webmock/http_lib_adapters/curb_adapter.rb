@@ -332,6 +332,11 @@ if defined?(Curl)
           end
         METHOD
       end
+
+      def reset
+        instance_variable_set(:@body_str, nil)
+        super
+      end
     end
   end
 end
