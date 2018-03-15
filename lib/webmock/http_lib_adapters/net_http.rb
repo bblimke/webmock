@@ -271,6 +271,20 @@ module Net  #:nodoc: all
       end
       raise "Unable to create local socket" unless @io
     end
+
+    if RUBY_VERSION >= '2.6.0'
+      def rbuf_fill
+        trace = TracePoint.trace(:line) do |tp|
+          if tp.binding.local_variable_defined?(:tmp)
+            tp.binding.local_variable_set(:tmp, nil)
+          end
+        end
+
+        super
+
+        trace.disable
+      end
+    end
   end
 
 end
