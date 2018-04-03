@@ -3,8 +3,10 @@ require 'thread'
 module WebMock
   module Util
     class Util::HashCounter
+      attr_accessor :ary
       attr_accessor :hash
       def initialize
+        self.ary = []
         self.hash = {}
         @order = {}
         @max = 0
@@ -13,6 +15,7 @@ module WebMock
       def put key, num=1
         @lock.synchronize do
           hash[key] = (hash[key] || 0) + num
+          ary << key
           @order[key] = @max = @max + 1
         end
       end
