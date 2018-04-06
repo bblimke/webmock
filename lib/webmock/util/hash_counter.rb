@@ -2,7 +2,7 @@ require 'thread'
 
 module WebMock
   module Util
-    class Util::HashCounter
+    class HashCounter
       attr_accessor :hash
       def initialize
         self.hash = {}
