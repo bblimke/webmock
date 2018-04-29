@@ -69,7 +69,7 @@ if defined?(::Patron)
           uri = WebMock::Util::URI.heuristic_parse(req.url)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
 
-          if [:put, :post].include?(req.action)
+          if [:put, :post, :patch].include?(req.action)
             if req.file_name
               if !File.exist?(req.file_name) || !File.readable?(req.file_name)
                 raise ArgumentError.new("Unable to open specified file.")

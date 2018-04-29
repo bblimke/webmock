@@ -19,6 +19,13 @@ unless RUBY_PLATFORM =~ /java/
         @sess.base_url = "http://www.example.com"
       end
 
+      it "should allow stubbing PATCH request with body" do
+        stub_request(:patch, "http://www.example.com/")
+          .with(body: "abc")
+
+        @sess.patch('/', "abc")
+      end
+
       describe "file requests" do
 
         before(:each) do
