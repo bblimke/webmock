@@ -122,7 +122,7 @@ module WebMock::Util
 
       def fill_accumulator_for_subscript(accumulator, key, value)
         current_node = accumulator
-        subkeys = key.split(/(?=\[\w)/)
+        subkeys = key.split(/(?=\[[^\[\]]+)/)
         subkeys[0..-2].each do |subkey|
           node = subkey =~ /\[\]\z/ ? [] : {}
           subkey = subkey.gsub(/[\[\]]/, '')

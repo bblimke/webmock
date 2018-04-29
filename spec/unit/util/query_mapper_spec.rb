@@ -70,6 +70,12 @@ describe WebMock::Util::QueryMapper do
       hsh = subject.query_to_values(query)
       expect(hsh['a']).to eq('foo')
     end
+
+    it "should parse hash query with key starting with non word character" do
+      query = "a[$in]=1".freeze
+      hsh = subject.query_to_values(query)
+      expect(hsh).to eql({'a' => {'$in' => '1'}})
+    end
   end
 
   context '#to_query' do
