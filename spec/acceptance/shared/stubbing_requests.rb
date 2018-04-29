@@ -155,6 +155,24 @@ shared_examples_for "stubbing requests" do |*adapter_info|
               body: 'c[d][]=f&a=1&c[d][]=e')
             }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: POST http://www.example.com/ with body 'c\[d\]\[\]=f&a=1&c\[d\]\[\]=e'))
           end
+
+          describe "for request with form url encoded body and content type" do
+            it "should match if stubbed request body hash has string values matching string values in request body" do
+              WebMock.reset!
+              stub_request(:post, "www.example.com").with(body: {"foo" => '1'})
+              expect(http_request(
+                :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+              body: "foo=1").status).to eq("200")
+            end
+
+            it "should match if stubbed request body hash has NON string values matching string values in request body" do
+              WebMock.reset!
+              stub_request(:post, "www.example.com").with(body: {"foo" => 1})
+              expect(http_request(
+                :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+              body: "foo=1").status).to eq("200")
+            end
+          end
         end
 
 
@@ -186,6 +204,30 @@ shared_examples_for "stubbing requests" do |*adapter_info|
             expect(http_request(
               :post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
             body: "{\"foo\":\"a b c\"}").status).to eq("200")
+          end
+
+          it "should match if stubbed request body hash has NON string values matching NON string values in request body" do
+            WebMock.reset!
+            stub_request(:post, "www.example.com").with(body: {"foo" => 1})
+            expect(http_request(
+              :post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+            body: "{\"foo\":1}").status).to eq("200")
+          end
+
+          it "should not match if stubbed request body hash has string values matching NON string values in request body" do
+            WebMock.reset!
+            stub_request(:post, "www.example.com").with(body: {"foo" => '1'})
+            expect{http_request(
+              :post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+            body: "{\"foo\":1}") }.to raise_error(WebMock::NetConnectNotAllowedError)
+          end
+
+          it "should not match if stubbed request body hash has NON string values matching string values in request body" do
+            WebMock.reset!
+            stub_request(:post, "www.example.com").with(body: {"foo" => 1})
+            expect{http_request(
+              :post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+            body: "{\"foo\":\"1\"}") }.to raise_error(WebMock::NetConnectNotAllowedError)
           end
         end
 

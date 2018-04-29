@@ -243,7 +243,7 @@ module WebMock
 
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
-        matching_hashes?(body_as_hash(body, content_type), @pattern)
+        matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
       elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
         @pattern == body_as_hash(body, content_type)
       else
@@ -298,15 +298,16 @@ module WebMock
     #
     # @return [Boolean] true if the paramaters match the comparison
     #   hash, false if not.
-    def matching_hashes?(query_parameters, pattern)
+    def matching_body_hashes?(query_parameters, pattern, content_type)
       return false unless query_parameters.is_a?(Hash)
       return false unless query_parameters.keys.sort == pattern.keys.sort
       query_parameters.each do |key, actual|
         expected = pattern[key]
 
         if actual.is_a?(Hash) && expected.is_a?(Hash)
-          return false unless matching_hashes?(actual, expected)
+          return false unless matching_body_hashes?(actual, expected, content_type)
         else
+          expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
           return false unless expected === actual
         end
       end
@@ -321,6 +322,9 @@ module WebMock
       Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash, deep: true).sort]
     end
 
+    def url_encoded_body?(content_type)
+      content_type =~ %r{^application/x-www-form-urlencoded}
+    end
   end
 
   class HeadersPattern
