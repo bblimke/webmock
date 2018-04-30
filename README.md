@@ -1053,6 +1053,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Olia Kremmyda
 * Michał Matyas
 * Matt Brictson
+* Kenny Ortmann
+* redbar0n
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

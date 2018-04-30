@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.4.0
+
+ * Ruby 2.6 support. Prevent `Net/ReadTimeout` error in Ruby 2.6
+
+    Thanks to [Koichi ITO](https://github.com/koic)
+
+ * Handling query params, which represent nested hashes with keys starting with non word characters.
+
+    Thanks to [rapides](https://github.com/rapides) for reporting the issue.
+
+ * Patron adapter handles PATCH requests with body.
+
+    Thanks to [Mattia](https://github.com/iMacTia) for reporting the issue.
+
+ * Allowing requests with url encoded body to be matched by request stubs declared with hash body with non-string values.
+
+        stub_request(:post, "www.example.com").with(body: {"a" => 1, "b" => false})
+
+        RestClient.post('www.example.com', 'a=1&b=false', :content_type => 'application/x-www-form-urlencoded') # ===> Success
+
+    Thanks to [Kenny Ortmann](https://github.com/yairgo) for suggesting this feature.
+
+ *  When request headers contain 'Accept'=>'application/json' and no registered stub matches the request, WebMock prints a suggested stub code with to_return body set to '{}'.
+
+    Thanks to [redbar0n](https://github.com/redbar0n)
+
+* Improved suggested stub output when the request stub only contains headers declaration.
+
+    Thanks to [Olia Kremmyda](https://github.com/oliakremmyda)
+
+* Fixed Curb adapter to handle `reset` method.
+
+    Thanks tp [dinhhuydh](https://github.com/dinhhuydh) for reporting the issue.
+    Thanks to [Olia Kremmyda](https://github.com/oliakremmyda) for fixing it.
+
+
 ## 3.3.0
 
  *  Better formatting of outputted request stub snippets, displayed on failures due to unstubbed requests.
