@@ -1,8 +1,8 @@
 class WebMock::Util::ValuesStringifier
   def self.stringify_values(value)
     case value
-    when nil
-      value
+    when String, Numeric, TrueClass, FalseClass
+      value.to_s
     when Hash
       Hash[
         value.map do |k, v|
@@ -14,7 +14,7 @@ class WebMock::Util::ValuesStringifier
         stringify_values(v)
       end
     else
-      value.to_s
+      value
     end
   end
 end
