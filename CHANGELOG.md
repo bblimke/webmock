@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.1
+
+ * When comparing url encoded body to a body from request stub, which was declared as hash, only String, Numeric and boolean hash values are stringified before the comparison.
+
+    Thanks to [Lukas Pokorny](https://github.com/luk4s)
+
 ## 3.4.0
 
  * Ruby 2.6 support. Prevent `Net/ReadTimeout` error in Ruby 2.6
