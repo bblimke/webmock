@@ -172,6 +172,14 @@ shared_examples_for "stubbing requests" do |*adapter_info|
                 :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
               body: "foo=1").status).to eq("200")
             end
+
+            it "should match if stubbed request body is hash_included" do
+              WebMock.reset!
+              stub_request(:post, "www.example.com").with(body: {"foo" => hash_including("bar" => '1')})
+              expect(http_request(
+                       :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                       body: "foo[bar]=1").status).to eq("200")
+            end
           end
         end
 
