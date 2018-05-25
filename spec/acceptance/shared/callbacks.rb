@@ -102,21 +102,56 @@ shared_context "callbacks" do |*adapter_info|
           WebMock.after_request(except: [:other_lib])  do |_, response|
             @response = response
           end
-          http_request(:get, "http://httpstat.us/201")
         end
 
-        it "should pass real response to callback with status and message" do
-          expect(@response.status[0]).to eq(201)
-          expect(@response.status[1]).to eq("Created") unless adapter_info.include?(:no_status_message)
+        describe "for a 201 http status response" do
+          before do
+            http_request(:get, "http://httpstat.us/201")
+          end
+
+          it "should pass real response to callback with status and message" do
+            expect(@response.status[0]).to eq(201)
+            expect(@response.status[1]).to eq("Created") unless adapter_info.include?(:no_status_message)
+          end
+
+          it "should pass real response to callback with headers" do
+            expect(@response.headers["Content-Length"]).to eq("11")
+          end
+
+          it "should pass response to callback with body" do
+            expect(@response.body.size).to eq(11)
+          end
         end
 
-        it "should pass real response to callback with headers" do
-          expect(@response.headers["Content-Length"]).to eq("11")
+        describe "for a redirect" do
+          before do
+            http_request(:get, "http://httpstat.us/301") # redirects to / with status 200 OK
+          end
+
+          let(:headers) {@response.headers}
+          let(:date_header) {headers['Date']}
+          let(:server_header) {headers['Server']}
+          let(:status_code) {headers['status'][0]}
+          let(:status_text) {headers['status'][1]}
+
+          it "should pass the final response to callback with status and message" do
+            expect(status_code).to eq(200) #
+            expect(status_text).to eq("OK") unless adapter_info.include?(:no_status_message)
+          end
+
+          it 'should return one and only one Server http header string' do
+            expect(server_header).to be_a String
+          end
+
+          it 'should return one and only one Date http header string' do
+            expect(date_header).to be_a String
+          end
+
+          it 'should a date header string that is a valid date' do
+            expect(Time.parse(date_header)).to be_a Time
+          end
         end
 
-        it "should pass response to callback with body" do
-          expect(@response.body.size).to eq(11)
-        end
       end
     end
 

@@ -38,6 +38,8 @@ module CurbSpecHelper
     end
     curl.timeout  = 30
     curl.connect_timeout = 30
+    curl.follow_location = true
+
 
     if headers = options[:headers]
       headers.each {|k,v| curl.headers[k] = v }
