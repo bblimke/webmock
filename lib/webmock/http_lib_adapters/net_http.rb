@@ -274,7 +274,10 @@ module Net  #:nodoc: all
 
     if RUBY_VERSION >= '2.6.0'
       def rbuf_fill
+        current_thread_id = Thread.current.object_id
+
         trace = TracePoint.trace(:line) do |tp|
+          next unless Thread.current.object_id == current_thread_id
           if tp.binding.local_variable_defined?(:tmp)
             tp.binding.local_variable_set(:tmp, nil)
           end
