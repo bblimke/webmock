@@ -33,7 +33,7 @@ module WebMock
         NORMALIZED_URIS[uri].dup
       end
 
-      def self.variations_of_uri_as_strings(uri_object, with_scheme: false)
+      def self.variations_of_uri_as_strings(uri_object, only_with_scheme: false)
         normalized_uri = normalize_uri(uri_object.dup).freeze
         uris = [ normalized_uri ]
 
@@ -47,7 +47,7 @@ module WebMock
           uris = uris_with_inferred_port_and_without(uris)
         end
 
-        if normalized_uri.scheme == "http" && !with_scheme
+        if normalized_uri.scheme == "http" && !only_with_scheme
           uris = uris_with_scheme_and_without(uris)
         end
 
