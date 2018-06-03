@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.4.2
+
+  * Fixed `rbuf_fill` in Net::HTTP adapter to be thread-safe
+
+    Thanks to [Arkadiy Tetelman](https://github.com/arkadiyt)
+
+  * Fix invalid scheme error with Addressable::Template
+
+    Thanks to [Kazato Sugimoto](https://github.com/uiureo)
+
 ## 3.4.1
 
  * When comparing url encoded body to a body from request stub, which was declared as hash, only String, Numeric and boolean hash values are stringified before the comparison.
