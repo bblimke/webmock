@@ -153,4 +153,23 @@ describe WebMock::API do
       end
     end
   end
+
+  describe '#reset_executed_requests!' do
+    subject {  WebMock::API.reset_executed_requests! }
+
+    let(:request_signature) { WebMock::RequestSignature.new(:get, "www.example.com") }
+    let(:request_pattern)   { WebMock::RequestPattern.new(:get, "www.example.com") }
+
+    before do
+      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+    end
+
+    it 'resets request registry counter' do
+      expect{
+        subject
+      }.to change{
+        WebMock::RequestRegistry.instance.times_executed(request_pattern)
+      }.from(1).to(0)
+    end
+  end
 end

@@ -66,6 +66,10 @@ module WebMock
       WebMock::StubRegistry.instance.remove_request_stub(stub)
     end
 
+    def reset_executed_requests!
+      WebMock::RequestRegistry.instance.reset!
+    end
+
     private
 
     def convert_uri_method_and_options_to_request_and_options(method, uri, options, &block)

@@ -460,6 +460,37 @@ stub_get = stub_request(:get, "www.example.com")
 remove_request_stub(stub_get)
 ```
 
+### Reset global request counter
+
+```ruby
+stub_get = stub_request(:get, "www.example.com")
+Net::HTTP.get('www.example.com', '/')
+
+WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)  # => 1
+reset_executed_requests!
+WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)  # => 0
+```
+
+but also:
+
+```ruby
+stub_get  = stub_request(:get, "www.example.com")
+stub_get2 = stub_request(:get, "www.example2.com")
+
+Net::HTTP.get('www.example.com', '/')
+Net::HTTP.get('www.example.com', '/')
+
+Net::HTTP.get('www.example2.com', '/')
+
+WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)   # => 2
+WebMock::RequestRegistry.instance.times_executed(stub_get2.request_pattern)  # => 1
+
+reset_executed_requests!
+
+WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)   # => 0
+WebMock::RequestRegistry.instance.times_executed(stub_get2.request_pattern)  # => 0
+```
+
 ### Real requests to network can be allowed or disabled
 
 ```ruby
