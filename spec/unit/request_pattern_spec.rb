@@ -464,7 +464,7 @@ describe WebMock::RequestPattern do
 
           context "custom json content type" do
             before do
-              WebMock.custom_content_type_mapping("application/vnd.api+json" => :json)
+              WebMock.custom_content_type_mapping = { "application/vnd.api+json" => :json }
             end
             let(:content_type) { 'application/vnd.api+json' }
             it_behaves_like "a json body"

@@ -83,7 +83,7 @@ module WebMock
     end
   end
 
-  def self.custom_content_type_mapping(config)
+  def self.custom_content_type_mapping=(config)
     Config.instance.custom_content_type_mapping = config
   end
 

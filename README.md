@@ -158,10 +158,10 @@ RestClient.post('www.example.com', '<data a="1" b="five" />',
   content_type: 'application/xml')    # ===> Success
 ```
 
-With a custom content type mapping:
+With an additional custom content type mapping:
 
 ```ruby
-WebMock.custom_content_type_mapping("application/vnd.api+json" => :json)
+WebMock.custom_content_type_mapping = { "application/vnd.api+json" => :json }
 
 stub_request(:post, "www.example.com").
   with(body: {data: {a: '1', b: 'five'}})
