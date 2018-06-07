@@ -1,5 +1,9 @@
 # Changelog
 
+###
+
+* Add ability to config custom content type mapping for request body matching
+
 ## 3.4.2
 
   * Fixed `rbuf_fill` in Net::HTTP adapter to be thread-safe

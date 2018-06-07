@@ -83,6 +83,10 @@ module WebMock
     end
   end
 
+  def self.custom_content_type_mapping(config)
+    Config.instance.custom_content_type_mapping = config
+  end
+
   def self.show_body_diff!
     Config.instance.show_body_diff = true
   end

@@ -14,5 +14,6 @@ module WebMock
     attr_accessor :show_stubbing_instructions
     attr_accessor :query_values_notation
     attr_accessor :show_body_diff
+    attr_accessor :custom_content_type_mapping
   end
 end

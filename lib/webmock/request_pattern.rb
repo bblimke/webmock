@@ -268,7 +268,7 @@ module WebMock
 
     private
     def body_as_hash(body, content_type)
-      case BODY_FORMATS[content_type]
+      case body_format(content_type)
       when :json then
         WebMock::Util::JSON.parse(body)
       when :xml then
@@ -276,6 +276,10 @@ module WebMock
       else
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
+    end
+
+    def body_format(content_type)
+      BODY_FORMATS[content_type] || (Config.instance.custom_content_type_mapping || {})[content_type]
     end
 
     def assert_non_multipart_body(content_type)
