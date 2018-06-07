@@ -705,6 +705,28 @@ Net::HTTP.get('www.example.com', '/')    # ===> Failure
 assert_not_requested :get, "www.example.com"    # ===> Success
 ```
 
+## Clearing request counters
+
+If you want to reset **only** the counters of the executed requests use `WebMock.reset_executed_requests!`
+
+```ruby
+stub  = stub_request(:get, "www.example.com")
+stub2 = stub_request(:get, "www.example2.com")
+
+Net::HTTP.get('www.example.com', '/')
+Net::HTTP.get('www.example.com', '/')
+
+Net::HTTP.get('www.example2.com', '/')
+
+expect(stub).to have_been_requested.times(2)
+expect(stub2).to have_been_requested.times(1)
+
+WebMock.reset_executed_requests!
+
+expect(stub).not_to have_been_requested
+expect(stub2).not_to have_been_requested
+```
+
 ## Disabling and enabling WebMock or only some http client adapters
 
 ```ruby

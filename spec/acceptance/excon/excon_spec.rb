@@ -20,7 +20,8 @@ describe "Excon" do
     it "should support excon response_block for real requests", net_connect: true do
       a = []
       WebMock.allow_net_connect!
-      r = Excon.new('http://httpstat.us/200').get(response_block: lambda {|e, remaining, total| a << e}, chunk_size: 1)
+      r = Excon.new('http://httpstat.us/200', headers: { "Accept" => "*" }).
+        get(response_block: lambda {|e, remaining, total| a << e}, chunk_size: 1)
       expect(a).to eq(["2", "0", "0", " ", "O", "K"])
       expect(r.body).to eq("")
     end
@@ -40,7 +41,8 @@ describe "Excon" do
       WebMock.after_request { |_, res|
         response = res
       }
-      r = Excon.new('http://httpstat.us/200').get(response_block: lambda {|e, remaining, total| a << e}, chunk_size: 1)
+      r = Excon.new('http://httpstat.us/200', headers: { "Accept" => "*" }).
+        get(response_block: lambda {|e, remaining, total| a << e}, chunk_size: 1)
       expect(response.body).to eq("200 OK")
       expect(a).to eq(["2", "0", "0", " ", "O", "K"])
       expect(r.body).to eq("")
