@@ -147,4 +147,11 @@ describe WebMock::Util::QueryMapper do
     expect(subject.values_to_query values).to eq query
     expect(subject.query_to_values query).to eq values
   end
+
+  it 'converts an empty array to ?' do
+    query = "one%5B%5D"
+    values = {"one" => []}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
 end
