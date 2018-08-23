@@ -172,6 +172,13 @@ shared_context "request expectations" do |*adapter_info|
             expect(a_request(:get, "www.example.com").with(query: hash_excluding(a: ['b', 'c']))).to have_been_made
           }.not_to raise_error
         end
+
+        it 'should satisfy expectation if the request was executed with an empty array in the query params' do
+          expect {
+            http_request(:get, "http://www.example.com/?a[]")
+            expect(a_request(:get, "www.example.com").with(query: hash_including(a: []))).to have_been_made
+          }.not_to raise_error
+        end
       end
 
       context "when using flat array notation" do

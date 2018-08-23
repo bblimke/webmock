@@ -68,6 +68,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, 'www.example.com').with(query: hash_excluding(a: ['b', 'c'])).to_return(body: 'abc')
         expect(http_request(:get, 'http://www.example.com/?a[]=c&a[]=d&b=1').body).to eq('abc')
       end
+
+      it "should return stubbed response when stub expects an empty array" do
+        stub_request(:get, 'www.example.com').with(query: { a: [] }).to_return(body: 'abc')
+        expect(http_request(:get, 'http://www.example.com/?a[]').body).to eq('abc')
+      end
     end
 
     describe "based on method" do
