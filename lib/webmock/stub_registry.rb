@@ -25,7 +25,7 @@ module WebMock
       responses = {}
 
       stub = ::WebMock::RequestStub.new(:any, /.*/).with { |request|
-        responses[request.object_id] = block.call(request)
+        responses[request.object_id] = yield(request)
       }.to_return(lambda { |request| responses.delete(request.object_id) })
 
       global_stubs.push stub
