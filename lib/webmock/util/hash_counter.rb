@@ -30,7 +30,7 @@ module WebMock
       end
 
       def each(&block)
-        @order.to_a.sort {|a, b| a[1] <=> b[1]}.each do |a|
+        @order.to_a.sort_by { |a| a[1] }.each do |a|
           block.call(a[0], hash[a[0]])
         end
       end
