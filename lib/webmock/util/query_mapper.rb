@@ -125,7 +125,7 @@ module WebMock::Util
         subkeys = key.split(/(?=\[[^\[\]]+)/)
         subkeys[0..-2].each do |subkey|
           node = subkey =~ /\[\]\z/ ? [] : {}
-          subkey = subkey.gsub(/[\[\]]/, '')
+          subkey = subkey.delete('[]')
           if current_node.is_a? Array
             container = current_node.find { |n| n.is_a?(Hash) && n.has_key?(subkey) }
             if container
@@ -141,7 +141,7 @@ module WebMock::Util
         end
         last_key = subkeys.last
         array_value = !!(last_key =~ /\[\]$/)
-        last_key = last_key.gsub(/[\[\]]/, '')
+        last_key = last_key.delete('[]')
         if current_node.is_a? Array
           last_container = current_node.select { |n| n.is_a?(Hash) }.last
           if last_container && !last_container.has_key?(last_key)
