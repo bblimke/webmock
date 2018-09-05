@@ -81,7 +81,7 @@ module WebMock::Util
           value = if value.nil?
                     nil
                   else
-                    ::Addressable::URI.unencode_component(value.gsub(/\+/, ' '))
+                    ::Addressable::URI.unencode_component(value.tr('+', ' '))
                   end
           key = Addressable::URI.unencode_component(key)
           key = key.dup.force_encoding(Encoding::ASCII_8BIT) if key.respond_to?(:force_encoding)
