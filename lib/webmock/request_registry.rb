@@ -25,7 +25,12 @@ module WebMock
       else
         text = "".dup
         self.requested_signatures.each do |request_signature, times_executed|
-          text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
+          begin
+            text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
+          rescue Encoding::CompatibilityError => error
+            request_signature.body = "ERROR PARSING BODY: " + error.to_s
+            text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
+          end
         end
         text
       end
