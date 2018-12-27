@@ -256,13 +256,8 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, read_timeout: 60, write_timeout: 60, continue_timeout: nil, debug_output: nil)
-      @read_timeout = read_timeout
-      @write_timeout = write_timeout
-      @rbuf = ''.dup
-      @debug_output = debug_output
-
-      @io = case io
+    def initialize(io, **)
+      io = case io
       when Socket, OpenSSL::SSL::SSLSocket, IO
         io
       when StringIO
@@ -270,7 +265,9 @@ module Net  #:nodoc: all
       when String
         PatchedStringIO.new(io)
       end
-      raise "Unable to create local socket" unless @io
+      raise "Unable to create local socket" unless io
+
+      super
     end
 
     if RUBY_VERSION >= '2.6.0'
