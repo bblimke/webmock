@@ -1,6 +1,10 @@
 WebMock
-=======
-[![Gem Version](https://badge.fury.io/rb/webmock.svg)](http://badge.fury.io/rb/webmock) [![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock) [![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock) [![Mentioned in Awesome Ruby](https://awesome.re/mentioned-badge.svg)](https://github.com/markets/awesome-ruby) [![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
+[![Gem Version](https://badge.fury.io/rb/webmock.svg)](http://badge.fury.io/rb/webmock)
+[![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock)
+[![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock)
+[![Mentioned in Awesome Ruby](https://awesome.re/mentioned-badge.svg)](https://github.com/markets/awesome-ruby)
+[![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
+[![SemVer](https://api.dependabot.com/badges/compatibility_score?dependency-name=webmock&package-manager=bundler&version-scheme=semver)](https://dependabot.com/compatibility-score.html?dependency-name=webmock&package-manager=bundler&version-scheme=semver)
 
 Library for stubbing and setting expectations on HTTP requests in Ruby.
 
