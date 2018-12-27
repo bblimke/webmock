@@ -285,7 +285,7 @@ module Net  #:nodoc: all
         end
 
         super
-
+      ensure
         trace.disable
       end
     end
