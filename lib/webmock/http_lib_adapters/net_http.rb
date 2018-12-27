@@ -256,7 +256,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, **)
+    def initialize(io, *args)
       io = case io
       when Socket, OpenSSL::SSL::SSLSocket, IO
         io
