@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.5.1
+
+  * Disabling TracePoint defined in Net::BufferedIO in case of exception being raised.
+
+    Thanks to [Koichi Sasada](https://github.com/ko1)
+
+
 ## 3.5.0
 
   * Ruby 2.6.0 support
