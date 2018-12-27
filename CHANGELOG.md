@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.5.0
+
+  * Ruby 2.6.0 support
+
+    Thanks to [Arkadiy Tetelman](https://github.com/arkadiyt)
+
+  * Added `WebMock.reset_executed_requests!` method.
+
+        stub_get = stub_request(:get, "www.example.com")
+        Net::HTTP.get('www.example.com', '/')
+        WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)  # => 1
+        reset_executed_requests!
+        WebMock::RequestRegistry.instance.times_executed(stub_get.request_pattern)  # => 0
+
+    Thanks to [Olia Kremmyda](https://github.com/oliakremmyda)
+
+  * Performance improvements
+
+    Thanks to [Pavel Rosický](https://github.com/ahorek)
+
 ## 3.4.2
 
   * Fixed `rbuf_fill` in Net::HTTP adapter to be thread-safe
