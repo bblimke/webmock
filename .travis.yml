@@ -16,6 +16,3 @@ matrix:
     - rvm: jruby-head
     - rvm: ruby-head
     - rvm: rbx-2
-# Send builds to container-based infrastructure
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
-sudo: false
