@@ -271,6 +271,7 @@ if defined?(Curl)
       def perform
         @webmock_method ||= :get
         curb_or_webmock { super }
+        reset_webmock_method
       end
 
       def put_data= data
@@ -331,6 +332,10 @@ if defined?(Curl)
             super
           end
         METHOD
+      end
+
+      def reset_webmock_method
+        @webmock_method = :get
       end
 
       def reset
