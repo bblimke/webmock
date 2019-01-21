@@ -272,6 +272,7 @@ if defined?(Curl)
       def perform
         @webmock_method ||= :get
         curb_or_webmock { super }
+      ensure
         reset_webmock_method
       end
 
