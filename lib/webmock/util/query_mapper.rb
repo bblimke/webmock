@@ -161,7 +161,7 @@ module WebMock::Util
         else
           if array_value
             current_node[last_key] ||= []
-            current_node[last_key] << value
+            current_node[last_key] << value unless value.nil?
           else
             current_node[last_key] = value
           end
@@ -186,7 +186,9 @@ module WebMock::Util
           new_query_values = new_query_values.to_hash
           new_query_values = new_query_values.inject([]) do |object, (key, value)|
             key = key.to_s if key.is_a?(::Symbol) || key.nil?
-            if value.is_a?(Array)
+            if value.is_a?(Array) && value.empty?
+              object << [key.to_s + '[]']
+            elsif value.is_a?(Array)
               value.each { |v| object << [key.to_s + '[]', v] }
             elsif value.is_a?(Hash)
               value.each { |k, v| object << ["#{key.to_s}[#{k}]", v]}
