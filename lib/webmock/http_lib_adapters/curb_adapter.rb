@@ -54,8 +54,6 @@ if defined?(Curl)
 
   module Curl
     class WebMockCurlEasy < Curl::Easy
-      attr_reader :webmock_method
-
       def curb_or_webmock
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)

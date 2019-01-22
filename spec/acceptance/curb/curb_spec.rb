@@ -417,8 +417,9 @@ unless RUBY_PLATFORM =~ /java/
         c.url = "http://www.example.com"
         c.post_body = "01234"
         c.http_post
-        expect(c.response_code).to eq(200)
-        expect(c.webmock_method).to eq(:get)
+        expect {
+          c.perform
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com))
       end
 
       it "should work with blank arguments for post" do
