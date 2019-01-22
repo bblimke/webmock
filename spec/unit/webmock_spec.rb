@@ -14,6 +14,6 @@ describe "WebMock version" do
   end
 
   it "should alias disallow_net_connect! to disable_net_connect!" do
-    expect(WebMock.method(:disallow_net_connect!)).to eq(WebMock.method(:disallow_net_connect!))
+    expect(WebMock.method(:disallow_net_connect!)).to eq(WebMock.method(:disable_net_connect!))
   end
 end
