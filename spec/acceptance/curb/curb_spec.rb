@@ -411,6 +411,17 @@ unless RUBY_PLATFORM =~ /java/
       it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
 
+      it "should reset @webmock_method after each call" do
+        stub_request(:post, "www.example.com").with(body: "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.post_body = "01234"
+        c.http_post
+        expect {
+          c.perform
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com))
+      end
+
       it "should work with blank arguments for post" do
         stub_request(:post, "www.example.com").with(body: "01234")
         c = Curl::Easy.new
