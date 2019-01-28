@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'em-http-request', '>= 1.0.2'
   s.add_development_dependency 'em-synchrony',    '>= 1.0.0'
   s.add_development_dependency 'excon',           '>= 0.27.5'
+  s.add_development_dependency 'net-http2',       '>= 0.18.0'
   s.add_development_dependency 'minitest',        '>= 5.0.0'
   s.add_development_dependency 'test-unit',       '>= 3.0.0'
   s.add_development_dependency 'rdoc',            '>  3.5.0'
