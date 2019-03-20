@@ -50,19 +50,22 @@ if defined?(Manticore)
 
             if webmock_response = registered_response_for(request_signature)
               webmock_response.raise_error_if_any
-              manticore_response = generate_manticore_response(webmock_response).call
-              real_request = false
+              manticore_response = generate_manticore_response(webmock_response)
+              manticore_response.on_complete do |_completed_response|
+                WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: false}, request_signature, webmock_response)
+              end
 
             elsif real_request_allowed?(request_signature.uri)
-              manticore_response = Manticore::Response.new(self, request, context, &block).call
-              webmock_response = generate_webmock_response(manticore_response)
-              real_request = true
+              manticore_response = Manticore::Response.new(self, request, context, &block)
+              manticore_response.on_complete do |completed_response|
+                webmock_response = generate_webmock_response(completed_response)
+                WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: true}, request_signature, webmock_response)
+              end
 
             else
               raise WebMock::NetConnectNotAllowedError.new(request_signature)
             end
 
-            WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: real_request}, request_signature, webmock_response)
             manticore_response
           end
 
