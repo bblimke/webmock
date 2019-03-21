@@ -51,7 +51,7 @@ if defined?(Manticore)
             if webmock_response = registered_response_for(request_signature)
               webmock_response.raise_error_if_any
               manticore_response = generate_manticore_response(webmock_response)
-              manticore_response.on_complete do |_completed_response|
+              manticore_response.on_success do
                 WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: false}, request_signature, webmock_response)
               end
 
