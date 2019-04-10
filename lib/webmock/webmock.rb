@@ -59,6 +59,8 @@ module WebMock
   end
 
   def self.net_connect_allowed?(uri = nil)
+    return Config.instance.allow_net_connect if uri.nil?
+
     if uri.is_a?(String)
       uri = WebMock::Util::URI.normalize_uri(uri)
     end
