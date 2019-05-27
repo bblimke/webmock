@@ -24,7 +24,7 @@ module WebMock
     end
 
     def with(options = {}, &block)
-      raise ArgumentError.new('#with method invoked with no arguments. Either options hash or block must be specified.') if options.empty? && !block_given?
+      raise ArgumentError.new('#with method invoked with no arguments. Either options hash or block must be specified. Created a block with do..end? Try creating it with curly braces {} instead.') if options.empty? && !block_given?
       assign_options(options)
       @with_block = block
       self
