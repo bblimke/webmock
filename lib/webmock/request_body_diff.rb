@@ -12,7 +12,7 @@ module WebMock
     def body_diff
       return {} unless request_signature_diffable? && request_stub_diffable?
 
-      HashDiff.diff(request_signature_body_hash, request_stub_body_hash)
+      Hashdiff.diff(request_signature_body_hash, request_stub_body_hash)
     end
 
     attr_reader :request_signature, :request_stub
