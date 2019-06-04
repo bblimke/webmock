@@ -1,5 +1,28 @@
 # Changelog
 
+## 3.6.0
+
+  * Compatibility with the latest version of hashdiff gem, with constant changed from HashDiff to Hashdiff
+
+    Thanks to [Jeff Felchner](https://github.com/jfelchner)
+
+  * Added a hint to the error message raised when `with` method is called without args or a block.
+
+    Thanks to [Adam Sokolnicki](https://github.com/asok)
+
+  * Resetting configured HTTP method in Curb adapter after each request
+
+    Thanks to [tiendo1011](https://github.com/tiendo1011)
+
+  * Added `WebMock.enable_net_connect!` as an alias for `WebMock.allow_net_connect!`
+    and `WebMock.disallow_net_connect!` as an alias for `WebMock.disable_net_connect!`
+
+    Thanks to [SoonKhen OwYong](https://github.com/owyongsk)
+
+  * Fixed handling of empty arrays as query params when using Faraday
+
+    Thanks to [Ryan Moret](https://github.com/rcmoret)
+
 ## 3.5.1
 
   * Disabling TracePoint defined in Net::BufferedIO in case of exception being raised.

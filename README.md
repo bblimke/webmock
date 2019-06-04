@@ -1091,6 +1091,11 @@ People who submitted patches and new features or suggested improvements. Many th
 * Geremia Taglialatela
 * Koichi Sasada
 * Yusuke Endoh
+* Grey Baker
+* SoonKhen OwYong
+* Pavel Valena
+* Adam Sokolnicki
+* Jeff Felchner
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
