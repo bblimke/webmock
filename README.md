@@ -878,6 +878,10 @@ end
 
 Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
 
+## Issue triage [![Open Source Helpers](https://www.codetriage.com/bblimke/webmock/badges/users.svg)](https://www.codetriage.com/bblimke/webmock)
+
+You can contribute by triaging issues which may include reproducing bug reports or asking for vital information, such as version numbers or reproduction instructions. If you would like to start triaging issues, one easy way to get started is to [subscribe to webmock on CodeTriage](https://www.codetriage.com/bblimke/webmock).
+
 ## Suggestions
 
 If you have any suggestions on how to improve WebMock please send an email to the mailing list [groups.google.com/group/webmock-users](http://groups.google.com/group/webmock-users)
