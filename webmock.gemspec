@@ -13,8 +13,6 @@ Gem::Specification.new do |s|
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.license     = "MIT"
 
-  s.rubyforge_project = 'webmock'
-
   s.required_ruby_version = '>= 2.0'
 
   s.add_dependency 'addressable', '>= 2.3.6'
