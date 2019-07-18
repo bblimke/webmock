@@ -183,8 +183,7 @@ module WebMock
     def matches_with_variations?(uri)
       normalized_template = Addressable::Template.new(WebMock::Util::URI.heuristic_parse(@pattern.pattern))
 
-      WebMock::Util::URI.variations_of_uri_as_strings(uri, only_with_scheme: true)
-        .any? { |u| normalized_template.match(u) }
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| normalized_template.match(u) }
     end
   end
 

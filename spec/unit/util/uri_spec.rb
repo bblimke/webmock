@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 URIS_WITHOUT_PATH_OR_PARAMS =
 [
   "www.example.com",
@@ -65,7 +64,6 @@ URIS_WITH_DIFFERENT_PORT =
   "http://www.example.com:88/"
 ].sort
 
-
 URIS_FOR_HTTPS =
 [
   "https://www.example.com",
@@ -74,6 +72,25 @@ URIS_FOR_HTTPS =
   "https://www.example.com:443/"
 ].sort
 
+URIS_FOR_LOCALHOST =
+[
+  "localhost",
+  "localhost/",
+  "localhost:80",
+  "localhost:80/",
+  "http://localhost",
+  "http://localhost/",
+  "http://localhost:80",
+  "http://localhost:80/"
+].sort
+
+URIS_WITH_SCHEME =
+[
+  "http://www.example.com",
+  "http://www.example.com/",
+  "http://www.example.com:80",
+  "http://www.example.com:80/"
+].sort
 
 describe WebMock::Util::URI do
 
@@ -112,6 +129,19 @@ describe WebMock::Util::URI do
     it "should find all variations of the same uri for all variations of https uris" do
       URIS_FOR_HTTPS.each do |uri|
         expect(WebMock::Util::URI.variations_of_uri_as_strings(uri).sort).to eq(URIS_FOR_HTTPS)
+      end
+    end
+
+    it "should find all variations of the same uri for all variations of host names uris without a period" do
+      URIS_FOR_LOCALHOST.each do |uri|
+        expect(WebMock::Util::URI.variations_of_uri_as_strings(uri).sort).to eq(URIS_FOR_LOCALHOST)
+      end
+    end
+
+    it "should find all variations of the same uri with scheme for all variations when only_with_scheme is true" do
+      URIS_WITHOUT_PATH_OR_PARAMS.each do |uri|
+        variations_of_uri_with_scheme = WebMock::Util::URI.variations_of_uri_as_strings(uri, only_with_scheme: true)
+        expect(variations_of_uri_with_scheme.sort).to eq(URIS_WITH_SCHEME)
       end
     end
 
