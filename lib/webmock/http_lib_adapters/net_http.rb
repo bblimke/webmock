@@ -251,6 +251,13 @@ class StubSocket #:nodoc:
   def readuntil(*args)
   end
 
+  def io
+    @io ||= StubIO.new
+  end
+
+  class StubIO
+    def setsockopt(*args); end
+  end
 end
 
 module Net  #:nodoc: all
