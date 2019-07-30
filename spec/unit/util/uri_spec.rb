@@ -92,6 +92,30 @@ URIS_WITH_SCHEME =
   "http://www.example.com:80/"
 ].sort
 
+URIS_WITH_COLON_IN_PATH =
+[
+  [
+    "https://example.com/a/b:80",
+    "https://example.com:443/a/b:80",
+  ].sort,
+  [
+    "https://example.com:443/a/b:443",
+    "https://example.com/a/b:443",
+  ].sort,
+  [
+    "http://example.com/a/b:443",
+    "example.com/a/b:443",
+    "http://example.com:80/a/b:443",
+    "example.com:80/a/b:443",
+  ].sort,
+  [
+    "http://example.com/a/b:80",
+    "example.com/a/b:80",
+    "http://example.com:80/a/b:80",
+    "example.com:80/a/b:80",
+  ].sort
+]
+
 describe WebMock::Util::URI do
 
   describe "reporting variations of uri" do
@@ -142,6 +166,14 @@ describe WebMock::Util::URI do
       URIS_WITHOUT_PATH_OR_PARAMS.each do |uri|
         variations_of_uri_with_scheme = WebMock::Util::URI.variations_of_uri_as_strings(uri, only_with_scheme: true)
         expect(variations_of_uri_with_scheme.sort).to eq(URIS_WITH_SCHEME)
+      end
+    end
+
+    it "should not replace :80 or :443 in path" do
+      URIS_WITH_COLON_IN_PATH.each do |uris|
+        uris.each do |uri|
+          expect(WebMock::Util::URI.variations_of_uri_as_strings(uri).sort).to eq(uris)
+        end
       end
     end
 

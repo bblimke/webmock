@@ -41,11 +41,11 @@ module WebMock
           uris = uris_with_trailing_slash_and_without(uris)
         end
 
-        uris = uris_encoded_and_unencoded(uris)
-
         if normalized_uri.port == Addressable::URI.port_mapping[normalized_uri.scheme]
           uris = uris_with_inferred_port_and_without(uris)
         end
+
+        uris = uris_encoded_and_unencoded(uris)
 
         if normalized_uri.scheme == "http" && !only_with_scheme
           uris = uris_with_scheme_and_without(uris)
@@ -80,8 +80,7 @@ module WebMock
 
       def self.uris_with_inferred_port_and_without(uris)
         uris.map { |uri|
-          uri = uri.dup.force_encoding(Encoding::ASCII_8BIT) if uri.respond_to?(:force_encoding)
-          [ uri, uri.gsub(%r{(:80)|(:443)}, "").freeze ]
+          [ uri, uri.omit(:port)]
         }.flatten
       end
 
