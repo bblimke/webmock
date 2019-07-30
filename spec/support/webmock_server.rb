@@ -36,6 +36,7 @@ class WebMockServer
         end
       end
       server.start do |socket|
+        socket.read(1)
         socket.puts <<-EOT.gsub(/^\s+\|/, '')
           |HTTP/1.1 200 OK\r
           |Date: Fri, 31 Dec 1999 23:59:59 GMT\r
