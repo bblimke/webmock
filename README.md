@@ -1104,6 +1104,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Claudio Poli
 * Csaba Apagyi
 * Frederick Cheung
+* Fábio D. Batista
+
 
 
 

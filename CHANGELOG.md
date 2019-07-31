@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.6.2
+
+  * Fixed Patron adapter to handle HTTP/2 status line.
+
+    Thanks to [Fábio D. Batista](https://github.com/fabiob)
+
 ## 3.6.1
 
   * Fixed issue with matching Addressable::Template without a period in the domain
