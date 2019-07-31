@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.6.1
+
+  * Fixed issue with matching Addressable::Template without a period in the domain
+
+    Thanks to [Eike Send](https://github.com/eikes)
+
+  * Support for `write_timeout` in Net::HTTP
+
+    Thanks to [Claudio Poli](https://github.com/masterkain)
+
+  * Fixed issue with handling urls with ":80" or ":443" in the path.
+
+    Thanks to [Csaba Apagyi](https://github.com/thisismydesign) for reporting and to [Frederick Cheung](https://github.com/fcheung) for fixing the issue.
+
 ## 3.6.0
 
   * Compatibility with the latest version of hashdiff gem, with constant changed from HashDiff to Hashdiff
