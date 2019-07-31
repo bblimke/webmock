@@ -229,7 +229,8 @@ class PatchedStringIO < StringIO #:nodoc:
   alias_method :orig_read_nonblock, :read_nonblock
 
   def read_nonblock(size, *args)
-    orig_read_nonblock(size)
+    args.reject! {|arg| !arg.is_a?(Hash)}
+    orig_read_nonblock(size, *args)
   end
 
 end
