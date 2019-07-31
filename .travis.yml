@@ -11,6 +11,7 @@ rvm:
   - jruby-9.1.17.0
   - jruby-9.2.7.0
   - jruby-head
+jdk: openjdk8
 matrix:
   allow_failures:
     - rvm: jruby-head
