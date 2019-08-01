@@ -50,7 +50,7 @@ module EMHttpRequestSpecHelper
   end
 
   def client_timeout_exception_class
-    "WebMock timeout error"
+    'Errno::ETIMEDOUT'
   end
 
   def connection_refused_exception_class
