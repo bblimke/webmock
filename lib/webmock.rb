@@ -54,5 +54,6 @@ require_relative 'webmock/http_lib_adapters/em_http_request_adapter'
 require_relative 'webmock/http_lib_adapters/typhoeus_hydra_adapter'
 require_relative 'webmock/http_lib_adapters/excon_adapter'
 require_relative 'webmock/http_lib_adapters/manticore_adapter'
+require_relative 'webmock/http_lib_adapters/async_http_client_adapter'
 
 require_relative 'webmock/webmock'

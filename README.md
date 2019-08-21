@@ -33,6 +33,7 @@ Supported HTTP libraries
 * Excon
 * HTTP Gem
 * Manticore
+* Async::HTTP::Client
 
 Supported Ruby Interpreters
 ---------------------------
