@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.7.0
+
+  * Support for Async::HTTP::Client
+
+    Thanks to [Andriy Yanko](https://github.com/ayanko)
+
 ## 3.6.2
 
   * Fixed Patron adapter to handle HTTP/2 status line.
