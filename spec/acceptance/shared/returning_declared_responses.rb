@@ -64,7 +64,10 @@ shared_context "declared responses" do |*adapter_info|
     it "should return response with declared headers" do
       stub_request(:get, "www.example.com").to_return(headers: SAMPLE_HEADERS)
       response = http_request(:get, "http://www.example.com/")
-      expect(response.headers["Content-Length"]).to eq("8888")
+      expect(response.headers["Accept"]).to eq("application/json")
+      unless adapter_info.include?(:no_content_length_header)
+        expect(response.headers["Content-Length"]).to eq("8888")
+      end
     end
 
     it "should return response with declared headers even if there are multiple headers with the same key" do
@@ -171,13 +174,22 @@ shared_context "declared responses" do |*adapter_info|
       end
 
       it "should return recorded headers" do
-        expect(@response.headers).to eq({
-          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-          "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"419",
-          "Connection"=>"Keep-Alive",
-          "Accept"=>"image/jpeg, image/png"
-        })
+        if adapter_info.include?(:no_content_length_header)
+          expect(@response.headers).to eq({
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Connection"=>"Keep-Alive",
+            "Accept"=>"image/jpeg, image/png"
+          })
+        else
+          expect(@response.headers).to eq({
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"419",
+            "Connection"=>"Keep-Alive",
+            "Accept"=>"image/jpeg, image/png"
+          })
+        end
       end
 
       it "should return recorded body" do
@@ -205,13 +217,22 @@ shared_context "declared responses" do |*adapter_info|
       end
 
       it "should return recorded headers" do
-        expect(@response.headers).to eq({
-          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-          "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"419",
-          "Connection"=>"Keep-Alive",
-          "Accept"=>"image/jpeg, image/png"
-        })
+        if adapter_info.include?(:no_content_length_header)
+          expect(@response.headers).to eq({
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Connection"=>"Keep-Alive",
+            "Accept"=>"image/jpeg, image/png"
+          })
+        else
+          expect(@response.headers).to eq({
+            "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+            "Content-Type"=>"text/html; charset=UTF-8",
+            "Content-Length"=>"419",
+            "Connection"=>"Keep-Alive",
+            "Accept"=>"image/jpeg, image/png"
+          })
+        end
       end
 
       it "should return recorded body" do
