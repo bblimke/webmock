@@ -1107,6 +1107,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Frederick Cheung
 * Fábio D. Batista
 * Andriy Yanko
+* y-yagi
 
 
 For a full list of contributors you can visit the

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.7.1
+
+  * Fixed Async::HTTP::Client adapter code to not cause Ruby warning
+
+    Thanks to [y-yagi](https://github.com/y-yagi)
+
 ## 3.7.0
 
   * Support for Async::HTTP::Client
