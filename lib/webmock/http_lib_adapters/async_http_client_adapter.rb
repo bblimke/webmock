@@ -195,8 +195,8 @@ if defined?(Async::HTTP)
           end
 
           def build_response(webmock_response)
-            headers = (webmock_response.headers || {}).each_with_object([]) do |(k, v), o|
-              Array(v).each do |v|
+            headers = (webmock_response.headers || {}).each_with_object([]) do |(k, value), o|
+              Array(value).each do |v|
                 o.push [k, v]
               end
             end
