@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.7.2
+
+  * Fixed handling of non UTF-8 encoded urls
+
+    Thanks to [Rafael França](https://github.com/rafaelfranca)
+
+  * Fixed "shadowing outer local variable" warning
+
+    Thanks to [y-yagi](https://github.com/y-yagi)
+
 ## 3.7.1
 
   * Fixed Async::HTTP::Client adapter code to not cause Ruby warning

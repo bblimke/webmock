@@ -1108,6 +1108,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Fábio D. Batista
 * Andriy Yanko
 * y-yagi
+* Rafael França
 
 
 For a full list of contributors you can visit the
