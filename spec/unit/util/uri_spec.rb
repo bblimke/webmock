@@ -177,6 +177,16 @@ describe WebMock::Util::URI do
       end
     end
 
+    it "should find all variations of uris with https, basic auth, a non-standard port and a path" do
+      uri = "https://~%8A:pass@www.example.com:9000/foo"
+      variations = [
+        "https://~%8A:pass@www.example.com:9000/foo",
+        "https://~\x8A:pass@www.example.com:9000/foo".force_encoding(Encoding::ASCII_8BIT)
+      ]
+
+      expect(WebMock::Util::URI.variations_of_uri_as_strings(uri)).to eq(variations)
+    end
+
   end
 
   describe "normalized uri equality" do
