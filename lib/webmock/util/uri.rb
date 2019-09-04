@@ -51,10 +51,7 @@ module WebMock
           uris = uris_with_scheme_and_without(uris)
         end
 
-        uris.map do |uri|
-          uri = uri.dup.force_encoding(Encoding::ASCII_8BIT) if uri.respond_to?(:force_encoding)
-          uri.to_s.gsub(/^\/\//,'')
-        end.uniq
+        uris.map {|uri| uri.to_s.gsub(/^\/\//,'') }.uniq
       end
 
       def self.strip_default_port_from_uri_string(uri_string)
@@ -89,13 +86,15 @@ module WebMock
 
       def self.uris_encoded_and_unencoded(uris)
         uris.map do |uri|
-          [ uri.to_s, Addressable::URI.unencode(uri, String).freeze ]
+          [
+            uri.to_s.force_encoding(Encoding::ASCII_8BIT),
+            Addressable::URI.unencode(uri, String).force_encoding(Encoding::ASCII_8BIT).freeze
+          ]
         end.flatten
       end
 
       def self.uris_with_scheme_and_without(uris)
         uris.map { |uri|
-          uri = uri.dup.force_encoding(Encoding::ASCII_8BIT) if uri.respond_to?(:force_encoding)
           [ uri, uri.gsub(%r{^https?://},"").freeze ]
         }.flatten
       end
