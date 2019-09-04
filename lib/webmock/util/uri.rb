@@ -101,8 +101,7 @@ module WebMock
       end
 
       def self.uris_with_trailing_slash_and_without(uris)
-        uris = uris.map { |uri|
-          uri = uri.dup.force_encoding(Encoding::ASCII_8BIT) if uri.respond_to?(:force_encoding)
+        uris.map { |uri|
           [ uri, uri.omit(:path).freeze ]
         }.flatten
       end
