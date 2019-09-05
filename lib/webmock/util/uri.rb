@@ -47,7 +47,7 @@ module WebMock
 
         uris = uris_encoded_and_unencoded(uris)
 
-        if normalized_uri.scheme == "http" && !only_with_scheme
+        if normalized_uri.scheme == "http" && normalized_uri.host.start_with?(/[[:alpha:]]/) && !only_with_scheme
           uris = uris_with_scheme_and_without(uris)
         end
 
