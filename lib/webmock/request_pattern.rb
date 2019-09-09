@@ -181,14 +181,8 @@ module WebMock
     private
 
     def matches_with_variations?(uri)
-      normalized_template =
-        if uri.is_a?(Addressable::URI)
-          Addressable::Template.new(uri)
-        else
-          Addressable::Template.new(WebMock::Util::URI.heuristic_parse(@pattern.pattern))
-        end
-
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| normalized_template.match(u) }
+      template = Addressable::Template.new(uri)
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| template.match(u) }
     end
   end
 
