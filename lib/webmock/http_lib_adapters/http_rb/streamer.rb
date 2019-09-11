@@ -5,7 +5,7 @@ module HTTP
         @io = StringIO.new str
       end
 
-      def readpartial(size = nil)
+      def readpartial(size = nil, outbuf = nil)
         unless size
           if defined?(HTTP::Client::BUFFER_SIZE)
             size = HTTP::Client::BUFFER_SIZE
@@ -14,7 +14,7 @@ module HTTP
           end
         end
 
-        @io.read size
+        @io.read size, outbuf
       end
 
       def close
