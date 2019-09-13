@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.7.3
+
+  * Fix for http.rb. Allow passing an output buffer to HTTP::Response::Body#readpartial
+
+    Thanks to [George Claghorn](https://github.com/georgeclaghorn)
+
+  * Fixed Manticore adapter to invoke Manticore failure handler on stubbed timeout
+
+    Thanks to [Alex Junger](https://github.com/alexJunger)
+
+  * Added project metadata to the gemspec
+
+    Thanks to [Orien Madgwick](https://github.com/orien)
+
 ## 3.7.2
 
   * Fixed handling of non UTF-8 encoded urls

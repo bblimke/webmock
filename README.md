@@ -1109,6 +1109,10 @@ People who submitted patches and new features or suggested improvements. Many th
 * Andriy Yanko
 * y-yagi
 * Rafael França
+* George Claghorn
+* Alex Junger
+* Orien Madgwick
+
 
 
 For a full list of contributors you can visit the
