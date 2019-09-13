@@ -13,6 +13,14 @@ Gem::Specification.new do |s|
   s.description = %q{WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.}
   s.license     = "MIT"
 
+  s.metadata = {
+    'bug_tracker_uri'   => 'https://github.com/bblimke/webmock/issues',
+    'changelog_uri'     => "https://github.com/bblimke/webmock/blob/v#{s.version}/CHANGELOG.md",
+    'documentation_uri' => "https://www.rubydoc.info/gems/webmock/#{s.version}",
+    'source_code_uri'   => "https://github.com/bblimke/webmock/tree/v#{s.version}",
+    'wiki_uri'          => 'https://github.com/bblimke/webmock/wiki'
+  }
+
   s.required_ruby_version = '>= 2.0'
 
   s.add_dependency 'addressable', '>= 2.3.6'
