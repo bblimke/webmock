@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.7.4
+
+  * Resetting memoized response fields in Curb adapter.
+
+    Thanks to [Andrei Sidorov](https://github.com/heretge)
+
 ## 3.7.3
 
   * Fix for http.rb. Allow passing an output buffer to HTTP::Response::Body#readpartial

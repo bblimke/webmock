@@ -1112,7 +1112,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * George Claghorn
 * Alex Junger
 * Orien Madgwick
-
+* Andrei Sidorov
 
 
 For a full list of contributors you can visit the
