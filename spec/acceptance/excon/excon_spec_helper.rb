@@ -28,6 +28,8 @@ module ExconSpecHelper
       res
     end
 
+    Excon.set_raise_on_warnings!(true)
+
     OpenStruct.new \
       body: response.body,
       headers: headers,
