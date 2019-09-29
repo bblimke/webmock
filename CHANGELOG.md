@@ -1,6 +1,6 @@
 # Changelog
 
-## master
+## 3.7.6
 
   * Suppressed keyword argument warnings in Ruby 2.7 in async-http adapter.
 
