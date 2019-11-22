@@ -228,9 +228,9 @@ class PatchedStringIO < StringIO #:nodoc:
 
   alias_method :orig_read_nonblock, :read_nonblock
 
-  def read_nonblock(size, *args)
+  def read_nonblock(size, *args, **kwargs)
     args.reject! {|arg| !arg.is_a?(Hash)}
-    orig_read_nonblock(size, *args)
+    orig_read_nonblock(size, *args, **kwargs)
   end
 
 end
@@ -257,7 +257,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, *args)
+    def initialize(io, *args, **kwargs)
       io = case io
       when Socket, OpenSSL::SSL::SSLSocket, IO
         io
