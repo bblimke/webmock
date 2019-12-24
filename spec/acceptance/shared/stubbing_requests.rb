@@ -640,4 +640,22 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
     end
   end
+
+  describe "in Rspec around(:each) hook" do
+    # order goes
+    # around(:each)
+    # before(:each)
+    # after(:each)
+    # anything after example.run in around(:each)
+    around(:each) do |example|
+      example.run
+      expect {
+        http_request(:get, "http://www.example.com/")
+      }.to_not raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
+    it "should still allow me to make a mocked request" do
+      stub_request(:get, "www.example.com")
+    end
+  end
 end
