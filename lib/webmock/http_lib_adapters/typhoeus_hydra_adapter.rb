@@ -102,7 +102,7 @@ if defined?(Typhoeus)
               status_message: webmock_response.status[1],
               body: webmock_response.body,
               headers: webmock_response.headers,
-              effective_url: request_signature.uri.omit(:port).to_s
+              effective_url: effective_url(request_signature.uri)
             )
           end
           response.mock = :webmock
@@ -167,6 +167,13 @@ if defined?(Typhoeus)
             end
           end
           res
+        end
+
+        private
+
+        def self.effective_url(uri)
+          return uri.omit(:port).to_s if [80, 443].include?(uri.port)
+          uri.to_s
         end
       end
     end
