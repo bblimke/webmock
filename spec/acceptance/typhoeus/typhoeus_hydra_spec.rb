@@ -32,6 +32,14 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe 'effective_url' do
+        it "returns effective_url as string without port" do
+          stub_request(:get, "http://www.example.com").to_return(headers: {'X-Test' => '1'})
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.effective_url).to eq 'http://www.example.com/'
+        end
+      end
+
       describe "when params are used" do
         it "should take into account params for POST request" do
           stub_request(:post, "www.example.com/?hello=world").with(query: {hello: 'world'})
