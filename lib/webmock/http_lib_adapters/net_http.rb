@@ -268,7 +268,14 @@ module Net  #:nodoc: all
       end
       raise "Unable to create local socket" unless io
 
-      super
+      # Prior to 2.4.0 `BufferedIO` only takes a single argument (`io`) with no
+      # options. Here we pass through our full set of arguments only if we're
+      # on 2.4.0 or later, and use a simplified invocation otherwise.
+      if RUBY_VERSION >= '2.4.0'
+        super
+      else
+        super(io)
+      end
     end
 
     if RUBY_VERSION >= '2.6.0'
