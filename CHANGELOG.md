@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.8.0
+
+  * Fixed options handling when initialising Async::HTTP::Client
+
+    Thanks to [Samuel Williams](https://github.com/ioquatix)
+
+  * Ruby 2.7 support.
+
+    Thanks to [Ryan Davis](https://github.com/zenspider) and [Brandur](https://github.com/brandur)
+
 ## 3.7.6
 
   * Suppressed keyword argument warnings in Ruby 2.7 in async-http adapter.

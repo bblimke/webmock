@@ -1115,6 +1115,9 @@ People who submitted patches and new features or suggested improvements. Many th
 * Orien Madgwick
 * Andrei Sidorov
 * Marco Costa
+* Ryan Davis
+* Brandur
+* Samuel Williams
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
