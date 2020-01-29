@@ -279,19 +279,22 @@ module Net  #:nodoc: all
     end
 
     if RUBY_VERSION >= '2.6.0'
+      # https://github.com/ruby/ruby/blob/7d02441f0d6e5c9d0a73a024519eba4f69e36dce/lib/net/protocol.rb#L208
+      # Modified version of method from ruby, so that nil is always passed into orig_read_nonblock to avoid timeout
       def rbuf_fill
-        current_thread_id = Thread.current.object_id
-
-        trace = TracePoint.trace(:line) do |tp|
-          next unless Thread.current.object_id == current_thread_id
-          if tp.binding.local_variable_defined?(:tmp)
-            tp.binding.local_variable_set(:tmp, nil)
-          end
-        end
-
-        super
-      ensure
-        trace.disable
+        case rv = @io.read_nonblock(BUFSIZE, nil, exception: false)
+        when String
+          return if rv.nil?
+          @rbuf << rv
+          rv.clear
+          return
+        when :wait_readable
+          @io.to_io.wait_readable(@read_timeout) or raise Net::ReadTimeout
+        when :wait_writable
+          @io.to_io.wait_writable(@read_timeout) or raise Net::ReadTimeout
+        when nil
+          raise EOFError, 'end of file reached'
+        end while true
       end
     end
   end
