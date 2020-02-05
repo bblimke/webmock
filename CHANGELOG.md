@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.1
+
+  * Added support for mocking non-ASCII bodies when making requests with HTTP.rb
+
+    Thanks to [Patrik Ragnarsson](https://github.com/dentarg)
+
 ## 3.8.0
 
   * Fixed options handling when initialising Async::HTTP::Client
