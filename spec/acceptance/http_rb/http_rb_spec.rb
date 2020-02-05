@@ -74,13 +74,13 @@ describe "HTTP.rb" do
   context "streamer" do
     it "can be read to a provided buffer" do
       stub_request(:get, "example.com/foo")
-        .to_return(status: 200, body: "Hello world!")
+        .to_return(status: 200, body: "Hello world! ")
       response = HTTP.get "http://example.com/foo"
 
       buffer = ""
       response.body.readpartial(1024, buffer)
 
-      expect(buffer).to eq "Hello world!"
+      expect(buffer).to eq "Hello world! "
     end
 
     it "can be closed" do
