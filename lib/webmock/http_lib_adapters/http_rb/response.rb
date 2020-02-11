@@ -14,8 +14,18 @@ module HTTP
       def from_webmock(webmock_response, request_signature = nil)
         status  = Status.new(webmock_response.status.first)
         headers = webmock_response.headers || {}
-        body    = Body.new(Streamer.new(webmock_response.body), encoding: webmock_response.body.encoding)
         uri     = normalize_uri(request_signature && request_signature.uri)
+
+        # HTTP.rb 3.0+ uses a keyword argument to pass the encoding, but 1.x
+        # and 2.x use a positional argument, and 0.x don't support supplying
+        # the encoding.
+        body = if HTTP::VERSION < "1.0.0"
+          Body.new(Streamer.new(webmock_response.body))
+        elsif HTTP::VERSION < "3.0.0"
+          Body.new(Streamer.new(webmock_response.body), webmock_response.body.encoding)
+        else
+          Body.new(Streamer.new(webmock_response.body), encoding: webmock_response.body.encoding)
+        end
 
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
 
