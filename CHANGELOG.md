@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.2
+
+  * Support correct encoding parameter for HTTP.rb 2.x and earlier
+
+    Thanks to [Alex Coomans](https://github.com/drcapulet)
+
 ## 3.8.1
 
   * Added support for mocking non-ASCII bodies when making requests with HTTP.rb
