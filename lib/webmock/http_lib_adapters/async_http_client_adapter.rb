@@ -36,12 +36,12 @@ if defined?(Async::HTTP)
           protocol = endpoint.protocol,
           scheme = endpoint.scheme,
           authority = endpoint.authority,
-          options = {}
+          **options
         )
           webmock_endpoint = WebMockEndpoint.new(scheme, authority, protocol)
 
-          @network_client = WebMockClient.new(endpoint, protocol, scheme, authority, options)
-          @webmock_client = WebMockClient.new(webmock_endpoint, protocol, scheme, authority, options)
+          @network_client = WebMockClient.new(endpoint, protocol, scheme, authority, **options)
+          @webmock_client = WebMockClient.new(webmock_endpoint, protocol, scheme, authority, **options)
 
           @scheme = scheme
           @authority = authority

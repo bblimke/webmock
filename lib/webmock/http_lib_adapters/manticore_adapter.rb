@@ -24,6 +24,12 @@ if defined?(Manticore)
           Manticore.instance_variable_set(:@manticore_facade, OriginalManticoreClient.new)
         end
 
+        class StubbedTimeoutResponse < Manticore::StubbedResponse
+          def call
+            @handlers[:failure].call(Manticore::ConnectTimeout.new("Too slow (mocked timeout)"))
+          end
+        end
+
         class WebMockManticoreClient < Manticore::Client
           def request(klass, url, options={}, &block)
             super(klass, WebMock::Util::URI.normalize_uri(url).to_s, format_options(options))
@@ -106,14 +112,16 @@ if defined?(Manticore)
           end
 
           def generate_manticore_response(webmock_response)
-            raise Manticore::ConnectTimeout if webmock_response.should_timeout
-
-            Manticore::StubbedResponse.stub(
-              code: webmock_response.status[0],
-              body: webmock_response.body,
-              headers: webmock_response.headers,
-              cookies: {}
-            )
+            if webmock_response.should_timeout
+              StubbedTimeoutResponse.new
+            else
+              Manticore::StubbedResponse.stub(
+                code: webmock_response.status[0],
+                body: webmock_response.body,
+                headers: webmock_response.headers,
+                cookies: {}
+              )
+            end
           end
 
           def generate_webmock_response(manticore_response)

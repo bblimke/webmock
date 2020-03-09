@@ -1,11 +1,11 @@
 before_install:
-  - gem update --system
-  - gem update bundler
+  - gem update --system -N
 rvm:
   - 2.3.8
   - 2.4.6
   - 2.5.5
   - 2.6.3
+  - 2.7.0
   - rbx-2
   - ruby-head
   - jruby-9.1.17.0

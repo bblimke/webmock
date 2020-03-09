@@ -159,4 +159,7 @@ if defined?(Excon)
       end
     end
   end
+
+  # Suppresses Excon connection argument validation warning
+  Excon::VALID_CONNECTION_KEYS << :__construction_args
 end

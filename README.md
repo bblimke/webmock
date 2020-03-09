@@ -43,6 +43,7 @@ Supported Ruby Interpreters
 * MRI 2.4
 * MRI 2.5
 * MRI 2.6
+* MRI 2.7
 * JRuby
 * Rubinius
 
@@ -1109,7 +1110,16 @@ People who submitted patches and new features or suggested improvements. Many th
 * Andriy Yanko
 * y-yagi
 * Rafael França
-
+* George Claghorn
+* Alex Junger
+* Orien Madgwick
+* Andrei Sidorov
+* Marco Costa
+* Ryan Davis
+* Brandur
+* Samuel Williams
+* Patrik Ragnarsson
+* Alex Coomans
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

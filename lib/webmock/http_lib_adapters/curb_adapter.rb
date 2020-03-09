@@ -340,6 +340,10 @@ if defined?(Curl)
 
       def reset
         instance_variable_set(:@body_str, nil)
+        instance_variable_set(:@content_type, nil)
+        instance_variable_set(:@header_str, nil)
+        instance_variable_set(:@last_effective_url, nil)
+        instance_variable_set(:@response_code, nil)
         super
       end
     end

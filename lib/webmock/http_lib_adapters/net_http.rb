@@ -228,9 +228,9 @@ class PatchedStringIO < StringIO #:nodoc:
 
   alias_method :orig_read_nonblock, :read_nonblock
 
-  def read_nonblock(size, *args)
+  def read_nonblock(size, *args, **kwargs)
     args.reject! {|arg| !arg.is_a?(Hash)}
-    orig_read_nonblock(size, *args)
+    orig_read_nonblock(size, *args, **kwargs)
   end
 
 end
@@ -257,7 +257,7 @@ end
 module Net  #:nodoc: all
 
   class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, *args)
+    def initialize(io, *args, **kwargs)
       io = case io
       when Socket, OpenSSL::SSL::SSLSocket, IO
         io
@@ -268,23 +268,33 @@ module Net  #:nodoc: all
       end
       raise "Unable to create local socket" unless io
 
-      super
+      # Prior to 2.4.0 `BufferedIO` only takes a single argument (`io`) with no
+      # options. Here we pass through our full set of arguments only if we're
+      # on 2.4.0 or later, and use a simplified invocation otherwise.
+      if RUBY_VERSION >= '2.4.0'
+        super
+      else
+        super(io)
+      end
     end
 
     if RUBY_VERSION >= '2.6.0'
+      # https://github.com/ruby/ruby/blob/7d02441f0d6e5c9d0a73a024519eba4f69e36dce/lib/net/protocol.rb#L208
+      # Modified version of method from ruby, so that nil is always passed into orig_read_nonblock to avoid timeout
       def rbuf_fill
-        current_thread_id = Thread.current.object_id
-
-        trace = TracePoint.trace(:line) do |tp|
-          next unless Thread.current.object_id == current_thread_id
-          if tp.binding.local_variable_defined?(:tmp)
-            tp.binding.local_variable_set(:tmp, nil)
-          end
-        end
-
-        super
-      ensure
-        trace.disable
+        case rv = @io.read_nonblock(BUFSIZE, nil, exception: false)
+        when String
+          return if rv.nil?
+          @rbuf << rv
+          rv.clear
+          return
+        when :wait_readable
+          @io.to_io.wait_readable(@read_timeout) or raise Net::ReadTimeout
+        when :wait_writable
+          @io.to_io.wait_writable(@read_timeout) or raise Net::ReadTimeout
+        when nil
+          raise EOFError, 'end of file reached'
+        end while true
       end
     end
   end

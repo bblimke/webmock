@@ -474,18 +474,25 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::ClassPerform
     end
 
-    describe "using .reset" do
+    describe "using #reset" do
       before do
         @curl = Curl::Easy.new
         @curl.url = "http://example.com"
-        body = "on_success fired"
-        stub_request(:any, "example.com").to_return(body: body)
+        stub_request(:any, "example.com").
+          to_return(body: "abc",
+                    headers: { "Content-Type" => "application/json" })
         @curl.http_get
       end
 
-      it "should clear the body_str" do
+      it "should clear all memoized response fields" do
         @curl.reset
-        expect(@curl.body_str).to eq(nil)
+        expect(@curl).to have_attributes(
+          body_str: nil,
+          content_type: nil,
+          header_str: nil,
+          last_effective_url: nil,
+          response_code: 0,
+        )
       end
     end
   end
