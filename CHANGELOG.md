@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.8.3
+
+  * Fixed problem introduced in version 3.4.2, which caused matching against Addressable::Template representing host part of the URI to raise an error.
+
+    Thanks to [Vesa Laakso](https://github.com/valscion)
+
 ## 3.8.2
 
   * Support correct encoding parameter for HTTP.rb 2.x and earlier
