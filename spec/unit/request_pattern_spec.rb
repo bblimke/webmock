@@ -132,6 +132,18 @@ describe WebMock::RequestPattern do
       expect(WebMock::RequestPattern.new(:get, uri)).to match(signature)
     end
 
+    it "should match if Addressable::Template pattern host matches request uri" do
+      signature = WebMock::RequestSignature.new(:get, "www.example.com")
+      uri = Addressable::Template.new("{subdomain}.example.com")
+      expect(WebMock::RequestPattern.new(:get, uri)).to match(signature)
+    end
+
+    it "should not match if Addressable::Template pattern host does not match request uri" do
+      signature = WebMock::RequestSignature.new(:get, "www.bad-example.com")
+      uri = Addressable::Template.new("{subdomain}.example.com")
+      expect(WebMock::RequestPattern.new(:get, uri)).not_to match(signature)
+    end
+
     it "should match for uris with same parameters as pattern" do
       expect(WebMock::RequestPattern.new(:get, "www.example.com?a=1&b=2")).
         to match(WebMock::RequestSignature.new(:get, "www.example.com?a=1&b=2"))
