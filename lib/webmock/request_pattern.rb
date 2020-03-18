@@ -131,38 +131,36 @@ module WebMock
       end
     end
 
+    def matches?(uri)
+      pattern_matches?(uri) && query_params_matches?(uri)
+    end
+
     def to_s
-      str = @pattern.inspect
+      str = pattern_inspect
       str += " with query params #{@query_params.inspect}" if @query_params
       str
+    end
+
+    private
+
+    def pattern_inspect
+      @pattern.inspect
+    end
+
+    def query_params_matches?(uri)
+      @query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, notation: Config.instance.query_values_notation)
     end
   end
 
   class URIRegexpPattern  < URIPattern
-    def matches?(uri)
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) } &&
-        (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, notation: Config.instance.query_values_notation))
-    end
+    private
 
-    def to_s
-      str = @pattern.inspect
-      str += " with query params #{@query_params.inspect}" if @query_params
-      str
+    def pattern_matches?(uri)
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| u.match(@pattern) }
     end
   end
 
   class URIAddressablePattern  < URIPattern
-    def matches?(uri)
-      if @query_params.nil?
-        # Let Addressable check the whole URI
-        matches_with_variations?(uri)
-      else
-        # WebMock checks the query, Addressable checks everything else
-        matches_with_variations?(uri.omit(:query)) &&
-          @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query)
-      end
-    end
-
     def add_query_params(query_params)
       @@add_query_params_warned ||= false
       if not @@add_query_params_warned
@@ -172,13 +170,21 @@ module WebMock
       super(query_params)
     end
 
-    def to_s
-      str = @pattern.pattern.inspect
-      str += " with variables #{@pattern.variables.inspect}" if @pattern.variables
-      str
+    private
+
+    def pattern_matches?(uri)
+      if @query_params.nil?
+        # Let Addressable check the whole URI
+        matches_with_variations?(uri)
+      else
+        # WebMock checks the query, Addressable checks everything else
+        matches_with_variations?(uri.omit(:query))
+      end
     end
 
-    private
+    def pattern_inspect
+      @pattern.pattern.inspect
+    end
 
     def matches_with_variations?(uri)
       template =
@@ -192,19 +198,6 @@ module WebMock
   end
 
   class URIStringPattern < URIPattern
-    def matches?(uri)
-      if @pattern.is_a?(Addressable::URI)
-        if @query_params
-          uri.omit(:query) === @pattern &&
-          (@query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, notation: Config.instance.query_values_notation))
-        else
-          uri === @pattern
-        end
-      else
-        false
-      end
-    end
-
     def add_query_params(query_params)
       super
       if @query_params.is_a?(Hash) || @query_params.is_a?(String)
@@ -214,10 +207,22 @@ module WebMock
       end
     end
 
-    def to_s
-      str = WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
-      str += " with query params #{@query_params.inspect}" if @query_params
-      str
+    private
+
+    def pattern_matches?(uri)
+      if @pattern.is_a?(Addressable::URI)
+        if @query_params
+          uri.omit(:query) === @pattern
+        else
+          uri === @pattern
+        end
+      else
+        false
+      end
+    end
+
+    def pattern_inspect
+      WebMock::Util::URI.strip_default_port_from_uri_string(@pattern.to_s)
     end
   end
 
