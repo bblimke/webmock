@@ -111,6 +111,16 @@ describe WebMock::RequestPattern do
         to match(WebMock::RequestSignature.new(:get, "www.example.com"))
     end
 
+    it "should match if uri proc pattern returning true" do
+      expect(WebMock::RequestPattern.new(:get, ->(uri) { true })).
+        to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    end
+
+    it "should not match if uri proc pattern returns false" do
+      expect(WebMock::RequestPattern.new(:get, ->(uri) { false })).
+        not_to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    end
+
     it "should match if uri Addressable::Template pattern matches unescaped form of request uri" do
       expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/{any_path}"))).
         to match(WebMock::RequestSignature.new(:get, "www.example.com/my%20path"))
@@ -236,6 +246,42 @@ describe WebMock::RequestPattern do
 
         it "should not match when query params are declared as RSpec HashIncluding matcher not matching params" do
           expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+          query: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"a" => ["b", "d"]}))).
+            not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+      end
+
+      describe "when uri is described as a proc" do
+        it "should match request query params" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true }, query: {"a" => ["b", "c"]})).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+        end
+
+        it "should match request query params if params don't match" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true }, query: {"x" => ["b", "c"]})).
+            not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+        end
+
+        it "should match when query params are declared as HashIncluding matcher matching params" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true },
+          query: WebMock::Matchers::HashIncludingMatcher.new({"a" => ["b", "c"]}))).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        it "should not match when query params are declared as HashIncluding matcher not matching params" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true },
+          query: WebMock::Matchers::HashIncludingMatcher.new({"x" => ["b", "c"]}))).
+            not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        it "should match when query params are declared as RSpec HashIncluding matcher matching params" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true },
+          query: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"a" => ["b", "c"]}))).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        it "should not match when query params are declared as RSpec HashIncluding matcher not matching params" do
+          expect(WebMock::RequestPattern.new(:get, ->(uri) { true },
           query: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"a" => ["b", "d"]}))).
             not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
         end
