@@ -24,7 +24,7 @@ module WebMock
       # doesn't run immediately after stub.with.
       responses = {}
 
-      stub = ::WebMock::RequestStub.new(:any, /.*/).with { |request|
+      stub = ::WebMock::RequestStub.new(:any, ->(uri) { true }).with { |request|
         responses[request.object_id] = yield(request)
       }.to_return(lambda { |request| responses.delete(request.object_id) })
 
