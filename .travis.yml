@@ -8,12 +8,19 @@ rvm:
   - 2.7.0
   - rbx-2
   - ruby-head
-  - jruby-9.1.17.0
-  - jruby-9.2.7.0
-  - jruby-head
-jdk: openjdk8
 matrix:
+  include:
+    - rvm: jruby-9.1.17.0
+      jdk: openjdk8
+    - rvm: jruby-9.2.11.1
+      jdk: openjdk11
+    - rvm: jruby-head
+      jdk: openjdk11
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
     - rvm: rbx-2
+env:
+  global:
+    JRUBY_OPTS: "--debug"
+
