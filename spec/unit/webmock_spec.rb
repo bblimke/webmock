@@ -16,4 +16,14 @@ describe "WebMock version" do
   it "should alias disallow_net_connect! to disable_net_connect!" do
     expect(WebMock.method(:disallow_net_connect!)).to eq(WebMock.method(:disable_net_connect!))
   end
+
+  describe ".allow!(*allowed)" do
+    it "appends to previously set allowed host" do
+      WebMock.disable_net_connect!(allow: ["allowed.net"])
+
+      WebMock.allow!("also-allowed.com")
+
+      expect(WebMock::Config.instance.allow).to match_array ["allowed.net", "also-allowed.com"]
+    end
+  end
 end
