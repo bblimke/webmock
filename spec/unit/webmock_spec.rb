@@ -17,6 +17,20 @@ describe "WebMock version" do
     expect(WebMock.method(:disallow_net_connect!)).to eq(WebMock.method(:disable_net_connect!))
   end
 
+  describe ".disable_net_connect!(options)" do
+    it "always sets the allowed as an array" do
+      WebMock.disable_net_connect!(allow: "allowed.net")
+
+      expect(WebMock::Config.instance.allow).to eql ["allowed.net"]
+    end
+
+    it "always sets the allowed as a flat array" do
+      WebMock.disable_net_connect!(allow: ["allowed.net"])
+
+      expect(WebMock::Config.instance.allow).to eql ["allowed.net"]
+    end
+  end
+
   describe ".allow!(*allowed)" do
     it "appends to previously set allowed host" do
       WebMock.disable_net_connect!(allow: ["allowed.net"])
