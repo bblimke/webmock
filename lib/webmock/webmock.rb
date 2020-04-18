@@ -58,6 +58,10 @@ module WebMock
     Config.instance.allow.push *allowed
   end
 
+  def self.clear_allowed!
+    Config.instance.allow = []
+  end
+
   class << self
     alias :enable_net_connect!   :allow_net_connect!
     alias :disallow_net_connect! :disable_net_connect!

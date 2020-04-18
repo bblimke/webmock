@@ -40,4 +40,15 @@ describe "WebMock version" do
       expect(WebMock::Config.instance.allow).to match_array ["allowed.net", "also-allowed.com"]
     end
   end
+
+  describe ".clear_allowed!" do
+    it "clears the previously set allowed hosts" do
+      WebMock.disable_net_connect!(allow: ["allowed.net"])
+      WebMock.allow!("also-allowed.com")
+
+      WebMock.clear_allowed!
+
+      expect(WebMock::Config.instance.allow).to eql []
+    end
+  end
 end
