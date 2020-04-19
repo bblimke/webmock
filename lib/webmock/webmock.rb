@@ -52,7 +52,7 @@ module WebMock
     Config.instance.allow = Array(options[:allow])
     Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
-  
+
   def self.allow!(*allowed)
     Config.instance.allow ||= []
     Config.instance.allow.push *allowed
