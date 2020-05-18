@@ -92,7 +92,7 @@ module WebMock
 
   class MethodPattern
     def initialize(pattern)
-      @pattern = pattern
+      @pattern = pattern.to_sym
     end
 
     def matches?(method)
