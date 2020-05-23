@@ -29,6 +29,25 @@ module HTTP
 
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
 
+        if HTTP::VERSION > '5.0.0'
+          request = HTTP::Request.new({
+            version: '1.1',
+            verb: request_signature.method,
+            headers: request_signature.headers,
+            uri: uri,
+            body: request_signature.body
+          })
+
+          return new({
+            status: status,
+            version: '1.1',
+            headers: headers,
+            body: body,
+            uri: uri,
+            request: request
+          })
+        end
+
         new({
           status: status,
           version: "1.1",
