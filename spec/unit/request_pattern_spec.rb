@@ -142,6 +142,12 @@ describe WebMock::RequestPattern do
       expect(WebMock::RequestPattern.new(:get, uri)).to match(signature)
     end
 
+    it "should match if Addressable::Template pattern that has ip address host without port matches request uri" do
+      signature = WebMock::RequestSignature.new(:get, "127.0.0.1/1234")
+      uri = Addressable::Template.new("127.0.0.1/{id}")
+      expect(WebMock::RequestPattern.new(:get, uri)).to match(signature)
+    end
+
     it "should match if Addressable::Template pattern host matches request uri" do
       signature = WebMock::RequestSignature.new(:get, "www.example.com")
       uri = Addressable::Template.new("{subdomain}.example.com")
