@@ -170,7 +170,17 @@ unless RUBY_PLATFORM =~ /java/
         context 'HTTP10 protocol' do
           let(:protocol) { Async::HTTP::Protocol::HTTP10 }
 
-          include_examples :common
+          if RUBY_VERSION > '2.5.0'
+            specify do
+              expect(subject).to eq(
+                status: 200,
+                headers: { 'connection' => ['keep-alive'] },
+                body: 'BODY'
+              )
+            end
+          else
+            include_examples :common
+          end
         end
 
         context 'HTTP11 protocol' do
@@ -198,7 +208,17 @@ unless RUBY_PLATFORM =~ /java/
         context 'HTTP10 protocol' do
           let(:protocol) { Async::HTTP::Protocol::HTTP10 }
 
-          include_examples :common
+          if RUBY_VERSION > '2.5.0'
+            specify do
+              expect(subject).to eq(
+                status: 200,
+                headers: { 'connection' => ['keep-alive'] },
+                body: 'BODY'
+              )
+            end
+          else
+            include_examples :common
+          end
         end
 
         context 'HTTP11 protocol' do
