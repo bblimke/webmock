@@ -4,7 +4,11 @@ module HTTP
 
     def perform(request, options)
       return __perform__(request, options) unless webmock_enabled?
-      WebMockPerform.new(request) { __perform__(request, options) }.exec
+       
+      response = options.features.inject(response) do |response, (_name, feature)|
+        feature.wrap_response(response)
+      end
+      response
     end
 
     def webmock_enabled?
