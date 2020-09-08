@@ -136,7 +136,7 @@ if defined?(Async::HTTP)
 
         def connect
           server_socket, client_socket = create_connected_sockets
-          Async do
+          Async(transient: true) do
             accept_socket(server_socket)
           end
           client_socket
