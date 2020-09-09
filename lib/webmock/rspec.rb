@@ -33,7 +33,8 @@ RSPEC_CONFIGURER.configure { |config|
     WebMock.disable!
   end
 
-  config.after(:each) do
+  config.around(:each) do |example|
+    example.run
     WebMock.reset!
   end
 }
