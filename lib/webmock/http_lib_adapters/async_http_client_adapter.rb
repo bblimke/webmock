@@ -151,7 +151,7 @@ if defined?(Async::HTTP)
         def create_connected_sockets
           Async::IO::Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM).tap do |sockets|
             sockets.each do |socket|
-              socket.instance_variable_set :@alpn_protocol, @alpn_protocol
+              socket.instance_variable_set :@alpn_protocol, nil
               socket.instance_eval do
                 def alpn_protocol
                   nil # means HTTP11 will be used for HTTPS
