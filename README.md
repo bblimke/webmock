@@ -240,6 +240,12 @@ stub_request(:any, /example/)
 Net::HTTP.get('www.example.com', '/')    # ===> Success
 ```
 
+### Matching uris using lambda
+
+```ruby
+stub_request(:any, ->(uri) { true })
+```
+
 ### Matching uris using RFC 6570 - Basic Example
 
 ```ruby
