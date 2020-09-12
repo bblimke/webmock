@@ -651,7 +651,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       example.run
       expect {
         http_request(:get, "http://www.example.com/")
-      }.to_not raise_error(WebMock::NetConnectNotAllowedError)
+      }.to_not raise_error # WebMock::NetConnectNotAllowedError
     end
 
     it "should still allow me to make a mocked request" do
