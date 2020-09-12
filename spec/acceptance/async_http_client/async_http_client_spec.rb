@@ -136,6 +136,8 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     context 'scheme and protocol' do
+      let(:default_response_headers) { {} }
+
       before do
         stub_request(
           :get, "#{scheme}://www.example.com"
@@ -152,7 +154,7 @@ unless RUBY_PLATFORM =~ /java/
         specify do
           expect(subject).to eq(
             status: 200,
-            headers: {},
+            headers: default_response_headers,
             body: 'BODY'
           )
         end
@@ -169,6 +171,7 @@ unless RUBY_PLATFORM =~ /java/
 
         context 'HTTP10 protocol' do
           let(:protocol) { Async::HTTP::Protocol::HTTP10 }
+          let(:default_response_headers) { {"connection"=>["keep-alive"]} }
 
           include_examples :common
         end
@@ -197,6 +200,7 @@ unless RUBY_PLATFORM =~ /java/
 
         context 'HTTP10 protocol' do
           let(:protocol) { Async::HTTP::Protocol::HTTP10 }
+          let(:default_response_headers) { {"connection"=>["keep-alive"]} }
 
           include_examples :common
         end
