@@ -1,5 +1,41 @@
 # Changelog
 
+## 3.9.0
+
+  * Allow using a "callable" (like a proc) as URI pattern
+
+        stub_request(:any, ->(uri) { true })
+
+    Thanks to [John Hawthorn](https://github.com/jhawthorn)
+
+  * Added stubbed IO on stubbed socket in Net::HTTP adapter.
+
+    Thanks to [Thilo Rusche](https://github.com/trusche)
+
+  * When 'webmock/rspec' is required, reset WebMock after all after(:each/example) hooks
+
+    Thanks to [Andrew Stuntz](https://github.com/drews256)
+
+  * Fixed `net_connect_allowed?` when invoked with no arguments, when there were any allowed URIs passed to `disable_net_connect?`.
+
+    Thanks to [Lucas Uyezu](https://github.com/lucasuyezu)
+
+  * Fixed async-http adapter which caused Async::HTTP::Client or Async::HTTP::Internet to hang and never return a response.
+
+    Thanks to (Bruno Sutic)[https://github.com/bruno-] and [Samuel Williams](https://github.com/ioquatix)
+
+  * Fixed warning when using async-http adapter
+
+    Thanks to (Bruno Sutic)[https://github.com/bruno-]
+
+  * Dropped support for Ruby 2.3 - EOL date: 2019-03-31
+
+  * Dropped support for Ruby 2.4 - EOL date: 2020-03-31
+
+  * Handling matching of Addressable::Template patterns that have an ip address without port and patterns that have ip address and don’t have schema and path.
+
+    Thanks to (Rafael França)[https://github.com/rafaelfranca] and (guppy0356)[https://github.com/guppy0356]
+
 ## 3.8.3
 
   * Fixed problem introduced in version 3.4.2, which caused matching against Addressable::Template representing host part of the URI to raise an error.
