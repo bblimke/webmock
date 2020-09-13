@@ -109,11 +109,13 @@ module WebMock
     include RSpecMatcherDetector
 
     def initialize(pattern)
-      @pattern = case pattern
-      when String
-        WebMock::Util::URI.normalize_uri(pattern)
-      else
+      @pattern = if pattern.is_a?(Addressable::URI) \
+                    || pattern.is_a?(Addressable::Template)
         pattern
+      elsif pattern.respond_to?(:call)
+        pattern
+      else
+        WebMock::Util::URI.normalize_uri(pattern)
       end
       @query_params = nil
     end
