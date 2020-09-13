@@ -203,7 +203,15 @@ module WebMock
         rescue Addressable::URI::InvalidURIError
           Addressable::Template.new(@pattern.pattern)
         end
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u| template.match(u) }
+      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u|
+        template_matches_uri?(template, u)
+      }
+    end
+
+    def template_matches_uri?(template, uri)
+      template.match(uri)
+    rescue Addressable::URI::InvalidURIError
+      false
     end
   end
 
