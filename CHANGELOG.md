@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.9.1
+
+  Fixed support for passing `URI` objects as second argument of `stub_request`
+
+    Thanks to [Ryan Kerr](https://github.com/leboshi)
+
 ## 3.9.0
 
   * Allow using a "callable" (like a proc) as URI pattern
