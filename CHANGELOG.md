@@ -28,11 +28,11 @@
 
   * Fixed async-http adapter which caused Async::HTTP::Client or Async::HTTP::Internet to hang and never return a response.
 
-    Thanks to (Bruno Sutic)[https://github.com/bruno-] and [Samuel Williams](https://github.com/ioquatix)
+    Thanks to [Bruno Sutic](https://github.com/bruno-) and [Samuel Williams](https://github.com/ioquatix)
 
   * Fixed warning when using async-http adapter
 
-    Thanks to (Bruno Sutic)[https://github.com/bruno-]
+    Thanks to [Bruno Sutic](https://github.com/bruno-)
 
   * Dropped support for Ruby 2.3 - EOL date: 2019-03-31
 
@@ -40,7 +40,7 @@
 
   * Handling matching of Addressable::Template patterns that have an ip address without port and patterns that have ip address and don’t have schema and path.
 
-    Thanks to (Rafael França)[https://github.com/rafaelfranca] and (guppy0356)[https://github.com/guppy0356]
+    Thanks to [Rafael França](https://github.com/rafaelfranca) and [guppy0356](https://github.com/guppy0356)
 
 ## 3.8.3
 
