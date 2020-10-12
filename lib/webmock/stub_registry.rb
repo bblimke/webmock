@@ -23,10 +23,20 @@ module WebMock
       # That way, there's no race condition in case #to_return
       # doesn't run immediately after stub.with.
       responses = {}
+      response_lock = Mutex.new
 
       stub = ::WebMock::RequestStub.new(:any, ->(uri) { true }).with { |request|
-        responses[request.object_id] = yield(request)
-      }.to_return(lambda { |request| responses.delete(request.object_id) })
+        update_response = -> { responses[request.object_id] = yield(request) }
+
+        # The block can recurse, so only lock if we don't already own it
+        if response_lock.owned?
+          update_response.call
+        else
+          response_lock.synchronize(&update_response)
+        end
+      }.to_return(lambda { |request|
+        response_lock.synchronize { responses.delete(request.object_id) }
+      })
 
       global_stubs.push stub
     end
