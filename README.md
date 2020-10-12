@@ -1137,6 +1137,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Lucas Uyezu
 * Bruno Sutic
 * Ryan Kerr
+* Adam Harwood
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

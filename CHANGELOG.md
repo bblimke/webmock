@@ -1,8 +1,14 @@
 # Changelog
 
+# 3.9.2
+
+  * Made global stubs thread-safe
+
+    Thanks to [Adam Harwood](https://github.com/adam-harwood)
+
 # 3.9.1
 
-  Fixed support for passing `URI` objects as second argument of `stub_request`
+  * Fixed support for passing `URI` objects as second argument of `stub_request`
 
     Thanks to [Ryan Kerr](https://github.com/leboshi)
 
