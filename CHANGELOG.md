@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.9.3
+
+  * Make httpclient_adapter thread-safe
+
+    Thanks to [Adam Harwood](https://github.com/adam-harwood)
+
 # 3.9.2
 
   * Made global stubs thread-safe
