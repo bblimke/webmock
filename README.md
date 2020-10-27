@@ -55,7 +55,6 @@ or alternatively:
         gem "webmock" 
     end
 
-
 ### or to install the latest development version from github master
 
     git clone http://github.com/bblimke/webmock.git
