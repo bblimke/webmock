@@ -48,6 +48,11 @@ Supported Ruby Interpreters
 
     gem install webmock
 
+or alternatively:
+
+    gem "webmock" # add to your Gemfile
+
+
 ### or to install the latest development version from github master
 
     git clone http://github.com/bblimke/webmock.git
