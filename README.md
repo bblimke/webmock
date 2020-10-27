@@ -50,7 +50,10 @@ Supported Ruby Interpreters
 
 or alternatively:
 
-    gem "webmock" # add to your Gemfile
+    # add to your Gemfile
+    group :test do
+        gem "webmock" 
+    end
 
 
 ### or to install the latest development version from github master
