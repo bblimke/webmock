@@ -107,7 +107,7 @@ if defined?(EventMachine::HttpClient)
           @uri ||= nil
           EM.next_tick {
             setup(make_raw_response(stubbed_webmock_response), @uri,
-                  stubbed_webmock_response.should_timeout ? "WebMock timeout error" : nil)
+                  stubbed_webmock_response.should_timeout ? Errno::ETIMEDOUT : nil)
           }
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)

@@ -23,7 +23,7 @@ module Net
       return nil if @body.nil?
 
       dest ||= ::Net::ReadAdapter.new(block)
-      dest << @body
+      dest << @body.dup
       @body = dest
     ensure
       # allow subsequent calls to #read_body to proceed as normal, without our hack...

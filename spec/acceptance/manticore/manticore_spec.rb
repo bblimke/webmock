@@ -51,6 +51,25 @@ if RUBY_PLATFORM =~ /java/
         response = Manticore.head("http://example-foo.com")
         expect(response.code).to eq(204)
       end
+
+      context "when a custom failure handler is defined" do
+        let(:failure_handler) { proc {} }
+
+        before do
+          allow(failure_handler).to receive(:call).with(kind_of(Manticore::Timeout)) do |ex|
+            raise ex
+          end
+        end
+
+        it "handles timeouts by invoking the failure handler" do
+          stub_request(:get, "http://example-foo.com").to_timeout
+          request = Manticore.get("http://example-foo.com").tap do |req|
+            req.on_failure(&failure_handler)
+          end
+          expect { request.call }.to raise_error(Manticore::Timeout)
+          expect(failure_handler).to have_received(:call)
+        end
+      end
     end
   end
 end

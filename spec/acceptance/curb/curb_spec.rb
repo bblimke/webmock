@@ -411,6 +411,17 @@ unless RUBY_PLATFORM =~ /java/
       it_should_behave_like "Curb"
       include CurbSpecHelper::NamedHttp
 
+      it "should reset @webmock_method after each call" do
+        stub_request(:post, "www.example.com").with(body: "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.post_body = "01234"
+        c.http_post
+        expect {
+          c.perform
+        }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com))
+      end
+
       it "should work with blank arguments for post" do
         stub_request(:post, "www.example.com").with(body: "01234")
         c = Curl::Easy.new
@@ -463,18 +474,25 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::ClassPerform
     end
 
-    describe "using .reset" do
+    describe "using #reset" do
       before do
         @curl = Curl::Easy.new
         @curl.url = "http://example.com"
-        body = "on_success fired"
-        stub_request(:any, "example.com").to_return(body: body)
+        stub_request(:any, "example.com").
+          to_return(body: "abc",
+                    headers: { "Content-Type" => "application/json" })
         @curl.http_get
       end
 
-      it "should clear the body_str" do
+      it "should clear all memoized response fields" do
         @curl.reset
-        expect(@curl.body_str).to eq(nil)
+        expect(@curl).to have_attributes(
+          body_str: nil,
+          content_type: nil,
+          header_str: nil,
+          last_effective_url: nil,
+          response_code: 0,
+        )
       end
     end
   end

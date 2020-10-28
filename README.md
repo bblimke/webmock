@@ -1,6 +1,11 @@
 WebMock
 =======
-[![Gem Version](https://badge.fury.io/rb/webmock.svg)](http://badge.fury.io/rb/webmock) [![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock) [![Dependency Status](https://gemnasium.com/bblimke/webmock.svg)](http://gemnasium.com/bblimke/webmock) [![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock) [![Mentioned in Awesome Ruby](https://awesome.re/mentioned-badge.svg)](https://github.com/markets/awesome-ruby) [![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
+[![Gem Version](https://badge.fury.io/rb/webmock.svg)](http://badge.fury.io/rb/webmock)
+[![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock)
+[![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock)
+[![Mentioned in Awesome Ruby](https://awesome.re/mentioned-badge.svg)](https://github.com/markets/awesome-ruby)
+[![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
+[![SemVer](https://api.dependabot.com/badges/compatibility_score?dependency-name=webmock&package-manager=bundler&version-scheme=semver)](https://dependabot.com/compatibility-score.html?dependency-name=webmock&package-manager=bundler&version-scheme=semver)
 
 Library for stubbing and setting expectations on HTTP requests in Ruby.
 
@@ -28,20 +33,28 @@ Supported HTTP libraries
 * Excon
 * HTTP Gem
 * Manticore
+* Async::HTTP::Client
 
 Supported Ruby Interpreters
 ---------------------------
 
-* MRI 2.2
-* MRI 2.3
-* MRI 2.4
 * MRI 2.5
+* MRI 2.6
+* MRI 2.7
 * JRuby
 * Rubinius
 
 ## Installation
 
     gem install webmock
+
+or alternatively:
+
+    # add to your Gemfile
+    group :test do
+        gem "webmock" 
+    end
+
 
 ### or to install the latest development version from github master
 
@@ -235,6 +248,12 @@ stub_request(:any, /example/)
 Net::HTTP.get('www.example.com', '/')    # ===> Success
 ```
 
+### Matching uris using lambda
+
+```ruby
+stub_request(:any, ->(uri) { true })
+```
+
 ### Matching uris using RFC 6570 - Basic Example
 
 ```ruby
@@ -290,6 +309,12 @@ stub_request(:any, "www.example.com").
     headers: { 'Content-Length' => 3 })
 
 Net::HTTP.get("www.example.com", '/')    # ===> "abc"
+```
+
+Set appropriate Content-Type for HTTParty's `parsed_response`.
+
+```ruby
+stub_request(:any, "www.example.com").to_return body: '{}', headers: {content_type: 'application/json'}
 ```
 
 ### Response with body specified as IO object
@@ -872,6 +897,10 @@ end
 
 Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
 
+## Issue triage [![Open Source Helpers](https://www.codetriage.com/bblimke/webmock/badges/users.svg)](https://www.codetriage.com/bblimke/webmock)
+
+You can contribute by triaging issues which may include reproducing bug reports or asking for vital information, such as version numbers or reproduction instructions. If you would like to start triaging issues, one easy way to get started is to [subscribe to webmock on CodeTriage](https://www.codetriage.com/bblimke/webmock).
+
 ## Suggestions
 
 If you have any suggestions on how to improve WebMock please send an email to the mailing list [groups.google.com/group/webmock-users](http://groups.google.com/group/webmock-users)
@@ -1080,6 +1109,43 @@ People who submitted patches and new features or suggested improvements. Many th
 * Lukas Pokorny
 * Arkadiy Tetelman
 * Kazato Sugimoto
+* Olle Jonsson
+* Pavel Rosický
+* Geremia Taglialatela
+* Koichi Sasada
+* Yusuke Endoh
+* Grey Baker
+* SoonKhen OwYong
+* Pavel Valena
+* Adam Sokolnicki
+* Jeff Felchner
+* Eike Send
+* Claudio Poli
+* Csaba Apagyi
+* Frederick Cheung
+* Fábio D. Batista
+* Andriy Yanko
+* y-yagi
+* Rafael França
+* George Claghorn
+* Alex Junger
+* Orien Madgwick
+* Andrei Sidorov
+* Marco Costa
+* Ryan Davis
+* Brandur
+* Samuel Williams
+* Patrik Ragnarsson
+* Alex Coomans
+* Vesa Laakso
+* John Hawthorn
+* guppy0356
+* Thilo Rusche
+* Andrew Stuntz
+* Lucas Uyezu
+* Bruno Sutic
+* Ryan Kerr
+* Adam Harwood
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

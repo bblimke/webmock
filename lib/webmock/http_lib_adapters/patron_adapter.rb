@@ -118,7 +118,7 @@ if defined?(::Patron)
         def self.build_webmock_response(patron_response)
           webmock_response = WebMock::Response.new
           reason = patron_response.status_line.
-            scan(%r(\AHTTP/(\d+\.\d+)\s+(\d\d\d)\s*([^\r\n]+)?))[0][2]
+            scan(%r(\AHTTP/(\d+(?:\.\d+)?)\s+(\d\d\d)\s*([^\r\n]+)?))[0][2]
           webmock_response.status = [patron_response.status, reason]
           webmock_response.body = patron_response.body
           webmock_response.headers = patron_response.headers

@@ -24,6 +24,12 @@ if defined?(Manticore)
           Manticore.instance_variable_set(:@manticore_facade, OriginalManticoreClient.new)
         end
 
+        class StubbedTimeoutResponse < Manticore::StubbedResponse
+          def call
+            @handlers[:failure].call(Manticore::ConnectTimeout.new("Too slow (mocked timeout)"))
+          end
+        end
+
         class WebMockManticoreClient < Manticore::Client
           def request(klass, url, options={}, &block)
             super(klass, WebMock::Util::URI.normalize_uri(url).to_s, format_options(options))
@@ -50,19 +56,22 @@ if defined?(Manticore)
 
             if webmock_response = registered_response_for(request_signature)
               webmock_response.raise_error_if_any
-              manticore_response = generate_manticore_response(webmock_response).call
-              real_request = false
+              manticore_response = generate_manticore_response(webmock_response)
+              manticore_response.on_success do
+                WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: false}, request_signature, webmock_response)
+              end
 
             elsif real_request_allowed?(request_signature.uri)
-              manticore_response = Manticore::Response.new(self, request, context, &block).call
-              webmock_response = generate_webmock_response(manticore_response)
-              real_request = true
+              manticore_response = Manticore::Response.new(self, request, context, &block)
+              manticore_response.on_complete do |completed_response|
+                webmock_response = generate_webmock_response(completed_response)
+                WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: true}, request_signature, webmock_response)
+              end
 
             else
               raise WebMock::NetConnectNotAllowedError.new(request_signature)
             end
 
-            WebMock::CallbackRegistry.invoke_callbacks({lib: :manticore, real_request: real_request}, request_signature, webmock_response)
             manticore_response
           end
 
@@ -103,14 +112,16 @@ if defined?(Manticore)
           end
 
           def generate_manticore_response(webmock_response)
-            raise Manticore::ConnectTimeout if webmock_response.should_timeout
-
-            Manticore::StubbedResponse.stub(
-              code: webmock_response.status[0],
-              body: webmock_response.body,
-              headers: webmock_response.headers,
-              cookies: {}
-            )
+            if webmock_response.should_timeout
+              StubbedTimeoutResponse.new
+            else
+              Manticore::StubbedResponse.stub(
+                code: webmock_response.status[0],
+                body: webmock_response.body,
+                headers: webmock_response.headers,
+                cookies: {}
+              )
+            end
           end
 
           def generate_webmock_response(manticore_response)

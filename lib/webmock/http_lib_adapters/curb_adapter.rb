@@ -54,7 +54,6 @@ if defined?(Curl)
 
   module Curl
     class WebMockCurlEasy < Curl::Easy
-
       def curb_or_webmock
         request_signature = build_request_signature
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -271,6 +270,8 @@ if defined?(Curl)
       def perform
         @webmock_method ||= :get
         curb_or_webmock { super }
+      ensure
+        reset_webmock_method
       end
 
       def put_data= data
@@ -333,8 +334,16 @@ if defined?(Curl)
         METHOD
       end
 
+      def reset_webmock_method
+        @webmock_method = :get
+      end
+
       def reset
         instance_variable_set(:@body_str, nil)
+        instance_variable_set(:@content_type, nil)
+        instance_variable_set(:@header_str, nil)
+        instance_variable_set(:@last_effective_url, nil)
+        instance_variable_set(:@response_code, nil)
         super
       end
     end

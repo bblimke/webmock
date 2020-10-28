@@ -111,7 +111,8 @@ shared_context "callbacks" do |*adapter_info|
         end
 
         it "should pass real response to callback with headers" do
-          expect(@response.headers["Content-Length"]).to eq("11")
+          expect(@response.headers["X-Powered-By"]).to eq( "ASP.NET")
+          expect(@response.headers["Content-Length"]).to eq("11") unless adapter_info.include?(:no_content_length_header)
         end
 
         it "should pass response to callback with body" do

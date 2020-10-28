@@ -201,6 +201,18 @@ describe "Net:HTTP" do
     expect(Net::HTTP.get_response(Addressable::URI.parse('http://www.example.com/hello?a=1')).body).to eq("abc")
   end
 
+  it "should support method calls on stubbed socket" do
+    WebMock.allow_net_connect!
+    stub_request(:get, 'www.google.com')#.with(headers: {"My-Header" => 99})
+    req = Net::HTTP::Get.new('/')
+    Net::HTTP.start('www.google.com') do |http|
+      http.request(req, '')
+      socket = http.instance_variable_get(:@socket)
+      expect(socket).to be_a(StubSocket)
+      expect { socket.io.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1) }.to_not raise_error
+    end
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)

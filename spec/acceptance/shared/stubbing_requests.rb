@@ -68,6 +68,11 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, 'www.example.com').with(query: hash_excluding(a: ['b', 'c'])).to_return(body: 'abc')
         expect(http_request(:get, 'http://www.example.com/?a[]=c&a[]=d&b=1').body).to eq('abc')
       end
+
+      it "should return stubbed response when stub expects an empty array" do
+        stub_request(:get, 'www.example.com').with(query: { a: [] }).to_return(body: 'abc')
+        expect(http_request(:get, 'http://www.example.com/?a[]').body).to eq('abc')
+      end
     end
 
     describe "based on method" do
@@ -633,6 +638,24 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       expect {
         http_request(:get, "http://www.example.com/")
       }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/))
+    end
+  end
+
+  describe "in Rspec around(:each) hook" do
+    # order goes
+    # around(:each)
+    # before(:each)
+    # after(:each)
+    # anything after example.run in around(:each)
+    around(:each) do |example|
+      example.run
+      expect {
+        http_request(:get, "http://www.example.com/")
+      }.to_not raise_error # WebMock::NetConnectNotAllowedError
+    end
+
+    it "should still allow me to make a mocked request" do
+      stub_request(:get, "www.example.com")
     end
   end
 end

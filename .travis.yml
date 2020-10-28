@@ -1,21 +1,24 @@
 before_install:
-  - gem update --system
-  - gem update bundler
+  - gem update --system -N
 rvm:
-  - 2.2.10
-  - 2.3.8
-  - 2.4.5
-  - 2.5.3
+  - 2.5.5
+  - 2.6.3
+  - 2.7.0
   - rbx-2
   - ruby-head
-  - jruby-9.0.5.0
-  - jruby-9.1.17.0
-  - jruby-head
 matrix:
+  include:
+    - rvm: jruby-9.1.17.0
+      jdk: openjdk8
+    - rvm: jruby-9.2.11.1
+      jdk: openjdk11
+    - rvm: jruby-head
+      jdk: openjdk11
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
     - rvm: rbx-2
-# Send builds to container-based infrastructure
-# http://docs.travis-ci.com/user/workers/container-based-infrastructure/
-sudo: false
+env:
+  global:
+    JRUBY_OPTS: "--debug"
+
