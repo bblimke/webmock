@@ -24,16 +24,19 @@ Features
 Supported HTTP libraries
 ------------------------
 
-* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, REST Client, HTTParty)
-* HTTPClient
-* Patron
-* EM-HTTP-Request
-* Curb (currently only Curb::Easy)
-* Typhoeus (currently only Typhoeus::Hydra)
-* Excon
-* HTTP Gem
-* Manticore
 * Async::HTTP::Client
+* Curb (currently only Curb::Easy)
+* EM-HTTP-Request
+* Excon
+* HTTPClient
+* [HTTP Gem (also known as http.rb)](https://github.com/httprb/http)
+* Manticore
+* Net::HTTP and other libraries based on Net::HTTP, e.g.:
+  * HTTParty
+  * REST Client
+  * RightHttpConnection
+* Patron
+* Typhoeus (currently only Typhoeus::Hydra)
 
 Supported Ruby Interpreters
 ---------------------------
