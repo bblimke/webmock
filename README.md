@@ -69,20 +69,12 @@ or alternatively:
 
 WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
 
-### Test::Unit
+### Cucumber
 
-Add the following code to `test/test_helper.rb`
-
-```ruby
-require 'webmock/test_unit'
-```
-
-### RSpec
-
-Add the following code to `spec/spec_helper`:
+Create a file `features/support/webmock.rb` with the following contents:
 
 ```ruby
-require 'webmock/rspec'
+require 'webmock/cucumber'
 ```
 
 ### MiniTest
@@ -93,12 +85,20 @@ Add the following code to `test/test_helper`:
 require 'webmock/minitest'
 ```
 
-### Cucumber
+### RSpec
 
-Create a file `features/support/webmock.rb` with the following contents:
+Add the following code to `spec/spec_helper`:
 
 ```ruby
-require 'webmock/cucumber'
+require 'webmock/rspec'
+```
+
+### Test::Unit
+
+Add the following code to `test/test_helper.rb`
+
+```ruby
+require 'webmock/test_unit'
 ```
 
 ### Outside a test framework
