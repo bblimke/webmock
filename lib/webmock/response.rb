@@ -91,10 +91,10 @@ module WebMock
 
     def ==(other)
       self.body == other.body &&
-      self.headers === other.headers &&
-      self.status == other.status &&
-      self.exception == other.exception &&
-      self.should_timeout == other.should_timeout
+        self.headers === other.headers &&
+        self.status == other.status &&
+        self.exception == other.exception &&
+        self.should_timeout == other.should_timeout
     end
 
     private
@@ -111,7 +111,13 @@ module WebMock
       valid_types = [Proc, IO, Pathname, String, Array]
       return if @body.nil?
       return if valid_types.any? { |c| @body.is_a?(c) }
-      raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+
+      if @body.class.is_a?(Hash)
+        raise InvalidBody, "must be one of: #{valid_types}, but you've used a #{@body.class}' instead." \
+          "\n What shall we encode it to? try calling .to_json .to_xml instead on the hash instead, or otherwise convert it to a string."
+      else
+        raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+      end
     end
 
     def read_raw_response(raw_response)
