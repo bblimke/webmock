@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.9.4
+
+  * More intuitive error message when stubbed response body was provided as Hash
+
+    Thanks to [Ben Koshy](https://github.com/BKSpurgeon)
+
 # 3.9.3
 
   * Make httpclient_adapter thread-safe
