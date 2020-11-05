@@ -49,15 +49,17 @@ Supported Ruby Interpreters
 
 ## Installation
 
+```bash
     gem install webmock
-
+```
 or alternatively:
 
+```ruby
     # add to your Gemfile
     group :test do
-        gem "webmock" 
+        gem "webmock"
     end
-
+```
 
 ### or to install the latest development version from github master
 
@@ -69,20 +71,12 @@ or alternatively:
 
 WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
 
-### Test::Unit
+### Cucumber
 
-Add the following code to `test/test_helper.rb`
-
-```ruby
-require 'webmock/test_unit'
-```
-
-### RSpec
-
-Add the following code to `spec/spec_helper`:
+Create a file `features/support/webmock.rb` with the following contents:
 
 ```ruby
-require 'webmock/rspec'
+require 'webmock/cucumber'
 ```
 
 ### MiniTest
@@ -93,12 +87,20 @@ Add the following code to `test/test_helper`:
 require 'webmock/minitest'
 ```
 
-### Cucumber
+### RSpec
 
-Create a file `features/support/webmock.rb` with the following contents:
+Add the following code to `spec/spec_helper`:
 
 ```ruby
-require 'webmock/cucumber'
+require 'webmock/rspec'
+```
+
+### Test::Unit
+
+Add the following code to `test/test_helper.rb`
+
+```ruby
+require 'webmock/test_unit'
 ```
 
 ### Outside a test framework
@@ -112,12 +114,9 @@ include WebMock::API
 WebMock.enable!
 ```
 
-## Examples
-
-
+# Examples
 
 ## Stubbing
-
 
 ### Stubbed request based on uri only and with the default response
 
