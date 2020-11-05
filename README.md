@@ -112,12 +112,9 @@ include WebMock::API
 WebMock.enable!
 ```
 
-## Examples
-
-
+# Examples
 
 ## Stubbing
-
 
 ### Stubbed request based on uri only and with the default response
 
