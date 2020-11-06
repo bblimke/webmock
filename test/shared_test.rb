@@ -9,6 +9,12 @@ module SharedTest
     @stub_https = stub_http_request(:any, "https://www.example.com")
   end
 
+  def teardown
+    # Ensure global Test::Unit teardown was called
+    assert_empty WebMock::RequestRegistry.instance.requested_signatures.hash
+    assert_empty WebMock::StubRegistry.instance.request_stubs
+  end
+
   def test_assert_requested_with_stub_and_block_raises_error
     assert_raises ArgumentError do
       assert_requested(@stub_http) {}
