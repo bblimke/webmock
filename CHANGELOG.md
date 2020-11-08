@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.9.5
+
+  * Prevent overwriting `teardown` method in Test::Unit
+
+    Thanks to [Jesse Bowes](https://github.com/jessebs)
+
 # 3.9.4
 
   * More intuitive error message when stubbed response body was provided as Hash
