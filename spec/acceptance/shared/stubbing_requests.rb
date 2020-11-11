@@ -593,6 +593,23 @@ shared_examples_for "stubbing requests" do |*adapter_info|
           end
         end
       end
+
+      context "when global stub should be invoked last" do
+        before do
+          WebMock.globally_stub_request(:after_local_stubs) do
+            { body: "global stub body" }
+          end
+        end
+
+        it "uses global stub when non-global stub is not defined" do
+          expect(http_request(:get, "http://www.example.com/").body).to eq("global stub body")
+        end
+
+        it "uses non-global stub first" do
+          stub_request(:get, "www.example.com").to_return(body: 'non-global stub body')
+          expect(http_request(:get, "http://www.example.com/").body).to eq("non-global stub body")
+        end
+      end
     end
 
     describe "when stubbing request with a block evaluated on request" do

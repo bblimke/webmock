@@ -140,8 +140,8 @@ module WebMock
     puts WebMock::RequestExecutionVerifier.executed_requests_message
   end
 
-  def self.globally_stub_request(&block)
-    WebMock::StubRegistry.instance.register_global_stub(&block)
+  def self.globally_stub_request(order = :before_local_stubs, &block)
+    WebMock::StubRegistry.instance.register_global_stub(order, &block)
   end
 
   %w(
