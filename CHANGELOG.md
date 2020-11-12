@@ -1,5 +1,19 @@
 # Changelog
 
+# 3.10.0
+
+  * Added option to global stubs to have lower priority than local stubs.
+
+        WebMock.globally_stub_request(:after_local_stubs) do
+          { body: "global stub body" }
+        end
+
+        stub_request(:get, "www.example.com").to_return(body: 'non-global stub body')
+
+        expect(http_request(:get, "http://www.example.com/").body).to eq("non-global stub body")
+
+    Thanks to [Marek Kasztelnik](https://github.com/mkasztelnik)
+
 # 3.9.5
 
   * Prevent overwriting `teardown` method in Test::Unit
