@@ -6,9 +6,9 @@ module HTTP
       return __perform__(request, options) unless webmock_enabled?
 
       response = WebMockPerform.new(request) { __perform__(request, options) }.exec
-      response = options.features.inject(response) do |response, (_name, feature)|
-        feature.wrap_response(response)
-      end
+      
+      options.features.each { |_name, feature| response = feature.wrap_response(response) }
+      
       response
     end
 
