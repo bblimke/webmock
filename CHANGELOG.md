@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.11.0
+
+  * Added support for `features` in http.rb adapter.
+
+    Thanks to [Carl (ce07c3)](https://github.com/ce07c3) 
+
 # 3.10.0
 
   * Added option to global stubs to have lower priority than local stubs.
