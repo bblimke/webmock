@@ -1,10 +1,16 @@
 # Changelog
 
+# 3.11.1
+
+  * Compatibility with async-http 0.54+
+
+    Thanks to [Jun Jiang](https://github.com/jasl)
+
 # 3.11.0
 
   * Added support for `features` in http.rb adapter.
 
-    Thanks to [Carl (ce07c3)](https://github.com/ce07c3) 
+    Thanks to [Carl (ce07c3)](https://github.com/ce07c3)
 
 # 3.10.0
 
