@@ -70,6 +70,38 @@ if RUBY_PLATFORM =~ /java/
           expect(failure_handler).to have_received(:call)
         end
       end
+
+      context 'when used in a streaming mode' do
+        let(:webmock_server_url) {"http://#{WebMockServer.instance.host_with_port}/"}
+        let(:result_chunks) { [] }
+
+        def manticore_streaming_get
+          Manticore.get(webmock_server_url).tap do |req|
+            req.on_success do |response|
+              response.body do |chunk|
+                result_chunks << chunk
+              end
+            end
+          end
+        end
+
+        context 'when connections are allowed' do
+          it 'works' do
+            WebMock.allow_net_connect!
+            expect { manticore_streaming_get.call }.to_not raise_error
+            expect(result_chunks).to_not be_empty
+          end
+        end
+
+        context 'when stubbed' do
+          it 'works' do
+            stub_body = 'hello!'
+            stub_request(:get, webmock_server_url).to_return(body: stub_body)
+            expect { manticore_streaming_get.call }.to_not raise_error
+            expect(result_chunks).to eq [stub_body]
+          end
+        end
+      end
     end
   end
 end

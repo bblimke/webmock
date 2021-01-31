@@ -127,8 +127,15 @@ if defined?(Manticore)
           def generate_webmock_response(manticore_response)
             webmock_response = WebMock::Response.new
             webmock_response.status = [manticore_response.code, manticore_response.message]
-            webmock_response.body = manticore_response.body
             webmock_response.headers = manticore_response.headers
+
+            # The attempt to read the body could fail if manticore is used in a streaming mode
+            webmock_response.body = begin
+              manticore_response.body
+            rescue ::Manticore::StreamClosedException
+              nil
+            end
+
             webmock_response
           end
         end
