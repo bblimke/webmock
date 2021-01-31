@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.11.2
+
+  * Fix for Manticore streaming mode
+
+    Thanks to [Oleksiy Kovyrin](https://github.com/kovyrin)
+
 # 3.11.1
 
   * Compatibility with async-http 0.54+
