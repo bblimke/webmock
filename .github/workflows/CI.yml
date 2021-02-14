@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - head
+          - '3.0'
+          - '2.7'
+          - '2.6'
+          - '2.5'
+          - jruby
+    continue-on-error: ${{ matrix.ruby == 'head' }}
+    name: Ruby ${{ matrix.ruby }}
+    env:
+      JRUBY_OPTS: "--debug"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Apt Packages
+        run: |
+          sudo apt-get install libcurl4-openssl-dev -y
+      - uses: ruby/setup-ruby@v1
+        continue-on-error: true
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: |
+          bundle exec rake
