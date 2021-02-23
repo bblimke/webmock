@@ -546,6 +546,12 @@ describe WebMock::RequestPattern do
                                                          body: "{\"a\":\"1\",\"b\":\"five\",\"c\":{\"d\":[\"e\",\"f\"]}}"))
               end
 
+          it "should match when content type is set to json api" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
+              to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/vnd.api+json'},
+                                                     body: "{\"a\":\"1\",\"c\":{\"d\":[\"e\",\"f\"]},\"b\":\"five\"}"))
+          end
+
           it "should not match when body is not json" do
             expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
               not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
