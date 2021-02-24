@@ -55,6 +55,7 @@ if defined?(Async::HTTP)
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           net_connect_allowed = WebMock.net_connect_allowed?(request_signature.uri)
+          real_request = false
 
           if webmock_response
             webmock_response.raise_error_if_any
@@ -62,6 +63,7 @@ if defined?(Async::HTTP)
             WebMockApplication.add_webmock_response(request, webmock_response)
             response = @webmock_client.call(request)
           elsif net_connect_allowed
+            real_request = true
             response = @network_client.call(request)
           else
             raise WebMock::NetConnectNotAllowedError.new(request_signature) unless webmock_response
@@ -72,7 +74,7 @@ if defined?(Async::HTTP)
             WebMock::CallbackRegistry.invoke_callbacks(
               {
                 lib: :async_http_client,
-                real_request: net_connect_allowed
+                real_request: real_request
               },
               request_signature,
               webmock_response
