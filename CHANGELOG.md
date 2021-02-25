@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.11.3
+
+  * Fixed async-http adapter to only considered requests as real if they are real.
+
+    Thanks to Thanks to [Tony Schneider](https://github.com/tonywok) and [Samuel Williams](https://github.com/ioquatix)
+
 # 3.11.2
 
   * Fix for Manticore streaming mode

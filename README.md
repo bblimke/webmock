@@ -1154,6 +1154,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * ce07c3
 * Jun Jiang
 * Oleksiy Kovyrin
+* Matt Larraz
+* Tony Schneider
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
