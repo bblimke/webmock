@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.12.0
+
+  * Added support for handling custom JSON and XML content types e.g. 'application/vnd.api+json'
+
 # 3.11.3
 
   * Fixed async-http adapter to only considered requests as real if they are real.
