@@ -340,4 +340,30 @@ describe "Net:HTTP" do
       http.request(req, '')
     end
   end
+
+  describe "hostname handling" do
+    it "should set brackets around the hostname if it is an IPv6 address" do
+      net_http = Net::HTTP.new('b2dc:5bdf:4f0d::3014:e0ca', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://[b2dc:5bdf:4f0d::3014:e0ca]:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is already wrapped by brackets" do
+      net_http = Net::HTTP.new('[b2dc:5bdf:4f0d::3014:e0ca]', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://[b2dc:5bdf:4f0d::3014:e0ca]:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is an IPv4 address" do
+      net_http = Net::HTTP.new('181.152.137.168', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://181.152.137.168:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is a domain" do
+      net_http = Net::HTTP.new('www.example.com', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://www.example.com:80/example.jpg')
+    end
+  end
 end
