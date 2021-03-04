@@ -37,6 +37,7 @@ Supported HTTP libraries
   * RightHttpConnection
 * Patron
 * Typhoeus (currently only Typhoeus::Hydra)
+* [httpx](https://honeyryderchuck.gitlab.io/httpx/wiki/Webmock-Adapter) 
 
 Supported Ruby Interpreters
 ---------------------------
