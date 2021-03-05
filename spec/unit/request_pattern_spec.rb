@@ -613,7 +613,7 @@ describe WebMock::RequestPattern do
             end
           end
 
-          context "standard application/json" do
+          context "standard application/xml" do
             let(:content_type) { 'application/xml' }
             it_behaves_like "a xml body"
           end
