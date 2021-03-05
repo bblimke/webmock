@@ -313,8 +313,6 @@ module WebMock
   module NetHTTPUtility
 
     def self.request_signature_from_request(net_http, request, body = nil)
-      protocol = net_http.use_ssl? ? "https" : "http"
-
       path = request.path
 
       if path.respond_to?(:request_uri) #https://github.com/bblimke/webmock/issues/288
@@ -323,7 +321,7 @@ module WebMock
 
       path = WebMock::Util::URI.heuristic_parse(path).request_uri if path =~ /^http/
 
-      uri = "#{protocol}://#{net_http.address}:#{net_http.port}#{path}"
+      uri = get_uri(net_http, path)
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
@@ -341,6 +339,15 @@ module WebMock
       end
 
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
+    end
+
+    def self.get_uri(net_http, path)
+      protocol = net_http.use_ssl? ? "https" : "http"
+
+      hostname = net_http.address
+      hostname = "[#{hostname}]" if /\A\[.*\]\z/ !~ hostname && /:/ =~ hostname
+
+      "#{protocol}://#{hostname}:#{net_http.port}#{path}"
     end
 
     def self.validate_headers(headers)
