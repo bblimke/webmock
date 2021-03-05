@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.12.1
+
+  * Fixed handling of URIs with IPv6 addresses with square brackets when in Net::HTTP adapter.
+
+    Thanks to [Johanna Hartmann](https://github.com/JohannaHartmann)
+
 # 3.12.0
 
   * Added support for handling custom JSON and XML content types e.g. 'application/vnd.api+json'
