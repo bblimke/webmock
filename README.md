@@ -24,19 +24,19 @@ Features
 Supported HTTP libraries
 ------------------------
 
-* Async::HTTP::Client
-* Curb (currently only Curb::Easy)
-* EM-HTTP-Request
-* Excon
-* HTTPClient
+* [Async::HTTP::Client](https://github.com/socketry/async-http)
+* [Curb](https://github.com/taf2/curb) (currently only Curb::Easy)
+* [EM-HTTP-Request](https://github.com/igrigorik/em-http-request)
+* [Excon](https://github.com/excon/excon)
+* [HTTPClient](https://github.com/nahi/httpclient)
 * [HTTP Gem (also known as http.rb)](https://github.com/httprb/http)
-* Manticore
-* Net::HTTP and other libraries based on Net::HTTP, e.g.:
-  * HTTParty
-  * REST Client
-  * RightHttpConnection
-* Patron
-* Typhoeus (currently only Typhoeus::Hydra)
+* [httpx](https://honeyryderchuck.gitlab.io/httpx/wiki/Webmock-Adapter)
+* [Manticore](https://github.com/cheald/manticore)
+* [Net::HTTP](https://ruby-doc.org/stdlib-2.7.0/libdoc/net/http/rdoc/Net/HTTP.html) and other libraries based on Net::HTTP, e.g.:
+  * [HTTParty](https://github.com/jnunemaker/httparty)
+  * [REST Client](https://github.com/rest-client/rest-client)  
+* [Patron](https://github.com/toland/patron)
+* [Typhoeus](https://github.com/typhoeus/typhoeus) (currently only Typhoeus::Hydra)
 
 Supported Ruby Interpreters
 ---------------------------
