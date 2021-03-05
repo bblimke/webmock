@@ -365,21 +365,5 @@ describe "Net:HTTP" do
       path = '/example.jpg'
       expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://www.example.com:80/example.jpg')
     end
-
-    it 'should work with IPv6 addresses' do
-      WebMock.stub_request(:get, 'http://[b2dc:5bdf:4f0d::3014:e0c1]:80/example.jpg')
-      uri = URI.parse('http://[b2dc:5bdf:4f0d::3014:e0c1]:80/example.jpg')
-      request = Net::HTTP::Get.new(uri)
-
-      expect { Net::HTTP.start(uri.hostname, uri.port) { |http| http.request(request) } }.not_to raise_error
-    end
-
-    it 'should work with IPv4 addresses' do
-      WebMock.stub_request(:get, 'http://181.152.137.168:80/example.jpg')
-      uri = URI.parse('http://181.152.137.168:80/example.jpg')
-      request = Net::HTTP::Get.new(uri)
-
-      expect { Net::HTTP.start(uri.hostname, uri.port) { |http| http.request(request) } }.not_to raise_error
-    end
   end
 end
