@@ -99,6 +99,11 @@ if defined?(EventMachine::HttpClient)
         end
       end
 
+      def connection_completed
+        @state = :response_header
+        send_request(request_signature.headers, request_signature.body)
+      end
+
       def send_request(head, body)
         WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
@@ -164,7 +169,7 @@ if defined?(EventMachine::HttpClient)
       end
 
       def build_request_signature
-        headers, body = @req.headers, @req.body
+        headers, body = build_request, @req.body
 
         @conn.middleware.select {|m| m.respond_to?(:request) }.each do |m|
           headers, body = m.request(self, headers, body)
@@ -177,8 +182,6 @@ if defined?(EventMachine::HttpClient)
         uri.query = encode_query(@req.uri, query).slice(/\?(.*)/, 1)
 
         body = form_encode_body(body) if body.is_a?(Hash)
-
-        headers = @req.headers
 
         if headers['authorization'] && headers['authorization'].is_a?(Array)
           headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(headers.delete('authorization'))
