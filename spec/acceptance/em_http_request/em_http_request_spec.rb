@@ -71,6 +71,35 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
+        it "only calls request middleware once" do
+          stub_request(:get, "www.example.com")
+
+          middleware = Class.new do
+            def self.called!
+              @called = called + 1
+            end
+
+            def self.called
+              @called || 0
+            end
+
+            def request(client, head, body)
+              self.class.called!
+              [head, body]
+            end
+          end
+
+          EM.run do
+            conn = EventMachine::HttpRequest.new('http://www.example.com/')
+            conn.use middleware
+            http = conn.get
+            http.callback do
+              expect(middleware.called).to eq(1)
+              EM.stop
+            end
+          end
+        end
+
         let(:response_middleware) do
           Class.new do
             def response(resp)
@@ -119,6 +148,33 @@ unless RUBY_PLATFORM =~ /java/
         context 'making a real request', net_connect: true do
           before { WebMock.allow_net_connect! }
           include_examples "em-http-request middleware/after_request hook integration"
+
+          it "only calls request middleware once" do
+            middleware = Class.new do
+              def self.called!
+                @called = called + 1
+              end
+
+              def self.called
+                @called || 0
+              end
+
+              def request(client, head, body)
+                self.class.called!
+                [head, body]
+              end
+            end
+
+            EM.run do
+              conn = EventMachine::HttpRequest.new(webmock_server_url)
+              conn.use middleware
+              http = conn.get
+              http.callback do
+                expect(middleware.called).to eq(1)
+                EM.stop
+              end
+            end
+          end
         end
 
         context 'when the request is stubbed' do
