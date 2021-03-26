@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.12.2
+
+  * Fixed em-http-request adapter to avoid calling middleware twice.
+
+    Thanks to [Alex Vondrak](https://github.com/ajvondrak)
+
 # 3.12.1
 
   * Fixed handling of URIs with IPv6 addresses with square brackets when in Net::HTTP adapter.
