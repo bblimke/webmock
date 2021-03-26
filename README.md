@@ -34,7 +34,7 @@ Supported HTTP libraries
 * [Manticore](https://github.com/cheald/manticore)
 * [Net::HTTP](https://ruby-doc.org/stdlib-2.7.0/libdoc/net/http/rdoc/Net/HTTP.html) and other libraries based on Net::HTTP, e.g.:
   * [HTTParty](https://github.com/jnunemaker/httparty)
-  * [REST Client](https://github.com/rest-client/rest-client)  
+  * [REST Client](https://github.com/rest-client/rest-client)
 * [Patron](https://github.com/toland/patron)
 * [Typhoeus](https://github.com/typhoeus/typhoeus) (currently only Typhoeus::Hydra)
 
