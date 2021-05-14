@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.13.0
+
+  * Support http.rb 5.x
+
+    Thanks to [Will Storey](https://github.com/horgh)
+
 # 3.12.2
 
   * Fixed em-http-request adapter to avoid calling middleware twice.
