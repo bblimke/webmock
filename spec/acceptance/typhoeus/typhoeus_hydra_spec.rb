@@ -32,6 +32,32 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe 'effective_url' do
+        context 'original request url is provided with custom port' do
+          it "returns effective_url as string with custom port" do
+            stub_request(:get, "http://www.example.com:8080").to_return(headers: {'X-Test' => '1'})
+            response = Typhoeus.get("http://www.example.com:8080")
+            expect(response.effective_url).to eq 'http://www.example.com:8080/'
+          end
+        end
+
+        context 'original request url is provided with standard port' do
+          it "returns effective_url as string with no port" do
+            stub_request(:get, "http://www.example.com:80").to_return(headers: {'X-Test' => '1'})
+            response = Typhoeus.get("http://www.example.com:80")
+            expect(response.effective_url).to eq 'http://www.example.com/'
+          end
+        end
+
+        context 'original request url is provided with no port' do
+          it "returns effective_url as string with no port" do
+            stub_request(:get, "http://www.example.com").to_return(headers: {'X-Test' => '1'})
+            response = Typhoeus.get("http://www.example.com")
+            expect(response.effective_url).to eq 'http://www.example.com/'
+          end
+        end
+      end
+
       describe "when params are used" do
         it "should take into account params for POST request" do
           stub_request(:post, "www.example.com/?hello=world").with(query: {hello: 'world'})
