@@ -158,7 +158,8 @@ module WebMock
 
           response.instance_variable_set(:@body, body)
           webmock_response.headers.to_a.each do |name, values|
-            values = [values] unless values.is_a?(Array)
+            # values = [values] unless values.is_a?(Array)
+            values = values.split("\n") unless values.is_a?(Array)
             values.each do |value|
               response.add_field(name, value)
             end
