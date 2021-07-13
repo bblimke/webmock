@@ -1,5 +1,7 @@
 # Changelog
 
+  * Fixed async-http adapter on Windows.
+
 # 3.13.0
 
   * Support http.rb 5.x
