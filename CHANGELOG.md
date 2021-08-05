@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.14.0
+
+  * Bump Addressable from 2.3.6 to 2.8.0
+
+    Thanks to [Eduardo Hernandez](https://github.com/EduardoGHdez)
+
 # 3.13.0
 
   * Support http.rb 5.x
