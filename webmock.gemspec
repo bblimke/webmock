@@ -31,6 +31,8 @@ Gem::Specification.new do |s|
     s.add_development_dependency 'patron',   '>= 0.4.18'
     s.add_development_dependency 'curb',     '>= 0.7.16'
     s.add_development_dependency 'typhoeus', '>= 0.5.0'
+    s.add_development_dependency 'em-http-request', '>= 1.0.2'
+    s.add_development_dependency 'em-synchrony',    '>= 1.0.0'
   end
 
   s.add_development_dependency 'http',            '>= 0.8.0'
@@ -38,8 +40,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack',            ((RUBY_VERSION < '2.2.2') ? '1.6.0' : '> 1.6')
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
-  s.add_development_dependency 'em-http-request', '>= 1.0.2'
-  s.add_development_dependency 'em-synchrony',    '>= 1.0.0'
   s.add_development_dependency 'excon',           '>= 0.27.5'
   s.add_development_dependency 'async-http',      '>= 0.48.0'
   s.add_development_dependency 'minitest',        '>= 5.0.0'
