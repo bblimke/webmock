@@ -151,7 +151,12 @@ if defined?(Async::HTTP)
         private
 
         def create_connected_sockets
-          Async::IO::Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM).tap do |sockets|
+          pair = begin
+            Async::IO::Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM)
+          rescue Errno::EAFNOSUPPORT
+            Async::IO::Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM)
+          end
+          pair.tap do |sockets|
             sockets.each do |socket|
               socket.instance_variable_set :@alpn_protocol, nil
               socket.instance_eval do
