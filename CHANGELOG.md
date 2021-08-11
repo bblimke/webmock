@@ -1,5 +1,7 @@
 # Changelog
 
+  * fixed async-http adapter on Windows
+
 # 3.14.0
 
   * Bump Addressable from 2.3.6 to 2.8.0
