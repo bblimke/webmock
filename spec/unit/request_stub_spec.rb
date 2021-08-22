@@ -78,6 +78,11 @@ describe WebMock::RequestStub do
       @request_stub.to_return_json(headers: {"A" => "a"}, body: "")
       expect(@request_stub.response.headers).to eq({"A"=>"a", "Content-Type"=>"application/json"})
     end
+
+    it "should allow callsites to override content_type header" do
+      @request_stub.to_return_json(headers: {content_type: 'application/super-special-json'})
+      expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/super-special-json"})
+    end
   end
 
   describe "then" do
