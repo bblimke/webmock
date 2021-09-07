@@ -24,6 +24,21 @@ module WebMock
     end
     alias_method :and_return, :to_return
 
+    def to_return_json(*response_hashes)
+      raise ArgumentError, '#to_return_json does not support passing a block' if block_given?
+
+      json_response_hashes = [*response_hashes].flatten.map do |resp_h|
+        headers, body = resp_h.values_at(:headers, :body)
+        resp_h.merge(
+          headers: {content_type: 'application/json'}.merge(headers.to_h),
+          body: body.is_a?(Hash) ? body.to_json : body
+        )
+      end
+
+      to_return(json_response_hashes)
+    end
+    alias_method :and_return_json, :to_return_json
+
     def to_rack(app, options={})
       @responses_sequences << ResponsesSequence.new([RackResponse.new(app)])
     end
