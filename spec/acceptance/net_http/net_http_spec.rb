@@ -213,6 +213,24 @@ describe "Net:HTTP" do
     end
   end
 
+  it "should start mocked Net::HTTP" do
+    uri = URI.parse('http://www.example.com/')
+    stub_http_request(:get, uri).to_return(body: "the body")
+
+    http = Net::HTTP.new(uri.host)
+    req = Net::HTTP::Get.new('/')
+    expected_started = [false, true]
+
+    expect(http).to receive(:request).twice.and_wrap_original do |m, *args, &block|
+      expect(expected_started.shift).to equal(m.receiver.started?)
+      m.call(*args, &block)
+    end
+
+    response = http.request(req)
+
+    expect(response.body).to eq("the body")
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)

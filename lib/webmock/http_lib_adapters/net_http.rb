@@ -77,6 +77,8 @@ module WebMock
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+            return start_without_connect { request(request, body, &block) } unless started?
+
             @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
