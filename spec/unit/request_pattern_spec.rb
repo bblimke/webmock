@@ -684,9 +684,9 @@ describe WebMock::RequestPattern do
         not_to match(WebMock::RequestSignature.new(:get, "www.example.com", headers: {'Content-Type' => 'image/jpeg'}))
     end
 
-    it "should match even is header keys are declared in different form" do
-      expect(WebMock::RequestPattern.new(:get, "www.example.com", headers: {'ContentLength' => '8888', 'Content-type' => 'image/png'})).
-        to match(WebMock::RequestSignature.new(:get, "www.example.com", headers: {:ContentLength => 8888, 'content_type' => 'image/png'}))
+    it "should match even if header keys are declared in different form" do
+      expect(WebMock::RequestPattern.new(:get, "www.example.com", headers: {'ContentLength' => '8888', 'Content-Type' => 'image/png'})).
+        to match(WebMock::RequestSignature.new(:get, "www.example.com", headers: {:ContentLength => 8888, 'content-type' => 'image/png'}))
     end
 
     it "should match is pattern doesn't have specified headers" do

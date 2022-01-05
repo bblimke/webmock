@@ -9,7 +9,8 @@ module WebMock
       def self.normalize_headers(headers)
         return nil unless headers
         array = headers.map { |name, value|
-          [name.to_s.split(/_|-/).map { |segment| segment.capitalize }.join("-"),
+          name = name.to_s.tr("_", "-") if name.is_a? Symbol
+          [name.to_s.split(/(_|-)/).map { |segment| segment.capitalize }.join,
            case value
             when Regexp then value
             when Array then (value.size == 1) ? value.first.to_s : value.map {|v| v.to_s}.sort
