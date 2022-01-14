@@ -24,7 +24,10 @@ module HTTP
         elsif HTTP::VERSION < "3.0.0"
           Body.new(Streamer.new(webmock_response.body), webmock_response.body.encoding)
         else
-          Body.new(Streamer.new(webmock_response.body), encoding: webmock_response.body.encoding)
+          Body.new(
+            Streamer.new(webmock_response.body, encoding: webmock_response.body.encoding),
+            encoding: webmock_response.body.encoding
+          )
         end
 
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
