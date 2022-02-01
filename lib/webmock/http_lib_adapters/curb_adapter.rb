@@ -128,7 +128,7 @@ if defined?(Curl)
       def headers_as_hash(headers)
         if headers.is_a?(Array)
           headers.inject({}) {|hash, header|
-            name, value = header.split(":").map(&:strip)
+            name, value = header.split(":", 2).map(&:strip)
             hash[name] = value
             hash
           }
