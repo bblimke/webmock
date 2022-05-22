@@ -98,7 +98,7 @@ module WebMock
               after_request.call(response)
             }
             if started?
-              if WebMock::Config.instance.net_http_connect_on_start
+              if WebMock.net_http_connect_on_start?(request_signature.uri)
                 super_with_after_request.call
               else
                 start_with_connect_without_finish {
@@ -144,7 +144,9 @@ module WebMock
         alias_method :start_with_connect, :start
 
         def start(&block)
-          if WebMock::Config.instance.net_http_connect_on_start
+          uri = Addressable::URI.parse(WebMock::NetHTTPUtility.get_uri(self))
+
+          if WebMock.net_http_connect_on_start?(uri)
             super(&block)
           else
             start_without_connect(&block)
