@@ -365,5 +365,10 @@ describe "Net:HTTP" do
       path = '/example.jpg'
       expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://www.example.com:80/example.jpg')
     end
+
+    it "does not require a path" do
+      net_http = Net::HTTP.new('www.example.com', 80)
+      expect(WebMock::NetHTTPUtility.get_uri(net_http)).to eq('http://www.example.com:80')
+    end
   end
 end

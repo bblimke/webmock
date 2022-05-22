@@ -341,7 +341,7 @@ module WebMock
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
     end
 
-    def self.get_uri(net_http, path)
+    def self.get_uri(net_http, path = nil)
       protocol = net_http.use_ssl? ? "https" : "http"
 
       hostname = net_http.address
