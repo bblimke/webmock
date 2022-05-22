@@ -71,7 +71,13 @@ module WebMock
   end
 
   def self.net_http_connect_on_start?(uri)
-    Config.instance.net_http_connect_on_start
+    allowed = Config.instance.net_http_connect_on_start || false
+
+    if [true, false].include?(allowed)
+      allowed
+    else
+      net_connect_explicit_allowed?(allowed, uri)
+    end
   end
 
   def self.net_connect_explicit_allowed?(allowed, uri=nil)
