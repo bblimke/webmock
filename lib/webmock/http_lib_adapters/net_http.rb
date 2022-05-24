@@ -101,9 +101,8 @@ module WebMock
               if WebMock::Config.instance.net_http_connect_on_start
                 super_with_after_request.call
               else
-                start_with_connect_without_finish {
-                  super_with_after_request.call
-                }
+                start_with_connect_without_finish
+                super_with_after_request.call
               end
             else
               start_with_connect {
@@ -132,15 +131,8 @@ module WebMock
         end
 
 
-        def start_with_connect_without_finish  # :yield: http
-          if block_given?
-            begin
-              do_start
-              return yield(self)
-            end
-          end
+        def start_with_connect_without_finish
           do_start
-          self
         end
 
         alias_method :start_with_connect, :start
