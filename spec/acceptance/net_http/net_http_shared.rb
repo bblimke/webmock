@@ -68,8 +68,11 @@ shared_examples_for "Net::HTTP" do
 
       if WebMock::Config.instance.net_http_connect_on_start
         expect(sockets.length).to eq(1)
+        expect(sockets.to_a[0]).to be_a(Net::BufferedIO)
       else
-        expect(sockets.length).to eq(4)
+        expect(sockets.length).to eq(2)
+        expect(sockets.to_a[0]).to be_a(StubSocket)
+        expect(sockets.to_a[1]).to be_a(Net::BufferedIO)
       end
 
       expect(sockets.all?(&:closed?)).to be(true)

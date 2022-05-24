@@ -98,12 +98,8 @@ module WebMock
               after_request.call(response)
             }
             if started?
-              if WebMock::Config.instance.net_http_connect_on_start
-                super_with_after_request.call
-              else
-                start_with_connect_without_finish
-                super_with_after_request.call
-              end
+              ensure_actual_connection
+              super_with_after_request.call
             else
               start_with_connect {
                 super_with_after_request.call
@@ -131,12 +127,8 @@ module WebMock
         end
 
 
-        def start_with_connect_without_finish
-          if @socket
-            @socket.close
-            @socket = nil
-          end
-          do_start
+        def ensure_actual_connection
+          do_start if @socket.is_a?(StubSocket)
         end
 
         alias_method :start_with_connect, :start
