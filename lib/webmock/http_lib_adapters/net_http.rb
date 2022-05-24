@@ -119,12 +119,14 @@ module WebMock
           raise IOError, 'HTTP session already opened' if @started
           if block_given?
             begin
+              @socket = Net::HTTP.socket_type.new
               @started = true
               return yield(self)
             ensure
               do_finish
             end
           end
+          @socket = Net::HTTP.socket_type.new
           @started = true
           self
         end
@@ -258,6 +260,7 @@ class StubSocket #:nodoc:
 
   class StubIO
     def setsockopt(*args); end
+    def peer_cert; end
   end
 end
 

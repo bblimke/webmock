@@ -26,20 +26,20 @@ shared_examples_for "Net::HTTP" do
 
     it "should connect only once when connected on start", net_connect: true do
       @http = Net::HTTP.new('localhost', port)
-      socket_id_before_request = socket_id_after_request = nil
+      socket_before_request = socket_after_request = nil
       @http.start {|conn|
-        socket_id_before_request = conn.instance_variable_get(:@socket).object_id
+        socket_before_request = conn.instance_variable_get(:@socket)
         conn.request(Net::HTTP::Get.new("/"))
-        socket_id_after_request = conn.instance_variable_get(:@socket).object_id
+        socket_after_request = conn.instance_variable_get(:@socket)
       }
 
-      if !defined?(WebMock::Config) || WebMock::Config.instance.net_http_connect_on_start
-        expect(socket_id_before_request).not_to eq(nil.object_id)
-        expect(socket_id_after_request).not_to eq(nil.object_id)
-        expect(socket_id_after_request).to eq(socket_id_before_request)
+      if WebMock::Config.instance.net_http_connect_on_start
+        expect(socket_before_request).to be_a(Net::BufferedIO)
+        expect(socket_after_request).to be_a(Net::BufferedIO)
+        expect(socket_after_request).to be(socket_before_request)
       else
-        expect(socket_id_before_request).to eq(nil.object_id)
-        expect(socket_id_after_request).not_to eq(nil.object_id)
+        expect(socket_before_request).to be_a(StubSocket)
+        expect(socket_after_request).to be_a(Net::BufferedIO)
       end
     end
 
