@@ -43,6 +43,38 @@ shared_examples_for "Net::HTTP" do
       end
     end
 
+    it "should allow sending multiple requests when persisted", net_connect: true do
+      @http = Net::HTTP.new('example.org')
+      @http.start
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      @http.finish
+    end
+
+    it "should not leak file descriptors", net_connect: true do
+      sockets = Set.new
+
+      @http = Net::HTTP.new('example.org')
+      @http.start
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.finish
+
+      if WebMock::Config.instance.net_http_connect_on_start
+        expect(sockets.length).to eq(1)
+      else
+        expect(sockets.length).to eq(4)
+      end
+
+      expect(sockets.all?(&:closed?)).to be(true)
+    end
+
     it "should pass the read_timeout value on", net_connect: true do
       @http = Net::HTTP.new('localhost', port)
       read_timeout = @http.read_timeout + 1

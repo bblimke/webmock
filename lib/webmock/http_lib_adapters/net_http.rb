@@ -132,6 +132,10 @@ module WebMock
 
 
         def start_with_connect_without_finish
+          if @socket
+            @socket.close
+            @socket = nil
+          end
           do_start
         end
 
