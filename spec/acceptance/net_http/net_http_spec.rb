@@ -254,6 +254,21 @@ describe "Net:HTTP" do
         }
       end
 
+      it "should connect to the server on start when allowlisted", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com", net_http_connect_on_start: "www.google.com")
+        @http.start {|conn|
+          cert = OpenSSL::X509::Certificate.new conn.peer_cert
+          expect(cert).to be_a(OpenSSL::X509::Certificate)
+        }
+      end
+
+      it "should not connect to the server on start when not allowlisted", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com", net_http_connect_on_start: "www.yahoo.com")
+        @http.start {|conn|
+          expect(conn.peer_cert).to be_nil
+        }
+      end
+
       it "should connect to the server if the URI matches an regex", net_connect: true do
         WebMock.disable_net_connect!(allow: /google.com/)
         Net::HTTP.get('www.google.com','/')
@@ -278,6 +293,13 @@ describe "Net:HTTP" do
   describe "when net_http_connect_on_start is false" do
     before(:each) do
       WebMock.allow_net_connect!(net_http_connect_on_start: false)
+    end
+    it_should_behave_like "Net::HTTP"
+  end
+
+  describe "when net_http_connect_on_start is a specific host" do
+    before(:each) do
+      WebMock.allow_net_connect!(net_http_connect_on_start: "localhost")
     end
     it_should_behave_like "Net::HTTP"
   end
@@ -364,6 +386,11 @@ describe "Net:HTTP" do
       net_http = Net::HTTP.new('www.example.com', 80)
       path = '/example.jpg'
       expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://www.example.com:80/example.jpg')
+    end
+
+    it "does not require a path" do
+      net_http = Net::HTTP.new('www.example.com', 80)
+      expect(WebMock::NetHTTPUtility.get_uri(net_http)).to eq('http://www.example.com:80')
     end
   end
 end
