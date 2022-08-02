@@ -66,7 +66,7 @@ shared_examples_for "Net::HTTP" do
       sockets << @http.instance_variable_get(:@socket)
       @http.finish
 
-      if WebMock::Config.instance.net_http_connect_on_start
+      if WebMock.net_http_connect_on_start?(Addressable::URI.parse("http://example.com/"))
         expect(sockets.length).to eq(1)
         expect(sockets.to_a[0]).to be_a(Net::BufferedIO)
       else

@@ -134,7 +134,9 @@ module WebMock
         alias_method :start_with_connect, :start
 
         def start(&block)
-          if WebMock::Config.instance.net_http_connect_on_start
+          uri = Addressable::URI.parse(WebMock::NetHTTPUtility.get_uri(self))
+
+          if WebMock.net_http_connect_on_start?(uri)
             super(&block)
           else
             start_without_connect(&block)
@@ -332,7 +334,7 @@ module WebMock
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
     end
 
-    def self.get_uri(net_http, path)
+    def self.get_uri(net_http, path = nil)
       protocol = net_http.use_ssl? ? "https" : "http"
 
       hostname = net_http.address

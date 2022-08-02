@@ -57,4 +57,58 @@ describe "WebMock" do
       end
     end
   end
+
+  describe ".net_http_connect_on_start?" do
+    let(:uri) { Addressable::URI.parse("http://example.org:5432") }
+
+    it "will not connect on start when false" do
+      WebMock.disable_net_connect!
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(false)
+    end
+
+    it "will connect on start when true" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: true)
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(true)
+    end
+
+    it "will connect on start when regexp matches" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: /example/)
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(true)
+    end
+
+    it "will not connect on start when regexp does not match" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: /nope/)
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(false)
+    end
+
+    it "will connect on start when host matches" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "example.org")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(true)
+    end
+
+    it "will not connect on start when host does not match" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "localhost")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(false)
+    end
+
+    it "will connect on start when host + port matches" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "example.org:5432")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(true)
+    end
+
+    it "will not connect on start when host + port does not match" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "example.org:80")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(false)
+    end
+
+    it "will connect on start when scheme + host + port matches" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "http://example.org:5432")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(true)
+    end
+
+    it "will not connect on start when scheme + host + port does not match" do
+      WebMock.disable_net_connect!(net_http_connect_on_start: "https://example.org:5432")
+      expect(WebMock.net_http_connect_on_start?(uri)).to be(false)
+    end
+  end
 end

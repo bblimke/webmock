@@ -70,6 +70,16 @@ module WebMock
       Config.instance.allow && net_connect_explicit_allowed?(Config.instance.allow, uri) )
   end
 
+  def self.net_http_connect_on_start?(uri)
+    allowed = Config.instance.net_http_connect_on_start || false
+
+    if [true, false].include?(allowed)
+      allowed
+    else
+      net_connect_explicit_allowed?(allowed, uri)
+    end
+  end
+
   def self.net_connect_explicit_allowed?(allowed, uri=nil)
     case allowed
     when Array
