@@ -550,9 +550,9 @@ RestClient.get('sample.org', '/bar')          # ===> Failure
 With an object that responds to `#call`, receiving a `URI` object and returning a boolean:
 
 ```ruby
-blacklist = ['google.com', 'facebook.com', 'apple.com']
+denylist = ['google.com', 'facebook.com', 'apple.com']
 allowed_sites = lambda{|uri|
-  blacklist.none?{|site| uri.host.include?(site) }
+  denylist.none?{|site| uri.host.include?(site) }
 }
 WebMock.disable_net_connect!(allow: allowed_sites)
 
