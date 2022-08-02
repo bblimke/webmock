@@ -33,7 +33,7 @@ shared_examples_for "Net::HTTP" do
         socket_after_request = conn.instance_variable_get(:@socket)
       }
 
-      if WebMock::Config.instance.net_http_connect_on_start
+      if !defined?(WebMock::NetHTTPUtility) || WebMock::Config.instance.net_http_connect_on_start
         expect(socket_before_request).to be_a(Net::BufferedIO)
         expect(socket_after_request).to be_a(Net::BufferedIO)
         expect(socket_after_request).to be(socket_before_request)
@@ -66,7 +66,7 @@ shared_examples_for "Net::HTTP" do
       sockets << @http.instance_variable_get(:@socket)
       @http.finish
 
-      if WebMock.net_http_connect_on_start?(Addressable::URI.parse("http://example.com/"))
+      if !defined?(WebMock::NetHTTPUtility) || WebMock.net_http_connect_on_start?(Addressable::URI.parse("http://example.com/"))
         expect(sockets.length).to eq(1)
         expect(sockets.to_a[0]).to be_a(Net::BufferedIO)
       else
