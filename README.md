@@ -1161,6 +1161,10 @@ People who submitted patches and new features or suggested improvements. Many th
 * Alex Vondrak
 * Will Storey
 * Eduardo Hernandez
+* ojab
+* Giorgio Gambino
+* Timmitry
+* Michael Fairley
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
