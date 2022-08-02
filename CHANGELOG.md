@@ -1,10 +1,20 @@
 # Changelog
 
+# 3.16.0
+
+  * Fix leaky file descriptors and reuse socket for persistent connections.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
+  * Allow specifying for what URIs or hosts, Net::HTTP should connect on start.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
 # 3.15.0
 
   * fixed async-http adapter on Windows
 
-    Tyanks to [Pavel Rosický](https://github.com/ahorek)
+    Thanks to [Pavel Rosický](https://github.com/ahorek)
 
   * Support for http.rb >= 5.0.2
 
@@ -16,7 +26,7 @@
 
   * Support for matching body of JSON or application/x-www-form-urlencoded requests with content type header including charset.
 
-     Thanks to [Timmitry](https://github.com/Timmitry)
+    Thanks to [Timmitry](https://github.com/Timmitry)
 
   * Prevent double-wrapping http.rb features on non-stubbed requests
 
