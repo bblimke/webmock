@@ -102,7 +102,7 @@ shared_context "callbacks" do |*adapter_info|
           WebMock.after_request(except: [:other_lib])  do |_, response|
             @response = response
           end
-          http_request(:get, "http://httpstat.us/201", headers: { "Accept" => "*" })
+          http_request(:get, "https://httpstat.us/201", headers: { "Accept" => "*" })
         end
 
         it "should pass real response to callback with status and message" do
@@ -111,7 +111,7 @@ shared_context "callbacks" do |*adapter_info|
         end
 
         it "should pass real response to callback with headers" do
-          expect(@response.headers["X-Powered-By"]).to eq( "ASP.NET")
+          expect(@response.headers["Server"]).to eq( "Kestrel")
           expect(@response.headers["Content-Length"]).to eq("11") unless adapter_info.include?(:no_content_length_header)
         end
 

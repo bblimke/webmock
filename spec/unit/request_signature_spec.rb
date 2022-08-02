@@ -18,7 +18,7 @@ describe WebMock::RequestSignature do
     end
 
     it "assigns normalized headers" do
-      expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      allow(WebMock::Util::Headers).to receive(:normalize_headers).with({'A' => 'a'}.freeze).and_return('B' => 'b')
       expect(
         WebMock::RequestSignature.new(:get, "www.example.com", headers: {'A' => 'a'}).headers
       ).to eq({'B' => 'b'})

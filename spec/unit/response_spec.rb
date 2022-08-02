@@ -31,7 +31,7 @@ describe WebMock::Response do
   end
 
   it "should report normalized headers" do
-    expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    allow(WebMock::Util::Headers).to receive(:normalize_headers).with({'A' => 'a'}.freeze).and_return('B' => 'b')
     @response = WebMock::Response.new(headers: {'A' => 'a'})
     expect(@response.headers).to eq({'B' => 'b'})
   end

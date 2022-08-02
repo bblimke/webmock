@@ -248,7 +248,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     context 'multiple requests' do
-      let(:endpoint) { Async::HTTP::Endpoint.parse('http://www.example.com') }
+      let!(:endpoint) { Async::HTTP::Endpoint.parse('http://www.example.com') }
       let(:requests_count) { 3 }
 
       shared_examples :common do
@@ -300,13 +300,13 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         context 'HTTP1 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP1 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP1 }
 
           include_examples :common
         end
 
         context 'HTTP2 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP2 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP2 }
 
           include_examples :common
         end
@@ -331,13 +331,13 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         context 'HTTP1 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP1 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP1 }
 
           include_examples :common
         end
 
         context 'HTTP2 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP2 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP2 }
 
           include_examples :common
         end
