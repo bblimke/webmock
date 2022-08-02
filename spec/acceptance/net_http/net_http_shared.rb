@@ -1,3 +1,5 @@
+require 'set'
+
 shared_examples_for "Net::HTTP" do
   describe "when making real requests", net_connect: true do
     let(:port){ WebMockServer.instance.port }
