@@ -26,21 +26,56 @@ shared_examples_for "Net::HTTP" do
 
     it "should connect only once when connected on start", net_connect: true do
       @http = Net::HTTP.new('localhost', port)
-      socket_id_before_request = socket_id_after_request = nil
+      socket_before_request = socket_after_request = nil
       @http.start {|conn|
-        socket_id_before_request = conn.instance_variable_get(:@socket).object_id
+        socket_before_request = conn.instance_variable_get(:@socket)
         conn.request(Net::HTTP::Get.new("/"))
-        socket_id_after_request = conn.instance_variable_get(:@socket).object_id
+        socket_after_request = conn.instance_variable_get(:@socket)
       }
 
-      if !defined?(WebMock::Config) || WebMock::Config.instance.net_http_connect_on_start
-        expect(socket_id_before_request).not_to eq(nil.object_id)
-        expect(socket_id_after_request).not_to eq(nil.object_id)
-        expect(socket_id_after_request).to eq(socket_id_before_request)
+      if WebMock::Config.instance.net_http_connect_on_start
+        expect(socket_before_request).to be_a(Net::BufferedIO)
+        expect(socket_after_request).to be_a(Net::BufferedIO)
+        expect(socket_after_request).to be(socket_before_request)
       else
-        expect(socket_id_before_request).to eq(nil.object_id)
-        expect(socket_id_after_request).not_to eq(nil.object_id)
+        expect(socket_before_request).to be_a(StubSocket)
+        expect(socket_after_request).to be_a(Net::BufferedIO)
       end
+    end
+
+    it "should allow sending multiple requests when persisted", net_connect: true do
+      @http = Net::HTTP.new('example.org')
+      @http.start
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      expect(@http.get("/")).to be_a(Net::HTTPSuccess)
+      @http.finish
+    end
+
+    it "should not leak file descriptors", net_connect: true do
+      sockets = Set.new
+
+      @http = Net::HTTP.new('example.org')
+      @http.start
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.get("/")
+      sockets << @http.instance_variable_get(:@socket)
+      @http.finish
+
+      if WebMock::Config.instance.net_http_connect_on_start
+        expect(sockets.length).to eq(1)
+        expect(sockets.to_a[0]).to be_a(Net::BufferedIO)
+      else
+        expect(sockets.length).to eq(2)
+        expect(sockets.to_a[0]).to be_a(StubSocket)
+        expect(sockets.to_a[1]).to be_a(Net::BufferedIO)
+      end
+
+      expect(sockets.all?(&:closed?)).to be(true)
     end
 
     it "should pass the read_timeout value on", net_connect: true do

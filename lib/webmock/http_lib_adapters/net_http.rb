@@ -98,13 +98,8 @@ module WebMock
               after_request.call(response)
             }
             if started?
-              if WebMock::Config.instance.net_http_connect_on_start
-                super_with_after_request.call
-              else
-                start_with_connect_without_finish {
-                  super_with_after_request.call
-                }
-              end
+              ensure_actual_connection
+              super_with_after_request.call
             else
               start_with_connect {
                 super_with_after_request.call
@@ -119,26 +114,21 @@ module WebMock
           raise IOError, 'HTTP session already opened' if @started
           if block_given?
             begin
+              @socket = Net::HTTP.socket_type.new
               @started = true
               return yield(self)
             ensure
               do_finish
             end
           end
+          @socket = Net::HTTP.socket_type.new
           @started = true
           self
         end
 
 
-        def start_with_connect_without_finish  # :yield: http
-          if block_given?
-            begin
-              do_start
-              return yield(self)
-            end
-          end
-          do_start
-          self
+        def ensure_actual_connection
+          do_start if @socket.is_a?(StubSocket)
         end
 
         alias_method :start_with_connect, :start
@@ -258,6 +248,7 @@ class StubSocket #:nodoc:
 
   class StubIO
     def setsockopt(*args); end
+    def peer_cert; end
   end
 end
 
