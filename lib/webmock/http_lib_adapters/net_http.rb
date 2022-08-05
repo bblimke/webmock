@@ -128,7 +128,11 @@ module WebMock
 
 
         def ensure_actual_connection
-          do_start if @socket.is_a?(StubSocket)
+          if @socket.is_a?(StubSocket)
+            @socket&.close
+            @socket = nil
+            do_start
+          end
         end
 
         alias_method :start_with_connect, :start
@@ -232,13 +236,16 @@ class StubSocket #:nodoc:
   attr_accessor :read_timeout, :continue_timeout, :write_timeout
 
   def initialize(*args)
+    @closed = false
   end
 
   def closed?
-    @closed ||= true
+    @closed
   end
 
   def close
+    @closed = true
+    nil
   end
 
   def readuntil(*args)
@@ -251,6 +258,9 @@ class StubSocket #:nodoc:
   class StubIO
     def setsockopt(*args); end
     def peer_cert; end
+    def peeraddr; ["AF_INET", 443, "127.0.0.1", "127.0.0.1"] end
+    def ssl_version; "TLSv1.3" end
+    def cipher; ["TLS_AES_128_GCM_SHA256", "TLSv1.3", 128, 128] end
   end
 end
 
