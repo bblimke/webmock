@@ -258,6 +258,7 @@ class StubSocket #:nodoc:
   class StubIO
     def setsockopt(*args); end
     def peer_cert; end
+    def peeraddr; ["AF_INET", 443, "127.0.0.1", "127.0.0.1"] end
   end
 end
 

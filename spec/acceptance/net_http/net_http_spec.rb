@@ -213,6 +213,12 @@ describe "Net:HTTP" do
     end
   end
 
+  it "uses the StubSocket to provide IP address" do
+    Net::HTTP.start("http://example.com") do |http|
+      expect(http.ipaddr).to eq("127.0.0.1")
+    end
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)
