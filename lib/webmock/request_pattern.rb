@@ -281,6 +281,8 @@ module WebMock
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
         matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
+      elsif (@pattern).is_a?(Array)
+        matching_body_array?(body_as_hash(body, content_type), @pattern, content_type)
       elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
         @pattern == body_as_hash(body, content_type)
       else
@@ -344,17 +346,31 @@ module WebMock
     def matching_body_hashes?(query_parameters, pattern, content_type)
       return false unless query_parameters.is_a?(Hash)
       return false unless query_parameters.keys.sort == pattern.keys.sort
-      query_parameters.each do |key, actual|
-        expected = pattern[key]
 
-        if actual.is_a?(Hash) && expected.is_a?(Hash)
-          return false unless matching_body_hashes?(actual, expected, content_type)
-        else
-          expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
-          return false unless expected === actual
-        end
+      query_parameters.all? do |key, actual|
+        expected = pattern[key]
+        matching_values(actual, expected, content_type)
       end
+    end
+
+    def matching_body_array?(query_parameters, pattern, content_type)
+      return false unless query_parameters.is_a?(Array)
+      return false unless query_parameters.length == pattern.length
+
+      query_parameters.each_with_index do |actual, index|
+        expected = pattern[index]
+        reutrn false unless matching_values(actual, expected, content_type)
+      end
+
       true
+    end
+
+    def matching_values(actual, expected, content_type)
+      return matching_body_hashes?(actual, expected, content_type) if actual.is_a?(Hash) && expected.is_a?(Hash)
+      return matching_body_array?(actual, expected, content_type) if actual.is_a?(Array) && expected.is_a?(Array)
+
+      expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
+      expected === actual
     end
 
     def empty_string?(string)
