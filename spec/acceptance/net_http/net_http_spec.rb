@@ -213,9 +213,11 @@ describe "Net:HTTP" do
     end
   end
 
-  it "uses the StubSocket to provide IP address" do
-    Net::HTTP.start("http://example.com") do |http|
-      expect(http.ipaddr).to eq("127.0.0.1")
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+    it "uses the StubSocket to provide IP address" do
+      Net::HTTP.start("http://example.com") do |http|
+        expect(http.ipaddr).to eq("127.0.0.1")
+      end
     end
   end
 
