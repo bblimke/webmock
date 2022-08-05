@@ -1,5 +1,29 @@
 # Changelog
 
+# 3.17.0
+
+  * Minimum required Ruby version is 2.3
+
+    Thanks to [Go Sueyoshi](https://github.com/sue445)
+
+  * When using Net::HTTP, stubbed socket StubSocket#close and StubSocket#closed? behave more like the real sockets.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
+  * Added `peeraddr`, `ssl_version` and `cipher` methods to stubbed sockets used by Net::HTTP.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
+  * Added support for matching top-level array in JSON request body.
+
+    E.g.
+
+      ````
+      stub_request(:post, 'www.example.com').with(body: [{a: 1}])
+      ````
+
+    Thanks to [Cedric Sohrauer](https://github.com/cedrics)
+
 # 3.16.0
 
   * Fix leaky file descriptors and reuse socket for persistent connections.
