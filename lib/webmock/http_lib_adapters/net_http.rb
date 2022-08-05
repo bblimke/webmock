@@ -259,6 +259,8 @@ class StubSocket #:nodoc:
     def setsockopt(*args); end
     def peer_cert; end
     def peeraddr; ["AF_INET", 443, "127.0.0.1", "127.0.0.1"] end
+    def ssl_version; "TLSv1.3" end
+    def cipher; ["TLS_AES_128_GCM_SHA256", "TLSv1.3", 128, 128] end
   end
 end
 

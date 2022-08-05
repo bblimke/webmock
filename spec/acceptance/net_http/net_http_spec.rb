@@ -219,6 +219,14 @@ describe "Net:HTTP" do
     end
   end
 
+  it "defines common socket methods" do
+    Net::HTTP.start("http://example.com") do |http|
+      socket = http.instance_variable_get(:@socket)
+      expect(socket.io.ssl_version).to eq("TLSv1.3")
+      expect(socket.io.cipher).to eq(["TLS_AES_128_GCM_SHA256", "TLSv1.3", 128, 128])
+    end
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)
