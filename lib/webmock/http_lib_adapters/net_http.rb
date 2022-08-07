@@ -165,7 +165,7 @@ module WebMock
           response.extend Net::WebMockHTTPResponse
 
           if webmock_response.should_timeout
-            raise timeout_exception, "execution expired"
+            raise Net::OpenTimeout, "execution expired"
           end
 
           webmock_response.raise_error_if_any
@@ -173,16 +173,6 @@ module WebMock
           yield response if block_given?
 
           response
-        end
-
-        def timeout_exception
-          if defined?(Net::OpenTimeout)
-            # Ruby 2.x
-            Net::OpenTimeout
-          else
-            # Fallback, if things change
-            Timeout::Error
-          end
         end
 
         def build_webmock_response(net_http_response)
