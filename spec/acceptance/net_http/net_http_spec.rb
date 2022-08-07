@@ -115,33 +115,16 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
-  it "raises an ArgumentError if passed headers as symbols if RUBY_VERSION < 2.3.0" do
+  it "raises an ArgumentError if passed headers as symbols" do
     uri = URI.parse("http://google.com/")
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
+    request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
 
-    # Net::HTTP calls downcase on header keys assigned with []=
-    # In Ruby 1.8.7 symbols do not respond to downcase
-    #
-    # Meaning you can not assign header keys as symbols in ruby 1.8.7 using []=
-    if :symbol.respond_to?(:downcase)
-      request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
-    else
-      request.instance_eval do
-        @header = request.to_hash.merge({InvalidHeaderSinceItsASymbol: "this will not be valid"})
-      end
-    end
-
-    if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
-      expect do
-        http.request(request)
-      end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
-    else
-      stub_http_request(:get, "google.com").with(headers: { InvalidHeaderSinceItsASymbol: "this will not be valid" })
-      expect do
-        http.request(request)
-      end.not_to raise_error
-    end
+    stub_http_request(:get, "google.com").with(headers: { InvalidHeaderSinceItsASymbol: "this will not be valid" })
+    expect do
+      http.request(request)
+    end.not_to raise_error
   end
 
   it "should handle multiple values for the same response header" do
