@@ -72,6 +72,8 @@ module WebMock
         end
 
         def request(request, body = nil, &block)
+          return super unless started?
+
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -82,28 +84,21 @@ module WebMock
             build_net_http_response(webmock_response, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
             check_right_http_connection
-            after_request = lambda do |response|
-              if WebMock::CallbackRegistry.any_callbacks?
-                webmock_response = build_webmock_response(response)
-                WebMock::CallbackRegistry.invoke_callbacks(
-                  {lib: :net_http, real_request: true}, request_signature, webmock_response)
-              end
-              response.extend Net::WebMockHTTPResponse
-              block.call response if block
-              response
+            ensure_actual_connection
+
+            response = super(request, nil, &nil)
+
+            if WebMock::CallbackRegistry.any_callbacks?
+              WebMock::CallbackRegistry.invoke_callbacks(
+                {lib: :net_http, real_request: true},
+                request_signature,
+                build_webmock_response(response)
+              )
             end
-            super_with_after_request = lambda {
-              response = super(request, nil, &nil)
-              after_request.call(response)
-            }
-            if started?
-              ensure_actual_connection
-              super_with_after_request.call
-            else
-              start_with_connect {
-                super_with_after_request.call
-              }
-            end
+
+            response.extend Net::WebMockHTTPResponse
+            block.call response if block
+            response
           else
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
