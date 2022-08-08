@@ -553,6 +553,12 @@ describe WebMock::RequestPattern do
                 headers: {content_type: content_type}, body: "[{\"a\":1}]"))
             end
 
+            it "should not match if the request body has a different top level array" do
+              expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: ["a", "b"])).
+                not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                headers: {content_type: content_type}, body: "[\"a\", \"c\"]"))
+            end
+
             it "should not match when body is not json" do
               expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
                 not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
