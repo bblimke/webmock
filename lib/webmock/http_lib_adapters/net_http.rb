@@ -165,7 +165,7 @@ module WebMock
           response.extend Net::WebMockHTTPResponse
 
           if webmock_response.should_timeout
-            raise timeout_exception, "execution expired"
+            raise Net::OpenTimeout, "execution expired"
           end
 
           webmock_response.raise_error_if_any
@@ -173,16 +173,6 @@ module WebMock
           yield response if block_given?
 
           response
-        end
-
-        def timeout_exception
-          if defined?(Net::OpenTimeout)
-            # Ruby 2.x
-            Net::OpenTimeout
-          else
-            # Fallback, if things change
-            Timeout::Error
-          end
         end
 
         def build_webmock_response(net_http_response)
@@ -328,7 +318,6 @@ module WebMock
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
-      validate_headers(headers)
 
       if request.body_stream
         body = request.body_stream.read
@@ -351,25 +340,6 @@ module WebMock
       hostname = "[#{hostname}]" if /\A\[.*\]\z/ !~ hostname && /:/ =~ hostname
 
       "#{protocol}://#{hostname}:#{net_http.port}#{path}"
-    end
-
-    def self.validate_headers(headers)
-      # For Ruby versions < 2.3.0, if you make a request with headers that are symbols
-      # Net::HTTP raises a NoMethodError
-      #
-      # WebMock normalizes headers when creating a RequestSignature,
-      # and will update all headers from symbols to strings.
-      #
-      # This could create a false positive in a test suite with WebMock.
-      #
-      # So before this point, WebMock raises an ArgumentError if any of the headers are symbols
-      # instead of the cryptic NoMethodError "undefined method `split' ...` from Net::HTTP
-      if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
-        header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
-        if header_as_symbol
-          raise ArgumentError.new("Net:HTTP does not accept headers as symbols")
-        end
-      end
     end
 
     def self.check_right_http_connection
