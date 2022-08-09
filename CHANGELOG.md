@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.17.1
+
+  * Fixed Syntax Error
+
+    Thanks to [Mark Spangler](https://github.com/mspangler)
+
 # 3.17.0
 
   * Minimum required Ruby version is 2.3
