@@ -359,7 +359,7 @@ module WebMock
 
       query_parameters.each_with_index do |actual, index|
         expected = pattern[index]
-        reutrn false unless matching_values(actual, expected, content_type)
+        return false unless matching_values(actual, expected, content_type)
       end
 
       true
