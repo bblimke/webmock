@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     'wiki_uri'          => 'https://github.com/bblimke/webmock/wiki'
   }
 
-  s.required_ruby_version = '>= 2.0'
+  s.required_ruby_version = '>= 2.3'
 
   s.add_dependency 'addressable', '>= 2.8.0'
   s.add_dependency 'crack', '>= 0.3.2'

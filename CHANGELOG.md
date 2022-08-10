@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.15.1
+
+  * Minimum required Ruby version is 2.3
+
 # 3.15.0
 
   * fixed async-http adapter on Windows
