@@ -35,11 +35,11 @@ module WebMock
     alias == eql?
 
     def url_encoded?
-      !!(headers&.fetch('Content-Type', nil)&.start_with?('application/x-www-form-urlencoded'))
+      !!(headers && headers.fetch('Content-Type', "").start_with?('application/x-www-form-urlencoded'))
     end
 
     def json_headers?
-      !!(headers&.fetch('Content-Type', nil)&.start_with?('application/json'))
+      !!(headers && headers.fetch('Content-Type', "").start_with?('application/json'))
     end
 
     private
