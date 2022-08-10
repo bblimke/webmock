@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.16.1
+
+  * Minimum required Ruby version is 2.3
+
 # 3.16.0
 
   * Fix leaky file descriptors and reuse socket for persistent connections.
