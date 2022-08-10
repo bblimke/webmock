@@ -30,7 +30,11 @@
 
     Thanks to [Cedric Sohrauer](https://github.com/cedrics)
 
-# 3.16.0
+# 3.16.2
+
+  * Minimum required Ruby version is 2.0.
+
+# 3.16.0 (yanked)
 
   * Fix leaky file descriptors and reuse socket for persistent connections.
 
@@ -40,7 +44,11 @@
 
     Thanks to [Ray Zane](https://github.com/rzane)
 
-# 3.15.0
+# 3.15.2
+
+  * Minimum required Ruby version is 2.0.
+
+# 3.15.0 (yanked)
 
   * fixed async-http adapter on Windows
 
