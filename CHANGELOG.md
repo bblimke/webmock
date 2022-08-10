@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.15.2
+
+  * Minimum required Ruby version is 2.0 again.
+
 # 3.15.1
 
   * Minimum required Ruby version is 2.3
