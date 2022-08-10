@@ -11,19 +11,19 @@
 # 3.15.0
 
   * fixed async-http adapter on Windows
-  
+
     Tyanks to [Pavel Rosický](https://github.com/ahorek)
-  
-  * Support for http.rb >= 5.0.2 
-  
+
+  * Support for http.rb >= 5.0.2
+
     Thanks to [ojab](https://github.com/ojab)
 
   * Curb adapter supports headers with `:` character in the header value
-  
+
     Thanks to [Giorgio Gambino](https://github.com/mrbuzz)
 
   * Support for matching body of JSON or application/x-www-form-urlencoded requests with content type header including charset.
-  
+
     Thanks to [Timmitry](https://github.com/Timmitry)
 
   * Prevent double-wrapping http.rb features on non-stubbed requests
