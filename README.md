@@ -1176,7 +1176,7 @@ For a full list of contributors you can visit the
 
 ## Background
 
-Thank you Fakeweb! This library was inspired by [FakeWeb](http://fakeweb.rubyforge.org).
+Thank you Fakeweb! This library was inspired by [FakeWeb](https://github.com/chrisk/fakeweb).
 I imported some solutions from that project to WebMock. I also copied some code i.e Net:HTTP adapter.
 Fakeweb architecture unfortunately didn't allow me to extend it easily with the features I needed.
 I also preferred some things to work differently i.e request stub precedence.
