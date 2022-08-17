@@ -1,5 +1,15 @@
 # Changelog
 
+# 3.18.0
+
+  * Net::BufferedIO is not replaced anymore.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
+  * Simplified connection handing in Net::HTTP adapter.
+
+    Thanks to [Ray Zane](https://github.com/rzane)
+
 # 3.17.1
 
   * Fixed Syntax Error
