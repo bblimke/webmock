@@ -142,6 +142,34 @@ describe WebMock::Response do
   end
 
   describe "from raw response" do
+    describe "when input is a StringIO" do
+      before(:each) do
+        @io = StringIO.new(File.read(CURL_EXAMPLE_OUTPUT_PATH))
+        @response = WebMock::Response.new(@io)
+      end
+
+      it "should read status" do
+        expect(@response.status).to eq([202, "OK"])
+      end
+
+      it "should read headers" do
+        expect(@response.headers).to eq(
+          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+          "Content-Type"=>"text/html; charset=UTF-8",
+          "Content-Length"=>"419",
+          "Connection"=>"Keep-Alive",
+          "Accept"=>"image/jpeg, image/png"
+        )
+      end
+
+      it "should read body" do
+        expect(@response.body.size).to eq(419)
+      end
+
+      it "should close IO" do
+        expect(@io).to be_closed
+      end
+    end
 
     describe "when input is IO" do
       before(:each) do

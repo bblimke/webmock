@@ -14,8 +14,11 @@ module WebMock
 
   class Response
     def initialize(options = {})
-      if options.is_a?(IO) || options.is_a?(String)
+      case options
+      when IO, StringIO
         self.options = read_raw_response(options)
+      when String
+        self.options = read_raw_response(StringIO.new(options))
       else
         self.options = options
       end
@@ -120,13 +123,8 @@ module WebMock
       end
     end
 
-    def read_raw_response(raw_response)
-      if raw_response.is_a?(IO)
-        string = raw_response.read
-        raw_response.close
-        raw_response = string
-      end
-      socket = ::Net::BufferedIO.new(raw_response)
+    def read_raw_response(io)
+      socket = ::Net::BufferedIO.new(io)
       response = ::Net::HTTPResponse.read_new(socket)
       transfer_encoding = response.delete('transfer-encoding') #chunks were already read by curl
       response.reading_body(socket, true) {}
@@ -138,6 +136,8 @@ module WebMock
       options[:body] = response.read_body
       options[:status] = [response.code.to_i, response.message]
       options
+    ensure
+      socket.close
     end
 
     InvalidBody = Class.new(StandardError)
