@@ -67,78 +67,57 @@ module WebMock
         end
 
         def request(request, body = nil, &block)
+          return super unless started?
+
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-            @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
             build_net_http_response(webmock_response, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
             check_right_http_connection
-            after_request = lambda do |response|
-              if WebMock::CallbackRegistry.any_callbacks?
-                webmock_response = build_webmock_response(response)
-                WebMock::CallbackRegistry.invoke_callbacks(
-                  {lib: :net_http, real_request: true}, request_signature, webmock_response)
-              end
-              response.extend Net::WebMockHTTPResponse
-              block.call response if block
-              response
+            ensure_actually_connected
+
+            response = super(request, nil, &nil)
+
+            if WebMock::CallbackRegistry.any_callbacks?
+              WebMock::CallbackRegistry.invoke_callbacks(
+                {lib: :net_http, real_request: true},
+                request_signature,
+                build_webmock_response(response)
+              )
             end
-            super_with_after_request = lambda {
-              response = super(request, nil, &nil)
-              after_request.call(response)
-            }
-            if started?
-              ensure_actual_connection
-              super_with_after_request.call
-            else
-              start_with_connect {
-                super_with_after_request.call
-              }
-            end
+
+            response.extend Net::WebMockHTTPResponse
+            block.call response if block
+            response
           else
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
         end
 
-        def start_without_connect
-          raise IOError, 'HTTP session already opened' if @started
-          if block_given?
-            begin
-              @socket = Net::HTTP.socket_type.new
-              @started = true
-              return yield(self)
-            ensure
-              do_finish
-            end
-          end
-          @socket = Net::HTTP.socket_type.new
-          @started = true
-          self
-        end
+        private
 
+        alias_method :actually_connect, :connect
 
-        def ensure_actual_connection
-          if @socket.is_a?(StubSocket)
-            @socket&.close
-            @socket = nil
-            do_start
-          end
-        end
-
-        alias_method :start_with_connect, :start
-
-        def start(&block)
+        def connect
           uri = Addressable::URI.parse(WebMock::NetHTTPUtility.get_uri(self))
 
           if WebMock.net_http_connect_on_start?(uri)
-            super(&block)
+            super
           else
-            start_without_connect(&block)
+            @socket = StubSocket.new
+          end
+        end
+
+        def ensure_actually_connected
+          if @socket.is_a?(StubSocket)
+            @socket&.close
+            @socket = nil
+            actually_connect
           end
         end
 
