@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.18.1
+
+  * Reverted simplified connection handing in Net::HTTP adapter due to https://github.com/bblimke/webmock/issues/999
+
 # 3.18.0
 
   * Net::BufferedIO is not replaced anymore.
