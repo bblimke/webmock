@@ -4,26 +4,30 @@ module WebMock
   module Util
     class HashCounter
       attr_accessor :hash
+
       def initialize
-        self.hash = {}
+        self.hash = Hash.new(0)
         @order = {}
         @max = 0
         @lock = ::Mutex.new
       end
-      def put key, num=1
+
+      def put(key, num=1)
         @lock.synchronize do
-          hash[key] = (hash[key] || 0) + num
-          @order[key] = @max = @max + 1
+          hash[key] += num
+          @order[key] = @max += 1
         end
       end
-      def get key
+
+      def get(key)
         @lock.synchronize do
-          hash[key] || 0
+          hash[key]
         end
       end
 
       def select(&block)
         return unless block_given?
+
         @lock.synchronize do
           hash.select(&block)
         end
