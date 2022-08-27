@@ -25,4 +25,20 @@ describe WebMock::Util::Headers do
 
   end
 
+  describe ".normalize_headers" do
+    it "normalizes capitalization for string header names" do
+      expect(described_class.normalize_headers({ "foo-BAR-bAz" => "qUx" }))
+        .to eq({ "Foo-Bar-Baz" => "qUx" })
+    end
+
+    it "stringifies and dasherizes symbol header names" do
+      expect(described_class.normalize_headers({ foo_bar: "qUx" }))
+        .to eq({ "Foo-Bar" => "qUx" })
+    end
+
+    it "respects choice of underscores for string header names" do
+      expect(described_class.normalize_headers({ "foo-BAR_bAz" => "qUx" }))
+        .to eq({ "Foo-Bar_Baz" => "qUx" })
+    end
+  end
 end
