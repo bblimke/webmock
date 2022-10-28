@@ -152,8 +152,8 @@ unless RUBY_PLATFORM =~ /java/
           it "doesn't modify headers" do
             EM.run do
               conn = EventMachine::HttpRequest.new(webmock_server_url)
-              http = conn.post(head: { 'content-length' => '125' }, body: 'test')
-              expect(conn).to receive(:send_data).with(/POST \/ HTTP\/1.1\r\nContent-Length: 125\r\nConnection: close\r\nHost: localhost:\d+\r\nUser-Agent: EventMachine HttpClient\r\nAccept-Encoding: gzip, compressed\r\n\r\n/).and_call_original
+              http = conn.post(head: { 'content-length' => '4' }, body: 'test')
+              expect(conn).to receive(:send_data).with(/POST \/ HTTP\/1.1\r\nContent-Length: 4\r\nConnection: close\r\nHost: localhost:\d+\r\nUser-Agent: EventMachine HttpClient\r\nAccept-Encoding: gzip, compressed\r\n\r\n/).and_call_original
               expect(conn).to receive(:send_data).with('test')
               http.callback do
                 EM.stop
