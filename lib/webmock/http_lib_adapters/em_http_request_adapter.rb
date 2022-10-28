@@ -116,7 +116,7 @@ if defined?(EventMachine::HttpClient)
           }
           self
         elsif WebMock.net_connect_allowed?(request_signature.uri)
-          super
+          super(request_signature.raw_headers, request_signature.body)
         else
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
