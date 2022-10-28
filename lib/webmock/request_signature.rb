@@ -3,7 +3,7 @@ module WebMock
   class RequestSignature
 
     attr_accessor :method, :uri, :body
-    attr_reader :headers
+    attr_reader :headers, :raw_headers
 
     def initialize(method, uri, options = {})
       self.method = method.to_sym
@@ -22,6 +22,7 @@ module WebMock
     end
 
     def headers=(headers)
+      @raw_headers = headers
       @headers = WebMock::Util::Headers.normalize_headers(headers)
     end
 

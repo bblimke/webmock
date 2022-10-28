@@ -24,6 +24,13 @@ describe WebMock::RequestSignature do
       ).to eq({'B' => 'b'})
     end
 
+    it "assigns raw headers" do
+      allow(WebMock::Util::Headers).to receive(:normalize_headers).with({'A' => 'a'}.freeze).and_return('B' => 'b')
+      expect(
+        WebMock::RequestSignature.new(:get, "www.example.com", headers: {'A' => 'a'}).raw_headers
+      ).to eq({'A' => 'a'})
+    end
+
     it "assign the body" do
       expect(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc").body).to eq("abc")
     end
