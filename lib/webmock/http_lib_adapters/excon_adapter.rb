@@ -3,6 +3,7 @@ begin
 rescue LoadError
   # excon not found
 end
+require 'pry'
 
 if defined?(Excon)
   WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.27.5').check_version!
@@ -50,6 +51,7 @@ if defined?(Excon)
         end
 
         def self.handle_request(params)
+          binding.pry
           mock_request  = self.build_request params.dup
           WebMock::RequestRegistry.instance.requested_signatures.put(mock_request)
 
