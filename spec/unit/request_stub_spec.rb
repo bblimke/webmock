@@ -69,6 +69,24 @@ describe WebMock::RequestStub do
       expect(@request_stub.response.status).to eq([500, ""])
     end
 
+    it "should json-ify an Array body" do
+      @request_stub.to_return_json(body: [{abc: "def" }])
+      expect(@request_stub.response.body).to eq('[{"abc":"def"}]')
+    end
+
+    it "should json-ify any object responding to `to_json`" do
+      record = double("SomeRecord")
+      allow(record).to receive_messages(to_json: '{"what":"something"}.')
+
+      @request_stub.to_return_json(body: record)
+      expect(@request_stub.response.body).to eq('{"what":"something"}.')
+    end
+
+    it "should not over-json-ify a String body" do
+      @request_stub.to_return_json(body: '{"abc":"def"}')
+      expect(@request_stub.response.body).to eq('{"abc":"def"}')
+    end
+
     it "should apply the content_type header" do
       @request_stub.to_return_json(body: {abc: "def"}, status: 500)
       expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/json"})

@@ -31,7 +31,7 @@ module WebMock
         headers, body = resp_h.values_at(:headers, :body)
         resp_h.merge(
           headers: {content_type: 'application/json'}.merge(headers.to_h),
-          body: body.is_a?(Hash) ? body.to_json : body
+          body: body.is_a?(String) ? body : body.to_json
         )
       end
 
