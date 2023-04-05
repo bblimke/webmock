@@ -50,22 +50,24 @@ Supported Ruby Interpreters
 ## Installation
 
 ```bash
-    gem install webmock
+gem install webmock
 ```
 or alternatively:
 
 ```ruby
-    # add to your Gemfile
-    group :test do
-        gem "webmock"
-    end
+# add to your Gemfile
+group :test do
+  gem "webmock"
+end
 ```
 
 ### or to install the latest development version from github master
 
-    git clone http://github.com/bblimke/webmock.git
-    cd webmock
-    rake install
+```bash
+git clone http://github.com/bblimke/webmock.git
+cd webmock
+rake install
+```
 
 ## Upgrading from v1.x to v2.x
 
