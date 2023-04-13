@@ -540,7 +540,7 @@ RestClient.get('www.example.org:8080', '/') # ===> Allowed
 With a `Regexp` matching the URI:
 
 ```ruby
-WebMock.disable_net_connect!(allow: %r{ample.org/foo})
+WebMock.disable_net_connect!(allow: %r{ample\.org/foo})
 
 RestClient.get('www.example.org', '/foo/bar') # ===> Allowed
 RestClient.get('sample.org', '/foo')          # ===> Allowed
