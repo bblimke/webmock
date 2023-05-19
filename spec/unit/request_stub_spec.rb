@@ -87,6 +87,14 @@ describe WebMock::RequestStub do
       expect(@request_stub.response.body).to eq('{"abc":"def"}')
     end
 
+    it "should json-ify any callable proc or lambda to body" do
+      record = double("SomeRecord")
+      allow(record).to receive_messages(to_json: '{"what":"something callable"}.')
+
+      @request_stub.to_return_json(body: -> { record })
+      expect(@request_stub.response.body).to eq('{"what":"something callable"}.')
+    end
+
     it "should apply the content_type header" do
       @request_stub.to_return_json(body: {abc: "def"}, status: 500)
       expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/json"})

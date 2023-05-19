@@ -29,9 +29,13 @@ module WebMock
 
       json_response_hashes = [*response_hashes].flatten.map do |resp_h|
         headers, body = resp_h.values_at(:headers, :body)
+
+        body = body.call if body.respond_to?(:call)
+        body = body.to_json unless body.is_a?(String)
+
         resp_h.merge(
           headers: {content_type: 'application/json'}.merge(headers.to_h),
-          body: body.is_a?(String) ? body : body.to_json
+          body: body
         )
       end
 
