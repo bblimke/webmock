@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WebMock
   class HttpLibAdapter
     def self.adapter_for(lib)

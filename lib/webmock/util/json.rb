@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This is a copy of https://github.com/jnunemaker/crack/blob/master/lib/crack/json.rb
 # with date parsing removed
 # Copyright (c) 2004-2008 David Heinemeier Hansson

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'em-http-request'
 rescue LoadError

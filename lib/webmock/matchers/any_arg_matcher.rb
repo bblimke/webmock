@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WebMock
   module Matchers
     # this is a based on RSpec::Mocks::ArgumentMatchers::AnyArgMatcher

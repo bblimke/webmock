@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This code was created based on https://github.com/myronmarston/vcr/blob/master/lib/vcr/util/version_checker.rb
 # Thanks to @myronmarston
 

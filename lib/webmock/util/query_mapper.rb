@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WebMock::Util
   class QueryMapper
     class << self

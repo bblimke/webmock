@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'minitest/test'
   test_class = Minitest::Test

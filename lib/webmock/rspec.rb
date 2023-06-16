@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'webmock'
 
 # RSpec 1.x and 2.x compatibility

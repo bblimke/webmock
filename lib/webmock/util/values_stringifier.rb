@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class WebMock::Util::ValuesStringifier
   def self.stringify_values(value)
     case value
