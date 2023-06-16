@@ -1,7 +1,7 @@
 WebMock
 =======
 [![Gem Version](https://badge.fury.io/rb/webmock.svg)](http://badge.fury.io/rb/webmock)
-[![Build Status](https://secure.travis-ci.org/bblimke/webmock.svg?branch=master)](http://travis-ci.org/bblimke/webmock)
+[![Build Status](https://github.com/bblimke/webmock/workflows/CI/badge.svg?branch=master)](https://github.com/bblimke/webmock/actions)
 [![Code Climate](https://codeclimate.com/github/bblimke/webmock/badges/gpa.svg)](https://codeclimate.com/github/bblimke/webmock)
 [![Mentioned in Awesome Ruby](https://awesome.re/mentioned-badge.svg)](https://github.com/markets/awesome-ruby)
 [![Inline docs](http://inch-ci.org/github/bblimke/webmock.svg?branch=master)](http://inch-ci.org/github/bblimke/webmock)
@@ -24,16 +24,19 @@ Features
 Supported HTTP libraries
 ------------------------
 
-* Net::HTTP and libraries based on Net::HTTP (i.e RightHttpConnection, REST Client, HTTParty)
-* HTTPClient
-* Patron
-* EM-HTTP-Request
-* Curb (currently only Curb::Easy)
-* Typhoeus (currently only Typhoeus::Hydra)
-* Excon
-* HTTP Gem
-* Manticore
-* Async::HTTP::Client
+* [Async::HTTP::Client](https://github.com/socketry/async-http)
+* [Curb](https://github.com/taf2/curb) (currently only Curb::Easy)
+* [EM-HTTP-Request](https://github.com/igrigorik/em-http-request)
+* [Excon](https://github.com/excon/excon)
+* [HTTPClient](https://github.com/nahi/httpclient)
+* [HTTP Gem (also known as http.rb)](https://github.com/httprb/http)
+* [httpx](https://honeyryderchuck.gitlab.io/httpx/wiki/Webmock-Adapter)
+* [Manticore](https://github.com/cheald/manticore)
+* [Net::HTTP](https://ruby-doc.org/stdlib-2.7.0/libdoc/net/http/rdoc/Net/HTTP.html) and other libraries based on Net::HTTP, e.g.:
+  * [HTTParty](https://github.com/jnunemaker/httparty)
+  * [REST Client](https://github.com/rest-client/rest-client)
+* [Patron](https://github.com/toland/patron)
+* [Typhoeus](https://github.com/typhoeus/typhoeus) (currently only Typhoeus::Hydra)
 
 Supported Ruby Interpreters
 ---------------------------
@@ -46,15 +49,17 @@ Supported Ruby Interpreters
 
 ## Installation
 
+```bash
     gem install webmock
-
+```
 or alternatively:
 
+```ruby
     # add to your Gemfile
     group :test do
-        gem "webmock" 
+        gem "webmock"
     end
-
+```
 
 ### or to install the latest development version from github master
 
@@ -66,20 +71,12 @@ or alternatively:
 
 WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
 
-### Test::Unit
+### Cucumber
 
-Add the following code to `test/test_helper.rb`
-
-```ruby
-require 'webmock/test_unit'
-```
-
-### RSpec
-
-Add the following code to `spec/spec_helper`:
+Create a file `features/support/webmock.rb` with the following contents:
 
 ```ruby
-require 'webmock/rspec'
+require 'webmock/cucumber'
 ```
 
 ### MiniTest
@@ -90,12 +87,20 @@ Add the following code to `test/test_helper`:
 require 'webmock/minitest'
 ```
 
-### Cucumber
+### RSpec
 
-Create a file `features/support/webmock.rb` with the following contents:
+Add the following code to `spec/spec_helper`:
 
 ```ruby
-require 'webmock/cucumber'
+require 'webmock/rspec'
+```
+
+### Test::Unit
+
+Add the following code to `test/test_helper.rb`
+
+```ruby
+require 'webmock/test_unit'
 ```
 
 ### Outside a test framework
@@ -109,12 +114,9 @@ include WebMock::API
 WebMock.enable!
 ```
 
-## Examples
-
-
+# Examples
 
 ## Stubbing
-
 
 ### Stubbed request based on uri only and with the default response
 
@@ -548,9 +550,9 @@ RestClient.get('sample.org', '/bar')          # ===> Failure
 With an object that responds to `#call`, receiving a `URI` object and returning a boolean:
 
 ```ruby
-blacklist = ['google.com', 'facebook.com', 'apple.com']
+denylist = ['google.com', 'facebook.com', 'apple.com']
 allowed_sites = lambda{|uri|
-  blacklist.none?{|site| uri.host.include?(site) }
+  denylist.none?{|site| uri.host.include?(site) }
 }
 WebMock.disable_net_connect!(allow: allowed_sites)
 
@@ -1146,13 +1148,35 @@ People who submitted patches and new features or suggested improvements. Many th
 * Bruno Sutic
 * Ryan Kerr
 * Adam Harwood
+* Ben Koshy
+* Jesse Bowes
+* Marek Kasztelnik
+* ce07c3
+* Jun Jiang
+* Oleksiy Kovyrin
+* Matt Larraz
+* Tony Schneider
+* Niklas Hösl
+* Johanna Hartmann
+* Alex Vondrak
+* Will Storey
+* Eduardo Hernandez
+* ojab
+* Giorgio Gambino
+* Timmitry
+* Michael Fairley
+* Ray Zane
+* Go Sueyoshi
+* Cedric Sohrauer
+* Akira Matsuda
+* Mark Spangler
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
 
 ## Background
 
-Thank you Fakeweb! This library was inspired by [FakeWeb](http://fakeweb.rubyforge.org).
+Thank you Fakeweb! This library was inspired by [FakeWeb](https://github.com/chrisk/fakeweb).
 I imported some solutions from that project to WebMock. I also copied some code i.e Net:HTTP adapter.
 Fakeweb architecture unfortunately didn't allow me to extend it easily with the features I needed.
 I also preferred some things to work differently i.e request stub precedence.

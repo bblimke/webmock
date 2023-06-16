@@ -22,7 +22,7 @@ unless RUBY_PLATFORM =~ /java/
 
         def make_request
           EM.run do
-            request = EM::HttpRequest.new(http_url).get(redirects: 1)
+            request = EM::HttpRequest.new(http_url, ssl: {verify_peer: true}).get(redirects: 1)
             request.callback { EM.stop }
           end
         end
@@ -66,6 +66,35 @@ unless RUBY_PLATFORM =~ /java/
 
             http.callback do
               expect(WebMock).to have_requested(:get, "www.example.com").with(body: 'bar')
+              EM.stop
+            end
+          end
+        end
+
+        it "only calls request middleware once" do
+          stub_request(:get, "www.example.com")
+
+          middleware = Class.new do
+            def self.called!
+              @called = called + 1
+            end
+
+            def self.called
+              @called || 0
+            end
+
+            def request(client, head, body)
+              self.class.called!
+              [head, body]
+            end
+          end
+
+          EM.run do
+            conn = EventMachine::HttpRequest.new('http://www.example.com/')
+            conn.use middleware
+            http = conn.get
+            http.callback do
+              expect(middleware.called).to eq(1)
               EM.stop
             end
           end
@@ -119,6 +148,33 @@ unless RUBY_PLATFORM =~ /java/
         context 'making a real request', net_connect: true do
           before { WebMock.allow_net_connect! }
           include_examples "em-http-request middleware/after_request hook integration"
+
+          it "only calls request middleware once" do
+            middleware = Class.new do
+              def self.called!
+                @called = called + 1
+              end
+
+              def self.called
+                @called || 0
+              end
+
+              def request(client, head, body)
+                self.class.called!
+                [head, body]
+              end
+            end
+
+            EM.run do
+              conn = EventMachine::HttpRequest.new(webmock_server_url)
+              conn.use middleware
+              http = conn.get
+              http.callback do
+                expect(middleware.called).to eq(1)
+                EM.stop
+              end
+            end
+          end
         end
 
         context 'when the request is stubbed' do

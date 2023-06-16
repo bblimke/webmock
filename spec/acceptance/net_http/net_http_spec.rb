@@ -115,33 +115,16 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
-  it "raises an ArgumentError if passed headers as symbols if RUBY_VERSION < 2.3.0" do
+  it "raises an ArgumentError if passed headers as symbols" do
     uri = URI.parse("http://google.com/")
     http = Net::HTTP.new(uri.host, uri.port)
     request = Net::HTTP::Get.new(uri.request_uri)
+    request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
 
-    # Net::HTTP calls downcase on header keys assigned with []=
-    # In Ruby 1.8.7 symbols do not respond to downcase
-    #
-    # Meaning you can not assign header keys as symbols in ruby 1.8.7 using []=
-    if :symbol.respond_to?(:downcase)
-      request[:InvalidHeaderSinceItsASymbol] = "this will not be valid"
-    else
-      request.instance_eval do
-        @header = request.to_hash.merge({InvalidHeaderSinceItsASymbol: "this will not be valid"})
-      end
-    end
-
-    if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
-      expect do
-        http.request(request)
-      end.to raise_error ArgumentError, "Net:HTTP does not accept headers as symbols"
-    else
-      stub_http_request(:get, "google.com").with(headers: { InvalidHeaderSinceItsASymbol: "this will not be valid" })
-      expect do
-        http.request(request)
-      end.not_to raise_error
-    end
+    stub_http_request(:get, "google.com").with(headers: { InvalidHeaderSinceItsASymbol: "this will not be valid" })
+    expect do
+      http.request(request)
+    end.not_to raise_error
   end
 
   it "should handle multiple values for the same response header" do
@@ -213,6 +196,22 @@ describe "Net:HTTP" do
     end
   end
 
+  if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('2.7.0')
+    it "uses the StubSocket to provide IP address" do
+      Net::HTTP.start("http://example.com") do |http|
+        expect(http.ipaddr).to eq("127.0.0.1")
+      end
+    end
+  end
+
+  it "defines common socket methods" do
+    Net::HTTP.start("http://example.com") do |http|
+      socket = http.instance_variable_get(:@socket)
+      expect(socket.io.ssl_version).to eq("TLSv1.3")
+      expect(socket.io.cipher).to eq(["TLS_AES_128_GCM_SHA256", "TLSv1.3", 128, 128])
+    end
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)
@@ -254,6 +253,21 @@ describe "Net:HTTP" do
         }
       end
 
+      it "should connect to the server on start when allowlisted", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com", net_http_connect_on_start: "www.google.com")
+        @http.start {|conn|
+          cert = OpenSSL::X509::Certificate.new conn.peer_cert
+          expect(cert).to be_a(OpenSSL::X509::Certificate)
+        }
+      end
+
+      it "should not connect to the server on start when not allowlisted", net_connect: true do
+        WebMock.disable_net_connect!(allow: "www.google.com", net_http_connect_on_start: "www.yahoo.com")
+        @http.start {|conn|
+          expect(conn.peer_cert).to be_nil
+        }
+      end
+
       it "should connect to the server if the URI matches an regex", net_connect: true do
         WebMock.disable_net_connect!(allow: /google.com/)
         Net::HTTP.get('www.google.com','/')
@@ -278,6 +292,13 @@ describe "Net:HTTP" do
   describe "when net_http_connect_on_start is false" do
     before(:each) do
       WebMock.allow_net_connect!(net_http_connect_on_start: false)
+    end
+    it_should_behave_like "Net::HTTP"
+  end
+
+  describe "when net_http_connect_on_start is a specific host" do
+    before(:each) do
+      WebMock.allow_net_connect!(net_http_connect_on_start: "localhost")
     end
     it_should_behave_like "Net::HTTP"
   end
@@ -338,6 +359,37 @@ describe "Net:HTTP" do
 
     res = Net::HTTP.start(uri.host, uri.port) do |http|
       http.request(req, '')
+    end
+  end
+
+  describe "hostname handling" do
+    it "should set brackets around the hostname if it is an IPv6 address" do
+      net_http = Net::HTTP.new('b2dc:5bdf:4f0d::3014:e0ca', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://[b2dc:5bdf:4f0d::3014:e0ca]:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is already wrapped by brackets" do
+      net_http = Net::HTTP.new('[b2dc:5bdf:4f0d::3014:e0ca]', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://[b2dc:5bdf:4f0d::3014:e0ca]:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is an IPv4 address" do
+      net_http = Net::HTTP.new('181.152.137.168', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://181.152.137.168:80/example.jpg')
+    end
+
+    it "should not set brackets around the hostname if it is a domain" do
+      net_http = Net::HTTP.new('www.example.com', 80)
+      path = '/example.jpg'
+      expect(WebMock::NetHTTPUtility.get_uri(net_http, path)).to eq('http://www.example.com:80/example.jpg')
+    end
+
+    it "does not require a path" do
+      net_http = Net::HTTP.new('www.example.com', 80)
+      expect(WebMock::NetHTTPUtility.get_uri(net_http)).to eq('http://www.example.com:80')
     end
   end
 end

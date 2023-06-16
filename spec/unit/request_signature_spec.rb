@@ -18,7 +18,7 @@ describe WebMock::RequestSignature do
     end
 
     it "assigns normalized headers" do
-      expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+      allow(WebMock::Util::Headers).to receive(:normalize_headers).with({'A' => 'a'}.freeze).and_return('B' => 'b')
       expect(
         WebMock::RequestSignature.new(:get, "www.example.com", headers: {'A' => 'a'}).headers
       ).to eq({'B' => 'b'})
@@ -125,8 +125,18 @@ describe WebMock::RequestSignature do
       expect(subject.url_encoded?).to be true
     end
 
+    it "returns true if the headers are urlencoded with a specified charset" do
+      subject.headers = { "Content-Type" => "application/x-www-form-urlencoded; charset=UTF-8" }
+      expect(subject.url_encoded?).to be true
+    end
+
     it "returns false if the headers are NOT urlencoded" do
       subject.headers = { "Content-Type" => "application/made-up-format" }
+      expect(subject.url_encoded?).to be false
+    end
+
+    it "returns false when no content type header is present" do
+      subject.headers = { "Some-Header" => "some-value" }
       expect(subject.url_encoded?).to be false
     end
 
@@ -142,8 +152,18 @@ describe WebMock::RequestSignature do
       expect(subject.json_headers?).to be true
     end
 
+    it "returns true if the headers are json with a specified charset" do
+      subject.headers = { "Content-Type" => "application/json; charset=UTF-8" }
+      expect(subject.json_headers?).to be true
+    end
+
     it "returns false if the headers are NOT json" do
       subject.headers = { "Content-Type" => "application/made-up-format" }
+      expect(subject.json_headers?).to be false
+    end
+
+    it "returns false when no content type header is present" do
+      subject.headers = { "Some-Header" => "some-value" }
       expect(subject.json_headers?).to be false
     end
 

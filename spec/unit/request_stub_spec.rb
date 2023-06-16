@@ -50,6 +50,41 @@ describe WebMock::RequestStub do
 
   end
 
+  describe "to_return_json" do
+
+    it "should raise if a block is given" do
+      expect {
+        @request_stub.to_return_json(body: "abc", status: 500) { puts "don't call me" }
+      }.to raise_error(ArgumentError, '#to_return_json does not support passing a block')
+    end
+
+    it "should assign responses normally" do
+      @request_stub.to_return_json([{body: "abc"}, {body: "def"}])
+      expect([@request_stub.response.body, @request_stub.response.body]).to eq(["abc", "def"])
+    end
+
+    it "should json-ify a Hash body" do
+      @request_stub.to_return_json(body: {abc: "def"}, status: 500)
+      expect(@request_stub.response.body).to eq({abc: "def"}.to_json)
+      expect(@request_stub.response.status).to eq([500, ""])
+    end
+
+    it "should apply the content_type header" do
+      @request_stub.to_return_json(body: {abc: "def"}, status: 500)
+      expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/json"})
+    end
+
+    it "should preserve existing headers" do
+      @request_stub.to_return_json(headers: {"A" => "a"}, body: "")
+      expect(@request_stub.response.headers).to eq({"A"=>"a", "Content-Type"=>"application/json"})
+    end
+
+    it "should allow callsites to override content_type header" do
+      @request_stub.to_return_json(headers: {content_type: 'application/super-special-json'})
+      expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/super-special-json"})
+    end
+  end
+
   describe "then" do
     it "should return stub without any modifications, acting as syntactic sugar" do
       expect(@request_stub.then).to eq(@request_stub)

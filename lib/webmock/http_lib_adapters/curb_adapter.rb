@@ -5,7 +5,7 @@ rescue LoadError
 end
 
 if defined?(Curl)
-  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '0.9.1', ['0.8.7']).check_version!
+  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '1.0.1', ['0.8.7']).check_version!
 
   module WebMock
     module HttpLibAdapters
@@ -128,7 +128,7 @@ if defined?(Curl)
       def headers_as_hash(headers)
         if headers.is_a?(Array)
           headers.inject({}) {|hash, header|
-            name, value = header.split(":").map(&:strip)
+            name, value = header.split(":", 2).map(&:strip)
             hash[name] = value
             hash
           }

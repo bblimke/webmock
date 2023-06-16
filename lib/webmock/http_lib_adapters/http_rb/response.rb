@@ -11,7 +11,7 @@ module HTTP
     end
 
     class << self
-      def from_webmock(webmock_response, request_signature = nil)
+      def from_webmock(request, webmock_response, request_signature = nil)
         status  = Status.new(webmock_response.status.first)
         headers = webmock_response.headers || {}
         uri     = normalize_uri(request_signature && request_signature.uri)
@@ -24,17 +24,31 @@ module HTTP
         elsif HTTP::VERSION < "3.0.0"
           Body.new(Streamer.new(webmock_response.body), webmock_response.body.encoding)
         else
-          Body.new(Streamer.new(webmock_response.body), encoding: webmock_response.body.encoding)
+          Body.new(
+            Streamer.new(webmock_response.body, encoding: webmock_response.body.encoding),
+            encoding: webmock_response.body.encoding
+          )
         end
 
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
+
+        # 5.0.0 had a breaking change to require request instead of uri.
+        if HTTP::VERSION < '5.0.0'
+          return new({
+            status: status,
+            version: "1.1",
+            headers: headers,
+            body: body,
+            uri: uri
+          })
+        end
 
         new({
           status: status,
           version: "1.1",
           headers: headers,
           body: body,
-          uri: uri
+          request: request,
         })
       end
 

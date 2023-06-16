@@ -14,8 +14,11 @@ module WebMock
 
   class Response
     def initialize(options = {})
-      if options.is_a?(IO) || options.is_a?(String)
+      case options
+      when IO, StringIO
         self.options = read_raw_response(options)
+      when String
+        self.options = read_raw_response(StringIO.new(options))
       else
         self.options = options
       end
@@ -91,10 +94,10 @@ module WebMock
 
     def ==(other)
       self.body == other.body &&
-      self.headers === other.headers &&
-      self.status == other.status &&
-      self.exception == other.exception &&
-      self.should_timeout == other.should_timeout
+        self.headers === other.headers &&
+        self.status == other.status &&
+        self.exception == other.exception &&
+        self.should_timeout == other.should_timeout
     end
 
     private
@@ -111,16 +114,17 @@ module WebMock
       valid_types = [Proc, IO, Pathname, String, Array]
       return if @body.nil?
       return if valid_types.any? { |c| @body.is_a?(c) }
-      raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+
+      if @body.class.is_a?(Hash)
+        raise InvalidBody, "must be one of: #{valid_types}, but you've used a #{@body.class}' instead." \
+          "\n What shall we encode it to? try calling .to_json .to_xml instead on the hash instead, or otherwise convert it to a string."
+      else
+        raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+      end
     end
 
-    def read_raw_response(raw_response)
-      if raw_response.is_a?(IO)
-        string = raw_response.read
-        raw_response.close
-        raw_response = string
-      end
-      socket = ::Net::BufferedIO.new(raw_response)
+    def read_raw_response(io)
+      socket = ::Net::BufferedIO.new(io)
       response = ::Net::HTTPResponse.read_new(socket)
       transfer_encoding = response.delete('transfer-encoding') #chunks were already read by curl
       response.reading_body(socket, true) {}
@@ -132,6 +136,8 @@ module WebMock
       options[:body] = response.read_body
       options[:status] = [response.code.to_i, response.message]
       options
+    ensure
+      socket.close
     end
 
     InvalidBody = Class.new(StandardError)

@@ -383,6 +383,17 @@ unless RUBY_PLATFORM =~ /java/
         expect(c.body).to eq("abc")
       end
 
+      it "supports headers containing the ':' character" do
+        stub_request(:get, "www.example.com").with(headers: {'Referer'=>'http://www.example.com'}).to_return(body: "abc")
+
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.headers = ["Referer: http://www.example.com"]
+        c.http(:GET)
+        expect(c.body).to eq("abc")
+        expect(c.headers).to eq(["Referer: http://www.example.com"])
+      end
+
       describe 'match request body' do
         it 'for post' do
           stub_request(:post, "www.example.com").with(body: 'foo=nhe').to_return(body: "abc")

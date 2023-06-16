@@ -135,6 +135,28 @@ unless RUBY_PLATFORM =~ /java/
       expect { make_request(:get, 'http://www.example.com') }.to raise_error Async::TimeoutError
     end
 
+    it 'does not invoke "after real request" callbacks for stubbed requests' do
+      WebMock.allow_net_connect!
+      stub_request(:get, 'http://www.example.com').to_return(body: 'abc')
+
+      callback_invoked = false
+      WebMock.after_request(real_requests_only: true) { |_| callback_invoked = true }
+
+      make_request(:get, 'http://www.example.com')
+      expect(callback_invoked).to eq(false)
+    end
+
+    it 'does invoke "after request" callbacks for stubbed requests' do
+      WebMock.allow_net_connect!
+      stub_request(:get, 'http://www.example.com').to_return(body: 'abc')
+
+      callback_invoked = false
+      WebMock.after_request(real_requests_only: false) { |_| callback_invoked = true }
+
+      make_request(:get, 'http://www.example.com')
+      expect(callback_invoked).to eq(true)
+    end
+
     context 'scheme and protocol' do
       let(:default_response_headers) { {} }
 
@@ -226,7 +248,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     context 'multiple requests' do
-      let(:endpoint) { Async::HTTP::Endpoint.parse('http://www.example.com') }
+      let!(:endpoint) { Async::HTTP::Endpoint.parse('http://www.example.com') }
       let(:requests_count) { 3 }
 
       shared_examples :common do
@@ -278,13 +300,13 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         context 'HTTP1 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP1 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP1 }
 
           include_examples :common
         end
 
         context 'HTTP2 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP2 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP2 }
 
           include_examples :common
         end
@@ -309,13 +331,13 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         context 'HTTP1 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP1 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP1 }
 
           include_examples :common
         end
 
         context 'HTTP2 protocol' do
-          let(:protocol) { Async::HTTP::Protocol::HTTP2 }
+          let!(:protocol) { Async::HTTP::Protocol::HTTP2 }
 
           include_examples :common
         end

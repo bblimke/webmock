@@ -10,24 +10,19 @@ module WebMock
       adapter_for :net_http
 
       OriginalNetHTTP = Net::HTTP unless const_defined?(:OriginalNetHTTP)
-      OriginalNetBufferedIO = Net::BufferedIO unless const_defined?(:OriginalNetBufferedIO)
 
       def self.enable!
-        Net.send(:remove_const, :BufferedIO)
         Net.send(:remove_const, :HTTP)
         Net.send(:remove_const, :HTTPSession)
         Net.send(:const_set, :HTTP, @webMockNetHTTP)
         Net.send(:const_set, :HTTPSession, @webMockNetHTTP)
-        Net.send(:const_set, :BufferedIO, Net::WebMockNetBufferedIO)
       end
 
       def self.disable!
-        Net.send(:remove_const, :BufferedIO)
         Net.send(:remove_const, :HTTP)
         Net.send(:remove_const, :HTTPSession)
         Net.send(:const_set, :HTTP, OriginalNetHTTP)
         Net.send(:const_set, :HTTPSession, OriginalNetHTTP)
-        Net.send(:const_set, :BufferedIO, OriginalNetBufferedIO)
 
         #copy all constants from @webMockNetHTTP to original Net::HTTP
         #in case any constants were added to @webMockNetHTTP instead of Net::HTTP
@@ -98,13 +93,8 @@ module WebMock
               after_request.call(response)
             }
             if started?
-              if WebMock::Config.instance.net_http_connect_on_start
-                super_with_after_request.call
-              else
-                start_with_connect_without_finish {
-                  super_with_after_request.call
-                }
-              end
+              ensure_actual_connection
+              super_with_after_request.call
             else
               start_with_connect {
                 super_with_after_request.call
@@ -119,32 +109,33 @@ module WebMock
           raise IOError, 'HTTP session already opened' if @started
           if block_given?
             begin
+              @socket = Net::HTTP.socket_type.new
               @started = true
               return yield(self)
             ensure
               do_finish
             end
           end
+          @socket = Net::HTTP.socket_type.new
           @started = true
           self
         end
 
 
-        def start_with_connect_without_finish  # :yield: http
-          if block_given?
-            begin
-              do_start
-              return yield(self)
-            end
+        def ensure_actual_connection
+          if @socket.is_a?(StubSocket)
+            @socket&.close
+            @socket = nil
+            do_start
           end
-          do_start
-          self
         end
 
         alias_method :start_with_connect, :start
 
         def start(&block)
-          if WebMock::Config.instance.net_http_connect_on_start
+          uri = Addressable::URI.parse(WebMock::NetHTTPUtility.get_uri(self))
+
+          if WebMock.net_http_connect_on_start?(uri)
             super(&block)
           else
             start_without_connect(&block)
@@ -169,7 +160,7 @@ module WebMock
           response.extend Net::WebMockHTTPResponse
 
           if webmock_response.should_timeout
-            raise timeout_exception, "execution expired"
+            raise Net::OpenTimeout, "execution expired"
           end
 
           webmock_response.raise_error_if_any
@@ -177,16 +168,6 @@ module WebMock
           yield response if block_given?
 
           response
-        end
-
-        def timeout_exception
-          if defined?(Net::OpenTimeout)
-            # Ruby 2.x
-            Net::OpenTimeout
-          else
-            # Fallback, if things change
-            Timeout::Error
-          end
         end
 
         def build_webmock_response(net_http_response)
@@ -222,31 +203,21 @@ module WebMock
   end
 end
 
-# patch for StringIO behavior in Ruby 2.2.3
-# https://github.com/bblimke/webmock/issues/558
-class PatchedStringIO < StringIO #:nodoc:
-
-  alias_method :orig_read_nonblock, :read_nonblock
-
-  def read_nonblock(size, *args, **kwargs)
-    args.reject! {|arg| !arg.is_a?(Hash)}
-    orig_read_nonblock(size, *args, **kwargs)
-  end
-
-end
-
 class StubSocket #:nodoc:
 
   attr_accessor :read_timeout, :continue_timeout, :write_timeout
 
   def initialize(*args)
+    @closed = false
   end
 
   def closed?
-    @closed ||= true
+    @closed
   end
 
   def close
+    @closed = true
+    nil
   end
 
   def readuntil(*args)
@@ -258,63 +229,17 @@ class StubSocket #:nodoc:
 
   class StubIO
     def setsockopt(*args); end
+    def peer_cert; end
+    def peeraddr; ["AF_INET", 443, "127.0.0.1", "127.0.0.1"] end
+    def ssl_version; "TLSv1.3" end
+    def cipher; ["TLS_AES_128_GCM_SHA256", "TLSv1.3", 128, 128] end
   end
 end
-
-module Net  #:nodoc: all
-
-  class WebMockNetBufferedIO < BufferedIO
-    def initialize(io, *args, **kwargs)
-      io = case io
-      when Socket, OpenSSL::SSL::SSLSocket, IO
-        io
-      when StringIO
-        PatchedStringIO.new(io.string)
-      when String
-        PatchedStringIO.new(io)
-      end
-      raise "Unable to create local socket" unless io
-
-      # Prior to 2.4.0 `BufferedIO` only takes a single argument (`io`) with no
-      # options. Here we pass through our full set of arguments only if we're
-      # on 2.4.0 or later, and use a simplified invocation otherwise.
-      if RUBY_VERSION >= '2.4.0'
-        super
-      else
-        super(io)
-      end
-    end
-
-    if RUBY_VERSION >= '2.6.0'
-      # https://github.com/ruby/ruby/blob/7d02441f0d6e5c9d0a73a024519eba4f69e36dce/lib/net/protocol.rb#L208
-      # Modified version of method from ruby, so that nil is always passed into orig_read_nonblock to avoid timeout
-      def rbuf_fill
-        case rv = @io.read_nonblock(BUFSIZE, nil, exception: false)
-        when String
-          return if rv.nil?
-          @rbuf << rv
-          rv.clear
-          return
-        when :wait_readable
-          @io.to_io.wait_readable(@read_timeout) or raise Net::ReadTimeout
-        when :wait_writable
-          @io.to_io.wait_writable(@read_timeout) or raise Net::ReadTimeout
-        when nil
-          raise EOFError, 'end of file reached'
-        end while true
-      end
-    end
-  end
-
-end
-
 
 module WebMock
   module NetHTTPUtility
 
     def self.request_signature_from_request(net_http, request, body = nil)
-      protocol = net_http.use_ssl? ? "https" : "http"
-
       path = request.path
 
       if path.respond_to?(:request_uri) #https://github.com/bblimke/webmock/issues/288
@@ -323,11 +248,10 @@ module WebMock
 
       path = WebMock::Util::URI.heuristic_parse(path).request_uri if path =~ /^http/
 
-      uri = "#{protocol}://#{net_http.address}:#{net_http.port}#{path}"
+      uri = get_uri(net_http, path)
       method = request.method.downcase.to_sym
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
-      validate_headers(headers)
 
       if request.body_stream
         body = request.body_stream.read
@@ -343,23 +267,13 @@ module WebMock
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
     end
 
-    def self.validate_headers(headers)
-      # For Ruby versions < 2.3.0, if you make a request with headers that are symbols
-      # Net::HTTP raises a NoMethodError
-      #
-      # WebMock normalizes headers when creating a RequestSignature,
-      # and will update all headers from symbols to strings.
-      #
-      # This could create a false positive in a test suite with WebMock.
-      #
-      # So before this point, WebMock raises an ArgumentError if any of the headers are symbols
-      # instead of the cryptic NoMethodError "undefined method `split' ...` from Net::HTTP
-      if Gem::Version.new(RUBY_VERSION.dup) < Gem::Version.new('2.3.0')
-        header_as_symbol = headers.keys.find {|header| header.is_a? Symbol}
-        if header_as_symbol
-          raise ArgumentError.new("Net:HTTP does not accept headers as symbols")
-        end
-      end
+    def self.get_uri(net_http, path = nil)
+      protocol = net_http.use_ssl? ? "https" : "http"
+
+      hostname = net_http.address
+      hostname = "[#{hostname}]" if /\A\[.*\]\z/ !~ hostname && /:/ =~ hostname
+
+      "#{protocol}://#{hostname}:#{net_http.port}#{path}"
     end
 
     def self.check_right_http_connection

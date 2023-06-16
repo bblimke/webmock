@@ -279,6 +279,8 @@ module WebMock
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
         matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
+      elsif (@pattern).is_a?(Array)
+        matching_body_array?(body_as_hash(body, content_type), @pattern, content_type)
       elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
         @pattern == body_as_hash(body, content_type)
       else
@@ -293,8 +295,9 @@ module WebMock
     end
 
     private
+
     def body_as_hash(body, content_type)
-      case BODY_FORMATS[content_type]
+      case body_format(content_type)
       when :json then
         WebMock::Util::JSON.parse(body)
       when :xml then
@@ -302,6 +305,11 @@ module WebMock
       else
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
+    end
+
+    def body_format(content_type)
+      normalized_content_type = content_type.sub(/\A(application\/)[a-zA-Z0-9.-]+\+(json|xml)\Z/,'\1\2')
+      BODY_FORMATS[normalized_content_type]
     end
 
     # Compare two hashes for equality
@@ -330,17 +338,31 @@ module WebMock
     def matching_body_hashes?(query_parameters, pattern, content_type)
       return false unless query_parameters.is_a?(Hash)
       return false unless query_parameters.keys.sort == pattern.keys.sort
-      query_parameters.each do |key, actual|
-        expected = pattern[key]
 
-        if actual.is_a?(Hash) && expected.is_a?(Hash)
-          return false unless matching_body_hashes?(actual, expected, content_type)
-        else
-          expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
-          return false unless expected === actual
-        end
+      query_parameters.all? do |key, actual|
+        expected = pattern[key]
+        matching_values(actual, expected, content_type)
       end
+    end
+
+    def matching_body_array?(query_parameters, pattern, content_type)
+      return false unless query_parameters.is_a?(Array)
+      return false unless query_parameters.length == pattern.length
+
+      query_parameters.each_with_index do |actual, index|
+        expected = pattern[index]
+        return false unless matching_values(actual, expected, content_type)
+      end
+
       true
+    end
+
+    def matching_values(actual, expected, content_type)
+      return matching_body_hashes?(actual, expected, content_type) if actual.is_a?(Hash) && expected.is_a?(Hash)
+      return matching_body_array?(actual, expected, content_type) if actual.is_a?(Array) && expected.is_a?(Array)
+
+      expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
+      expected === actual
     end
 
     def empty_string?(string)

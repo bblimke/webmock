@@ -20,7 +20,7 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
     end
 
     it "should raise error on non stubbed request" do
-      lambda { http_request(:get, "http://www.example.net/") }.must_raise(WebMock::NetConnectNotAllowedError)
+      expect { http_request(:get, "http://www.example.net/") }.must_raise(WebMock::NetConnectNotAllowedError)
     end
 
     it "should verify that expected request occured" do

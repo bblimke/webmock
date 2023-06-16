@@ -31,7 +31,7 @@ describe WebMock::Response do
   end
 
   it "should report normalized headers" do
-    expect(WebMock::Util::Headers).to receive(:normalize_headers).with('A' => 'a').and_return('B' => 'b')
+    allow(WebMock::Util::Headers).to receive(:normalize_headers).with({'A' => 'a'}.freeze).and_return('B' => 'b')
     @response = WebMock::Response.new(headers: {'A' => 'a'})
     expect(@response.headers).to eq({'B' => 'b'})
   end
@@ -130,14 +130,46 @@ describe WebMock::Response do
     # Users of webmock commonly make the mistake of stubbing the response
     # body to return a hash, to prevent this:
     #
-    it "should error if not given one of the allowed types" do
+    it "should error if given a non-allowed type: a hash" do
       expect { WebMock::Response.new(body: Hash.new) }.to \
         raise_error(WebMock::Response::InvalidBody)
     end
 
+    it "should error if given a non-allowed type: something that is not a hash" do
+      expect { WebMock::Response.new(body: 123) }.to \
+        raise_error(WebMock::Response::InvalidBody)
+    end
   end
 
   describe "from raw response" do
+    describe "when input is a StringIO" do
+      before(:each) do
+        @io = StringIO.new(File.read(CURL_EXAMPLE_OUTPUT_PATH))
+        @response = WebMock::Response.new(@io)
+      end
+
+      it "should read status" do
+        expect(@response.status).to eq([202, "OK"])
+      end
+
+      it "should read headers" do
+        expect(@response.headers).to eq(
+          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+          "Content-Type"=>"text/html; charset=UTF-8",
+          "Content-Length"=>"419",
+          "Connection"=>"Keep-Alive",
+          "Accept"=>"image/jpeg, image/png"
+        )
+      end
+
+      it "should read body" do
+        expect(@response.body.size).to eq(419)
+      end
+
+      it "should close IO" do
+        expect(@io).to be_closed
+      end
+    end
 
     describe "when input is IO" do
       before(:each) do
@@ -152,12 +184,12 @@ describe WebMock::Response do
 
       it "should read headers" do
         expect(@response.headers).to eq({
-          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-          "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"419",
-          "Connection"=>"Keep-Alive",
-          "Accept"=>"image/jpeg, image/png"
-          })
+                                          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+                                          "Content-Type"=>"text/html; charset=UTF-8",
+                                          "Content-Length"=>"419",
+                                          "Connection"=>"Keep-Alive",
+                                          "Accept"=>"image/jpeg, image/png"
+        })
       end
 
       it "should read body" do
@@ -182,12 +214,12 @@ describe WebMock::Response do
 
       it "should read headers" do
         expect(@response.headers).to eq({
-          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
-          "Content-Type"=>"text/html; charset=UTF-8",
-          "Content-Length"=>"419",
-          "Connection"=>"Keep-Alive",
-          "Accept"=>"image/jpeg, image/png"
-          })
+                                          "Date"=>"Sat, 23 Jan 2010 01:01:05 GMT",
+                                          "Content-Type"=>"text/html; charset=UTF-8",
+                                          "Content-Length"=>"419",
+                                          "Connection"=>"Keep-Alive",
+                                          "Accept"=>"image/jpeg, image/png"
+        })
       end
 
       it "should read body" do
@@ -234,11 +266,11 @@ describe WebMock::Response do
       it "should evaluate new response with evaluated options" do
         request_signature = WebMock::RequestSignature.new(:post, "www.example.com", body: "abc", headers: {'A' => 'a'})
         response = WebMock::DynamicResponse.new(lambda {|request|
-          {
-            body: request.body,
-            headers: request.headers,
-            status: 302
-          }
+                                                  {
+                                                    body: request.body,
+                                                    headers: request.headers,
+                                                    status: 302
+                                                  }
         })
         evaluated_response = response.evaluate(request_signature)
         expect(evaluated_response.body).to eq("abc")
