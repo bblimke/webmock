@@ -36,5 +36,6 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
           rubygems: 'latest'
+          bundler: 'latest'
       - run: |
           bundle exec rake
