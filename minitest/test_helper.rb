@@ -10,7 +10,7 @@ gem 'minitest'
 require 'minitest/autorun'
 require 'webmock/minitest'
 
-test_class = defined?(MiniTest::Test) ? MiniTest::Test : MiniTest::Unit::TestCase
+test_class = defined?(Minitest::Test) ? Minitest::Test : MiniTest::Unit::TestCase
 
 test_class.class_eval do
 
@@ -28,7 +28,7 @@ test_class.class_eval do
    end
 
    def assert_fail(message, &block)
-     assert_raise_with_message(MiniTest::Assertion, message, &block)
+     assert_raise_with_message(Minitest::Assertion, message, &block)
    end
 
 end
