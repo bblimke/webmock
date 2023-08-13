@@ -149,6 +149,18 @@ unless RUBY_PLATFORM =~ /java/
           before { WebMock.allow_net_connect! }
           include_examples "em-http-request middleware/after_request hook integration"
 
+          it "doesn't modify headers" do
+            EM.run do
+              conn = EventMachine::HttpRequest.new(webmock_server_url)
+              http = conn.post(head: { 'content-length' => '4' }, body: 'test')
+              expect(conn).to receive(:send_data).with(/POST \/ HTTP\/1.1\r\nContent-Length: 4\r\nConnection: close\r\nHost: localhost:\d+\r\nUser-Agent: EventMachine HttpClient\r\nAccept-Encoding: gzip, compressed\r\n\r\n/).and_call_original
+              expect(conn).to receive(:send_data).with('test')
+              http.callback do
+                EM.stop
+              end
+            end
+          end
+
           it "only calls request middleware once" do
             middleware = Class.new do
               def self.called!
