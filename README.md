@@ -40,12 +40,12 @@ Supported HTTP libraries
 
 Supported Ruby Interpreters
 ---------------------------
-
-* MRI 2.5
 * MRI 2.6
 * MRI 2.7
+* MRI 3.0
+* MRI 3.1
+* MRI 3.2
 * JRuby
-* Rubinius
 
 ## Installation
 
