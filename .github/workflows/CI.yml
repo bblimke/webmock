@@ -31,7 +31,7 @@ jobs:
         run: |
           sudo apt-get install libcurl4-openssl-dev -y
       - uses: ruby/setup-ruby@v1
-        continue-on-error: true
+        continue-on-error: false
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
