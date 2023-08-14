@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency 'typhoeus', '>= 0.5.0'
     s.add_development_dependency 'em-http-request', '>= 1.0.2'
     s.add_development_dependency 'em-synchrony',    '>= 1.0.0'
+    s.add_development_dependency 'async-http',      '>= 0.48.0'
   end
 
   s.add_development_dependency 'http',            '>= 0.8.0'
@@ -41,7 +42,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
   s.add_development_dependency 'excon',           '>= 0.27.5'
-  s.add_development_dependency 'async-http',      '>= 0.48.0'
   s.add_development_dependency 'minitest',        '>= 5.0.0'
   s.add_development_dependency 'test-unit',       '>= 3.0.0'
   s.add_development_dependency 'rdoc',            '>  3.5.0'
