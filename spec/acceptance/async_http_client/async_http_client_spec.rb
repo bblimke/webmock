@@ -3,11 +3,11 @@ require 'spec_helper'
 require 'acceptance/webmock_shared'
 require_relative './async_http_client_spec_helper'
 
-require 'protocol/http/body/file'
-
-Async.logger.debug! if ENV['ASYNC_LOGGER_DEBUG']
-
 unless RUBY_PLATFORM =~ /java/
+  require 'protocol/http/body/file'
+
+  Async.logger.debug! if ENV['ASYNC_LOGGER_DEBUG']
+
   describe 'Async::HTTP::Client' do
     include AsyncHttpClientSpecHelper
 
