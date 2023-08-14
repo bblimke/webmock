@@ -37,7 +37,7 @@ module CurbSpecHelper
       curl.password = options[:basic_auth][1]
     end
     curl.timeout  = 30
-    curl.connect_timeout = 30
+    curl.connect_timeout = 5
 
     if headers = options[:headers]
       headers.each {|k,v| curl.headers[k] = v }

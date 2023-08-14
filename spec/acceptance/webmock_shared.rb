@@ -22,6 +22,10 @@ shared_examples "with WebMock" do |*adapter_info|
       WebMock.reset!
     end
 
+    around(:each, net_connect: true) do |ex|
+      ex.run_with_retry retry: 2, exceptions_to_retry: [client_timeout_exception_class]
+    end
+
     include_context "allowing and disabling net connect", *adapter_info
 
     include_context "stubbing requests", *adapter_info
