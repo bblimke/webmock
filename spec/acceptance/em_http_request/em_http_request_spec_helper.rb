@@ -57,6 +57,9 @@ module EMHttpRequestSpecHelper
     RuntimeError
   end
 
+  def connection_error_class
+  end
+
   def http_library
     :em_http_request
   end

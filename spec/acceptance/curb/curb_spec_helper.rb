@@ -54,6 +54,9 @@ module CurbSpecHelper
     Curl::Err::ConnectionFailedError
   end
 
+  def connection_error_class
+  end
+
   def http_library
     :curb
   end

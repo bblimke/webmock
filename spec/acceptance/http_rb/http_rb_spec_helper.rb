@@ -31,6 +31,9 @@ module HttpRbSpecHelper
     HTTP::ConnectionError
   end
 
+  def connection_error_class
+  end
+
   def http_library
     :http_rb
   end

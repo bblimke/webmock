@@ -44,6 +44,10 @@ module AsyncHttpClientSpecHelper
     Errno::ECONNREFUSED
   end
 
+  def connection_error_class
+    HTTP::ConnectionError
+  end
+
   def http_library
     :async_http_client
   end

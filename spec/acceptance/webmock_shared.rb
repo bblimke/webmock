@@ -23,7 +23,11 @@ shared_examples "with WebMock" do |*adapter_info|
     end
 
     around(:each, net_connect: true) do |ex|
-      ex.run_with_retry retry: 2, exceptions_to_retry: [client_timeout_exception_class, connection_refused_exception_class]
+      ex.run_with_retry retry: 2, exceptions_to_retry: [
+        client_timeout_exception_class,
+        connection_refused_exception_class,
+        connection_error_class
+      ].compact
     end
 
     include_context "allowing and disabling net connect", *adapter_info
