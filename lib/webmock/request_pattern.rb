@@ -283,7 +283,7 @@ module WebMock
         matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
       elsif (@pattern).is_a?(Array)
         matching_body_array?(body_as_hash(body, content_type), @pattern, content_type)
-      elsif (@pattern).is_a?(WebMock::Matchers::HashIncludingMatcher)
+      elsif (@pattern).is_a?(WebMock::Matchers::HashArgumentMatcher)
         @pattern == body_as_hash(body, content_type)
       else
         empty_string?(@pattern) && empty_string?(body) ||
