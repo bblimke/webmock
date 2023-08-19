@@ -330,6 +330,16 @@ stub_request(:any, "www.example.com").
 Net::HTTP.get('www.example.com', '/')    # ===> "abc\n"
 ```
 
+### Response with JSON body
+
+```ruby
+
+stub_request(:any, "www.example.com").
+  to_return_json(body: {foo: "bar"})
+
+Net::HTTP.get('www.example.com', '/') # ===> "{\"foo\": \"bar\"}"
+```
+
 ### Response with custom status message
 
 ```ruby
