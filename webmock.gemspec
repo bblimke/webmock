@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     'wiki_uri'          => 'https://github.com/bblimke/webmock/wiki'
   }
 
-  s.required_ruby_version = '>= 2.3'
+  s.required_ruby_version = '>= 2.5'
 
   s.add_dependency 'addressable', '>= 2.8.0'
   s.add_dependency 'crack', '>= 0.3.2'
@@ -38,7 +38,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'http',            '>= 0.8.0'
   s.add_development_dependency 'manticore',       '>= 0.5.1' if RUBY_PLATFORM =~ /java/
-  s.add_development_dependency 'rack',            ((RUBY_VERSION < '2.2.2') ? '1.6.0' : '> 1.6')
+  s.add_development_dependency 'rack',            '> 1.6'
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
   s.add_development_dependency 'excon',           '>= 0.27.5'
