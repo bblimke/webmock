@@ -48,22 +48,24 @@ Supported Ruby Interpreters
 ## Installation
 
 ```bash
-    gem install webmock
+gem install webmock
 ```
 or alternatively:
 
 ```ruby
-    # add to your Gemfile
-    group :test do
-        gem "webmock"
-    end
+# add to your Gemfile
+group :test do
+  gem "webmock"
+end
 ```
 
 ### or to install the latest development version from github master
 
-    git clone http://github.com/bblimke/webmock.git
-    cd webmock
-    rake install
+```bash
+git clone http://github.com/bblimke/webmock.git
+cd webmock
+rake install
+```
 
 ## Upgrading from v1.x to v2.x
 
@@ -381,7 +383,8 @@ RestClient.post('www.example.net', 'abc')    # ===> "abc\n"
 
 ### Dynamically evaluated raw responses recorded with `curl -is`
 
-    `curl -is www.example.com > /tmp/www.example.com.txt`
+`curl -is www.example.com > /tmp/www.example.com.txt`
+
 ```ruby
 stub_request(:get, "www.example.com").
   to_return(lambda { |request| File.new("/tmp/#{request.uri.host.to_s}.txt") })
