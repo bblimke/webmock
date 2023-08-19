@@ -84,13 +84,12 @@ module WebMock
     def compare_version
       case
         when @major < @min_major then :too_low
+        when @major == @min_major && @minor < @min_minor then :too_low
+        when @major == @min_major && @minor == @min_minor && @patch < @min_patch then :too_low
         when @max_major && @major > @max_major then :too_high
-        when @major > @min_major then :ok
-        when @max_major && @major < @max_major then :ok
-        when @minor < @min_minor then :too_low
-        when @max_minor && @minor > @max_minor then :too_high
-        when @minor > @min_minor then :ok
-        when @patch < @min_patch then :too_low
+        when @max_major && @major == @max_major && @max_minor && @minor > @max_minor then :too_high
+
+        else :ok
       end
     end
 
