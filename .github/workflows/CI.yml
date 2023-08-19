@@ -14,25 +14,27 @@ jobs:
       matrix:
         ruby:
           - head
+          - '3.2'
           - '3.1'
           - '3.0'
           - '2.7'
           - '2.6'
-          - '2.5'
           - jruby
     continue-on-error: ${{ matrix.ruby == 'head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
       JRUBY_OPTS: "--debug"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Apt Packages
         run: |
           sudo apt-get install libcurl4-openssl-dev -y
       - uses: ruby/setup-ruby@v1
-        continue-on-error: true
+        continue-on-error: false
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          rubygems: 'latest'
+          bundler: 'latest'
       - run: |
           bundle exec rake

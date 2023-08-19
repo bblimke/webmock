@@ -58,6 +58,9 @@ module NetHTTPSpecHelper
     Errno::ECONNREFUSED
   end
 
+  def connection_error_class
+  end
+
   def http_library
     :net_http
   end

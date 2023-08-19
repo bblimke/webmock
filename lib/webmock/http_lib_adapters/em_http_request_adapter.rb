@@ -101,7 +101,7 @@ if defined?(EventMachine::HttpClient)
 
       def connection_completed
         @state = :response_header
-        send_request(request_signature.headers, request_signature.body)
+        send_request(*headers_and_body_processed_by_middleware)
       end
 
       def send_request(head, body)
@@ -168,12 +168,18 @@ if defined?(EventMachine::HttpClient)
         webmock_response
       end
 
-      def build_request_signature
-        headers, body = build_request, @req.body
-
-        @conn.middleware.select {|m| m.respond_to?(:request) }.each do |m|
-          headers, body = m.request(self, headers, body)
+      def headers_and_body_processed_by_middleware
+        @headers_and_body_processed_by_middleware ||= begin
+          head, body = build_request, @req.body
+          @conn.middleware.each do |m|
+            head, body = m.request(self, head, body) if m.respond_to?(:request)
+          end
+          [head, body]
         end
+      end
+
+      def build_request_signature
+        headers, body = headers_and_body_processed_by_middleware
 
         method = @req.method
         uri = @req.uri.clone

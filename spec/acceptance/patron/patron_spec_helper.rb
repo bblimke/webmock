@@ -47,6 +47,9 @@ module PatronSpecHelper
     Patron::ConnectionFailed
   end
 
+  def connection_error_class
+  end
+
   def http_library
     :patron
   end
