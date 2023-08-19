@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module HTTP
   class WebMockPerform
     def initialize(request, options, &perform)

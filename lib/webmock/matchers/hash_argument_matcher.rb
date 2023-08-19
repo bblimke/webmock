@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WebMock
   module Matchers
     # Base class for Hash matchers

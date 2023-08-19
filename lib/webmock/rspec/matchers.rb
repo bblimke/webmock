@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'webmock'
 require 'webmock/rspec/matchers/request_pattern_matcher'
 require 'webmock/rspec/matchers/webmock_matcher'

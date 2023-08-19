@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'httpclient'
   require 'jsonclient' # defined in 'httpclient' gem as well

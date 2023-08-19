@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WebMock
   class StubRequestSnippet
     def initialize(request_stub)
