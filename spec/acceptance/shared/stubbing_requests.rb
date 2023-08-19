@@ -178,12 +178,44 @@ shared_examples_for "stubbing requests" do |*adapter_info|
               body: "foo=1").status).to eq("200")
             end
 
-            it "should match if stubbed request body is hash_included" do
-              WebMock.reset!
-              stub_request(:post, "www.example.com").with(body: {"foo" => hash_including("bar" => '1')})
-              expect(http_request(
-                       :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
-                       body: "foo[bar]=1").status).to eq("200")
+            context "when using hash_including to match the request body" do
+              it "should match if stubbed request body is including hash" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: {"foo" => hash_including("bar" => '1')})
+                expect(http_request(
+                         :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                         body: "foo[bar]=1").status).to eq("200")
+              end
+
+              it "should not match if stubbed request body is excluding hash" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: {"foo" => hash_including("bar" => '1')})
+                expect {
+                  http_request(:post, "http://www.example.com/",
+                    headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                    body: "foo[xyz]=1")
+                }.to raise_error(WebMock::NetConnectNotAllowedError)
+              end
+            end
+
+            context "when using hash_excluding to match the request body" do
+              it "should match if stubbed request body is excluding hash" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: {"foo" => hash_excluding("bar" => '1')})
+                expect(http_request(
+                   :post, "http://www.example.com/", headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                   body: "foo[xyz]=1").status).to eq("200")
+              end
+
+              it "should not match if stubbed request body is including hash" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: {"foo" => hash_excluding("bar" => '1')})
+                expect {
+                  http_request(:post, "http://www.example.com/",
+                    headers: {'Content-Type' => 'application/x-www-form-urlencoded'},
+                    body: "foo[bar]=1")
+                }.to raise_error(WebMock::NetConnectNotAllowedError)
+              end
             end
           end
         end
