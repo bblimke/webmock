@@ -1181,6 +1181,14 @@ People who submitted patches and new features or suggested improvements. Many th
 * Cedric Sohrauer
 * Akira Matsuda
 * Mark Spangler
+* Henrik Nyh
+* Yoann Lecuyer
+* Lucas Arnaud
+* Marc Rohloff
+* inkstak
+* Yuki Inoue
+* Brandon Weaver
+* Josh Nichols
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

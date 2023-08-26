@@ -1,5 +1,39 @@
 # Changelog
 
+# 3.19.0
+
+  * Do not alter real (non-stubbed) request headers when handling em-http-request requests.
+
+      Thanks to [Yoann Lecuyer](https://github.com/ylecuyer)
+
+  * Fix matching stubs with HashExcludingMatcher
+
+      Thanks to [Lucas Arnaud](https://github.com/lucasarnaud)
+
+  * Remove development and test files from the gem package
+
+      Thanks to [Orien Madgwick](https://github.com/orien)
+
+  * Fix supported http client gem version checks.
+
+      Thanks to [Marc Rohloff](https://github.com/marcrohloff) and [Roman Stražanec](https://github.com/romanstrazanec)
+
+  * Non-string body passed to #to_return_json is now converted to JSON string.
+
+      Thanks to [inkstak](https://github.com/inkstak)
+
+  * `[::1]` is recognised as localhost e.g when passing `allow_localhost` option to `disable_net_connect!`
+
+      Thanks to [Yuki Inoue](https://github.com/Yuki-Inoue)
+
+  * Optimized `normalize_headers` for performance
+
+      Thanks to [Brandon Weaver](https://github.com/baweaver)
+
+  * Added Frozen string literal to files to optimise memory usage
+
+      Thanks to [Josh Nichols](https://github.com/technicalpickles)
+
 # 3.18.1
 
   * Reverted simplified connection handing in Net::HTTP adapter due to https://github.com/bblimke/webmock/issues/999
