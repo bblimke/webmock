@@ -136,6 +136,25 @@ shared_context "declared responses" do |*adapter_info|
       end
     end
 
+    describe "when response was declared via to_return_json" do
+      describe "and declared response body is lamba" do
+        it "should evaluate the response body at the time of returning the response" do
+          record = double("SomeRecord")
+          allow(record).to receive_messages(to_json: '{"what":"something callable"}.')
+
+          stub_request(:get, "www.example.com").to_return_json(body: -> {record})
+
+          allow(record).to receive_messages(to_json: '{"what":"something else callable"}.')
+          expect(http_request(:get, "http://www.example.com/").body).to eq('{"what":"something else callable"}.')
+        end
+
+        it "should evaluate the response body with request passed as argument to lambda" do
+          stub_request(:get, "www.example.com").to_return_json(body: ->(request) {"\"#{request.uri.to_s}\""})
+          expect(http_request(:get, "http://www.example.com/").body).to eq("\"http://www.example.com:80/\"")
+        end
+      end
+    end
+
     describe "when response was declared as lambda" do
       it "should return evaluated response body" do
         stub_request(:post, "www.example.com").to_return(lambda {|request|

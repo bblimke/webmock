@@ -87,12 +87,24 @@ describe WebMock::RequestStub do
       expect(@request_stub.response.body).to eq('{"abc":"def"}')
     end
 
-    it "should json-ify any callable proc or lambda to body" do
+    it "should evaluate a callable proc or lambda body at the time of response being returned and not at the time of stub declaration" do
+      record = double("SomeRecord")
+      allow(record).to receive_messages(to_json: '{"what":"something callable"}.')
+
+      @request_stub.to_return_json(body: (->(request) { record }))
+
+      allow(record).to receive_messages(to_json: '{"what":"something else callable"}.')
+      expect(@request_stub.response.body.call(double(WebMock::RequestSignature))).to eq('{"what":"something else callable"}.')
+    end
+
+    it "should evaluate a callable proc or lambda body, even if it takes no args" do
       record = double("SomeRecord")
       allow(record).to receive_messages(to_json: '{"what":"something callable"}.')
 
       @request_stub.to_return_json(body: -> { record })
-      expect(@request_stub.response.body).to eq('{"what":"something callable"}.')
+
+      allow(record).to receive_messages(to_json: '{"what":"something else callable"}.')
+      expect(@request_stub.response.body.call(double(WebMock::RequestSignature))).to eq('{"what":"something else callable"}.')
     end
 
     it "should apply the content_type header" do
