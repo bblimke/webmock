@@ -1,10 +1,12 @@
 # Changelog
 
-# 3.19.0
+# 3.19.1
 
   * When passing a Proc or lambda as response body to `to_return_json`, the body is evaluated at the time of request and not at the time of `to_return_json` method invocation.
 
       Thanks to [Jason Karns](https://github.com/jasonkarns) for reporting.
+
+# 3.19.0
 
   * Do not alter real (non-stubbed) request headers when handling em-http-request requests.
 
