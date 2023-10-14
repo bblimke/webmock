@@ -29,6 +29,15 @@ unless RUBY_PLATFORM =~ /java/
           expect(response.body).not_to be_nil
           expect(response.headers).not_to be_nil
           expect(response.effective_url).not_to be_nil
+          expect(response.total_time).to eq 0.0
+          expect(response.time).to eq 0.0  # aliased by Typhoeus::Response::Informations
+          expect(response.starttransfer_time).to eq 0.0
+          expect(response.start_transfer_time).to eq 0.0  # aliased by Typhoeus::Response::Informations
+          expect(response.appconnect_time).to eq 0.0
+          expect(response.pretransfer_time).to eq 0.0
+          expect(response.connect_time).to eq 0.0
+          expect(response.namelookup_time).to eq 0.0
+          expect(response.redirect_time).to eq 0.0
         end
       end
 
