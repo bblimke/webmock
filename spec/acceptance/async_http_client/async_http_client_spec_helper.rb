@@ -16,7 +16,7 @@ module AsyncHttpClientSpecHelper
 
     body = options[:body]
 
-    Async do
+    result = Async do
       begin
         Async::HTTP::Client.open(endpoint) do |client|
           response = client.send(
@@ -34,6 +34,8 @@ module AsyncHttpClientSpecHelper
         e
       end
     end.wait
+
+    result.is_a?(Exception) ? raise(result) : result
   end
 
   def client_timeout_exception_class

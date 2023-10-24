@@ -345,7 +345,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     def make_request(method, url, protocol: nil, headers: {}, body: nil)
-      Async do
+      result  = Async do
         endpoint = Async::HTTP::Endpoint.parse(url)
 
         begin
@@ -362,6 +362,8 @@ unless RUBY_PLATFORM =~ /java/
           e
         end
       end.wait
+
+      result.is_a?(Exception) ? raise(result) : result
     end
 
     def response_to_hash(response)
