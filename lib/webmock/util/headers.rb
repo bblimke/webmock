@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'base64'
-
 module WebMock
 
   module Util
@@ -59,7 +57,8 @@ module WebMock
       end
 
       def self.basic_auth_header(*credentials)
-        "Basic #{Base64.strict_encode64(credentials.join(':')).chomp}"
+        strict_base64_encoded = [credentials.join(':')].pack("m0")
+        "Basic #{strict_base64_encoded.chomp}"
       end
 
       def self.normalize_name(name)
