@@ -8,9 +8,9 @@ module WebMock
 
     class Headers
 
-      STANDARD_HEADER_DELIMITER = '-'.freeze
-      NONSTANDARD_HEADER_DELIMITER = '_'.freeze
-      JOIN = ', '.freeze
+      STANDARD_HEADER_DELIMITER = '-'
+      NONSTANDARD_HEADER_DELIMITER = '_'
+      JOIN = ', '
 
       def self.normalize_headers(headers)
         return nil unless headers
