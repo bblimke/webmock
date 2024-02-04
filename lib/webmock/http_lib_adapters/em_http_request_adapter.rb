@@ -156,7 +156,7 @@ if defined?(EventMachine::HttpClient)
         raw_cookie = response_header.cookie
         raw_cookie = [raw_cookie] if raw_cookie.is_a? String
 
-        cookie = raw_cookie.select { |c| c.start_with? name }.first
+        cookie = raw_cookie.detect { |c| c.start_with? name }
         cookie and cookie.split('=', 2)[1]
       end
 
