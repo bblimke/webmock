@@ -11,7 +11,7 @@ module AsyncHttpClientSpecHelper
       end
     end
     headers.push(
-      ['authorization', 'Basic ' + Base64.strict_encode64(options[:basic_auth].join(':'))]
+      ['authorization', WebMock::Util::Headers.basic_auth_header(options[:basic_auth])]
     ) if options[:basic_auth]
 
     body = options[:body]
