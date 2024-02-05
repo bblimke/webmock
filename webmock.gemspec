@@ -41,6 +41,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rack',            '> 1.6'
   s.add_development_dependency 'rspec',           '>= 3.1.0'
   s.add_development_dependency 'httpclient',      '>= 2.2.4'
+  s.add_development_dependency 'mutex_m' # For Ruby 3.4 compatibility until this commit of httpclient is released https://github.com/nahi/httpclient/commit/552a56770689e800ad11a21cd06075064736569f
   s.add_development_dependency 'excon',           '>= 0.27.5'
   s.add_development_dependency 'minitest',        '>= 5.0.0'
   s.add_development_dependency 'test-unit',       '>= 3.0.0'
