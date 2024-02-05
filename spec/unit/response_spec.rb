@@ -105,6 +105,10 @@ describe WebMock::Response do
       expect(@response.body).to_not be_frozen
     end
 
+    it "shoud return utf-8 encoded string by default" do
+      expect(@response.body.encoding).to eq(Encoding::UTF_8)
+    end
+
     it "should report body if assigned" do
       @response = WebMock::Response.new(body: "abc")
       expect(@response.body).to eq("abc")
