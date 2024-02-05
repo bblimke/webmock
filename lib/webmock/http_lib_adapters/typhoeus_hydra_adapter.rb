@@ -96,7 +96,14 @@ if defined?(Typhoeus)
               status_message: "",
               body: "",
               headers: {},
-              return_code: :operation_timedout
+              return_code: :operation_timedout,
+              total_time: 0.0,
+              starttransfer_time: 0.0,
+              appconnect_time: 0.0,
+              pretransfer_time: 0.0,
+              connect_time: 0.0,
+              namelookup_time: 0.0,
+              redirect_time: 0.0
             )
           else
             ::Typhoeus::Response.new(
@@ -104,7 +111,14 @@ if defined?(Typhoeus)
               status_message: webmock_response.status[1],
               body: webmock_response.body,
               headers: webmock_response.headers,
-              effective_url: request_signature.uri
+              effective_url: request_signature.uri,
+              total_time: 0.0,
+              starttransfer_time: 0.0,
+              appconnect_time: 0.0,
+              pretransfer_time: 0.0,
+              connect_time: 0.0,
+              namelookup_time: 0.0,
+              redirect_time: 0.0
             )
           end
           response.mock = :webmock
