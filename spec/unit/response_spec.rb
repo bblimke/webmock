@@ -101,6 +101,10 @@ describe WebMock::Response do
       expect(@response.body).to eq('')
     end
 
+    it "should return unfrozen string empty body by default" do
+      expect(@response.body).to_not be_frozen
+    end
+
     it "should report body if assigned" do
       @response = WebMock::Response.new(body: "abc")
       expect(@response.body).to eq("abc")

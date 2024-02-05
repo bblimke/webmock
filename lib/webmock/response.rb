@@ -38,7 +38,7 @@ module WebMock
     end
 
     def body
-      @body || ''
+      @body || String.new
     end
 
     def body=(body)
