@@ -90,4 +90,12 @@ describe "HTTP.rb" do
       response.connection.close
     end
   end
+
+  it "should preserve request body encoding when matching requests" do
+    stub_request(:post, "www.example.com").with(body: (lambda {|body|
+      body.encoding == Encoding::UTF_8
+    }))
+    http_request(:post, "http://www.example.com/", body: "abc")
+  end
+
 end
