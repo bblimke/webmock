@@ -1,5 +1,27 @@
 # Changelog
 
+# 3.20.0
+
+  * Optimised EmHttpRequestAdapter performance.
+
+    Thanks to [Ricardo Trindade](https://github.com/RicardoTrindade)
+
+  * Removed runtime dependency on base64.
+
+    Thanks to [Earlopain](https://github.com/Earlopain)
+
+  * Typhoeus::Response objects constructed from stubbed responses now have all timing attributes set to 0.0.
+
+    Thanks to [James Brown](https://github.com/Roguelazer)
+
+  * Optimised WebMock::Util::Headers by removing redundant freeze invocations.
+
+    Thanks to [Kazuhiro NISHIYAMA](https://github.com/znz)
+
+  * The default stubbed response body, which is an empty String, is unfrozen.
+
+  * When building signatures of requests made by http.rb, the request body encoding is now preserved.
+
 # 3.19.1
 
   * When passing a Proc or lambda as response body to `to_return_json`, the body is evaluated at the time of request and not at the time of `to_return_json` method invocation.
