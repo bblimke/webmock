@@ -47,7 +47,9 @@ module WebMock
       # Rack-specific variables
       env['rack.input']      = StringIO.new(body)
       env['rack.errors']     = $stderr
-      env['rack.version']    = Rack::VERSION
+      if !Rack.const_defined?(:RELEASE) || Rack::RELEASE < "3"
+        env['rack.version']    = Rack::VERSION
+      end
       env['rack.url_scheme'] = uri.scheme
       env['rack.run_once']   = true
       env['rack.session']    = session
