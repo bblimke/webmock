@@ -102,6 +102,7 @@ describe "HTTPClient" do
     class Filter
       def filter_request(request)
         request.header["Authorization"] = "Bearer 0123456789"
+        request.header.request_uri.query = "webmock=here"
       end
 
       def filter_response(request, response)
@@ -112,7 +113,9 @@ describe "HTTPClient" do
     before do
       @client = HTTPClient.new
       @client.request_filter << Filter.new
-      stub_request(:get, 'www.example.com').with(headers: {'Authorization' => 'Bearer 0123456789'})
+      stub_request(:get, 'www.example.com').with(
+        query: {'webmock' => 'here'},
+        headers: {'Authorization' => 'Bearer 0123456789'})
     end
 
     it "supports request filters" do
