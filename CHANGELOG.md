@@ -1,5 +1,15 @@
 # Changelog
 
+# 3.21.0
+
+  * Don't use deprecated Rack::VERSION for Rack >= 3
+
+    Thanks to [Étienne Barrié](https://github.com/etiennebarrie)
+
+  * Updated HTTPClient adapter, to build request signature using the URI after filters have been applied.
+
+    Thanks to [Matt Brown](https://github.com/mattbnz)
+
 # 3.20.0
 
   * Optimised EmHttpRequestAdapter performance.

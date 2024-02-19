@@ -1193,6 +1193,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Earlopain
 * James Brown
 * Kazuhiro NISHIYAMA
+* Étienne Barrié
+* Matt Brown
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
