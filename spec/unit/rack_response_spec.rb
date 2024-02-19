@@ -69,6 +69,20 @@ describe WebMock::RackResponse do
     expect(response.body).to include('Good to meet you, Олег!')
   end
 
+  it "should send or not a rack.version depending on the Rack version" do
+    request = WebMock::RequestSignature.new(:get, 'www.example.com/env')
+    response = @rack_response.evaluate(request)
+
+    expect(response.status.first).to eq(200)
+    body = JSON.parse(response.body)
+
+    if Gem.loaded_specs["rack"].version > Gem::Version.new("3.0.0")
+      expect(body).not_to include("rack.version")
+    else
+      expect(body).to include("rack.version")
+    end
+  end
+
   describe 'rack error output' do
     before :each do
       @original_stderr = $stderr

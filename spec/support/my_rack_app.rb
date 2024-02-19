@@ -37,6 +37,8 @@ class MyRackApp
       when ['GET', '/error']
         env['rack.errors'].puts('Error!')
         [500, {}, ['']]
+      when ['GET', '/env']
+        [200, {}, [JSON.dump(env)]]
       else
         [404, {}, ['']]
     end

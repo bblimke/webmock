@@ -22,6 +22,8 @@ require 'support/webmock_server'
 require 'support/my_rack_app'
 require 'support/failures'
 
+Warning[:deprecated] = true if Warning.respond_to?(:[]=)
+
 CURL_EXAMPLE_OUTPUT_PATH = File.expand_path('../support/example_curl_output.txt', __FILE__)
 
 RSpec.configure do |config|
