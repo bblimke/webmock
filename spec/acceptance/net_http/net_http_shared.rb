@@ -13,6 +13,12 @@ shared_examples_for "Net::HTTP" do
       expect(response.body).to be_a(Net::ReadAdapter)
     end
 
+    it "should return response that returns request uri" do
+      uri = URI.parse("http://localhost:#{port}/")
+      response = Net::HTTP.get_response(uri)
+      expect(response.uri).to eql(uri)
+    end
+
     it "should handle requests with block passed to read_body", net_connect: true do
       body = "".dup
       req = Net::HTTP::Get.new("/")

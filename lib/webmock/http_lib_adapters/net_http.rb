@@ -77,7 +77,7 @@ module WebMock
             @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
-            build_net_http_response(webmock_response, &block)
+            build_net_http_response(webmock_response, request.uri, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
             check_right_http_connection
             after_request = lambda do |response|
@@ -144,7 +144,7 @@ module WebMock
           end
         end
 
-        def build_net_http_response(webmock_response, &block)
+        def build_net_http_response(webmock_response, request_uri, &block)
           response = Net::HTTPResponse.send(:response_class, webmock_response.status[0].to_s).new("1.0", webmock_response.status[0].to_s, webmock_response.status[1])
           body = webmock_response.body
           body = nil if webmock_response.status[0].to_s == '204'
@@ -158,6 +158,8 @@ module WebMock
           end
 
           response.instance_variable_set(:@read, true)
+
+          response.uri = request_uri
 
           response.extend Net::WebMockHTTPResponse
 

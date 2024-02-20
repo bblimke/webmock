@@ -149,6 +149,24 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
+  context "returning response that returns request uri" do
+    context "when making a real request" do
+      it "should return response that reports request uri" do
+        WebMock.allow_net_connect!
+        uri = URI.parse("http://localhost:#{port}/")
+        response = Net::HTTP.get_response(uri)
+        expect(response.uri).to eql(uri)
+      end
+    end
+
+    it "should return response that returns request uri" do
+      stub_request(:get, "www.example.com")
+      uri = URI.parse("http://www.example.com/")
+      response = Net::HTTP.get_response(uri)
+      expect(response.uri).to eql(URI.parse("http://www.example.com/"))
+    end
+  end
+
   it "should handle Net::HTTP::Post#body_stream" do
     stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")
