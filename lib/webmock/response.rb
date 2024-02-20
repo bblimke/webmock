@@ -117,11 +117,11 @@ module WebMock
       return if @body.nil?
       return if valid_types.any? { |c| @body.is_a?(c) }
 
-      if @body.class.is_a?(Hash)
-        raise InvalidBody, "must be one of: #{valid_types}, but you've used a #{@body.class}' instead." \
-          "\n What shall we encode it to? try calling .to_json .to_xml instead on the hash instead, or otherwise convert it to a string."
+      if @body.is_a?(Hash)
+        raise InvalidBody, "must be one of: #{valid_types}, but you've used a #{@body.class}. " \
+          "Please convert it by calling .to_json .to_xml, or otherwise convert it to a string."
       else
-        raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given"
+        raise InvalidBody, "must be one of: #{valid_types}. '#{@body.class}' given."
       end
     end
 

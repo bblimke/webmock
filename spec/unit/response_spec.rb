@@ -140,12 +140,16 @@ describe WebMock::Response do
     #
     it "should error if given a non-allowed type: a hash" do
       expect { WebMock::Response.new(body: Hash.new) }.to \
-        raise_error(WebMock::Response::InvalidBody)
+        raise_error(
+          WebMock::Response::InvalidBody,
+          "must be one of: [Proc, IO, Pathname, String, Array], but you've used a Hash. Please convert it by calling .to_json .to_xml, or otherwise convert it to a string."
+        )
     end
 
     it "should error if given a non-allowed type: something that is not a hash" do
       expect { WebMock::Response.new(body: 123) }.to \
-        raise_error(WebMock::Response::InvalidBody)
+        raise_error(WebMock::Response::InvalidBody,
+          "must be one of: [Proc, IO, Pathname, String, Array]. 'Integer' given.")
     end
   end
 
