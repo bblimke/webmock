@@ -1,8 +1,16 @@
 # Changelog
 
+# 3.21.2
+
+  * Corrected type checking in `WebMock::Response#assert_valid_body!` to accurately recognize `Hash` objects. Additionally, improved the clarity of the error message for unsupported body types, guiding users towards proper usage.
+
+    Thanks to [Jake Robb](https://github.com/jakerobb) for reporting.
+
 # 3.21.1
 
   * The stubbed Net::HTTPResponse#uri now returns request.uri, aligning it with the behavior of an actual Net::HTTPResponse.
+
+    Thanks to [Abe Voelker](https://github.com/abevoelker) for reporting and to [Victor Maslov](https://github.com/Nakilon) and [Gio Lodi](https://github.com/mokagio) for the suggested solution.
 
 # 3.21.0
 
@@ -192,7 +200,7 @@
 
   * Fixed async-http adapter to only considered requests as real if they are real.
 
-    Thanks to Thanks to [Tony Schneider](https://github.com/tonywok) and [Samuel Williams](https://github.com/ioquatix)
+    Thanks to [Tony Schneider](https://github.com/tonywok) and [Samuel Williams](https://github.com/ioquatix)
 
 # 3.11.2
 
