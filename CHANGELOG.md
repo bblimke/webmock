@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.21.1
+
+  * The stubbed Net::HTTPResponse#uri now returns request.uri, aligning it with the behavior of an actual Net::HTTPResponse.
+
 # 3.21.0
 
   * Don't use deprecated Rack::VERSION for Rack >= 3
