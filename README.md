@@ -606,7 +606,11 @@ which can be passed to `WebMock.allow_net_connect!` and `WebMock.disable_net_con
 WebMock.allow_net_connect!(net_http_connect_on_start: true)
 ```
 
-This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`.
+This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. At the time of connection being made there is no information about the request or URL yet, therefore WebMock is not able to decide whether to stub a request or not and all connections are allowed. To enable connections only to a specific domain (e.g. your test server) use:
+
+```ruby
+WebMock.allow_net_connect!(net_http_connect_on_start: "www.example.com")
+```
 
 ## Setting Expectations
 
