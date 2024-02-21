@@ -31,9 +31,9 @@ if defined?(HTTP) && defined?(HTTP::VERSION)
     end
   end
 
-  require "webmock/http_lib_adapters/http_rb/client"
-  require "webmock/http_lib_adapters/http_rb/request"
-  require "webmock/http_lib_adapters/http_rb/response"
-  require "webmock/http_lib_adapters/http_rb/streamer"
-  require "webmock/http_lib_adapters/http_rb/webmock"
+  require_relative "http_rb/client"
+  require_relative "http_rb/request"
+  require_relative "http_rb/response"
+  require_relative "http_rb/streamer"
+  require_relative "http_rb/webmock"
 end
