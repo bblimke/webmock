@@ -59,7 +59,6 @@ if defined?(::HTTPClient)
     end
 
     def do_get(req, proxy, conn, stream = false, &block)
-
       clear_thread_variables unless conn.async_thread
 
       request_signature = build_request_signature(req, :reuse_existing)
@@ -67,7 +66,7 @@ if defined?(::HTTPClient)
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
       if webmock_responses[request_signature]
-        webmock_response = synchronize_request_response { webmock_responses.delete(request_signature) }
+        webmock_response = webmock_responses.delete(request_signature)
         response = build_httpclient_response(webmock_response, stream, req.header, &block)
         @request_filter.each do |filter|
           filter.filter_response(req, response)
@@ -78,7 +77,7 @@ if defined?(::HTTPClient)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         # in case there is a nil entry in the hash...
-        synchronize_request_response { webmock_responses.delete(request_signature) }
+        webmock_responses.delete(request_signature)
 
         res = if stream
           do_get_stream_without_webmock(req, proxy, conn, &block)
@@ -111,7 +110,7 @@ if defined?(::HTTPClient)
       clear_thread_variables
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
-      synchronize_request_response { webmock_request_signatures << request_signature }
+      webmock_request_signatures << request_signature
 
       if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
         conn = super
@@ -198,9 +197,7 @@ if defined?(::HTTPClient)
 
     def webmock_responses
       Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] ||= Hash.new do |hash, request_signature|
-        synchronize_request_response do
-          hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
-        end
+        hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
       end
     end
 
@@ -209,10 +206,8 @@ if defined?(::HTTPClient)
     end
 
     def previous_signature_for(signature)
-      synchronize_request_response do
-        return nil unless index = webmock_request_signatures.index(signature)
-        webmock_request_signatures.delete_at(index)
-      end
+      return nil unless index = webmock_request_signatures.index(signature)
+      webmock_request_signatures.delete_at(index)
     end
 
     private
@@ -225,16 +220,6 @@ if defined?(::HTTPClient)
       session_headers.all.inject({}) do |hdrs, header|
         hdrs[header[0]] = header[1]
         hdrs
-      end
-    end
-
-    def synchronize_request_response
-      if REQUEST_RESPONSE_LOCK.owned?
-        yield
-      else
-        REQUEST_RESPONSE_LOCK.synchronize do
-          yield
-        end
       end
     end
 
