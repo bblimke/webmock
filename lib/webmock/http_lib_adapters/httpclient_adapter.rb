@@ -45,6 +45,8 @@ if defined?(::HTTPClient)
   end
 
   module WebMockHTTPClients
+    WEBMOCK_HTTPCLIENT_RESPONSES = :webmock_httpclient_responses
+    WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES = :webmock_httpclient_request_signatures
 
     REQUEST_RESPONSE_LOCK = Mutex.new
 
@@ -57,6 +59,9 @@ if defined?(::HTTPClient)
     end
 
     def do_get(req, proxy, conn, stream = false, &block)
+
+      clear_thread_variables unless conn.async_thread
+
       request_signature = build_request_signature(req, :reuse_existing)
 
       WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -103,12 +108,16 @@ if defined?(::HTTPClient)
     end
 
     def do_request_async(method, uri, query, body, extheader)
+      clear_thread_variables
       req = create_request(method, uri, query, body, extheader)
       request_signature = build_request_signature(req)
       synchronize_request_response { webmock_request_signatures << request_signature }
 
       if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
-        super
+        conn = super
+        conn.async_thread[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES]
+        conn.async_thread[WEBMOCK_HTTPCLIENT_RESPONSES] = Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES]
+        conn
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
@@ -188,7 +197,7 @@ if defined?(::HTTPClient)
     end
 
     def webmock_responses
-      @webmock_responses ||= Hash.new do |hash, request_signature|
+      Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] ||= Hash.new do |hash, request_signature|
         synchronize_request_response do
           hash[request_signature] = WebMock::StubRegistry.instance.response_for_request(request_signature)
         end
@@ -196,7 +205,7 @@ if defined?(::HTTPClient)
     end
 
     def webmock_request_signatures
-      @webmock_request_signatures ||= []
+      Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] ||= []
     end
 
     def previous_signature_for(signature)
@@ -227,6 +236,11 @@ if defined?(::HTTPClient)
           yield
         end
       end
+    end
+
+    def clear_thread_variables
+      Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = nil
+      Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] = nil
     end
   end
 
