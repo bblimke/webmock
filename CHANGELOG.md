@@ -1,9 +1,14 @@
 # Changelog
 
+# 3.23.0
+
+ * Fixed HTTP.rb adapter to support streaming real responses when WebMock is enabled.
+
+    Thanks to [Viacheslav Nepomniashchikh](https://github.com/aka-nez) for reporting and investigating this [issue](https://github.com/bblimke/webmock/issues/1017).
+
 # 3.22.0
 
   * Addressed an issue in the HTTPClient adapter where memoized stubbed responses and memoized request_signatures were incorrectly persisted between subsequent requests ([#1019](https://github.com/bblimke/webmock/issues/1019)). The implementation of a more robust thread-safety solution by [Tom Beauvais](https://github.com/tbeauvais) in [PR #300](https://github.com/bblimke/webmock/pull/300) not only resolved the memoization problem but also enhanced the overall thread safety of the adapter. This update ensures that stubbed responses and request signatures are correctly isolated to individual requests, improving both consistency and thread safety.
-
 
 # 3.21.2
 
