@@ -453,6 +453,24 @@ stub_request(:any, 'www.example.net').to_timeout
 RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
 ```
 
+### Streaming response
+
+Net::HTTP supports streaming responses. WebMock can simulate this by specifying an Array for body.
+This is only implemented for Net::HTTP at the moment.
+
+```ruby
+stub_http_request(:get, "www.example.com").to_return(body: ["a", "b", "c"])
+
+Net::HTTP.start('www.example.com') do |http|
+  req = Net::HTTP::Get.new('/')
+  http.request(req) do |res|
+    res.read_body do |segment|
+      puts segment
+    end
+  end
+end    # ===> "a\nb\nc\n"
+```
+
 ### Multiple responses for repeated requests
 
 ```ruby
