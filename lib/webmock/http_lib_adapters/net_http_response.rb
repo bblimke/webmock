@@ -25,7 +25,11 @@ module Net
       return nil if @body.nil?
 
       dest ||= ::Net::ReadAdapter.new(block)
-      dest << @body.dup
+      if @body.is_a?(Array)
+        @body.each { |part| dest << part.dup }
+      else
+        dest << @body.dup
+      end
       @body = dest
     ensure
       # allow subsequent calls to #read_body to proceed as normal, without our hack...

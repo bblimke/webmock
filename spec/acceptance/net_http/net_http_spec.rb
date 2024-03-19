@@ -142,6 +142,21 @@ describe "Net:HTTP" do
     expect(response_body).to eq("abc")
   end
 
+  it "should support streaming a response body", focus: true do
+    stub_http_request(:get, "www.example.com").to_return(body: ["a", "b", "c"])
+    response_body = +""
+
+    http_request(:get, "http://www.example.com/") do |response|
+      i = 0
+      response.read_body do |fragment|
+        response_body << "#{fragment}#{i}"
+        i += 1
+      end
+    end
+
+    expect(response_body).to eq("a0b1c2")
+  end
+
   it "should handle Net::HTTP::Post#body" do
     stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")

@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.13.1 (future)
+
+  * Add support for streaming responses in Net::HTTP adapter
+
 # 3.23.0
 
  * Fixed HTTP.rb adapter to support streaming real responses when WebMock is enabled.
