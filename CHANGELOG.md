@@ -1,6 +1,6 @@
 # Changelog
 
-# 3.13.1 (future)
+# 3.23.1 (future)
 
   * Add support for streaming responses in Net::HTTP adapter
 
