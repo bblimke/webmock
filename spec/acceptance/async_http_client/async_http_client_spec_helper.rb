@@ -1,3 +1,5 @@
+require "ostruct"
+
 module AsyncHttpClientSpecHelper
   def http_request(method, url, options = {}, &block)
     endpoint = Async::HTTP::Endpoint.parse(url)

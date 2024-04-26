@@ -154,9 +154,9 @@ if defined?(Async::HTTP)
 
         def create_connected_sockets
           pair = begin
-            Async::IO::Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM)
+            Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM)
           rescue Errno::EAFNOSUPPORT
-            Async::IO::Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM)
+            Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM)
           end
           pair.tap do |sockets|
             sockets.each do |socket|
