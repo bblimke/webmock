@@ -1,4 +1,4 @@
-require "ostruct"
+require 'ostruct'
 
 module AsyncHttpClientSpecHelper
   def http_request(method, url, options = {}, &block)
