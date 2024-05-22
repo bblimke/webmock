@@ -152,11 +152,15 @@ if defined?(Async::HTTP)
 
         private
 
+        def socket_class
+          @_socket_class ||= Gem::Dependency.new("async-io").matching_specs.any? ? Async::IO::Socket : Socket
+        end
+
         def create_connected_sockets
           pair = begin
-            Socket.pair(Socket::AF_UNIX, Socket::SOCK_STREAM)
+            socket_class.pair(Socket::AF_UNIX, Socket::SOCK_STREAM)
           rescue Errno::EAFNOSUPPORT
-            Socket.pair(Socket::AF_INET, Socket::SOCK_STREAM)
+            socket_class.pair(Socket::AF_INET, Socket::SOCK_STREAM)
           end
           pair.tap do |sockets|
             sockets.each do |socket|
