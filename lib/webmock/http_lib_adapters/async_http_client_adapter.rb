@@ -153,7 +153,7 @@ if defined?(Async::HTTP)
         private
 
         def socket_class
-          @_socket_class ||= Gem::Dependency.new("async-io").matching_specs.any? ? Async::IO::Socket : Socket
+          defined?(Async::IO::Socket) ? Async::IO::Socket : Socket
         end
 
         def create_connected_sockets
