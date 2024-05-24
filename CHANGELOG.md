@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.23.1
+
+* Added support for async-http version >= 0.65.0 [PR](https://github.com/bblimke/webmock/pull/1056)
+
+    Thanks to [Jacob Frautschi](https://github.com/jakeonfire)
+
 # 3.23.0
 
  * Fixed HTTP.rb adapter to support streaming real responses when WebMock is enabled.

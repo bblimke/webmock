@@ -1202,6 +1202,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Victor Maslov
 * Gio Lodi
 * Ryan Brooks
+* Jacob Frautschi
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
