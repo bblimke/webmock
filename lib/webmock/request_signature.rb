@@ -49,6 +49,17 @@ module WebMock
     def assign_options(options)
       self.body = options[:body] if options.has_key?(:body)
       self.headers = options[:headers] if options.has_key?(:headers)
+
+      if headers && body then
+        if content_type = headers['Content-Type'] then
+          content_type, boundary = content_type.split(';')
+          if boundary && boundary =~ /^\s*boundary=([a-z0-9]+)$/i then
+            boundary_string = $1
+            self.body.gsub!(boundary_string, '<<<boundary>>>')
+            self.headers['Content-Type'].gsub!(boundary_string, '<<<boundary>>>')
+          end
+        end
+      end
     end
 
   end
