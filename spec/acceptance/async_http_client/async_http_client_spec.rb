@@ -130,6 +130,11 @@ unless RUBY_PLATFORM =~ /java/
       )
     end
 
+    it 'works with responses that use chunked transfer encoding' do
+      stub_request(:get, "www.example.com").to_return(body: "abc", headers: { 'Transfer-Encoding' => 'chunked' })
+      expect(http_request(:get, "http://www.example.com").body).to eq("abc")
+    end
+
     it 'works with to_timeout' do
       stub_request(:get, 'http://www.example.com').to_timeout
       expect { make_request(:get, 'http://www.example.com') }.to raise_error Async::TimeoutError
