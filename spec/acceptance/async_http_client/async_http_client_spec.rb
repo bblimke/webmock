@@ -289,7 +289,7 @@ unless RUBY_PLATFORM =~ /java/
         subject do
           responses = {}
           Async do |task|
-            Async::HTTP::Client.open(endpoint, protocol) do |client|
+            Async::HTTP::Client.open(endpoint, protocol: protocol) do |client|
               requests_count.times do |index|
                 response = client.get "/foo#{index}"
                 responses[index] = response_to_hash(response)
@@ -316,7 +316,7 @@ unless RUBY_PLATFORM =~ /java/
         subject do
           responses = {}
           Async do |task|
-            Async::HTTP::Client.open(endpoint, protocol) do |client|
+            Async::HTTP::Client.open(endpoint, protocol: protocol) do |client|
               tasks = requests_count.times.map do |index|
                 task.async do
                   response = client.get "/foo#{index}"
@@ -349,7 +349,7 @@ unless RUBY_PLATFORM =~ /java/
         endpoint = Async::HTTP::Endpoint.parse(url)
 
         begin
-          Async::HTTP::Client.open(endpoint, protocol || endpoint.protocol) do |client|
+          Async::HTTP::Client.open(endpoint, protocol: protocol || endpoint.protocol) do |client|
             response = client.send(
               method,
               endpoint.path,

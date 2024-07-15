@@ -35,9 +35,9 @@ if defined?(Async::HTTP)
       class WebMockClientWrapper < Client
         def initialize(
           endpoint,
-          protocol = endpoint.protocol,
-          scheme = endpoint.scheme,
-          authority = endpoint.authority,
+          protocol: endpoint.protocol,
+          scheme: endpoint.scheme,
+          authority: endpoint.authority,
           **options
         )
           webmock_endpoint = WebMockEndpoint.new(scheme, authority, protocol)
@@ -45,6 +45,7 @@ if defined?(Async::HTTP)
           @network_client = WebMockClient.new(endpoint, **options)
           @webmock_client = WebMockClient.new(webmock_endpoint, **options)
 
+          @endpoint = endpoint
           @scheme = scheme
           @authority = authority
         end
