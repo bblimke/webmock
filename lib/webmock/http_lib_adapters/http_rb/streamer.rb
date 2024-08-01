@@ -25,6 +25,10 @@ module HTTP
         @io.close
       end
 
+      def finished_request?
+        @io.eof?
+      end
+
       def sequence_id
         -1
       end

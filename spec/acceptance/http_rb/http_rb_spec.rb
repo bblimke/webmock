@@ -89,6 +89,20 @@ describe "HTTP.rb" do
 
       response.connection.close
     end
+
+    it "reports request finish" do
+      stub_request(:get, "example.com/foo")
+        .to_return(body: 'XX')
+      response = HTTP.get "http://example.com/foo"
+
+      expect(response.connection.finished_request?).to be(false)
+
+      response.body.readpartial(1)
+      expect(response.connection.finished_request?).to be(false)
+
+      response.body.readpartial
+      expect(response.connection.finished_request?).to be(true)
+    end
   end
 
   it "should preserve request body encoding when matching requests" do
