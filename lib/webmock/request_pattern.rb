@@ -309,6 +309,7 @@ module WebMock
       else
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
+    rescue Psych::SyntaxError, REXML::ParseException
     end
 
     def body_format(content_type)
