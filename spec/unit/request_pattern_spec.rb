@@ -614,7 +614,7 @@ describe WebMock::RequestPattern do
             it "should not match when body is not xml" do
               expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
                 not_to match(WebMock::RequestSignature.new(:post, "www.example.com",
-                                                               headers: {content_type: content_type}, body: "foo bar"))
+                                                               headers: {content_type: content_type}, body: ""))
                 end
 
             it "matches when the content type include a charset" do
