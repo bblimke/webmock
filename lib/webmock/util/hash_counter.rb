@@ -17,9 +17,14 @@ module WebMock
 
       def put(key, num=1)
         @lock.synchronize do
+          if hash.key?(key)
+            existing_key = hash.keys.find { |k| k.hash == key.hash }
+            array << existing_key
+          else
+            array << key
+          end
           hash[key] += num
           @order[key] = @max += 1
-          array << key
         end
       end
 
