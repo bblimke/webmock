@@ -8,15 +8,16 @@ module WebMock
     attr_accessor :requested_signatures
 
     class Request
-      attr_accessor :method, :uri
+      attr_accessor :method, :uri, :headers
 
       def self.from_webmock_request_signature(request_signature)
-        new(method: request_signature.method, uri: request_signature.uri)
+        new(method: request_signature.method, uri: request_signature.uri, headers: request_signature.headers)
       end
 
-      def initialize(method:, uri:)
+      def initialize(method:, uri:, headers:)
         @method = method
         @uri = uri
+        @headers = headers
       end
     end
 

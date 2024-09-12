@@ -104,10 +104,10 @@ describe WebMock::RequestRegistry do
       expect(request_registry.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
     end
 
-    it "parses the URL of the requests made" do
+    it "returns the headers of the request" do
       request_registry = WebMock::RequestRegistry.instance
-      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
-      expect(request_registry.requests_made.first.uri).to eq(Addressable::URI.parse("http://www.example.com/"))
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com", headers: { 'Content-Type' => 'application/json' }))
+      expect(request_registry.requests_made.first.headers).to eq({ 'Content-Type' => 'application/json' })
     end
   end
 end
