@@ -94,13 +94,14 @@ describe WebMock::RequestRegistry do
 
   describe "requests_made" do
     it "returns the requests made" do
-      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
-      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:put, "www.example.org"))
-      expect(WebMock::RequestRegistry.instance.requests_made.count).to eq(2)
-      expect(WebMock::RequestRegistry.instance.requests_made[0].method).to eq(:get)
-      expect(WebMock::RequestRegistry.instance.requests_made[0].uri).to eq(Addressable::URI.parse("http://www.example.com/"))
-      expect(WebMock::RequestRegistry.instance.requests_made[1].method).to eq(:put)
-      expect(WebMock::RequestRegistry.instance.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
+      request_registry = WebMock::RequestRegistry.instance
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:put, "www.example.org"))
+      expect(request_registry.requests_made.count).to eq(2)
+      expect(request_registry.requests_made[0].method).to eq(:get)
+      expect(request_registry.requests_made[0].uri).to eq(Addressable::URI.parse("http://www.example.com/"))
+      expect(request_registry.requests_made[1].method).to eq(:put)
+      expect(request_registry.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
     end
   end
 end
