@@ -103,5 +103,11 @@ describe WebMock::RequestRegistry do
       expect(request_registry.requests_made[1].method).to eq(:put)
       expect(request_registry.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
     end
+
+    it "parses the URL of the requests made" do
+      request_registry = WebMock::RequestRegistry.instance
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      expect(request_registry.requests_made.first.uri).to eq(Addressable::URI.parse("http://www.example.com/"))
+    end
   end
 end

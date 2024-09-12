@@ -40,8 +40,7 @@ module WebMock
 
     def to_a
       requested_signatures.
-        hash.
-        flat_map { |request_signature, number_of_requests| [request_signature] * number_of_requests }.
+        array.
         map { |request_signature| Request.from_webmock_request_signature(request_signature) }
     end
 
