@@ -92,4 +92,15 @@ describe WebMock::RequestRegistry do
     end
   end
 
+  describe "requests_made" do
+    it "should return an array of request signatures" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      WebMock::RequestRegistry.instance.requested_signatures.put(WebMock::RequestSignature.new(:put, "www.example.org"))
+      expect(WebMock::RequestRegistry.instance.requests_made.count).to eq(2)
+      expect(WebMock::RequestRegistry.instance.requests_made[0].method).to eq(:get)
+      expect(WebMock::RequestRegistry.instance.requests_made[0].uri).to eq(Addressable::URI.parse("http://www.example.com/"))
+      expect(WebMock::RequestRegistry.instance.requests_made[1].method).to eq(:put)
+      expect(WebMock::RequestRegistry.instance.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
+    end
+  end
 end

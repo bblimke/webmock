@@ -7,6 +7,19 @@ module WebMock
 
     attr_accessor :requested_signatures
 
+    class Request
+      attr_accessor :method, :uri
+
+      def self.from_webmock_request_signature(request_signature)
+        new(method: request_signature.method, uri: request_signature.uri)
+      end
+
+      def initialize(method:, uri:)
+        @method = method
+        @uri = uri
+      end
+    end
+
     def initialize
       reset!
     end
@@ -19,6 +32,17 @@ module WebMock
       self.requested_signatures.select do |request_signature|
         request_pattern.matches?(request_signature)
       end.inject(0) { |sum, (_, times_executed)| sum + times_executed }
+    end
+
+    def requests_made
+      to_a
+    end
+
+    def to_a
+      requested_signatures.
+        hash.
+        flat_map { |request_signature, number_of_requests| [request_signature] * number_of_requests }.
+        map { |request_signature| Request.from_webmock_request_signature(request_signature) }
     end
 
     def to_s
