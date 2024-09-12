@@ -7,25 +7,6 @@ module WebMock
 
     attr_accessor :requested_signatures
 
-    class Request
-      attr_accessor :method, :uri, :headers, :body
-
-      def self.from_webmock_request_signature(request_signature)
-        new(method: request_signature.method, uri: request_signature.uri, headers: request_signature.headers, body: request_signature.body)
-      end
-
-      def initialize(method:, uri:, headers:, body:)
-        @method = method
-        @uri = uri
-        @headers = headers
-        @body = body
-      end
-
-      def parsed_body
-        JSON.parse(body, symbolize_names: true)
-      end
-    end
-
     def initialize
       reset!
     end
@@ -46,8 +27,7 @@ module WebMock
 
     def to_a
       requested_signatures.
-        array.
-        map { |request_signature| Request.from_webmock_request_signature(request_signature) }
+        array
     end
 
     def to_s
