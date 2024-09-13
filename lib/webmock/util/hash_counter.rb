@@ -13,19 +13,24 @@ module WebMock
         @max = 0
         @lock = ::Mutex.new
         self.array = []
+        @request_object_ids = {}
       end
 
       def put(key, num=1)
         @lock.synchronize do
-          if hash.key?(key)
-            existing_key = hash.keys.find { |k| k.hash == key.hash }
-            array << existing_key
-          else
-            array << key
-          end
+          store_to_array(key:, num:)
           hash[key] += num
           @order[key] = @max += 1
         end
+      end
+
+      def store_to_array(key:, num:)
+        request_object_id = @request_object_ids[key.hash]
+        request_object_id = key.object_id if request_object_id.nil?
+        num.times do
+          array << ObjectSpace._id2ref(request_object_id)
+        end
+        @request_object_ids[key.hash] = key.object_id
       end
 
       def get(key)

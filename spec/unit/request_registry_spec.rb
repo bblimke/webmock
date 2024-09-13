@@ -120,6 +120,16 @@ describe WebMock::RequestRegistry do
       expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
     end
 
+    context "when storing the same signature with a count" do
+      it "adds two references to the signature" do
+        request_registry = WebMock::RequestRegistry.instance
+        signature = WebMock::RequestSignature.new(:get, "www.example.com")
+        request_registry.requested_signatures.put(signature, 2)
+        expect(request_registry.requests_made[0].object_id).to eq(signature.object_id)
+        expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
+      end
+    end
+
     context "with a JSON request" do
       it "returns the parsed JSON body of the request" do
         request_registry = WebMock::RequestRegistry.instance
