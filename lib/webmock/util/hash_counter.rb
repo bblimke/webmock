@@ -29,6 +29,8 @@ module WebMock
         request_object_id = key.object_id if request_object_id.nil?
         num.times do
           array << ObjectSpace._id2ref(request_object_id)
+        rescue RangeError
+          # Points to an invalid or recycled object so ignore
         end
         @request_object_ids[key.hash] = key.object_id
       end
