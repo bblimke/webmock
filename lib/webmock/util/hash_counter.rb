@@ -18,13 +18,13 @@ module WebMock
 
       def put(key, num=1)
         @lock.synchronize do
-          store_to_array(key:, num:)
+          store_to_array(key, num)
           hash[key] += num
           @order[key] = @max += 1
         end
       end
 
-      def store_to_array(key:, num:)
+      def store_to_array(key, num)
         request_object_id = @request_object_ids[key]
         request_object_id = key.object_id if request_object_id.nil?
         num.times do
