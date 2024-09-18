@@ -20,8 +20,8 @@ jobs:
           - '3.0'
           - '2.7'
           - '2.6'
-          - jruby
-    continue-on-error: ${{ matrix.ruby == 'head' }}
+          - jruby-head
+    continue-on-error: ${{ matrix.ruby == 'head' || matrix.ruby == 'jruby-head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
       JRUBY_OPTS: "--debug"
