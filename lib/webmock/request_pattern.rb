@@ -84,11 +84,12 @@ module WebMock
         URIAddressablePattern.new(uri)
       elsif uri.respond_to?(:call)
         URICallablePattern.new(uri)
-      else
+      elsif uri.is_a?(String)
         URIStringPattern.new(uri)
+      else
+        raise ArgumentError.new("URI should be a String, Regexp, Addressable::Template or a callable object. Got: #{uri.class}")
       end
     end
-
   end
 
 

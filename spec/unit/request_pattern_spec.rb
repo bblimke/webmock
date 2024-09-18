@@ -436,6 +436,14 @@ describe WebMock::RequestPattern do
           end
         end
       end
+
+      describe "when uri is passed as Pathname" do
+        it "should raise an ArgumentError" do
+          expect {
+            WebMock::RequestPattern.new(:get, Pathname.new("www.example.com"))
+          }.to raise_error(ArgumentError, "URI should be a String, Regexp, Addressable::Template or a callable object. Got: Pathname")
+        end
+      end
     end
 
     describe "when matching requests with body" do
