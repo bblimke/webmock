@@ -4,7 +4,6 @@ require 'singleton'
 
 require 'addressable/uri'
 require 'addressable/template'
-require 'crack/xml'
 
 require_relative 'webmock/deprecation'
 require_relative 'webmock/version'
@@ -17,7 +16,8 @@ require_relative 'webmock/util/headers'
 require_relative 'webmock/util/hash_counter'
 require_relative 'webmock/util/hash_keys_stringifier'
 require_relative 'webmock/util/values_stringifier'
-require_relative 'webmock/util/json'
+require_relative 'webmock/util/parsers/json'
+require_relative 'webmock/util/parsers/xml'
 require_relative 'webmock/util/version_checker'
 require_relative 'webmock/util/hash_validator'
 

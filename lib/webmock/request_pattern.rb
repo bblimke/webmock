@@ -303,13 +303,14 @@ module WebMock
     def body_as_hash(body, content_type)
       case body_format(content_type)
       when :json then
-        WebMock::Util::JSON.parse(body)
+        WebMock::Util::Parsers::JSON.parse(body)
       when :xml then
-        Crack::XML.parse(body)
+        WebMock::Util::Parsers::XML.parse(body)
       else
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
-    rescue Psych::SyntaxError, REXML::ParseException
+    rescue WebMock::Util::Parsers::ParseError
+      nil
     end
 
     def body_format(content_type)
