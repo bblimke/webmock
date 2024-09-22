@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-return if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4.0') && Gem.loaded_specs['em-http-request'].version <= Gem::Version.new('1.1.7')
+return if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4.0')
 
 begin
   require 'em-http-request'

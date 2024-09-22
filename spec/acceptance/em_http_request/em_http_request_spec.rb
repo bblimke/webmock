@@ -10,7 +10,7 @@ describe "EM::HttpRequest" do
 
   before(:all) do
     skip 'em-http-request is not supported on JRuby' if RUBY_PLATFORM =~ /java/
-    skip 'em-http-request <= 1.1.7 is not supported on Ruby >= 3.4' if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4.0') && Gem.loaded_specs['em-http-request'].version <= Gem::Version.new('1.1.7')
+    skip 'em-http-request is not supported on Ruby >= 3.4' if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4.0')
   end
 
   include_context "with WebMock", :no_status_message
