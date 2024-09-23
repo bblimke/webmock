@@ -13,7 +13,7 @@ module WebMock
         @max = 0
         @lock = ::Mutex.new
         self.array = []
-        @request_object_ids = {}
+        @request_objects = {}
       end
 
       def put(key, num=1)
@@ -25,14 +25,10 @@ module WebMock
       end
 
       def store_to_array(key, num)
-        request_object_id = @request_object_ids[key]
-        request_object_id = key.object_id if request_object_id.nil?
+        stored_object = @request_objects[key] ||= key
         num.times do
-          array << ObjectSpace._id2ref(request_object_id)
-        rescue RangeError
-          # Points to an invalid or recycled object so ignore
+          array << stored_object
         end
-        @request_object_ids[key] = key.object_id
       end
 
       def get(key)
