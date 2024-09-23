@@ -6,7 +6,7 @@ rescue LoadError
   # patron not found
 end
 
-if defined?(::Patron)
+if defined?(::Patron::Session)
   module WebMock
     module HttpLibAdapters
       class PatronAdapter < ::WebMock::HttpLibAdapter
