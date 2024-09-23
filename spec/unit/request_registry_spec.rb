@@ -131,22 +131,10 @@ describe WebMock::RequestRegistry do
     end
 
     context "with a JSON request" do
-      it "returns the parsed JSON body of the request" do
+      it "returns the body of the request" do
         request_registry = WebMock::RequestRegistry.instance
         request_registry.requested_signatures.put(json_request_with_body(a: 1))
         expect(request_registry.requests_made.first.body).to eq({ a: 1 }.to_json)
-        expect(request_registry.requests_made.first.parsed_body).to eq(a: 1)
-      end
-
-      context "and invalid JSON in the body" do
-        it "crashes" do
-          request_registry = WebMock::RequestRegistry.instance
-          request_registry.requested_signatures.put(json_request_with_raw_body("{ invalid_json }"))
-          expect(request_registry.requests_made.first.body).to eq("{ invalid_json }")
-          expect do
-            request_registry.requests_made.first.parsed_body
-          end.to raise_error JSON::ParserError
-        end
       end
     end
   end
@@ -155,9 +143,5 @@ describe WebMock::RequestRegistry do
 
   def json_request_with_body(body)
     WebMock::RequestSignature.new(:get, "www.example.com", body: JSON.generate(body))
-  end
-
-  def json_request_with_raw_body(body)
-    WebMock::RequestSignature.new(:get, "www.example.com", body: body)
   end
 end

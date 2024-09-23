@@ -44,10 +44,6 @@ module WebMock
       !!(headers&.fetch('Content-Type', nil)&.start_with?('application/json'))
     end
 
-    def parsed_body
-      JSON.parse(body, symbolize_names: true)
-    end
-
     private
 
     def assign_options(options)
