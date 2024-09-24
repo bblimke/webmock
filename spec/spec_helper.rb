@@ -3,7 +3,6 @@ require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
   require 'curb'
   require 'patron'
-  require 'em-http'
   require 'typhoeus'
 end
 if RUBY_PLATFORM =~ /java/
