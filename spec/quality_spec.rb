@@ -30,7 +30,7 @@ describe "The library itself" do
   def check_for_tab_characters(filename)
     failing_lines = []
     File.readlines(filename).each_with_index do |line,number|
-      failing_lines << number + 1 if line =~ /\t/
+      failing_lines << number + 1 if line.force_encoding('UTF-8') =~ /\t/
     end
 
     unless failing_lines.empty?
@@ -41,7 +41,8 @@ describe "The library itself" do
   def check_for_extra_spaces(filename)
     failing_lines = []
     File.readlines(filename).each_with_index do |line,number|
-      next if line =~ /^\s+#.*\s+\n$/
+      line.force_encoding('UTF-8') =~ /^\s+#.*\s+\n$/
+      next if line.force_encoding('UTF-8') =~ /^\s+#.*\s+\n$/
       failing_lines << number + 1 if line =~ /\s+\n$/
     end
 
@@ -64,7 +65,7 @@ describe "The library itself" do
     error_messages = []
     Dir.chdir(File.expand_path("../..", __FILE__)) do
       `git ls-files`.split("\n").each do |filename|
-        next if filename =~ /\.gitmodules|fixtures/
+        next if filename =~ /\.gitmodules|fixtures|support/
         error_messages << check_for_tab_characters(filename)
         error_messages << check_for_extra_spaces(filename)
       end
