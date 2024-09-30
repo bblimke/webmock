@@ -1,5 +1,25 @@
 # Changelog
 
+# 3.24.0
+
+* Ignore parsing errors when parsing invalid JSON or XML body to match against body pattern #1066
+
+    Thanks to [Christian Schmidt](https://github.com/c960657)
+
+* Added support for mocked HTTP::Connection#finished_request? method #1065
+
+    Thanks to [Christian Schmidt](https://github.com/c960657)
+
+* Detect if Patron is loaded by checking if Patron::Session constant is defined #1068
+
+    Thanks to [Rodrigo Argumedo](https://github.com/rodrigoargumedo)
+
+* Raising an ArgumentError when uri is passed as a Pathname object to stub_request or request expectation declaration.
+
+* Dropped support for em-http-request on Ruby 3.4. The current version of em-http-request (1.1.7) is incompatible with Ruby 3.4 due to an unresolved issue (https://github.com/igrigorik/em-http-request/issues/365). Support for em-http-request will be re-enabled once the compatibility issue is resolved.
+
+    Thanks to [Christian Schmidt](https://github.com/c960657)
+
 # 3.23.1
 
 * Added support for async-http version >= 0.65.0 [PR](https://github.com/bblimke/webmock/pull/1056)
