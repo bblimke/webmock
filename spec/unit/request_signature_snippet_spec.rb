@@ -47,8 +47,9 @@ RSpec.describe WebMock::RequestSignatureSnippet do
   end
 
   describe "#request_stubs" do
+    let(:body) { {"a" => "b"} }
     before :each do
-      WebMock.stub_request(:get, "https://www.example.com").with(body: {"a" => "b"})
+      WebMock.stub_request(:get, "https://www.example.com").with(body: body)
     end
 
     context "when showing the body diff is turned off" do
@@ -60,7 +61,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
         result = subject.request_stubs
         result.sub!("registered request stubs:\n\n", "")
         expect(result).to eq(
-          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: {\"a\"=>\"b\"})"
+          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: #{body.inspect})"
         )
       end
 
@@ -74,7 +75,7 @@ RSpec.describe WebMock::RequestSignatureSnippet do
         result = subject.request_stubs
         result.sub!("registered request stubs:\n\n", "")
         expect(result).to eq(
-          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: {\"a\"=>\"b\"})\n\nBody diff:\n [[\"-\", \"key\", \"different value\"], [\"+\", \"a\", \"b\"]]\n"
+          "stub_request(:get, \"https://www.example.com/\").\n  with(\n    body: #{body.inspect})\n\nBody diff:\n [[\"-\", \"key\", \"different value\"], [\"+\", \"a\", \"b\"]]\n"
         )
       end
     end

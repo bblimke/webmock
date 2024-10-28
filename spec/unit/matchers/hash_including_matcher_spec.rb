@@ -14,7 +14,7 @@ module WebMock
       end
 
       it "describes itself properly" do
-        expect(HashIncludingMatcher.new(a: 1).inspect).to eq "hash_including({\"a\"=>1})"
+        expect(HashIncludingMatcher.new(a: 1).inspect).to eq "hash_including(#{{"a"=>1}.inspect})"
       end
 
       describe "success" do
