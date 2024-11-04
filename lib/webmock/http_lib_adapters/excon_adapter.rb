@@ -9,6 +9,8 @@ end
 if defined?(Excon)
   WebMock::VersionChecker.new('Excon', Excon::VERSION, '0.27.5').check_version!
 
+  EXCON_1_1_1_OR_LATER = Gem::Version.new(Excon::VERSION) >= Gem::Version.new('1.1.1')
+
   module WebMock
     module HttpLibAdapters
 
@@ -100,7 +102,7 @@ if defined?(Excon)
               string << key.to_s << '&'
             else
               for value in [*values]
-                string << key.to_s << '=' << CGI.escape(value.to_s) << '&'
+                string << key.to_s << '=' << (EXCON_1_1_1_OR_LATER ? value.to_s : CGI.escape(value.to_s)) << '&'
               end
             end
           end
