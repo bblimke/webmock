@@ -172,7 +172,7 @@ if defined?(Typhoeus)
                 request.execute_headers_callbacks(response)
               end
               if request.respond_to?(:streaming?) && request.streaming?
-                response.options[:response_body] = ""
+                response.options[:response_body] = "".dup
                 request.on_body.each { |callback| callback.call(webmock_response.body, response) }
               end
               request.finish(response)

@@ -125,6 +125,19 @@ unless RUBY_PLATFORM =~ /java/
           expect(test_complete).to eq("")
         end
 
+        it "should initialize the streaming response body with a mutible (non-frozen) string" do
+          skip("This test requires a newer version of Typhoeus") unless @request.respond_to?(:on_body)
+
+          stub_request(:any, "example.com").to_return(body: "body")
+
+          @request.on_body do |body_chunk, response|
+            response.body << body_chunk
+          end
+          hydra.queue @request
+
+          expect{ hydra.run }.not_to raise_error
+        end
+
         it "should call on_headers with 2xx response" do
           body = "on_headers fired"
           stub_request(:any, "example.com").to_return(body: body, headers: {'X-Test' => '1'})
