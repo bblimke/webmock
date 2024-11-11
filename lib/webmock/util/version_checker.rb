@@ -43,6 +43,7 @@ module WebMock
     end
 
     def check_version!
+      return unless ENV['WEBMOCK_CHECK_VERSION'] == "1"
       warn_about_too_low if too_low?
       warn_about_too_high if too_high?
       warn_about_unsupported_version if unsupported_version?
