@@ -84,7 +84,7 @@ module WebMock
         URIAddressablePattern.new(uri)
       elsif uri.respond_to?(:call)
         URICallablePattern.new(uri)
-      elsif uri.is_a?(::URI::Generic)
+      elsif uri.is_a?(::URI::Generic) || uri.is_a?(Addressable::URI)
         URIStringPattern.new(uri.to_s)
       elsif uri.is_a?(String)
         URIStringPattern.new(uri)
