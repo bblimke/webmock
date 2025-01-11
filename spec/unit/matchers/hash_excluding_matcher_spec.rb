@@ -12,7 +12,7 @@ module WebMock
       end
 
       it 'describes itself properly' do
-        expect(HashExcludingMatcher.new(a: 1).inspect).to eq 'hash_excluding({"a"=>1})'
+        expect(HashExcludingMatcher.new(a: 1).inspect).to eq "hash_excluding(#{{'a' => 1}})"
       end
 
       describe 'success' do
