@@ -21,7 +21,9 @@ jobs:
           - '3.0'
           - '2.7'
           - '2.6'
-          - jruby-head
+          # FIXME: When the JRuby issue https://github.com/jruby/jruby/issues/8606 is resolved,
+          # please re-run it with the following:
+          # - jruby-head
     continue-on-error: ${{ matrix.ruby == 'head' || matrix.ruby == 'jruby-head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
