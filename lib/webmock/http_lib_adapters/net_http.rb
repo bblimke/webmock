@@ -12,19 +12,25 @@ module WebMock
       adapter_for :net_http
 
       OriginalNetHTTP = Net::HTTP unless const_defined?(:OriginalNetHTTP)
+      # This will be removed in Ruby 3.5. In Ruby 3.4, const_remove will warn.
+      HAS_LEGACY_CONSTANT = Net.const_defined?(:HTTPSession)
 
       def self.enable!
         Net.send(:remove_const, :HTTP)
-        Net.send(:remove_const, :HTTPSession)
         Net.send(:const_set, :HTTP, @webMockNetHTTP)
-        Net.send(:const_set, :HTTPSession, @webMockNetHTTP)
+        if HAS_LEGACY_CONSTANT
+          remove_silently(Net, :HTTPSession)
+          Net.send(:const_set, :HTTPSession, @webMockNetHTTP)
+        end
       end
 
       def self.disable!
         Net.send(:remove_const, :HTTP)
-        Net.send(:remove_const, :HTTPSession)
         Net.send(:const_set, :HTTP, OriginalNetHTTP)
-        Net.send(:const_set, :HTTPSession, OriginalNetHTTP)
+        if HAS_LEGACY_CONSTANT
+          remove_silently(Net, :HTTPSession)
+          Net.send(:const_set, :HTTPSession, OriginalNetHTTP)
+        end
 
         #copy all constants from @webMockNetHTTP to original Net::HTTP
         #in case any constants were added to @webMockNetHTTP instead of Net::HTTP
@@ -35,6 +41,14 @@ module WebMock
             OriginalNetHTTP.send(:const_set, constant, @webMockNetHTTP.const_get(constant))
           end
         end
+      end
+
+      def self.remove_silently(mod, const) #:nodoc:
+        # Don't warn on removing the deprecated constant
+        verbose, $VERBOSE = $VERBOSE, nil
+        mod.send(:remove_const, const)
+      ensure
+        $VERBOSE = verbose
       end
 
       @webMockNetHTTP = Class.new(Net::HTTP) do
