@@ -19,21 +19,21 @@ describe WebMock::RequestPattern do
 
     it "should report string describing itself with query params" do
       expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: {'a' => ['b', 'c']}).to_s).to eq(
-        "GET /.*example.*/ with query params {\"a\"=>[\"b\", \"c\"]}"
+        "GET /.*example.*/ with query params #{{"a" => ["b", "c"]}}"
       )
     end
 
     it "should report string describing itself with query params as hash including matcher" do
       expect(WebMock::RequestPattern.new(:get, /.*example.*/,
       query: WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s).to eq(
-        "GET /.*example.*/ with query params hash_including({\"a\"=>[\"b\", \"c\"]})"
+        "GET /.*example.*/ with query params hash_including(#{{"a" => ["b", "c"]}})"
       )
     end
 
     it "should report string describing itself with body as hash including matcher" do
       expect(WebMock::RequestPattern.new(:get, /.*example.*/,
       body: WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s).to eq(
-        "GET /.*example.*/ with body hash_including({\"a\"=>[\"b\", \"c\"]})"
+        "GET /.*example.*/ with body hash_including(#{{"a" => ["b", "c"]}})"
       )
     end
   end

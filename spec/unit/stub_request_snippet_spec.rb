@@ -69,7 +69,7 @@ describe WebMock::StubRequestSnippet do
         expected = <<-STUB
 stub_request(:post, "http://www.example.com/").
   with(
-    body: {"user"=>{"first_name"=>"Bartosz"}},
+    body: #{{"user" => {"first_name" => "Bartosz"}}},
     headers: {
 \t  'Content-Type'=>'application/x-www-form-urlencoded'
     }).
