@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.25.0
+
+* Resolve net-http adapter deprecation Ruby 3.4
+
+    Thanks to [Earlopain](https://github.com/Earlopain)
+
 # 3.24.0
 
 * Ignore parsing errors when parsing invalid JSON or XML body to match against body pattern #1066
