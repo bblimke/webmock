@@ -230,18 +230,18 @@ if defined?(::HTTPClient)
   end
 
   class WebMockHTTPClient < HTTPClient
-    include WebMockHTTPClients
-
     alias_method :do_get_block_without_webmock, :do_get_block
     alias_method :do_get_stream_without_webmock, :do_get_stream
+
+    include WebMockHTTPClients
   end
 
   if defined? ::JSONClient
     class WebMockJSONClient < JSONClient
-      include WebMockHTTPClients
-
       alias_method :do_get_block_without_webmock, :do_get_block
       alias_method :do_get_stream_without_webmock, :do_get_stream
+
+      include WebMockHTTPClients
     end
   end
 
