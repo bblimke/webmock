@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 require 'spec_helper'
 require 'acceptance/webmock_shared'
 
