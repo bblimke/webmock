@@ -271,6 +271,10 @@ module WebMock
 
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
 
+      # Prevent empty Host header by providing similar behavior as Net::HTTP
+      # https://github.com/ruby/net-http/blob/cfbbb50c931a78fc2b5c731b9abeda161e1dfdd1/lib/net/http.rb#L2482
+      headers['host'] = URI(uri).host if headers['host'].nil?
+
       if request.body_stream
         body = request.body_stream.read
         request.body_stream = nil
