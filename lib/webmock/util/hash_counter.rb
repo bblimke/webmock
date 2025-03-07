@@ -5,19 +5,29 @@ require 'thread'
 module WebMock
   module Util
     class HashCounter
-      attr_accessor :hash
+      attr_accessor :hash, :array
 
       def initialize
         self.hash = Hash.new(0)
         @order = {}
         @max = 0
         @lock = ::Mutex.new
+        self.array = []
+        @request_objects = {}
       end
 
       def put(key, num=1)
         @lock.synchronize do
+          store_to_array(key, num)
           hash[key] += num
           @order[key] = @max += 1
+        end
+      end
+
+      def store_to_array(key, num)
+        stored_object = @request_objects[key] ||= key
+        num.times do
+          array << stored_object
         end
       end
 
