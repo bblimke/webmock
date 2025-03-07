@@ -41,7 +41,7 @@ module WebMock::Util
       #   #=> [['one', 'two'], ['one', 'three']]
       def query_to_values(query, options={})
         return nil if query.nil?
-        query = query.dup.force_encoding('utf-8') if query.respond_to?(:force_encoding)
+        query = query.to_s.dup.force_encoding('utf-8') if query.respond_to?(:force_encoding)
 
         options[:notation] ||= :subscript
 
