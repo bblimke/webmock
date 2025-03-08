@@ -1207,6 +1207,7 @@ People who submitted patches and new features or suggested improvements. Many th
 * Jacob Frautschi
 * Christian Schmidt
 * Rodrigo Argumedo
+* Patrick Jaberg
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

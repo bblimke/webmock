@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.25.1
+
+* Fix FrozenError in Typhoeus streaming response body
+
+    Thanks to [Patrick Jaberg](https://github.com/patrickjaberg)
+
 # 3.25.0
 
 * Resolve net-http adapter deprecation Ruby 3.4
