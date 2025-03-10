@@ -82,6 +82,17 @@ describe WebMock::RackResponse do
     end
   end
 
+  it "shouldn't set a rack.session" do
+    request = WebMock::RequestSignature.new(:get, 'www.example.com/env')
+    response = @rack_response.evaluate(request)
+
+    expect(response.status.first).to eq(200)
+    body = JSON.parse(response.body)
+
+    expect(body).not_to include("rack.session")
+    expect(body).not_to include("rack.session.options")
+  end
+
   describe 'rack error output' do
     before :each do
       @original_stderr = $stderr
