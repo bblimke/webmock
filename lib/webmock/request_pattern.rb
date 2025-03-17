@@ -84,11 +84,14 @@ module WebMock
         URIAddressablePattern.new(uri)
       elsif uri.respond_to?(:call)
         URICallablePattern.new(uri)
-      else
+      elsif uri.is_a?(::URI::Generic)
+        URIStringPattern.new(uri.to_s)
+      elsif uri.is_a?(String)
         URIStringPattern.new(uri)
+      else
+        raise ArgumentError.new("URI should be a String, Regexp, Addressable::Template or a callable object. Got: #{uri.class}")
       end
     end
-
   end
 
 
@@ -303,12 +306,14 @@ module WebMock
     def body_as_hash(body, content_type)
       case body_format(content_type)
       when :json then
-        WebMock::Util::JSON.parse(body)
+        WebMock::Util::Parsers::JSON.parse(body)
       when :xml then
-        Crack::XML.parse(body)
+        WebMock::Util::Parsers::XML.parse(body)
       else
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
+    rescue WebMock::Util::Parsers::ParseError
+      nil
     end
 
     def body_format(content_type)

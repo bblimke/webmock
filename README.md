@@ -44,6 +44,7 @@ Supported Ruby Interpreters
 * MRI 3.1
 * MRI 3.2
 * MRI 3.3
+* MRI 3.4
 * JRuby
 
 ## Installation
@@ -1204,6 +1205,9 @@ People who submitted patches and new features or suggested improvements. Many th
 * Gio Lodi
 * Ryan Brooks
 * Jacob Frautschi
+* Christian Schmidt
+* Rodrigo Argumedo
+* Patrick Jaberg
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.

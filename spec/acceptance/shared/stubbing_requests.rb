@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 shared_examples_for "stubbing requests" do |*adapter_info|
   describe "when requests are stubbed" do
     describe "based on uri" do

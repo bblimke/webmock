@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 $:.push File.expand_path('../lib', __FILE__)
 require 'webmock/version'
 
@@ -21,7 +20,7 @@ Gem::Specification.new do |s|
     'wiki_uri'          => 'https://github.com/bblimke/webmock/wiki'
   }
 
-  s.required_ruby_version = '>= 2.5'
+  s.required_ruby_version = '>= 2.6'
 
   s.add_dependency 'addressable', '>= 2.8.0'
   s.add_dependency 'crack', '>= 0.3.2'

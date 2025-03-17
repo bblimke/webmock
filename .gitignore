@@ -32,3 +32,4 @@ tmp/*
 *.rbx
 .ruby-gemset
 .ruby-version
+.tool-versions

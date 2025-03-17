@@ -1,4 +1,3 @@
-# encoding: utf-8
 require 'spec_helper'
 require 'acceptance/webmock_shared'
 require_relative './async_http_client_spec_helper'
