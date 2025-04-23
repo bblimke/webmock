@@ -53,10 +53,13 @@ module HTTP
     end
 
     def perform
-      return unless ::WebMock.net_connect_allowed?(request_signature.uri)
-      response = @perform.call
-      invoke_callbacks(response.to_webmock, real_request: true)
-      response
+      if ::WebMock.net_connect_allowed?(request_signature.uri)
+        response = @perform.call
+        invoke_callbacks(response.to_webmock, real_request: true)
+        response
+      else
+        raise ::WebMock::NetConnectNotAllowedError.new request_signature
+      end
     end
 
     def halt
