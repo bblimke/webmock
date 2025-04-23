@@ -200,9 +200,9 @@ module WebMock
 
 
         def check_right_http_connection
-          unless @@alredy_checked_for_right_http_connection ||= false
+          unless @@already_checked_for_right_http_connection ||= false
             WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
-            @@alredy_checked_for_right_http_connection = true
+            @@already_checked_for_right_http_connection = true
           end
         end
       end
