@@ -92,4 +92,56 @@ describe WebMock::RequestRegistry do
     end
   end
 
+  describe "requests_made" do
+    it "returns the requests made" do
+      request_registry = WebMock::RequestRegistry.instance
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:put, "www.example.org"))
+      expect(request_registry.requests_made.count).to eq(2)
+      expect(request_registry.requests_made[0].method).to eq(:get)
+      expect(request_registry.requests_made[0].uri).to eq(Addressable::URI.parse("http://www.example.com/"))
+      expect(request_registry.requests_made[1].method).to eq(:put)
+      expect(request_registry.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
+    end
+
+    it "returns the headers of the request" do
+      request_registry = WebMock::RequestRegistry.instance
+      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com", headers: { 'Content-Type' => 'application/json' }))
+      expect(request_registry.requests_made.first.headers).to eq({ 'Content-Type' => 'application/json' })
+    end
+
+    it "only stores references to existing signatures" do
+      request_registry = WebMock::RequestRegistry.instance
+      signature = WebMock::RequestSignature.new(:get, "www.example.com")
+      duplicate_signature = WebMock::RequestSignature.new(:get, "www.example.com")
+      request_registry.requested_signatures.put(signature)
+      request_registry.requested_signatures.put(duplicate_signature)
+      expect(request_registry.requests_made[0].object_id).to eq(signature.object_id)
+      expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
+    end
+
+    context "when storing the same signature with a count" do
+      it "adds two references to the signature" do
+        request_registry = WebMock::RequestRegistry.instance
+        signature = WebMock::RequestSignature.new(:get, "www.example.com")
+        request_registry.requested_signatures.put(signature, 2)
+        expect(request_registry.requests_made[0].object_id).to eq(signature.object_id)
+        expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
+      end
+    end
+
+    context "with a JSON request" do
+      it "returns the body of the request" do
+        request_registry = WebMock::RequestRegistry.instance
+        request_registry.requested_signatures.put(json_request_with_body(a: 1))
+        expect(request_registry.requests_made.first.body).to eq({ a: 1 }.to_json)
+      end
+    end
+  end
+
+  private
+
+  def json_request_with_body(body)
+    WebMock::RequestSignature.new(:get, "www.example.com", body: JSON.generate(body))
+  end
 end
