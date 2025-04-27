@@ -7,6 +7,8 @@ module SharedTest
     super
     @stub_http = stub_http_request(:any, "http://www.example.com")
     @stub_https = stub_http_request(:any, "https://www.example.com")
+    @body1 = File.read(File.expand_path('test/support/body1'))
+    @body2 = File.read(File.expand_path('test/support/body2')).force_encoding('ASCII-8BIT')
   end
 
   def test_assert_requested_with_stub_and_block_raises_error
@@ -60,6 +62,20 @@ module SharedTest
       body: "abc", headers: {'A' => 'a'})
     assert_requested(:get, "http://www.example.com",
       body: "abc", headers: {'A' => 'a'})
+  end
+
+  def test_verification_that_expected_request_occured_with_utf8_body_and_headers
+    http_request(:post, "http://www.example.com/",
+      body: @body1, headers: {'A' => 'a'})
+    http_request(:post, "http://www.example.com/",
+      body: @body2, headers: {'A' => 'a'})
+    assert_fail(/.*/) do
+      # we know this will fail, but it shouldn't cause an exception
+      assert_requested(:post, "http://www.example.com",
+        body: @body1, headers: {'A' => 'b'})
+    end
+  rescue Encoding::CompatibilityError => e
+    flunk e.message
   end
 
   def test_verification_that_expected_request_occured_with_query_params
