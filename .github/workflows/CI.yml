@@ -23,9 +23,7 @@ jobs:
           - '3.0'
           - '2.7'
           - '2.6'
-          # FIXME: When the JRuby issue https://github.com/jruby/jruby/issues/8606 is resolved,
-          # please re-run it with the following:
-          # - jruby-head
+          - jruby-head
     continue-on-error: ${{ matrix.ruby == 'head' || matrix.ruby == 'jruby-head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
@@ -53,6 +51,11 @@ jobs:
             openssl \
             zlib1g-dev \
             libcurl4-openssl-dev
+      - name: prepare java environment for jruby
+        if: matrix.ruby == 'jruby-head'
+        run: |
+          apt-get install -y openjdk-21-jdk
+          java -version
       - uses: actions/checkout@v5
       - uses: ruby/setup-ruby@v1
         continue-on-error: false
