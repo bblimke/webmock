@@ -163,7 +163,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
       describe "allowing by scheme:host string" do
         before :each do
-          WebMock.disable_net_connect!(allow: 'https://www.google.pl')
+          WebMock.disable_net_connect!(allow: HTTP_STATUS_SERVICE)
         end
 
         context "when the host and scheme is not allowed" do
@@ -180,38 +180,39 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
           it "should raise exception if request was made to different port" do
             expect {
-              http_request(:get, 'https://www.google.pl:80/')
-            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET https://www.google.pl:80))
+              http_request(:get, "#{HTTP_STATUS_SERVICE}:8080/")
+            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET #{HTTP_STATUS_SERVICE}:8080))
           end
 
           it "should raise exception if request was made to different scheme" do
+            https_scheme = HTTP_STATUS_SERVICE.sub(%r{^http://}, 'https://')
             expect {
-              http_request(:get, 'http://www.google.pl/')
-            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.google.pl))
+              http_request(:get, "#{https_scheme}/")
+            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET #{https_scheme}))
           end
         end
 
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
-            stub_request(:get, 'https://www.google.pl').to_return(body: "abc")
-            expect(http_request(:get, "https://www.google.pl/").body).to eq("abc")
+            stub_request(:get, "#{HTTP_STATUS_SERVICE}/").to_return(body: "abc")
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/").body).to eq("abc")
           end
 
           it "should make a real request to allowed host with scheme", net_connect: true do
             method = http_library == :httpclient ? :head : :get #https://github.com/nahi/httpclient/issues/299
-            expect(http_request(method, "https://www.google.pl/").status).to eq('200')
+            expect(http_request(method, "#{HTTP_STATUS_SERVICE}/").status).to eq('200')
           end
 
           it "should make a real request to allowed host with scheme and port", net_connect: true do
             method = http_library == :httpclient ? :head : :get
-            expect(http_request(method, "https://www.google.pl:443/").status).to eq('200')
+            expect(http_request(method, "#{HTTP_STATUS_SERVICE}:80/").status).to eq('200')
           end
         end
       end
 
       describe "allowing by regular expression" do
         before :each do
-          WebMock.disable_net_connect!(allow: %r{httpstat})
+          WebMock.disable_net_connect!(allow: %r{#{HTTP_STATUS_SERVICE}})
         end
 
         context "when the host is not allowed" do
@@ -239,16 +240,17 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
           end
 
           it "should make a real request if request is allowed by path regexp and url contains default port", net_connect: true do
-            WebMock.disable_net_connect!(allow: %r{www.google.pl/webhp})
+            path = "#{HTTP_STATUS_SERVICE.sub(%r{^http://},'')}/200"
+            WebMock.disable_net_connect!(allow: %r{#{path}})
             method = http_library == :httpclient ? :head : :get
-            expect(http_request(method, 'https://www.google.pl:443/webhp').status).to eq('200')
+            expect(http_request(method, "#{HTTP_STATUS_SERVICE}:80/200").status).to eq('200')
           end
         end
       end
 
       describe "allowing by a callable" do
         before :each do
-          WebMock.disable_net_connect!(allow: lambda{|url| url.to_str.include?('httpstat') })
+          WebMock.disable_net_connect!(allow: lambda{|url| url.to_str.include?(HTTP_STATUS_SERVICE) })
         end
 
         context "when the host is not allowed" do
