@@ -91,7 +91,7 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
     describe "is not allowed, with exceptions" do
       describe "allowing by host string" do
         before :each do
-          WebMock.disable_net_connect!(allow: 'https://httpstat.us')
+          WebMock.disable_net_connect!(allow: HTTP_STATUS_SERVICE)
         end
 
         context "when the host is not allowed" do
@@ -109,13 +109,13 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
-            stub_request(:get, 'https://httpstat.us/200').to_return(body: "abc")
-            expect(http_request(:get, "https://httpstat.us/200").body).to eq("abc")
+            stub_request(:get, "#{HTTP_STATUS_SERVICE}/200").to_return(body: "abc")
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").body).to eq("abc")
           end
 
           # WARNING: this makes a real HTTP request!
           it "should make a real request to allowed host", net_connect: true do
-            expect(http_request(:get, "https://httpstat.us/200").status).to eq('200')
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").status).to eq('200')
           end
         end
       end
@@ -229,13 +229,13 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
-            stub_request(:get, 'https://httpstat.us/200').to_return(body: "abc")
-            expect(http_request(:get, "https://httpstat.us/200").body).to eq("abc")
+            stub_request(:get, "#{HTTP_STATUS_SERVICE}/200").to_return(body: "abc")
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").body).to eq("abc")
           end
 
           # WARNING: this makes a real HTTP request!
           it "should make a real request to allowed host", net_connect: true do
-            expect(http_request(:get, "https://httpstat.us/200").status).to eq('200')
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").status).to eq('200')
           end
 
           it "should make a real request if request is allowed by path regexp and url contains default port", net_connect: true do
@@ -266,20 +266,20 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
-            stub_request(:get, 'https://httpstat.us/200').to_return(body: "abc")
-            expect(http_request(:get, "https://httpstat.us/200").body).to eq("abc")
+            stub_request(:get, "#{HTTP_STATUS_SERVICE}/200").to_return(body: "abc")
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").body).to eq("abc")
           end
 
           # WARNING: this makes a real HTTP request!
           it "should make a real request to allowed host", net_connect: true do
-            expect(http_request(:get, "https://httpstat.us/200").status).to eq('200')
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").status).to eq('200')
           end
         end
       end
 
       describe "allowing by a list of the above" do
         before :each do
-          WebMock.disable_net_connect!(allow: [lambda{|_| false }, %r{foobar}, 'https://httpstat.us'])
+          WebMock.disable_net_connect!(allow: [lambda{|_| false }, %r{foobar}, HTTP_STATUS_SERVICE])
         end
 
         context "when the host is not allowed" do
@@ -297,13 +297,13 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
 
         context "when the host is allowed" do
           it "should return stubbed response if request was stubbed" do
-            stub_request(:get, 'https://httpstat.us/200').to_return(body: "abc")
-            expect(http_request(:get, "https://httpstat.us/200").body).to eq("abc")
+            stub_request(:get, "#{HTTP_STATUS_SERVICE}/200").to_return(body: "abc")
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").body).to eq("abc")
           end
 
           # WARNING: this makes a real HTTP request!
           it "should make a real request to allowed host", net_connect: true do
-            expect(http_request(:get, "https://httpstat.us/200").status).to eq('200')
+            expect(http_request(:get, "#{HTTP_STATUS_SERVICE}/200").status).to eq('200')
           end
         end
       end

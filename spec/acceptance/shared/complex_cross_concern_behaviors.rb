@@ -18,7 +18,7 @@ shared_context "complex cross-concern behaviors" do |*adapter_info|
     expect(played_back_response).to eq(real_response)
   end
 
-  let(:no_content_url) { 'https://httpstat.us/204' }
+  let(:no_content_url) { "#{HTTP_STATUS_SERVICE}/204" }
   [nil, ''].each do |stub_val|
     it "returns the same value (nil or "") for a request stubbed as #{stub_val.inspect} that a real empty response has", net_connect: true do
       unless http_library == :curb
