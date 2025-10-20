@@ -44,16 +44,14 @@ unless RUBY_PLATFORM =~ /java/
 
         it "should raise same error as Patron if file is not readable for get request" do
           stub_request(:get, "www.example.com")
-          File.open("/tmp/read_only_file", "w") do |tmpfile|
-            tmpfile.chmod(0400)
-          end
-          begin
-            expect {
-              @sess.get_file("/", "/tmp/read_only_file")
-            }.to raise_error(ArgumentError, "Unable to open specified file.")
-          ensure
-            File.unlink("/tmp/read_only_file")
-          end
+
+          allow(File).to receive(:open).and_call_original
+          allow(File).to receive(:open).with(@file_path, "w").and_raise(Errno::EACCES)
+
+          expect {
+            @sess.get_file("/", @file_path)
+          }.to raise_error(ArgumentError, "Unable to open specified file.")
+
         end
 
         it "should work with put_file" do
