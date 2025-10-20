@@ -102,7 +102,7 @@ shared_context "callbacks" do |*adapter_info|
           WebMock.after_request(except: [:other_lib])  do |_, response|
             @response = response
           end
-          http_request(:get, "https://httpstat.us/201", headers: { "Accept" => "*" })
+          http_request(:get, "#{HTTP_STATUS_SERVICE}/201", headers: { "Accept" => "*" })
         end
 
         it "should pass real response to callback with status and message" do
