@@ -29,12 +29,16 @@ jobs:
     env:
       JRUBY_OPTS: "--debug"
       HTTP_STATUS_SERVICE: "http://httpstatus"
+      HOME: "/home/runner/" # Needed for ruby-head
     services:
       httpstatus:
         image: ghcr.io/aaronpowell/httpstatus:f1c763d1f33cd10566f18ec190fc853895bdbdd7
         env:
           ASPNETCORE_URLS: "http://+:80"
     steps:
+      - name: Make sure home directory exists
+        run: |
+          mkdir -p ${HOME}
       - name: Install Apt Packages needed for setup-ruby
         run: |
           apt update
