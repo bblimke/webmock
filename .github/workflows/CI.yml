@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ubuntu:24.04
     strategy:
       fail-fast: false
       matrix:
@@ -21,24 +23,50 @@ jobs:
           - '3.0'
           - '2.7'
           - '2.6'
-          # FIXME: When the JRuby issue https://github.com/jruby/jruby/issues/8606 is resolved,
-          # please re-run it with the following:
-          # - jruby-head
+          - jruby-head
     continue-on-error: ${{ matrix.ruby == 'head' || matrix.ruby == 'jruby-head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
       JRUBY_OPTS: "--debug"
+      HTTP_STATUS_SERVICE: "http://httpstatus"
+      HOME: "/home/runner/" # Needed for ruby-head
+    services:
+      httpstatus:
+        image: ghcr.io/aaronpowell/httpstatus:f1c763d1f33cd10566f18ec190fc853895bdbdd7
+        env:
+          ASPNETCORE_URLS: "http://+:80"
     steps:
-      - uses: actions/checkout@v4
-      - name: Install Apt Packages
+      - name: Make sure home directory exists
         run: |
-          sudo apt update
-          sudo apt-get install libcurl4-openssl-dev -y
+          mkdir -p ${HOME}
+      - name: Install Apt Packages needed for setup-ruby
+        run: |
+          apt update
+          apt-get install -y --no-install-recommends \
+            build-essential \
+            ca-certificates \
+            cmake \
+            curl \
+            git \
+            libffi-dev \
+            libyaml-dev \
+            libreadline-dev \
+            libssl-dev \
+            openssl \
+            zlib1g-dev \
+            libcurl4-openssl-dev
+      - name: prepare java environment for jruby
+        if: matrix.ruby == 'jruby-head'
+        run: |
+          apt-get install -y openjdk-21-jdk
+          java -version
+      - uses: actions/checkout@v5
       - uses: ruby/setup-ruby@v1
         continue-on-error: false
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          cache-version: 1
           rubygems: 'latest'
           bundler: 'latest'
       - run: |

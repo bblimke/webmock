@@ -25,6 +25,8 @@ Warning[:deprecated] = true if Warning.respond_to?(:[]=)
 
 CURL_EXAMPLE_OUTPUT_PATH = File.expand_path('../support/example_curl_output.txt', __FILE__)
 
+HTTP_STATUS_SERVICE = ENV.fetch("HTTP_STATUS_SERVICE", "https://httpstat.us")
+
 RSpec.configure do |config|
   no_network_connection = ENV["NO_CONNECTION"] || ! NetworkConnection.is_network_available?
   if no_network_connection

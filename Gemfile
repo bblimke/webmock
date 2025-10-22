@@ -14,4 +14,5 @@ gem 'rake'
 
 platforms :jruby do
   gem 'jruby-openssl'
+  gem 'base64'
 end
