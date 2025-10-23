@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-return if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.4.0')
-
 begin
   require 'em-http-request'
 rescue LoadError

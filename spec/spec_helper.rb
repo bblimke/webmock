@@ -2,6 +2,7 @@ require 'rubygems'
 require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
   require 'curb'
+  require 'em-http'
   require 'patron'
   require 'typhoeus'
 end
@@ -49,4 +50,3 @@ RSpec.configure do |config|
 
   config.include Failures
 end
-
