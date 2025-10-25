@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.25.2
+
+* Return support for `em_http_request`
+
+    Thanks to [Oleg](https://github.com/Koilanetroc)
+
 # 3.25.1
 
 * Fix FrozenError in Typhoeus streaming response body
