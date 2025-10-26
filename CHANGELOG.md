@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.26.0
+
+* Support Addressable::URI in request patterns
+
+    Thanks to [Alexey Zapparov](https://github.com/ixti)
+
 # 3.25.2
 
 * Return support for `em_http_request`
