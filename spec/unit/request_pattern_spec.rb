@@ -477,7 +477,7 @@ describe WebMock::RequestPattern do
         it "should raise an ArgumentError" do
           expect {
             WebMock::RequestPattern.new(:get, Pathname.new("www.example.com"))
-          }.to raise_error(ArgumentError, "URI should be a String, Regexp, Addressable::Template or a callable object. Got: Pathname")
+          }.to raise_error(ArgumentError, "URI should be a String, Regexp, Addressable::Template, a callable object, or respond to #to_str. Got: Pathname")
         end
       end
     end
