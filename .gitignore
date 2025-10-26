@@ -33,3 +33,4 @@ tmp/*
 .ruby-gemset
 .ruby-version
 .tool-versions
+.devcontainer
