@@ -21,7 +21,7 @@ unless RUBY_PLATFORM =~ /java/
 
         def make_request
           EM.run do
-            request = EM::HttpRequest.new(http_url, ssl: {verify_peer: true}).get(redirects: 1)
+            request = EM::HttpRequest.new(http_url, ssl: {verify_peer: false}).get(redirects: 1)
             request.callback { EM.stop }
           end
         end
