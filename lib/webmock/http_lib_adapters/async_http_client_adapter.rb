@@ -211,7 +211,7 @@ if defined?(Async::HTTP)
           def build_response(webmock_response)
             headers = (webmock_response.headers || {}).each_with_object([]) do |(k, value), o|
               Array(value).each do |v|
-                o.push [k, v]
+                o.push [k, v] unless k.downcase == 'content-length' # async-http appends the exact content-length automatically
               end
             end
 

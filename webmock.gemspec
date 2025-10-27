@@ -46,7 +46,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rdoc',            '>  3.5.0'
   s.add_development_dependency 'webrick'
   s.add_development_dependency 'rspec-retry'
-  s.add_development_dependency 'protocol-http',   '<= 0.50.0'
 
   s.files        = Dir["CHANGELOG.md", "LICENSE", "README.md", "lib/**/*"]
   s.require_path = "lib"

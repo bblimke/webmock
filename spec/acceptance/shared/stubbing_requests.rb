@@ -366,10 +366,10 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
     describe "based on headers" do
       it "should match requests if headers are the same" do
-        stub_request(:get, "www.example.com").with(headers: SAMPLE_HEADERS )
+        stub_request(:get, "www.example.com").with(headers: { "Accept" => "application/json" } )
         expect(http_request(
           :get, "http://www.example.com/",
-        headers: SAMPLE_HEADERS).status).to eq("200")
+        headers: { "Accept" => "application/json" }).status).to eq("200")
       end
 
       it "should match requests if headers are the same and declared as array" do
@@ -413,12 +413,12 @@ shared_examples_for "stubbing requests" do |*adapter_info|
       end
 
       it "should not match requests if headers are different" do
-        stub_request(:get, "www.example.com").with(headers: SAMPLE_HEADERS)
+        stub_request(:get, "www.example.com").with(headers: { "Accept" => "application/json" })
 
         expect {
           http_request(
             :get, "http://www.example.com/",
-          headers: { 'Content-Length' => '9999'})
+          headers: { "Accept" => "text/html" })
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com/ with headers))
       end
 
