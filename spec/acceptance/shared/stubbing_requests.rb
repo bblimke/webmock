@@ -366,10 +366,10 @@ shared_examples_for "stubbing requests" do |*adapter_info|
 
     describe "based on headers" do
       it "should match requests if headers are the same" do
-        stub_request(:get, "www.example.com").with(headers: { "Accept" => "application/json" } )
+        stub_request(:get, "www.example.com").with(headers: SAMPLE_REQUEST_HEADERS )
         expect(http_request(
           :get, "http://www.example.com/",
-        headers: { "Accept" => "application/json" }).status).to eq("200")
+        headers: SAMPLE_REQUEST_HEADERS).status).to eq("200")
       end
 
       it "should match requests if headers are the same and declared as array" do
@@ -409,7 +409,7 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         stub_request(:get, "www.example.com")
         expect(http_request(
           :get, "http://www.example.com/",
-        headers: SAMPLE_HEADERS).status).to eq("200")
+        headers: SAMPLE_REQUEST_HEADERS).status).to eq("200")
       end
 
       it "should not match requests if headers are different" do
