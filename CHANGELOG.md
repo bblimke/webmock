@@ -1,5 +1,11 @@
 # Changelog
 
+# 3.26.1
+
+  Fix compatibility with recent async-http versions
+
+    Thanks to [Mikhail Doronin](https://github.com/misdoro)
+
 # 3.26.0
 
 * Support Addressable::URI in request patterns
