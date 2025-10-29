@@ -8,8 +8,9 @@ require 'acceptance/shared/allowing_and_disabling_net_connect'
 require 'acceptance/shared/precedence_of_stubs'
 require 'acceptance/shared/complex_cross_concern_behaviors'
 
-unless defined? SAMPLE_HEADERS
-  SAMPLE_HEADERS = { "Content-Length" => "8888", "Accept" => "application/json" }
+unless defined? SAMPLE_REQUEST_HEADERS
+  SAMPLE_REQUEST_HEADERS = { "Accept" => "application/json" }
+  SAMPLE_RESPONSE_HEADERS = { "Content-Type" => "application/json", "Content-Length" => "8888" }
   ESCAPED_PARAMS = "x=ab%20c&z=%27Stop%21%27%20said%20Fred%20m"
   NOT_ESCAPED_PARAMS = "z='Stop!' said Fred m&x=ab c"
 end

@@ -62,9 +62,9 @@ shared_context "declared responses" do |*adapter_info|
     end
 
     it "should return response with declared headers" do
-      stub_request(:get, "www.example.com").to_return(headers: SAMPLE_HEADERS)
+      stub_request(:get, "www.example.com").to_return(headers: SAMPLE_RESPONSE_HEADERS)
       response = http_request(:get, "http://www.example.com/")
-      expect(response.headers["Accept"]).to eq("application/json")
+      expect(response.headers["Content-Type"]).to eq("application/json")
       unless adapter_info.include?(:no_content_length_header)
         expect(response.headers["Content-Length"]).to eq("8888")
       end

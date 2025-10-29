@@ -536,9 +536,9 @@ shared_context "request expectations" do |*adapter_info|
       describe "when request with headers is expected" do
         it "should satisfy expectation if request was executed with the same headers" do
           expect {
-            http_request(:get, "http://www.example.com/", headers: SAMPLE_HEADERS)
+            http_request(:get, "http://www.example.com/", headers: SAMPLE_REQUEST_HEADERS)
             expect(a_request(:get, "www.example.com").
-            with(headers: SAMPLE_HEADERS)).to have_been_made
+            with(headers: SAMPLE_REQUEST_HEADERS)).to have_been_made
           }.not_to raise_error
         end
 
@@ -578,7 +578,7 @@ shared_context "request expectations" do |*adapter_info|
 
         it "should fail if request was executed with different headers" do
           expect {
-            http_request(:get, "http://www.example.com/", headers: SAMPLE_HEADERS)
+            http_request(:get, "http://www.example.com/", headers: SAMPLE_REQUEST_HEADERS)
             expect(a_request(:get, "www.example.com").
             with(headers: { 'Content-Length' => '9999'})).to have_been_made
           }.to fail_with(%r(The request GET http://www.example.com/ with headers \{'Content-Length'=>'9999'\} was expected to execute 1 time but it executed 0 times))
@@ -606,7 +606,7 @@ shared_context "request expectations" do |*adapter_info|
           expect {
             http_request(:post, "http://www.example.com/",
                          body: "abc",
-                         headers: SAMPLE_HEADERS
+                         headers: SAMPLE_REQUEST_HEADERS
                          )
             expect(a_request(:post, "www.example.com")).to have_been_made
           }.not_to raise_error
