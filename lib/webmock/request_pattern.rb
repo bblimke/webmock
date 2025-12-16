@@ -281,8 +281,6 @@ module WebMock
     end
 
     def matches?(body, content_type = "")
-      assert_non_multipart_body(content_type)
-
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
         matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
@@ -319,12 +317,6 @@ module WebMock
     def body_format(content_type)
       normalized_content_type = content_type.sub(/\A(application\/)[a-zA-Z0-9.-]+\+(json|xml)\Z/,'\1\2')
       BODY_FORMATS[normalized_content_type]
-    end
-
-    def assert_non_multipart_body(content_type)
-      if content_type =~ %r{^multipart/form-data}
-        raise ArgumentError.new("WebMock does not support matching body for multipart/form-data requests yet :(")
-      end
     end
 
     # Compare two hashes for equality
