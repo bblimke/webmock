@@ -183,6 +183,12 @@ stub_request(:post, "www.example.com").
 
 RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
 :content_type => 'application/x-www-form-urlencoded')    # ===> Success
+
+stub_request(:post, "www.example.com").
+  with(body: hash_including(id: /\d/))
+
+RestClient.post('www.example.com', "id=1",
+:content_type => 'application/x-www-form-urlencoded')    # ===> Success
 ```
 
 ### Matching custom request headers
