@@ -13,7 +13,8 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - head
+          # TODO: curb fails on ruby-head. Re-enable ruby-head once fixed.
+          # - head
           - '3.4'
           - '3.3'
           - '3.2'
