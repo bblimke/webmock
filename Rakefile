@@ -30,7 +30,6 @@ end
 
 Rake::TestTask.new(:minitest) do |test|
   test.test_files = FileList["minitest/**/*.rb"].exclude("test/test_helper.rb")
-  test.options = "--pride"
   test.verbose = false
   test.warning = false
 end
