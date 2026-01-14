@@ -21,7 +21,8 @@ jobs:
           - '3.0'
           - '2.7'
           - '2.6'
-          - jruby-head
+          # TODO: llhttp-ffi fails to install on jruby-head. Re-enable jruby-head once fixed.
+          # - jruby-head
     continue-on-error: ${{ matrix.ruby == 'head' || matrix.ruby == 'jruby-head' }}
     name: Ruby ${{ matrix.ruby }}
     env:
