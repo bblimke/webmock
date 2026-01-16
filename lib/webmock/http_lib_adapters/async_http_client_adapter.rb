@@ -208,8 +208,18 @@ if defined?(Async::HTTP)
             @webmock_responses ||= {}
           end
 
+          def strip_header?(key:, value:)
+            # WebMock's internal processing will not handle the body
+            # correctly if the header indicates that it is chunked, unless
+            # we also create all the chunks.
+            # It's far easier just to remove the header.
+            key =~ /transfer-encoding/i && value =~/chunked/i
+          end
+
           def build_response(webmock_response)
             headers = (webmock_response.headers || {}).each_with_object([]) do |(k, value), o|
+              next if strip_header?(key: k, value: value)
+
               Array(value).each do |v|
                 o.push [k, v] unless k.downcase == 'content-length' # async-http appends the exact content-length automatically
               end
