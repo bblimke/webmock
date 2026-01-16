@@ -16,6 +16,14 @@ unless RUBY_PLATFORM =~ /java/
           status).to eq("200")
       end
     end
+
+    describe "when doing PATCHes" do
+      it "should stub them" do
+        stub_request(:patch, "www.example.com").with(body: "01234")
+        expect(http_request(:patch, "http://www.example.com", body: "01234").
+          status).to eq("200")
+      end
+    end
   end
 
   describe "Curb features" do
@@ -454,6 +462,15 @@ unless RUBY_PLATFORM =~ /java/
         c.url = "http://www.example.com"
         c.put_data = "01234"
         c.http_put
+        expect(c.response_code).to eq(200)
+      end
+
+      it "should work with blank arguments for patch" do
+        stub_request(:patch, "www.example.com").with(body: "01234")
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.patch_body = "01234"
+        c.http_patch
         expect(c.response_code).to eq(200)
       end
 
