@@ -15,6 +15,7 @@ jobs:
         ruby:
           # TODO: curb fails on ruby-head. Re-enable ruby-head once fixed.
           # - head
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'

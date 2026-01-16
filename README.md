@@ -45,6 +45,7 @@ Supported Ruby Interpreters
 * MRI 3.2
 * MRI 3.3
 * MRI 3.4
+* MRI 4.0
 * JRuby
 
 ## Installation
