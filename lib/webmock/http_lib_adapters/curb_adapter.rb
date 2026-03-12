@@ -32,8 +32,8 @@ if defined?(Curl)
           status, headers = nil, {}
 
           header_string.split(/\r\n/).each do |header|
-            if header =~ %r|^HTTP/1.[01] \d\d\d (.*)|
-              status = $1
+            if header =~ %r{\AHTTP/(1\.[01]|2) (\d{3})\s*(.*)}
+              status = $3
             else
               parts = header.split(':', 2)
               unless parts.empty?

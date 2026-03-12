@@ -507,4 +507,32 @@ unless RUBY_PLATFORM =~ /java/
       end
     end
   end
+
+  describe WebMock::HttpLibAdapters::CurbAdapter do
+    let(:header_tpl) { "HTTP/_VERSION_ 500 BROKEN\r\nX-anyheader: anyvalue" }
+
+    describe '.parse_header_string' do
+      %w[1.0 1.1 2].each do |http_v|
+        it "returns correct status from HTTP/#{http_v}" do
+          input = header_tpl.sub("_VERSION_", http_v)
+          expect(described_class.parse_header_string(input)[0]).to eq("BROKEN")
+        end
+      end
+
+      it "returns correct single line of header (HTTP version known)" do
+        input = header_tpl.sub("_VERSION_", "1.1")
+        expect(described_class.parse_header_string(input)[1]).to match(Hash["X-anyheader", "anyvalue"])
+      end
+
+      it "returns correct status from HTTP/2 without reason phrase" do
+        input = "HTTP/2 500\r\nX-anyheader: anyvalue"                                                                                                                              
+        expect(described_class.parse_header_string(input)[0]).to eq("")                                                                                                            
+      end 
+
+      it "returns incorrect headers (HTTP Version unknown)" do
+        input = header_tpl.sub("_VERSION_", "X.Y")
+        expect(described_class.parse_header_string(input)[1]).to_not match(Hash["X-anyheader", "anyvalue"])
+      end
+    end
+  end
 end
