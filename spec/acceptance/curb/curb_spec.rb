@@ -373,6 +373,15 @@ unless RUBY_PLATFORM =~ /java/
         expect(c.body).to eq("abc")
       end
 
+      it "should alias code to response_code" do
+        stub_request(:get, "www.example.com").to_return(status: 456)
+
+        c = Curl::Easy.new
+        c.url = "http://www.example.com"
+        c.http(:GET)
+        expect(c.code).to eq(456)
+      end
+
       it "supports array headers passed to Curl::Easy" do
         stub_request(:get, "www.example.com").with(headers: {'X-One' => '1'}).to_return(body: "abc")
 
