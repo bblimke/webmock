@@ -43,7 +43,10 @@ module HTTP
       invoke_callbacks(webmock_response, real_request: false)
       response = ::HTTP::Response.from_webmock @request, webmock_response, request_signature
 
-      @options.features.each { |_name, feature| response = feature.wrap_response(response) }
+      # HTTP.rb 6.0+ wraps responses in reverse feature order
+      features = @options.features.values
+      features = features.reverse if HTTP::VERSION >= "6.0.0"
+      features.each { |feature| response = feature.wrap_response(response) }
       response
     end
 

@@ -28,9 +28,6 @@ module HTTP
         headers = webmock_response.headers || {}
         uri     = normalize_uri(request_signature && request_signature.uri)
 
-        # HTTP.rb 3.0+ uses a keyword argument to pass the encoding, but 1.x
-        # and 2.x use a positional argument, and 0.x don't support supplying
-        # the encoding.
         body = build_http_rb_response_body_from_webmock_response(webmock_response)
 
         return new(status, "1.1", headers, body, uri) if HTTP::VERSION < "1.0.0"
@@ -44,6 +41,17 @@ module HTTP
             body: body,
             uri: uri
           })
+        end
+
+        # 6.0.0 changed Response.new from a positional hash to keyword arguments.
+        if HTTP::VERSION >= '6.0.0'
+          return new(
+            status: status,
+            version: "1.1",
+            headers: headers,
+            body: body,
+            request: request,
+          )
         end
 
         new({

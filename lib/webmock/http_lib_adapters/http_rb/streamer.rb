@@ -10,15 +10,22 @@ module HTTP
 
       def readpartial(size = nil, outbuf = nil)
         unless size
-          if defined?(HTTP::Client::BUFFER_SIZE)
-            size = HTTP::Client::BUFFER_SIZE
-          elsif defined?(HTTP::Connection::BUFFER_SIZE)
+          if defined?(HTTP::Connection::BUFFER_SIZE)
             size = HTTP::Connection::BUFFER_SIZE
+          elsif defined?(HTTP::Client::BUFFER_SIZE)
+            size = HTTP::Client::BUFFER_SIZE
           end
         end
 
-        chunk = @io.read size, outbuf
-        chunk.force_encoding(@encoding) if chunk
+        chunk = @io.read(size, outbuf)
+
+        # HTTP.rb 6.0+ expects EOFError at end-of-stream instead of nil
+        if chunk.nil?
+          raise EOFError if HTTP::VERSION >= "6.0.0"
+          return nil
+        end
+
+        chunk.force_encoding(@encoding)
       end
 
       def close
