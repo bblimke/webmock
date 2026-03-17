@@ -313,6 +313,7 @@ if defined?(Curl)
       def response_code
         @response_code ||= super
       end
+      alias code response_code
 
       def header_str
         @header_str ||= super
