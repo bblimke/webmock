@@ -1,8 +1,22 @@
 # Changelog
 
+# 3.26.2
+
+* Add support to parse http/2 request on curb adapter
+
+    Thanks to [Christoph Rieß](https://github.com/criess)
+
+* CurbAdapter alias `code` from `response_code`
+
+    Thanks to [Christoph Rieß](https://github.com/criess)
+
+* Add HTTP.rb v6.0.0 compatibility to http_rb adapter
+
+    Thanks to [Erik Berlin](https://github.com/sferik)
+
 # 3.26.1
 
-  Fix compatibility with recent async-http versions
+* Fix compatibility with recent async-http versions
 
     Thanks to [Mikhail Doronin](https://github.com/misdoro)
 
