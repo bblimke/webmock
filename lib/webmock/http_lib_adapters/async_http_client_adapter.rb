@@ -92,6 +92,21 @@ if defined?(Async::HTTP)
           @webmock_client.close
         end
 
+        # WebMock doesn't mock connection pools. If your code
+        # accesses the pool directly, you must add the URL to WebMock's allowlist.
+        # This patch is here because puppeteer-ruby -> async-websocket uses (client).pool.acquire
+        # $(bundle show async-websocket)/lib/async/websocket/client.rb:109
+        def pool
+          # WebMock's URI parser doesn't understand ws://, so we map it to http:// for the check
+          check_scheme = @scheme.to_s.sub(/^ws/, "http")
+          uri = WebMock::Util::URI.normalize_uri("#{check_scheme}://#{@authority}/")
+          if WebMock.net_connect_allowed?(uri)
+            @network_client.pool
+          else
+            raise WebMock::NetConnectNotAllowedError.new(WebMock::RequestSignature.new(:get, uri))
+          end
+        end
+
         private
 
         def build_request_signature(request)
