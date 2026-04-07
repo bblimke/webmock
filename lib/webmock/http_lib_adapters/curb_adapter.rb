@@ -122,9 +122,23 @@ if defined?(Curl)
           method,
           uri.to_s,
           body: request_body,
-          headers: headers
+          headers: headers,
+          proxy: proxy_from_curb
         )
         request_signature
+      end
+
+      def proxy_from_curb
+        return nil unless self.proxy_url
+        proxy_uri = URI.parse(self.proxy_url)
+        proxy = {
+          "host" => proxy_uri.host,
+          "port" => proxy_uri.port
+        }
+        proxy["username"] = proxy_uri.user if proxy_uri.user
+        proxy["password"] = proxy_uri.password if proxy_uri.password
+        proxy["scheme"] = proxy_uri.scheme if proxy_uri.scheme && proxy_uri.scheme != "http"
+        proxy
       end
 
       def headers_as_hash(headers)

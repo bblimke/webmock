@@ -94,9 +94,23 @@ if defined?(::Patron::Session)
             req.action,
             uri.to_s,
             body: request_body,
-            headers: headers
+            headers: headers,
+            proxy: proxy_from_patron(req)
           )
           request_signature
+        end
+
+        def self.proxy_from_patron(req)
+          return nil unless req.proxy && !req.proxy.empty?
+          proxy_uri = URI.parse(req.proxy)
+          proxy = {
+            "host" => proxy_uri.host,
+            "port" => proxy_uri.port
+          }
+          proxy["username"] = proxy_uri.user if proxy_uri.user
+          proxy["password"] = proxy_uri.password if proxy_uri.password
+          proxy["scheme"] = proxy_uri.scheme if proxy_uri.scheme && proxy_uri.scheme != "http"
+          proxy
         end
 
         def self.build_patron_response(webmock_response, default_response_charset)

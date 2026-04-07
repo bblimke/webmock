@@ -12,7 +12,7 @@ Features
 
 * Stubbing HTTP requests at low http client lib level (no need to change tests when you change HTTP library)
 * Setting and verifying expectations on HTTP requests
-* Matching requests based on method, URI, headers and body
+* Matching requests based on method, URI, headers, body and proxy
 * Smart matching of the same URIs in different representations (also encoded and non encoded forms)
 * Smart matching of the same headers in different representations.
 * Support for Test::Unit
@@ -212,6 +212,35 @@ req['Accept'] = ['image/png']
 req.add_field('Accept', 'image/jpeg')
 Net::HTTP.start("www.example.com") {|http| http.request(req) }    # ===> Success
 ```
+
+### Matching requests based on proxy
+
+```ruby
+stub_request(:get, "www.example.com").
+  with(proxy: { "host" => "proxy.example.com", "port" => 8080 })
+
+http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+http.start { |h| h.get("/") }    # ===> Success
+```
+
+Proxy pattern supports Hash (partial matching), String (URI comparison), and Regexp:
+
+```ruby
+# Match by proxy URI string
+stub_request(:get, "www.example.com").
+  with(proxy: "http://proxy.example.com:8080")
+
+# Match by proxy URI regexp
+stub_request(:get, "www.example.com").
+  with(proxy: /proxy\.example/)
+
+# Match requests with no proxy
+stub_request(:get, "www.example.com").
+  with(proxy: nil)
+```
+
+Proxy matching is supported by Net::HTTP, Curb, Excon, Patron, and Typhoeus.
+Other adapters do not extract proxy information and will always have a nil proxy.
 
 ### Matching requests against provided block
 
@@ -796,6 +825,7 @@ An executed request matches stubbed request if it passes following criteria:
 - And request method is the same as stubbed request method or stubbed request method is :any
 - And request body is the same as stubbed request body or stubbed request body is not specified
 - And request headers match stubbed request headers, or stubbed request headers match a subset of request headers, or stubbed request headers are not specified
+- And request proxy matches stubbed request proxy pattern (Hash, String, Regexp, or nil), or stubbed request proxy is not specified
 - And request matches provided block or block is not provided
 
 ## Precedence of stubs

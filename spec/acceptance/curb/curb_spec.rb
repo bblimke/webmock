@@ -544,4 +544,51 @@ unless RUBY_PLATFORM =~ /java/
       end
     end
   end
+
+  describe "proxy matching" do
+    before(:each) do
+      WebMock.disable_net_connect!
+      WebMock.reset!
+    end
+
+    it "should match request with correct proxy" do
+      stub_request(:get, "www.example.com").with(
+        proxy: {"host" => "proxy.example.com", "port" => 8080}
+      ).to_return(body: "proxied")
+
+      curl = Curl::Easy.new("http://www.example.com/")
+      curl.proxy_url = "http://proxy.example.com:8080"
+      curl.http_get
+      expect(curl.body_str).to eq("proxied")
+    end
+
+    it "should not match request with wrong proxy" do
+      stub_request(:get, "www.example.com").with(
+        proxy: {"host" => "other-proxy.example.com", "port" => 8080}
+      )
+
+      curl = Curl::Easy.new("http://www.example.com/")
+      curl.proxy_url = "http://proxy.example.com:8080"
+      expect {
+        curl.http_get
+      }.to raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
+    it "should match request without proxy when proxy pattern is nil" do
+      stub_request(:get, "www.example.com").with(proxy: nil).to_return(body: "direct")
+
+      curl = Curl::Easy.new("http://www.example.com/")
+      curl.http_get
+      expect(curl.body_str).to eq("direct")
+    end
+
+    it "should match request with proxy when no proxy pattern is specified" do
+      stub_request(:get, "www.example.com").to_return(body: "any")
+
+      curl = Curl::Easy.new("http://www.example.com/")
+      curl.proxy_url = "http://proxy.example.com:8080"
+      curl.http_get
+      expect(curl.body_str).to eq("any")
+    end
+  end
 end

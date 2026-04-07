@@ -28,6 +28,15 @@ describe WebMock::RequestSignature do
       expect(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc").body).to eq("abc")
     end
 
+    it "assigns proxy" do
+      proxy = {"host" => "proxy.example.com", "port" => 8080}
+      expect(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy).proxy).to eq(proxy)
+    end
+
+    it "leaves proxy nil when not provided" do
+      expect(WebMock::RequestSignature.new(:get, "www.example.com").proxy).to be_nil
+    end
+
     it "symbolizes the method" do
       expect(WebMock::RequestSignature.new('get', "www.example.com", body: "abc").method).to eq(:get)
     end
@@ -39,6 +48,17 @@ describe WebMock::RequestSignature do
         body: "abc", headers: {'A' => 'a', 'B' => 'b'}).to_s).to eq(
       "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
       )
+    end
+
+    it "includes proxy info when present" do
+      proxy = {"host" => "proxy.example.com", "port" => 8080}
+      expect(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy).to_s).to eq(
+        "GET http://www.example.com/ with proxy #{proxy.inspect}"
+      )
+    end
+
+    it "does not include proxy info when nil" do
+      expect(WebMock::RequestSignature.new(:get, "www.example.com").to_s).not_to include("proxy")
     end
   end
 
@@ -75,6 +95,21 @@ describe WebMock::RequestSignature do
       signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
         headers: {'A' => 'A'})
       expect(signature1.hash).not_to eq(signature2.hash)
+    end
+
+    it "reports different hash for two signatures with different proxy" do
+      signature1 = WebMock::RequestSignature.new(:get, "www.example.com",
+        proxy: {"host" => "proxy1.example.com", "port" => 8080})
+      signature2 = WebMock::RequestSignature.new(:get, "www.example.com",
+        proxy: {"host" => "proxy2.example.com", "port" => 8080})
+      expect(signature1.hash).not_to eq(signature2.hash)
+    end
+
+    it "reports same hash for two signatures with same proxy" do
+      proxy = {"host" => "proxy.example.com", "port" => 8080}
+      signature1 = WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy)
+      signature2 = WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy)
+      expect(signature1.hash).to eq(signature2.hash)
     end
   end
 

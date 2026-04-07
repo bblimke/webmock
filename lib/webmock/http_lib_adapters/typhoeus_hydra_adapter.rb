@@ -72,7 +72,8 @@ if defined?(Typhoeus)
             req.options[:method] || :get,
             uri.to_s,
             body: body,
-            headers: headers
+            headers: headers,
+            proxy: proxy_from_typhoeus(req)
           )
 
           req.instance_variable_set(:@__webmock_request_signature, request_signature)
@@ -80,6 +81,22 @@ if defined?(Typhoeus)
           request_signature
         end
 
+        def self.proxy_from_typhoeus(req)
+          proxy_url = req.options[:proxy]
+          return nil unless proxy_url && !proxy_url.empty?
+          proxy_uri = URI.parse(proxy_url)
+          proxy = {
+            "host" => proxy_uri.host,
+            "port" => proxy_uri.port
+          }
+          if req.options[:proxyuserpwd]
+            user, pass = req.options[:proxyuserpwd].split(":", 2)
+            proxy["username"] = user if user
+            proxy["password"] = pass if pass
+          end
+          proxy["scheme"] = proxy_uri.scheme if proxy_uri.scheme && proxy_uri.scheme != "http"
+          proxy
+        end
 
         def self.build_webmock_response(typhoeus_response)
           webmock_response = WebMock::Response.new

@@ -36,6 +36,13 @@ describe WebMock::RequestPattern do
         "GET /.*example.*/ with body hash_including(#{{"a" => ["b", "c"]}})"
       )
     end
+
+    it "should report string describing itself with proxy" do
+      expect(WebMock::RequestPattern.new(:get, "www.example.com",
+      proxy: {"host" => "proxy.example.com", "port" => 8080}).to_s).to eq(
+        "GET http://www.example.com/ with proxy #{{"host" => "proxy.example.com", "port" => 8080}.inspect}"
+      )
+    end
   end
 
   describe "with" do
@@ -53,8 +60,13 @@ describe WebMock::RequestPattern do
       expect(@request_pattern.to_s).to eq(WebMock::RequestPattern.new(:get, "www.example.com", headers: {'A' => 'a'}).to_s)
     end
 
+    it "should have assigned proxy pattern" do
+      @request_pattern.with(proxy: {"host" => "proxy.example.com", "port" => 8080})
+      expect(@request_pattern.to_s).to eq(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {"host" => "proxy.example.com", "port" => 8080}).to_s)
+    end
+
     it "should raise an error if options passed to `with` are invalid" do
-      expect { @request_pattern.with(foo: "bar") }.to raise_error('Unknown key: "foo". Valid keys are: "body", "headers", "query", "basic_auth"')
+      expect { @request_pattern.with(foo: "bar") }.to raise_error('Unknown key: "foo". Valid keys are: "body", "headers", "query", "basic_auth", "proxy"')
     end
 
     it "should raise an error if neither options or block is provided" do
@@ -784,6 +796,83 @@ describe WebMock::RequestPattern do
       signature = WebMock::RequestSignature.new(:get, "www.example.com")
       expect(WebMock::RequestPattern.new(:get, "www.example.com").with { |request| request == signature }).
         to match(signature)
+    end
+
+    describe "when proxy pattern" do
+      it "should match when proxy hash matches exactly" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {"host" => "proxy.example.com", "port" => 8080})).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should match when proxy pattern is a subset of request proxy" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080, "username" => "user"}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {"host" => "proxy.example.com"})).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should not match when proxy hash does not match" do
+        proxy = {"host" => "other-proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {"host" => "proxy.example.com", "port" => 8080})).
+          not_to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should not match hash pattern when request has no proxy" do
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {"host" => "proxy.example.com"})).
+          not_to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+      end
+
+      it "should match when proxy pattern is a string matching the proxy URI" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: "http://proxy.example.com:8080")).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should not match when proxy pattern is a string not matching the proxy URI" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: "http://other-proxy.example.com:8080")).
+          not_to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should match when proxy pattern is a regexp matching the proxy URI" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: /proxy\.example/)).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should not match when proxy pattern is a regexp not matching the proxy URI" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: /other-proxy/)).
+          not_to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should match when proxy pattern is nil and request has no proxy" do
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: nil)).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+      end
+
+      it "should not match when proxy pattern is nil but request has a proxy" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: nil)).
+          not_to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should match any request when no proxy pattern is specified" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com")).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
+
+      it "should match request without proxy when no proxy pattern is specified" do
+        expect(WebMock::RequestPattern.new(:get, "www.example.com")).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+      end
+
+      it "should match when proxy pattern uses symbol keys" do
+        proxy = {"host" => "proxy.example.com", "port" => 8080}
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", proxy: {host: "proxy.example.com", port: 8080})).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com", proxy: proxy))
+      end
     end
 
   end
