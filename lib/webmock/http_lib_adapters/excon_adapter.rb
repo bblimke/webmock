@@ -111,10 +111,35 @@ if defined?(Excon)
           params = params.dup
           params.delete(:user)
           params.delete(:password)
+          proxy = proxy_from_excon(params.delete(:proxy))
           method  = (params.delete(:method) || :get).to_s.downcase.to_sym
           params[:query] = to_query(params[:query]) if params[:query].is_a?(Hash)
           uri = Addressable::URI.new(params).to_s
-          WebMock::RequestSignature.new method, uri, body: body_from(params), headers: params[:headers]
+          WebMock::RequestSignature.new method, uri, body: body_from(params), headers: params[:headers], proxy: proxy
+        end
+
+        def self.proxy_from_excon(proxy_data)
+          return nil if proxy_data.nil?
+          if proxy_data.is_a?(String)
+            proxy_uri = URI.parse(proxy_data)
+            proxy = {
+              "host" => proxy_uri.host,
+              "port" => proxy_uri.port
+            }
+            proxy["username"] = proxy_uri.user if proxy_uri.user
+            proxy["password"] = proxy_uri.password if proxy_uri.password
+            proxy["scheme"] = proxy_uri.scheme if proxy_uri.scheme && proxy_uri.scheme != "http"
+            proxy
+          elsif proxy_data.is_a?(Hash)
+            proxy = {
+              "host" => proxy_data[:host],
+              "port" => proxy_data[:port]
+            }
+            proxy["username"] = proxy_data[:user] if proxy_data[:user]
+            proxy["password"] = proxy_data[:password] if proxy_data[:password]
+            proxy["scheme"] = proxy_data[:scheme] if proxy_data[:scheme] && proxy_data[:scheme] != "http"
+            proxy
+          end
         end
 
         def self.body_from(params)

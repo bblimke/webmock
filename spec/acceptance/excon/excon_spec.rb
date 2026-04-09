@@ -74,4 +74,44 @@ describe "Excon" do
 
   end
 
+  describe "proxy matching" do
+    before(:each) do
+      WebMock.disable_net_connect!
+      WebMock.reset!
+    end
+
+    it "should match request with correct proxy" do
+      stub_request(:get, "http://example.com/").with(
+        proxy: {"host" => "proxy.example.com", "port" => 8080}
+      ).to_return(body: "proxied")
+
+      response = Excon.new("http://example.com", proxy: "http://proxy.example.com:8080").get
+      expect(response.body).to eq("proxied")
+    end
+
+    it "should not match request with wrong proxy" do
+      stub_request(:get, "http://example.com/").with(
+        proxy: {"host" => "other-proxy.example.com", "port" => 8080}
+      )
+
+      expect {
+        Excon.new("http://example.com", proxy: "http://proxy.example.com:8080").get
+      }.to raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
+    it "should match request without proxy when proxy pattern is nil" do
+      stub_request(:get, "http://example.com/").with(proxy: nil).to_return(body: "direct")
+
+      response = Excon.new("http://example.com").get
+      expect(response.body).to eq("direct")
+    end
+
+    it "should match request with proxy when no proxy pattern is specified" do
+      stub_request(:get, "http://example.com/").to_return(body: "any")
+
+      response = Excon.new("http://example.com", proxy: "http://proxy.example.com:8080").get
+      expect(response.body).to eq("any")
+    end
+  end
+
 end

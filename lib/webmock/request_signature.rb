@@ -4,7 +4,7 @@ module WebMock
 
   class RequestSignature
 
-    attr_accessor :method, :uri, :body
+    attr_accessor :method, :uri, :body, :proxy
     attr_reader :headers
 
     def initialize(method, uri, options = {})
@@ -19,6 +19,9 @@ module WebMock
       string << " with body '#{body.to_s}'" if body && body.to_s != ''
       if headers && !headers.empty?
         string << " with headers #{WebMock::Util::Headers.sorted_headers_string(headers)}"
+      end
+      if proxy && !proxy.empty?
+        string << " with proxy #{proxy.inspect}"
       end
       string
     end
@@ -49,6 +52,7 @@ module WebMock
     def assign_options(options)
       self.body = options[:body] if options.has_key?(:body)
       self.headers = options[:headers] if options.has_key?(:headers)
+      self.proxy = options[:proxy] if options.has_key?(:proxy)
     end
 
   end

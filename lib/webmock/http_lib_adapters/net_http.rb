@@ -282,7 +282,18 @@ module WebMock
         request.set_body_internal body
       end
 
-      WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
+      WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers, proxy: proxy_from_net_http(net_http))
+    end
+
+    def self.proxy_from_net_http(net_http)
+      return nil unless net_http.proxy_address
+      proxy = {
+        "host" => net_http.proxy_address,
+        "port" => net_http.proxy_port
+      }
+      proxy["username"] = net_http.proxy_user if net_http.proxy_user
+      proxy["password"] = net_http.proxy_pass if net_http.proxy_pass
+      proxy
     end
 
     def self.get_uri(net_http, path = nil)

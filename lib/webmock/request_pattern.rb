@@ -14,13 +14,14 @@ module WebMock
 
   class RequestPattern
 
-    attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern
+    attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern, :proxy_pattern
 
     def initialize(method, uri, options = {})
       @method_pattern  = MethodPattern.new(method)
       @uri_pattern     = create_uri_pattern(uri)
       @body_pattern    = nil
       @headers_pattern = nil
+      @proxy_pattern   = nil
       @with_block      = nil
       assign_options(options)
     end
@@ -39,6 +40,7 @@ module WebMock
         @uri_pattern.matches?(request_signature.uri) &&
         (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, content_type || "")) &&
         (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
+        (@proxy_pattern.nil? || @proxy_pattern.matches?(request_signature.proxy)) &&
         (@with_block.nil? || @with_block.call(request_signature))
     end
 
@@ -47,6 +49,7 @@ module WebMock
       string << " #{@uri_pattern.to_s}"
       string << " with body #{@body_pattern.to_s}" if @body_pattern
       string << " with headers #{@headers_pattern.to_s}" if @headers_pattern
+      string << " with proxy #{@proxy_pattern.to_s}" if @proxy_pattern
       string << " with given block" if @with_block
       string
     end
@@ -56,10 +59,11 @@ module WebMock
 
     def assign_options(options)
       options = WebMock::Util::HashKeysStringifier.stringify_keys!(options, deep: true)
-      HashValidator.new(options).validate_keys('body', 'headers', 'query', 'basic_auth')
+      HashValidator.new(options).validate_keys('body', 'headers', 'query', 'basic_auth', 'proxy')
       set_basic_auth_as_headers!(options)
       @body_pattern = BodyPattern.new(options['body']) if options.has_key?('body')
       @headers_pattern = HeadersPattern.new(options['headers']) if options.has_key?('headers')
+      @proxy_pattern = ProxyPattern.new(options['proxy']) if options.has_key?('proxy')
       @uri_pattern.add_query_params(options['query']) if options.has_key?('query')
     end
 
@@ -422,6 +426,48 @@ module WebMock
 
     def empty_headers?(headers)
       headers.nil? || headers == {}
+    end
+  end
+
+  class ProxyPattern
+    def initialize(pattern)
+      @pattern = pattern
+    end
+
+    def matches?(proxy)
+      case @pattern
+      when Hash
+        return false if proxy.nil?
+        normalized = normalize_keys(@pattern)
+        normalized.all? { |key, value| value === proxy[key] }
+      when String
+        proxy_to_uri_string(proxy) == @pattern
+      when Regexp
+        @pattern =~ proxy_to_uri_string(proxy).to_s
+      when NilClass
+        proxy.nil?
+      else
+        @pattern === proxy
+      end
+    end
+
+    def to_s
+      @pattern.inspect
+    end
+
+    private
+
+    def normalize_keys(hash)
+      hash.each_with_object({}) { |(k, v), h| h[k.to_s] = v }
+    end
+
+    def proxy_to_uri_string(proxy)
+      return nil if proxy.nil?
+      scheme = proxy["scheme"] || "http"
+      host = proxy["host"]
+      port = proxy["port"]
+      return nil unless host
+      port ? "#{scheme}://#{host}:#{port}" : "#{scheme}://#{host}"
     end
   end
 

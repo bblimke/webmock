@@ -26,6 +26,12 @@ module WebMock
 
         with << "\n    headers: #{request_pattern.headers_pattern.pp_to_s}"
       end
+
+      if (request_pattern.proxy_pattern)
+        with << "," unless with.empty?
+
+        with << "\n    proxy: #{request_pattern.proxy_pattern.to_s}"
+      end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response
         if request_pattern.headers_pattern && request_pattern.headers_pattern.matches?({ 'Accept' => "application/json" })
