@@ -16,6 +16,17 @@ if defined?(Async::HTTP)
         OriginalAsyncHttpClient = Async::HTTP::Client unless const_defined?(:OriginalAsyncHttpClient)
 
         class << self
+          # protocol-http1 0.40.0 removed Protocol::HTTP1::Reason in favour of
+          # Protocol::HTTP::Status. Resolved on first use, rather than at load,
+          # so it does not depend on which of the two is required by then.
+          def status_descriptions
+            @status_descriptions ||= if defined?(::Protocol::HTTP1::Reason)
+                                       ::Protocol::HTTP1::Reason::DESCRIPTIONS
+                                     else
+                                       ::Protocol::HTTP::Status::DESCRIPTIONS
+                                     end
+          end
+
           def enable!
             Async::HTTP.send(:remove_const, :Client)
             Async::HTTP.send(:const_set, :Client, Async::HTTP::WebMockClientWrapper)
@@ -112,7 +123,7 @@ if defined?(Async::HTTP)
           webmock_response = WebMock::Response.new
           webmock_response.status = [
             response.status,
-            ::Protocol::HTTP1::Reason::DESCRIPTIONS[response.status]
+            WebMock::HttpLibAdapters::AsyncHttpClientAdapter.status_descriptions[response.status]
           ]
           webmock_response.headers = build_webmock_response_headers(response)
           webmock_response.body = body
