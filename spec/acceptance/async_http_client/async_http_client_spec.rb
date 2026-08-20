@@ -156,6 +156,28 @@ unless RUBY_PLATFORM =~ /java/
       expect(callback_invoked).to eq(true)
     end
 
+    context 'with a real response' do
+      # build_webmock_response is the only place the adapter reads a status
+      # description, and only real responses reach it.
+      let(:server_url) { "http://#{WebMockServer.instance.host_with_port}/" }
+
+      after do
+        WebMock.reset_callbacks
+        WebMock.disable_net_connect!
+      end
+
+      it 'builds a webmock response with a status message' do
+        WebMock.allow_net_connect!
+
+        recorded_response = nil
+        WebMock.after_request { |_request, response| recorded_response = response }
+
+        make_request(:get, server_url)
+
+        expect(recorded_response.status).to eq([200, 'OK'])
+      end
+    end
+
     context 'scheme and protocol' do
       let(:default_response_headers) { {} }
 

@@ -62,7 +62,7 @@ module AsyncHttpClientSpecHelper
     {
 
       status: response.status.to_s,
-      message: Protocol::HTTP1::Reason::DESCRIPTIONS[response.status],
+      message: WebMock::HttpLibAdapters::AsyncHttpClientAdapter.status_descriptions[response.status],
       headers: build_response_headers(response),
       body: response.read
     }
