@@ -1,5 +1,15 @@
 # Changelog
 
+# 3.26.3
+
+* Confirm to work with curb 1.3.7
+
+    Thanks to [Josch Bockler](https://github.com/jbockler)
+
+* Fix NameError in async-http adapter on protocol-http1 >= 0.40
+
+    Thanks to [Leslie Hoare](https://github.com/lesleh)
+
 # 3.26.2
 
 * Add support to parse http/2 request on curb adapter

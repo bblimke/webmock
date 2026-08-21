@@ -1213,6 +1213,8 @@ People who submitted patches and new features or suggested improvements. Many th
 * Mikhail Doronin
 * Christoph Rieß
 * Erik Berlin
+* Josch Bockler
+* Leslie Hoare
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
