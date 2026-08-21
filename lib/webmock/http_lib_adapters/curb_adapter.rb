@@ -7,7 +7,13 @@ rescue LoadError
 end
 
 if defined?(Curl)
-  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '1.2.2', ['0.8.7']).check_version!
+  unsupported_curb_versions = ['0.8.7']
+
+  # Curl::Easy#perform raises "cannot define finalizer for TrueClass" on Ruby 2.6
+  # in curb 1.3.0 through 1.3.5. Fixed in curb 1.3.6. See https://github.com/taf2/curb/issues/478
+  unsupported_curb_versions += %w[1.3.0 1.3.1 1.3.2 1.3.3 1.3.4 1.3.5] if RUBY_VERSION < '2.7'
+
+  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '1.3.7', unsupported_curb_versions).check_version!
 
   module WebMock
     module HttpLibAdapters
