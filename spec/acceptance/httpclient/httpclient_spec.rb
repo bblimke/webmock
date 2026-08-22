@@ -52,6 +52,38 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
     end
 
     include_examples "with WebMock"
+
+    it "evaluates a stubbed response only once per async request even if the async thread starts early" do
+      # Reproduces two races that made the async thread evaluate the stub registry again and consume
+      # an extra response from the stub sequence: starting work before the caller finished wiring up
+      # the connection, and rebuilding the request signature after the Date header (1 second resolution)
+      # changed. Delaying #async_thread= beyond a second makes both interleavings deterministic;
+      # only the first request needs it.
+      connection_class = HTTPClient::Connection
+      delays = [1.1]
+      begin
+        connection_class.class_eval do
+          alias_method :async_thread_without_delay=, :async_thread=
+          define_method(:async_thread=) do |thread|
+            delay = delays.shift
+            sleep delay if delay
+            self.async_thread_without_delay = thread
+          end
+        end
+
+        stub_request(:get, "www.example.com").to_raise(MyException).to_return(body: "2")
+
+        expect {
+          http_request(:get, "http://www.example.com/")
+        }.to raise_error(MyException, "Exception from WebMock")
+        expect(http_request(:get, "http://www.example.com/").body).to eq("2")
+      ensure
+        connection_class.class_eval do
+          alias_method :async_thread=, :async_thread_without_delay=
+          remove_method :async_thread_without_delay=
+        end
+      end
+    end
   end
 
   it "should work with get_content" do

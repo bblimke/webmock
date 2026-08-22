@@ -112,7 +112,10 @@ if defined?(::HTTPClient)
       request_signature = build_request_signature(req)
       webmock_request_signatures << request_signature
 
-      if webmock_responses[request_signature] || WebMock.net_connect_allowed?(request_signature.uri)
+      if webmock_responses[request_signature]
+        webmock_response = webmock_responses.delete(request_signature)
+        async_conn_for_stubbed_request(req, request_signature, webmock_response)
+      elsif WebMock.net_connect_allowed?(request_signature.uri)
         conn = super
         conn.async_thread[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES]
         conn.async_thread[WEBMOCK_HTTPCLIENT_RESPONSES] = Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES]
@@ -226,6 +229,30 @@ if defined?(::HTTPClient)
     def clear_thread_variables
       Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = nil
       Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] = nil
+    end
+
+    # The async thread must not go through do_get, which would rebuild the request signature.
+    # Rebuilding calls headers_from_session again, and the session sets a Date header with
+    # 1 second resolution, so a signature built later can differ from the one the response was
+    # cached under, which makes the thread evaluate the stub registry again and consume
+    # an extra response from the stub sequence. The thread only delivers what the caller
+    # already evaluated, mirroring do_get's stubbed branch.
+    def async_conn_for_stubbed_request(req, request_signature, webmock_response)
+      conn = HTTPClient::Connection.new
+      conn.async_thread = Thread.new do
+        begin
+          WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+          response = build_httpclient_response(webmock_response, true, req.header)
+          @request_filter.each do |filter|
+            filter.filter_response(req, response)
+          end
+          conn.push(response)
+          WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient}, request_signature, webmock_response)
+        rescue Exception => e
+          conn.push e
+        end
+      end
+      conn
     end
   end
 
