@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.26.4
+
+* Fix race condition in `HTTPClient` adapter async requests by @koic in #1131
+
 # 3.26.3
 
 * Confirm to work with curb 1.3.7
