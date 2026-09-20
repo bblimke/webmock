@@ -1,5 +1,21 @@
 # Changelog
 
+# 3.27.0
+
+* Fix crash in async-http adapter when a request header has a nil value
+
+    Thanks to [hikmetba-bit](https://github.com/hikmetba-bit)
+
+* The async-http adapter now matches stubs against raw request header values instead of values parsed by protocol-http, consistent with the other adapters
+
+* Add RSpec `hash_excluding` support to body matching
+
+    Thanks to [Chris Gunther](https://github.com/cgunther)
+
+* Fix `hash_excluding` ignoring keys given without a value and regexp values, in both query and body matching
+
+* Fix crash when matching a request that has more than one `Content-Type` header
+
 # 3.26.4
 
 * Fix race condition in `HTTPClient` adapter async requests by @koic in #1131
