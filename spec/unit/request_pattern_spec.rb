@@ -828,7 +828,7 @@ describe WebMock::RequestPattern do
       describe "when body in a pattern is declared as a partial hash matcher" do
         let(:signature) { WebMock::RequestSignature.new(:post, "www.example.com", body: 'a=1&c[d][]=e&c[d][]=f&b=five') }
 
-       it "should match when query params are declared as HashIncluding matcher matching params" do
+        it "should match when query params are declared as HashIncluding matcher matching params" do
           expect(WebMock::RequestPattern.new(:post, "www.example.com",
           body: WebMock::Matchers::HashIncludingMatcher.new({:a => '1', 'c' => {'d' => ['e', 'f']}}))).
             to match(signature)
@@ -849,6 +849,30 @@ describe WebMock::RequestPattern do
         it "should not match when query params are declared as RSpec HashIncluding matcher not matching params" do
           expect(WebMock::RequestPattern.new(:post, "www.example.com",
           body: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({:x => '1', 'c' => {'d' => ['e', 'f']}}))).
+            not_to match(signature)
+        end
+
+        it "should match when query params are declared as HashExcluding matcher matching params" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: WebMock::Matchers::HashExcludingMatcher.new({:x => '1'}))).
+            to match(signature)
+        end
+
+        it "should not match when query params are declared as HashExcluding matcher not matching params" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: WebMock::Matchers::HashExcludingMatcher.new({:a => '1'}))).
+            not_to match(signature)
+        end
+
+        it "should match when query params are declared as RSpec HashExcluding matcher matching params" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({:x => '1'}))).
+            to match(signature)
+        end
+
+        it "should not match when query params are declared as RSpec HashExcluding matcher not matching params" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({:a => '1'}))).
             not_to match(signature)
         end
       end

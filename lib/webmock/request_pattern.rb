@@ -275,6 +275,8 @@ module WebMock
         normalize_hash(pattern)
       elsif rSpecHashIncludingMatcher?(pattern)
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(pattern)
+      elsif rSpecHashExcludingMatcher?(pattern)
+        WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(pattern)
       else
         pattern
       end

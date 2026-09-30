@@ -186,6 +186,18 @@ RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
 :content_type => 'application/x-www-form-urlencoded')    # ===> Success
 ```
 
+### Matching request body against excluding partial hash.
+
+```ruby
+stub_request(:post, "www.example.com").
+  with(body: hash_excluding({data: {a: '2', b: 'six'}}))
+
+RestClient.post('www.example.com', "data[a]=1&data[b]=five&x=1",
+:content_type => 'application/x-www-form-urlencoded')    # ===> Success
+RestClient.post('www.example.com', "data[a]=2&data[b]=six&x=1",
+:content_type => 'application/x-www-form-urlencoded')    # ===> Failure
+```
+
 ### Matching custom request headers
 
 ```ruby
