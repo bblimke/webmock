@@ -184,11 +184,14 @@ shared_context "allowing and disabling net connect" do |*adapter_info|
             }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET #{HTTP_STATUS_SERVICE}:8080))
           end
 
-          it "should raise exception if request was made to different scheme" do
-            https_scheme = HTTP_STATUS_SERVICE.sub(%r{^http://}, 'https://')
-            expect {
-              http_request(:get, "#{https_scheme}/")
-            }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET #{https_scheme}))
+          [%w[http https], %w[https http]].each do |allowed_scheme, request_scheme|
+            it "should raise exception if request was made to different scheme when #{allowed_scheme} is allowed" do
+              WebMock.disable_net_connect!(allow: "#{allowed_scheme}://www.example.com")
+              request_url = "#{request_scheme}://www.example.com/"
+              expect {
+                http_request(:get, request_url)
+              }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET #{Regexp.escape(request_url)}))
+            end
           end
         end
 
