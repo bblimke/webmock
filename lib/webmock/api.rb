@@ -72,6 +72,10 @@ module WebMock
       WebMock::RequestRegistry.instance.reset!
     end
 
+    def requests_made
+      WebMock::RequestRegistry.instance.requests_made
+    end
+
     private
 
     def convert_uri_method_and_options_to_request_and_options(method, uri, options, &block)

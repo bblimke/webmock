@@ -172,4 +172,19 @@ describe WebMock::API do
       }.from(1).to(0)
     end
   end
+
+  describe '#requests_made' do
+    subject { WebMock::API.requests_made }
+
+    let(:request_signature) { WebMock::RequestSignature.new(:get, "www.example.com") }
+    let(:request_pattern)   { WebMock::RequestPattern.new(:get, "www.example.com") }
+
+    before do
+      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+    end
+
+    it 'returns the number of requests made' do
+      expect(subject.count).to eq(1)
+    end
+  end
 end
