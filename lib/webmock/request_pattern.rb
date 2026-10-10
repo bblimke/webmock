@@ -306,6 +306,8 @@ module WebMock
     private
 
     def body_as_hash(body, content_type)
+      return if body.nil?
+
       case body_format(content_type)
       when :json then
         WebMock::Util::Parsers::JSON.parse(body)
