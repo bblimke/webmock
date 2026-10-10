@@ -534,9 +534,9 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       it "returns correct status from HTTP/2 without reason phrase" do
-        input = "HTTP/2 500\r\nX-anyheader: anyvalue"                                                                                                                              
-        expect(described_class.parse_header_string(input)[0]).to eq("")                                                                                                            
-      end 
+        input = "HTTP/2 500\r\nX-anyheader: anyvalue"
+        expect(described_class.parse_header_string(input)[0]).to eq("")
+      end
 
       it "returns incorrect headers (HTTP Version unknown)" do
         input = header_tpl.sub("_VERSION_", "X.Y")

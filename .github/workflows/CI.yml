@@ -62,6 +62,8 @@ jobs:
           apt-get install -y openjdk-21-jdk
           java -version
       - uses: actions/checkout@v5
+      - name: Let git read the checkout inside the container
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: ruby/setup-ruby@v1
         continue-on-error: false
         with:

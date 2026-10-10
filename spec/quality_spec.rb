@@ -29,7 +29,7 @@ require "spec_helper"
 describe "The library itself" do
   def check_for_tab_characters(filename)
     failing_lines = []
-    File.readlines(filename).each_with_index do |line,number|
+    File.readlines(filename, encoding: "UTF-8").each_with_index do |line,number|
       failing_lines << number + 1 if line =~ /\t/
     end
 
@@ -40,7 +40,7 @@ describe "The library itself" do
 
   def check_for_extra_spaces(filename)
     failing_lines = []
-    File.readlines(filename).each_with_index do |line,number|
+    File.readlines(filename, encoding: "UTF-8").each_with_index do |line,number|
       next if line =~ /^\s+#.*\s+\n$/
       failing_lines << number + 1 if line =~ /\s+\n$/
     end
@@ -63,7 +63,9 @@ describe "The library itself" do
   it "has no malformed whitespace" do
     error_messages = []
     Dir.chdir(File.expand_path("../..", __FILE__)) do
-      `git ls-files`.split("\n").each do |filename|
+      files = `git ls-files`.split("\n")
+      expect(files).not_to be_empty, "git ls-files listed no files, so there is nothing to check"
+      files.each do |filename|
         next if filename =~ /\.gitmodules|fixtures/
         error_messages << check_for_tab_characters(filename)
         error_messages << check_for_extra_spaces(filename)
