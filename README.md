@@ -444,6 +444,8 @@ stub_request(:get, "www.example.com").to_rack(MyRackApp)
 RestClient.post('www.example.com')    # ===> "Hello"
 ```
 
+WebMock does not set `rack.session` in the Rack env, just as a real server would not. If your app needs a session, include session middleware in the app you pass to `to_rack`.
+
 ### Raising errors
 
 #### Exception declared by class
