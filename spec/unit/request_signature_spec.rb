@@ -119,6 +119,28 @@ describe WebMock::RequestSignature do
 
   subject { WebMock::RequestSignature.new(:get, "www.example.com") }
 
+  describe "#content_type" do
+    it "returns the Content-Type header" do
+      subject.headers = { "Content-Type" => "application/json" }
+      expect(subject.content_type).to eq("application/json")
+    end
+
+    it "returns the first value when Content-Type is given more than once" do
+      subject.headers = { "Content-Type" => ["application/json", "application/json"] }
+      expect(subject.content_type).to eq("application/json")
+    end
+
+    it "returns nil when no content type header is present" do
+      subject.headers = { "Some-Header" => "some-value" }
+      expect(subject.content_type).to be_nil
+    end
+
+    it "returns nil when no headers are set" do
+      subject.headers = nil
+      expect(subject.content_type).to be_nil
+    end
+  end
+
   describe "#url_encoded?" do
     it "returns true if the headers are urlencoded" do
       subject.headers = { "Content-Type" => "application/x-www-form-urlencoded" }
@@ -127,6 +149,11 @@ describe WebMock::RequestSignature do
 
     it "returns true if the headers are urlencoded with a specified charset" do
       subject.headers = { "Content-Type" => "application/x-www-form-urlencoded; charset=UTF-8" }
+      expect(subject.url_encoded?).to be true
+    end
+
+    it "returns true if urlencoded Content-Type is given more than once" do
+      subject.headers = { "Content-Type" => ["application/x-www-form-urlencoded", "application/x-www-form-urlencoded"] }
       expect(subject.url_encoded?).to be true
     end
 
@@ -154,6 +181,11 @@ describe WebMock::RequestSignature do
 
     it "returns true if the headers are json with a specified charset" do
       subject.headers = { "Content-Type" => "application/json; charset=UTF-8" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns true if json Content-Type is given more than once" do
+      subject.headers = { "Content-Type" => ["application/json", "application/json"] }
       expect(subject.json_headers?).to be true
     end
 

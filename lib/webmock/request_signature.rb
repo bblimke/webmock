@@ -36,12 +36,18 @@ module WebMock
     end
     alias == eql?
 
+    # A request can carry Content-Type more than once, in which case the
+    # normalized header value is an Array. Use its first value.
+    def content_type
+      Array(headers&.fetch('Content-Type', nil)).first
+    end
+
     def url_encoded?
-      !!(headers&.fetch('Content-Type', nil)&.start_with?('application/x-www-form-urlencoded'))
+      !!content_type&.start_with?('application/x-www-form-urlencoded')
     end
 
     def json_headers?
-      !!(headers&.fetch('Content-Type', nil)&.start_with?('application/json'))
+      !!content_type&.start_with?('application/json')
     end
 
     private

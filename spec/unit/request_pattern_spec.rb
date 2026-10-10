@@ -640,6 +640,18 @@ describe WebMock::RequestPattern do
 
     describe "when matching requests with body" do
 
+      it "should match a request with Content-Type given more than once when no body pattern is declared" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com")).
+          to match(WebMock::RequestSignature.new(:post, "www.example.com", body: "abc",
+            headers: {"Content-Type" => ["text/plain", "text/plain"]}))
+      end
+
+      it "should match body hash against a request with Content-Type given more than once" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {"a" => "1"})).
+          to match(WebMock::RequestSignature.new(:post, "www.example.com", body: '{"a":"1"}',
+            headers: {"Content-Type" => ["application/json", "application/json"]}))
+      end
+
       it "should match if request body and body pattern are the same" do
         expect(WebMock::RequestPattern.new(:get, "www.example.com", body: "abc")).
           to match(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc"))
