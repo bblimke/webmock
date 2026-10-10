@@ -692,6 +692,21 @@ describe WebMock::RequestPattern do
           not_to match(WebMock::RequestSignature.new(:get, "www.example.com"))
       end
 
+      it "should not match if pattern body is a hash but request has no body and content type is json" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {a: '1'})).
+          not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
+      end
+
+      it "should not match if pattern body is a hash but request has no body and content type is xml" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {a: '1'})).
+          not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/xml'}))
+      end
+
+      it "should not match if pattern body is hash_including but request has no body and content type is json" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: WebMock::Matchers::HashIncludingMatcher.new({a: '1'}))).
+          not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
+      end
+
       describe "when body in pattern is declared as a hash" do
         let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
 
