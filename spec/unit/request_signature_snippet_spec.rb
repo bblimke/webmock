@@ -11,12 +11,6 @@ RSpec.describe WebMock::RequestSignatureSnippet do
   let(:request_signature) { WebMock::RequestSignature.new(method, uri) }
   let(:request_signature_body) { {"key" => "different value"}.to_json }
 
-  let(:request_pattern) {
-    WebMock::RequestPattern.new(
-      method, uri, {body: request_signature_body}
-    )
-  }
-
   before :each do
     request_signature.headers = {"Content-Type" => "application/json"}
     request_signature.body = request_signature_body

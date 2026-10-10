@@ -42,15 +42,6 @@ module WebMock
       diff.empty? ? "" : "Body diff:\n #{pretty_print_to_string(diff)}"
     end
 
-    def request_params
-      @request_params ||=
-        if request_signature.json_headers?
-          JSON.parse(request_signature.body)
-        else
-          ""
-        end
-    end
-
     def pretty_print_to_string(string_to_print)
       StringIO.open("".dup) do |stream|
         PP.pp(string_to_print, stream)
