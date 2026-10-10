@@ -26,6 +26,10 @@ module WebMock
           expect(HashIncludingMatcher.new(a: 1)).to eq("a" => 1, "b" => 2)
         end
 
+        it "matches a value against a regexp" do
+          expect(HashIncludingMatcher.new(a: /\d/)).to eq("a" => "1")
+        end
+
         describe "when matching anythingized keys" do
           let(:anything) { WebMock::Matchers::AnyArgMatcher.new(nil) }
 
@@ -76,6 +80,10 @@ module WebMock
 
         it "does not match a hash with an incorrect value" do
           expect(HashIncludingMatcher.new(a: 1, b: 2)).not_to eq('a' => 1, 'b' => 3)
+        end
+
+        it "does not match a value that does not match a regexp" do
+          expect(HashIncludingMatcher.new(a: /\d/)).not_to eq("a" => "x")
         end
 
         it "does not match when values are nil but keys are different" do

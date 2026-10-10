@@ -707,6 +707,11 @@ describe WebMock::RequestPattern do
           not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
       end
 
+      it "should not match if pattern body is an array but request has no body and content type is json" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: [{a: '1'}])).
+          not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
+      end
+
       describe "when body in pattern is declared as a hash" do
         let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
 
@@ -888,6 +893,18 @@ describe WebMock::RequestPattern do
         it "should not match when query params are declared as RSpec HashIncluding matcher not matching params" do
           expect(WebMock::RequestPattern.new(:post, "www.example.com",
           body: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({:x => '1', 'c' => {'d' => ['e', 'f']}}))).
+            not_to match(signature)
+        end
+
+        it "should match when body is declared as HashIncluding matcher with a regexp matching a param" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: WebMock::Matchers::HashIncludingMatcher.new({:a => /\d/}))).
+            to match(signature)
+        end
+
+        it "should not match when body is declared as HashIncluding matcher with a regexp not matching a param" do
+          expect(WebMock::RequestPattern.new(:post, "www.example.com",
+          body: WebMock::Matchers::HashIncludingMatcher.new({:b => /\d/}))).
             not_to match(signature)
         end
 
