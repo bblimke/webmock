@@ -742,8 +742,12 @@ expect(a_request(:post, "www.example.com").
 
 ```ruby
 stub = stub_request(:get, "www.example.com")
+
 # ... make requests ...
-expect(stub).to have_been_requested
+
+expect(stub).to have_been_requested.twice
+expect(stub).to have_been_requested.once.with(body: {"a" => [1, 2, 3]})
+expect(stub).to have_been_requested.once.with(body: {"a" => [4, 5, 6]})
 ```
 
 ## Clearing stubs and request history

@@ -52,13 +52,20 @@ module WebMock
       self
     end
 
+    def with(options = {}, &block)
+      @request_pattern_with = [options, block]
+      self
+    end
+
     def matches?(request_pattern)
       @request_execution_verifier.request_pattern = request_pattern
+      @request_execution_verifier.request_pattern.with(@request_pattern_with[0], &@request_pattern_with[1]) if @request_pattern_with
       @request_execution_verifier.matches?
     end
 
     def does_not_match?(request_pattern)
       @request_execution_verifier.request_pattern = request_pattern
+      @request_execution_verifier.request_pattern.with(@request_pattern_with[0], &@request_pattern_with[1]) if @request_pattern_with
       @request_execution_verifier.does_not_match?
     end
 
