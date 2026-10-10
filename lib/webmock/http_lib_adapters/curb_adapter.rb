@@ -13,7 +13,7 @@ if defined?(Curl)
   # in curb 1.3.0 through 1.3.5. Fixed in curb 1.3.6. See https://github.com/taf2/curb/issues/478
   unsupported_curb_versions += %w[1.3.0 1.3.1 1.3.2 1.3.3 1.3.4 1.3.5] if RUBY_VERSION < '2.7'
 
-  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', '1.3.7', unsupported_curb_versions).check_version!
+  WebMock::VersionChecker.new('Curb', Curl::CURB_VERSION, '0.7.16', nil, unsupported_curb_versions).check_version!
 
   module WebMock
     module HttpLibAdapters
