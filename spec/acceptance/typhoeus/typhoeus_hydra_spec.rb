@@ -153,5 +153,40 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
     end
+
+    describe "proxy matching" do
+      it "should match request with correct proxy" do
+        stub_request(:get, "www.example.com").with(
+          proxy: {"host" => "proxy.example.com", "port" => 8080}
+        ).to_return(body: "proxied")
+
+        response = Typhoeus.get("http://www.example.com", proxy: "http://proxy.example.com:8080")
+        expect(response.body).to eq("proxied")
+      end
+
+      it "should not match request with wrong proxy" do
+        stub_request(:get, "www.example.com").with(
+          proxy: {"host" => "other-proxy.example.com", "port" => 8080}
+        )
+
+        expect {
+          Typhoeus.get("http://www.example.com", proxy: "http://proxy.example.com:8080")
+        }.to raise_error(WebMock::NetConnectNotAllowedError)
+      end
+
+      it "should match request without proxy when proxy pattern is nil" do
+        stub_request(:get, "www.example.com").with(proxy: nil).to_return(body: "direct")
+
+        response = Typhoeus.get("http://www.example.com")
+        expect(response.body).to eq("direct")
+      end
+
+      it "should match request with proxy when no proxy pattern is specified" do
+        stub_request(:get, "www.example.com").to_return(body: "any")
+
+        response = Typhoeus.get("http://www.example.com", proxy: "http://proxy.example.com:8080")
+        expect(response.body).to eq("any")
+      end
+    end
   end
 end

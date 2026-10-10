@@ -128,6 +128,9 @@ module WebMock
       if (signature.headers && !signature.headers.empty?)
         stub.with(headers: signature.headers)
       end
+      if (signature.proxy && !signature.proxy.empty?)
+        stub.with(proxy: signature.proxy)
+      end
       stub
     end
   end

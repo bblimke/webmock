@@ -380,6 +380,96 @@ describe "Net:HTTP" do
     end
   end
 
+  describe "proxy matching" do
+    before(:each) do
+      WebMock.disable_net_connect!
+      WebMock.reset!
+    end
+
+    it "should match request with correct proxy" do
+      stub_request(:get, "www.example.com").with(
+        proxy: {"host" => "proxy.example.com", "port" => 8080}
+      ).to_return(body: "proxied")
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("proxied")
+    end
+
+    it "should not match request with wrong proxy" do
+      stub_request(:get, "www.example.com").with(
+        proxy: {"host" => "other-proxy.example.com", "port" => 8080}
+      )
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      expect {
+        http.start { |h| h.get("/") }
+      }.to raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
+    it "should match request without proxy when proxy pattern is nil" do
+      stub_request(:get, "www.example.com").with(proxy: nil).to_return(body: "direct")
+
+      http = Net::HTTP.new("www.example.com", 80)
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("direct")
+    end
+
+    it "should not match request with proxy when proxy pattern is nil" do
+      stub_request(:get, "www.example.com").with(proxy: nil)
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      expect {
+        http.start { |h| h.get("/") }
+      }.to raise_error(WebMock::NetConnectNotAllowedError)
+    end
+
+    it "should match request with proxy when no proxy pattern is specified" do
+      stub_request(:get, "www.example.com").to_return(body: "any")
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("any")
+    end
+
+    it "should match proxy with string pattern" do
+      stub_request(:get, "www.example.com").with(
+        proxy: "http://proxy.example.com:8080"
+      ).to_return(body: "matched")
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("matched")
+    end
+
+    it "should match proxy with regexp pattern" do
+      stub_request(:get, "www.example.com").with(
+        proxy: /proxy\.example/
+      ).to_return(body: "matched")
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("matched")
+    end
+
+    it "should include proxy info in error message for unregistered request" do
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080)
+      expect {
+        http.start { |h| h.get("/") }
+      }.to raise_error(WebMock::NetConnectNotAllowedError, /proxy.example.com/)
+    end
+
+    it "should capture proxy username and password" do
+      stub_request(:get, "www.example.com").with(
+        proxy: {"host" => "proxy.example.com", "port" => 8080, "username" => "user", "password" => "pass"}
+      ).to_return(body: "authed_proxy")
+
+      http = Net::HTTP.new("www.example.com", 80, "proxy.example.com", 8080, "user", "pass")
+      response = http.start { |h| h.get("/") }
+      expect(response.body).to eq("authed_proxy")
+    end
+  end
+
   describe "hostname handling" do
     it "should set brackets around the hostname if it is an IPv6 address" do
       net_http = Net::HTTP.new('b2dc:5bdf:4f0d::3014:e0ca', 80)
