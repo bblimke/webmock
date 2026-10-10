@@ -132,11 +132,18 @@ module WebMock
               do_finish
             end
           end
-          @socket = Net::HTTP.socket_type.new
+          @socket = socket_type_check.new
           @started = true
           self
         end
 
+        def socket_type_check
+          if Net::HTTP.socket_type == Net::BufferedIO
+            StubSocket
+          else
+            Net::HTTP.socket_type
+          end
+        end
 
         def ensure_actual_connection
           if @socket.is_a?(StubSocket)
