@@ -111,9 +111,31 @@ if defined?(Async::HTTP)
           WebMock::RequestSignature.new(
             request.method.downcase.to_sym,
             "#{request.scheme}://#{request.authority}#{request.path}",
-            headers: request.headers.to_h,
+            headers: request_headers(request),
             body: body
           )
+        end
+
+        # Protocol::HTTP::Headers#to_h can raise for headers with a nil value
+        # (some policy-tracked headers, e.g. "connection", may carry a nil
+        # value internally) since protocol-http >= 0.59.0 started parsing
+        # values during the to_h merge. Build the hash ourselves instead,
+        # skipping header entries with no value since they carry nothing to
+        # match against.
+        def request_headers(request)
+          headers = {}
+
+          request.headers.each do |key, value|
+            next if value.nil?
+
+            if headers.key?(key)
+              headers[key] = Array(headers[key]) + [value]
+            else
+              headers[key] = value
+            end
+          end
+
+          headers
         end
 
         def build_webmock_response(response)

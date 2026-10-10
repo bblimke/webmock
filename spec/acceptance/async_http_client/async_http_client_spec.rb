@@ -64,6 +64,31 @@ unless RUBY_PLATFORM =~ /java/
       )
     end
 
+    it 'does not raise when a request header has a nil value (regression for protocol-http >= 0.59.0, GH #1120)' do
+      endpoint = Async::HTTP::Endpoint.parse('http://www.example.com')
+      wrapper = Async::HTTP::WebMockClientWrapper.new(endpoint)
+
+      request_double = Struct.new(:method, :scheme, :authority, :path, :headers, :body) do
+        def read
+          'body'
+        end
+      end.new(
+        'GET', 'http', 'www.example.com', '/',
+        # "connection" is a policy-tracked header in protocol-http; a nil value
+        # here used to raise inside Headers#to_h once its value gets parsed
+        # during the merge (protocol-http >= 0.59.0).
+        ::Protocol::HTTP::Headers.new([['x-token', 'abc'], ['connection', nil]]),
+        nil
+      )
+
+      signature = nil
+      expect {
+        signature = wrapper.send(:build_request_signature, request_double)
+      }.not_to raise_error
+
+      expect(signature.headers).to eq('X-Token' => 'abc')
+    end
+
     it 'works with request body as text' do
       stub_request(:post, 'http://www.example.com').with(
         body: 'x'*10_000
