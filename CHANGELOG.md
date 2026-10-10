@@ -1,5 +1,27 @@
 # Changelog
 
+# 3.28.0
+
+* Fix `to_rack` apps receiving a `rack.session` they did not set up (#985)
+
+    WebMock used to add a session hash to the Rack env, shared by every request to the same stub. This confused apps that check whether a session is present, such as Rails API-only apps, and carried session data over between requests. WebMock now leaves `rack.session` and `rack.session.options` unset, as a real server does. If your app needs a session, include session middleware in the app you pass to `to_rack`. `RackResponse#session` and `RackResponse#session_options` have been removed.
+
+    Thanks to [Jan Graichen](https://github.com/jgraichen)
+
+* Fix crash when matching a hash body pattern against a JSON or XML request that has no body
+
+    Thanks to [Chris](https://github.com/ChrisJr404)
+
+* No longer warn about curb versions newer than the last one tested
+
+* Document regexp values in `hash_including`
+
+    Thanks to [Christian Bruckmayer](https://github.com/ChrisBr)
+
+* Remove unused `RequestSignatureSnippet#request_params`
+
+    Thanks to [Daniel Pepper](https://github.com/dpep)
+
 # 3.27.0
 
 * Fix crash in async-http adapter when a request header has a nil value
