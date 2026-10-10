@@ -179,6 +179,13 @@ shared_context "request expectations" do |*adapter_info|
             expect(a_request(:get, "www.example.com").with(query: hash_including(a: []))).to have_been_made
           }.not_to raise_error
         end
+
+        it "should satisfy expectation if the request was executed with query params declared as :any" do
+          expect {
+            http_request(:get, "http://www.example.com/?x=3&b=1")
+            expect(a_request(:get, "www.example.com").with(query: :any)).to have_been_made
+          }.not_to raise_error
+        end
       end
 
       context "when using flat array notation" do
