@@ -6,7 +6,7 @@ module WebMock
     # https://github.com/rspec/rspec-mocks/blob/master/lib/rspec/mocks/argument_matchers.rb
     class HashExcludingMatcher < HashArgumentMatcher
       def ==(actual)
-        super { |key, value| !actual.key?(key) || value != actual[key] }
+        super { |key, value| !actual.key?(key) || !(value === actual[key]) }
       end
 
       def inspect

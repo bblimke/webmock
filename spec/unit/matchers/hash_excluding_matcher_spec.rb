@@ -28,6 +28,10 @@ module WebMock
           expect(HashExcludingMatcher.new(a: nil)).to eq('b' => nil)
         end
 
+        it 'match when the value does not match the given regexp' do
+          expect(HashExcludingMatcher.new(a: /foo/)).to eq('a' => 'bar')
+        end
+
         describe 'when matching an empty hash' do
           it 'does not matches against any hash' do
             expect(HashExcludingMatcher.new({})).to eq(a: 1, b: 2, c: 3)
@@ -54,6 +58,18 @@ module WebMock
 
         it 'does not match a non-hash' do
           expect(HashExcludingMatcher.new(a: 1)).not_to eq 1
+        end
+
+        it 'does not match when the value matches the given regexp' do
+          expect(HashExcludingMatcher.new(a: /foo/)).not_to eq('a' => 'foo')
+        end
+
+        it 'does not match a hash containing a key given with WebMock any arg matcher' do
+          expect(HashExcludingMatcher.new(a: AnyArgMatcher.new(nil))).not_to eq('a' => 1)
+        end
+
+        it 'does not match a hash containing a key given with RSpec anything matcher' do
+          expect(HashExcludingMatcher.new(a: anything)).not_to eq('a' => 1)
         end
       end
     end
