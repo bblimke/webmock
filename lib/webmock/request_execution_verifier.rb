@@ -56,7 +56,29 @@ module WebMock
     def failure_message_phrase(is_negated=false)
       negation = is_negated ? "was not" : "was"
       "The request #{request_pattern} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}" +
+        (is_negated ? "" : json_body_hint) +
         self.class.executed_requests_message
+    end
+
+    # Only when too few requests matched: with too many, declaring the body
+    # as a hash would match even more of them.
+    def json_body_hint
+      return "" unless WebMock.show_body_diff? && too_few_requests_executed?
+
+      requests = RequestRegistry.instance.requested_signatures.select do |request_signature, _|
+        JsonBodyHint.applies?(request_pattern, request_signature)
+      end
+      requests.empty? ? "" : "\n\n#{JsonBodyHint::EXPECTATION_HINT}"
+    end
+
+    def too_few_requests_executed?
+      if @at_least_times_executed
+        times_executed < @at_least_times_executed
+      elsif @at_most_times_executed
+        false
+      else
+        times_executed < (@expected_times_executed || 1)
+      end
     end
 
     def quantity_phrase(is_negated=false)

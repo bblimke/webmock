@@ -176,6 +176,8 @@ RestClient.post('www.example.com', '<data a="1" b="five" />',
   content_type: 'application/xml')    # ===> Success
 ```
 
+A body declared as a string must match the request body exactly. For JSON, that includes key order and whitespace, so declare the body as a hash to match it as JSON, for example `with(body: JSON.parse(json_string))`.
+
 ### Matching request body against partial hash.
 
 ```ruby

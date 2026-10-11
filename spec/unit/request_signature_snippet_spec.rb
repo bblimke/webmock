@@ -73,6 +73,45 @@ RSpec.describe WebMock::RequestSignatureSnippet do
       end
     end
 
+    context "when a stub declares the same JSON body as a string with keys in another order" do
+      let(:method) { :post }
+      let(:request_signature_body) { '{"b":2,"a":1}' }
+
+      before :each do
+        WebMock.stub_request(:post, "http://example.com").with(body: '{"a":1,"b":2}')
+      end
+
+      it "suggests declaring the body as a hash, once, after that stub" do
+        result = subject.request_stubs
+        expect(result).to include(
+          "body: \"{\\\"a\\\":1,\\\"b\\\":2}\")\n\n#{WebMock::JsonBodyHint::STUB_HINT}\n"
+        )
+        expect(result.scan("Hint:").size).to eq(1)
+      end
+
+      it "does not suggest it when showing the body diff is turned off" do
+        WebMock.hide_body_diff!
+        expect(subject.request_stubs).not_to include("Hint:")
+      ensure
+        WebMock.show_body_diff!
+      end
+    end
+
+    context "when a stub declares a JSON body whose numbers differ in type from the request" do
+      let(:method) { :post }
+      let(:request_signature_body) { '{"a":1}' }
+
+      before :each do
+        WebMock.stub_request(:post, "http://example.com").with(body: '{"a":1.0}')
+      end
+
+      it "shows the body diff without the hint" do
+        result = subject.request_stubs
+        expect(result).to include("Body diff:")
+        expect(result).not_to include("Hint:")
+      end
+    end
+
     context "with no request stubs" do
       it "returns nil" do
         WebMock.reset!

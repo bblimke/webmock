@@ -102,6 +102,78 @@ describe WebMock::RequestExecutionVerifier do
     end
   end
 
+  describe "failure message for a JSON body declared as a string" do
+    before(:each) do
+      allow(WebMock::RequestRegistry.instance).to receive(:to_s).and_call_original
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:post, "www.example.com",
+          body: '{"b":2,"a":1}', headers: {"Content-Type" => "application/json"})
+      )
+    end
+
+    it "suggests declaring the body as a hash when a request had the same JSON formatted differently" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).to include(
+        "but it executed 0 times\n\n#{WebMock::JsonBodyHint::EXPECTATION_HINT}\n\nThe following requests were made:"
+      )
+    end
+
+    it "does not add the hint when the JSON is different" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":3}')
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).not_to include("Hint:")
+    end
+
+    it "does not add the hint when showing the body diff is turned off" do
+      WebMock.hide_body_diff!
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).not_to include("Hint:")
+    ensure
+      WebMock.show_body_diff!
+    end
+
+    context "when the request was made too many times" do
+      before(:each) do
+        WebMock::RequestRegistry.instance.requested_signatures.put(
+          WebMock::RequestSignature.new(:post, "www.example.com",
+            body: '{"a":1,"b":2}', headers: {"Content-Type" => "application/json"}), 2
+        )
+        @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
+      end
+
+      it "does not add the hint to an at_most failure" do
+        @verifier.at_most_times_executed = 1
+        expect(@verifier.matches?).to be false
+        expect(@verifier.failure_message).not_to include("Hint:")
+      end
+
+      it "does not add the hint to an exact count failure" do
+        @verifier.expected_times_executed = 1
+        expect(@verifier.matches?).to be false
+        expect(@verifier.failure_message).not_to include("Hint:")
+      end
+    end
+
+    it "adds the hint to an at_least failure with too few requests" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
+      @verifier.at_least_times_executed = 1
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).to include(WebMock::JsonBodyHint::EXPECTATION_HINT)
+    end
+
+    it "does not add the hint to the negated message" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:post, "www.example.com",
+          body: '{"a":1,"b":2}', headers: {"Content-Type" => "application/json"})
+      )
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
+      expect(@verifier.does_not_match?).to be false
+      expect(@verifier.failure_message_when_negated).not_to include("Hint:")
+    end
+  end
+
   describe "negative failure message" do
 
     it "reports failure message if it executed number of times specified" do

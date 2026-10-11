@@ -25,7 +25,10 @@ module WebMock
       text = "registered request stubs:\n".dup
       WebMock::StubRegistry.instance.request_stubs.each do |stub|
         text << "\n#{WebMock::StubRequestSnippet.new(stub).to_s(false)}"
-        add_body_diff(stub, text) if WebMock.show_body_diff?
+        if WebMock.show_body_diff?
+          add_body_diff(stub, text)
+          add_json_body_hint(stub, text)
+        end
       end
       text
     end
@@ -35,6 +38,12 @@ module WebMock
     def add_body_diff(stub, text)
       body_diff_str = signature_stub_body_diff(stub)
       text << "\n\n#{body_diff_str}" unless body_diff_str.empty?
+    end
+
+    def add_json_body_hint(stub, text)
+      return unless JsonBodyHint.applies?(stub.request_pattern, request_signature)
+
+      text << "\n\n#{JsonBodyHint::STUB_HINT}\n"
     end
 
     def signature_stub_body_diff(stub)

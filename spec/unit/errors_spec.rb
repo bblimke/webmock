@@ -127,7 +127,7 @@ describe "errors" do
 
     let(:request_signature) { double(:request_signature, to_s: rand(10**20).to_s) }
     let(:stub_result)       { double(:stub_result, to_s: rand(10**20).to_s) }
-    let(:request_stub)      { double(:request_stub) }
+    let(:request_stub)      { double(:request_stub, request_pattern: nil) }
     let(:body_pattern)      { double(:body_pattern, body_pattern: nil)}
     let(:body_diff)         { [["+", "test", "test2"], ["-", "test3"], ["~", "test5", "test6"]] }
   end
