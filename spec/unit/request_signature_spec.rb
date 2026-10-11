@@ -157,6 +157,11 @@ describe WebMock::RequestSignature do
       expect(subject.url_encoded?).to be true
     end
 
+    it "ignores the case of the content type" do
+      subject.headers = { "Content-Type" => "Application/X-WWW-Form-Urlencoded" }
+      expect(subject.url_encoded?).to be true
+    end
+
     it "returns false if the headers are NOT urlencoded" do
       subject.headers = { "Content-Type" => "application/made-up-format" }
       expect(subject.url_encoded?).to be false
@@ -187,6 +192,38 @@ describe WebMock::RequestSignature do
     it "returns true if json Content-Type is given more than once" do
       subject.headers = { "Content-Type" => ["application/json", "application/json"] }
       expect(subject.json_headers?).to be true
+    end
+
+    it "returns true for a content type with a +json suffix" do
+      subject.headers = { "Content-Type" => "application/vnd.api+json" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns true for a +json content type with parameters" do
+      subject.headers = { "Content-Type" => "application/problem+json; charset=utf-8" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns true for text/json" do
+      subject.headers = { "Content-Type" => "text/json" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns true for JavaScript content types, which are matched as JSON" do
+      ["application/javascript", "text/javascript"].each do |content_type|
+        subject.headers = { "Content-Type" => content_type }
+        expect(subject.json_headers?).to be true
+      end
+    end
+
+    it "ignores the case of the content type" do
+      subject.headers = { "Content-Type" => "Application/JSON" }
+      expect(subject.json_headers?).to be true
+    end
+
+    it "returns false for a sequence of JSON texts" do
+      subject.headers = { "Content-Type" => "application/json-seq" }
+      expect(subject.json_headers?).to be false
     end
 
     it "returns false if the headers are NOT json" do

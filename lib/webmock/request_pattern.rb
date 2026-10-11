@@ -33,11 +33,9 @@ module WebMock
     end
 
     def matches?(request_signature)
-      content_type = request_signature.content_type
-      content_type = content_type.split(';').first if content_type
       @method_pattern.matches?(request_signature.method) &&
         @uri_pattern.matches?(request_signature.uri) &&
-        (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, content_type || "")) &&
+        (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, request_signature.content_type)) &&
         (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
         (@with_block.nil? || @with_block.call(request_signature))
     end
@@ -255,18 +253,8 @@ module WebMock
   class BodyPattern
     include RSpecMatcherDetector
 
-    BODY_FORMATS = {
-      'text/xml'               => :xml,
-      'application/xml'        => :xml,
-      'application/json'       => :json,
-      'text/json'              => :json,
-      'application/javascript' => :json,
-      'text/javascript'        => :json,
-      'text/html'              => :html,
-      'application/x-yaml'     => :yaml,
-      'text/yaml'              => :yaml,
-      'text/plain'             => :plain
-    }
+    # Kept so existing references to the constant still resolve.
+    BODY_FORMATS = WebMock::Util::ContentType::BODY_FORMATS
 
     attr_reader :pattern
 
@@ -283,6 +271,8 @@ module WebMock
     end
 
     def matches?(body, content_type = "")
+      # Checked on the raw value, so body patterns used with mixed case
+      # multipart content types keep working as in earlier versions.
       assert_non_multipart_body(content_type)
 
       if (@pattern).is_a?(Hash)
@@ -308,7 +298,7 @@ module WebMock
     def body_as_hash(body, content_type)
       return if body.nil?
 
-      case body_format(content_type)
+      case WebMock::Util::ContentType.body_format(content_type)
       when :json then
         WebMock::Util::Parsers::JSON.parse(body)
       when :xml then
@@ -318,11 +308,6 @@ module WebMock
       end
     rescue WebMock::Util::Parsers::ParseError
       nil
-    end
-
-    def body_format(content_type)
-      normalized_content_type = content_type.sub(/\A(application\/)[a-zA-Z0-9.-]+\+(json|xml)\Z/,'\1\2')
-      BODY_FORMATS[normalized_content_type]
     end
 
     def assert_non_multipart_body(content_type)
@@ -380,7 +365,7 @@ module WebMock
       return matching_body_hashes?(actual, expected, content_type) if actual.is_a?(Hash) && expected.is_a?(Hash)
       return matching_body_array?(actual, expected, content_type) if actual.is_a?(Array) && expected.is_a?(Array)
 
-      expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if url_encoded_body?(content_type)
+      expected = WebMock::Util::ValuesStringifier.stringify_values(expected) if WebMock::Util::ContentType.url_encoded?(content_type)
       expected === actual
     end
 
@@ -390,10 +375,6 @@ module WebMock
 
     def normalize_hash(hash)
       Hash[WebMock::Util::HashKeysStringifier.stringify_keys!(hash, deep: true).sort]
-    end
-
-    def url_encoded_body?(content_type)
-      content_type =~ %r{^application/x-www-form-urlencoded}
     end
   end
 

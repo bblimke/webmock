@@ -43,11 +43,11 @@ module WebMock
     end
 
     def url_encoded?
-      !!content_type&.start_with?('application/x-www-form-urlencoded')
+      WebMock::Util::ContentType.url_encoded?(content_type)
     end
 
     def json_headers?
-      !!content_type&.start_with?('application/json')
+      WebMock::Util::ContentType.body_format(content_type) == :json
     end
 
     private

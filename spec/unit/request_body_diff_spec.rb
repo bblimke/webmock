@@ -51,6 +51,18 @@ RSpec.describe WebMock::RequestBodyDiff do
       end
     end
 
+    context "request signature has a +json content type" do
+      before :each do
+        request_signature.headers = {"Content-Type" => "application/vnd.api+json"}
+      end
+
+      it "generates a diff" do
+        expect(subject.body_diff).to eq(
+          [["~", "key", "different value", "value"]]
+        )
+      end
+    end
+
     context "request signature doesn't have json headers" do
       before :each do
         request_signature.headers = {"Content-Type" => "application/xml"}

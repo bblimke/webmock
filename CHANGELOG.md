@@ -1,5 +1,13 @@
 # Changelog
 
+# Unreleased
+
+* Show a body diff for JSON requests whose content type has a `+json` suffix, such as `application/vnd.api+json`, and for the other content types WebMock already matches as JSON (#734)
+
+    Thanks to [Olivier Brisse](https://github.com/ouranos)
+
+* Ignore the case of JSON, XML and url-encoded content types when matching request bodies, and match bodies of any `+json` or `+xml` media type, such as `image/svg+xml`, as JSON or XML
+
 # 3.28.0
 
 * Fix `to_rack` apps receiving a `rack.session` they did not set up (#985)

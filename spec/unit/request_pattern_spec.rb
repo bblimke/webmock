@@ -712,6 +712,20 @@ describe WebMock::RequestPattern do
           not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
       end
 
+      it "should raise an error for a multipart request" do
+        expect {
+          WebMock::RequestPattern.new(:post, "www.example.com", body: /filename=/).
+            matches?(WebMock::RequestSignature.new(:post, "www.example.com",
+              headers: {content_type: 'multipart/form-data; boundary=x'}, body: 'filename="a.txt"'))
+        }.to raise_error(ArgumentError, "WebMock does not support matching body for multipart/form-data requests yet :(")
+      end
+
+      it "should match a multipart request with a mixed case content type, as earlier versions did" do
+        expect(WebMock::RequestPattern.new(:post, "www.example.com", body: /filename=/)).
+          to match(WebMock::RequestSignature.new(:post, "www.example.com",
+            headers: {content_type: 'Multipart/Form-Data; boundary=x'}, body: 'filename="a.txt"'))
+      end
+
       describe "when body in pattern is declared as a hash" do
         let(:body_hash) { {:a => '1', :b => 'five', 'c' => {'d' => ['e', 'f']}} }
 
@@ -734,6 +748,12 @@ describe WebMock::RequestPattern do
           it "should not match when body is not url encoded" do
             expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
               not_to match(WebMock::RequestSignature.new(:post, "www.example.com", body: 'foo bar'))
+          end
+
+          it "should match non string values whatever the case of the content type" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: 1})).
+              to match(WebMock::RequestSignature.new(:post, "www.example.com",
+                headers: {content_type: 'Application/X-WWW-Form-Urlencoded'}, body: 'a=1'))
           end
 
           it "should match when hash contains regex values" do
@@ -825,6 +845,16 @@ describe WebMock::RequestPattern do
             let(:content_type) { 'application/vnd.api+json' }
             it_behaves_like "a json body"
           end
+
+          context "json content type with a suffix and parameters" do
+            let(:content_type) { 'application/problem+json; charset=utf-8' }
+            it_behaves_like "a json body"
+          end
+
+          context "json content type in mixed case" do
+            let(:content_type) { 'Application/JSON' }
+            it_behaves_like "a json body"
+          end
         end
 
         describe "for request with xml body and content type is set to xml" do
@@ -864,6 +894,11 @@ describe WebMock::RequestPattern do
 
           context "custom xml content type" do
             let(:content_type) { 'application/atom+xml' }
+            it_behaves_like "a xml body"
+          end
+
+          context "xml content type outside the application media type" do
+            let(:content_type) { 'image/svg+xml' }
             it_behaves_like "a xml body"
           end
         end
