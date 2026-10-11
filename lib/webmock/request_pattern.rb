@@ -14,7 +14,7 @@ module WebMock
 
   class RequestPattern
 
-    attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern
+    attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern, :with_block
 
     def initialize(method, uri, options = {})
       @method_pattern  = MethodPattern.new(method)

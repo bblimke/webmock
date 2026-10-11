@@ -95,9 +95,16 @@ describe WebMock::JsonBodyHint do
     expect { applies?(pattern('{"a":1,"b":2}'.dup.force_encoding("UTF-16LE"))) }.not_to raise_error
   end
 
-  it "does not call a block given to the pattern" do
+  it "does not check the URI unless the body differs only in formatting" do
+    uri_check = ->(_uri) { raise "the URI should not be checked" }
+    expect(applies?(WebMock::RequestPattern.new(:post, uri_check))).to be false
+    expect(applies?(WebMock::RequestPattern.new(:post, uri_check, body: {"a" => 1, "b" => 2}))).to be false
+    expect(applies?(WebMock::RequestPattern.new(:post, uri_check, body: '{"a":1,"b":3}'))).to be false
+  end
+
+  it "does not apply, and does not call the block, when the pattern has a block" do
     request_pattern = pattern('{"a":1,"b":2}').with { |_request| raise "the block should not be called" }
-    expect(applies?(request_pattern)).to be true
+    expect(applies?(request_pattern)).to be false
   end
 
   context "when the request content type is not JSON" do

@@ -8,6 +8,8 @@
 
     Thanks to [Sébastien S.](https://github.com/inkstak)
 
+* Show the JSON body hint for expectations narrowed with `with` too, and no longer show it when a block is given to the stub or expectation, since checking would mean calling the block
+
 # 3.29.0
 
 * Show a body diff for JSON requests whose content type has a `+json` suffix, such as `application/vnd.api+json`, and for the other content types WebMock already matches as JSON (#734)

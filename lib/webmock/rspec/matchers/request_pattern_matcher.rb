@@ -107,6 +107,11 @@ module WebMock
         @conditions = conditions
       end
 
+      # The parts that must all match, so JsonBodyHint can check each of them.
+      def patterns
+        [@pattern, @conditions]
+      end
+
       def matches?(request_signature)
         @pattern.matches?(request_signature) && @conditions.matches?(request_signature)
       end
