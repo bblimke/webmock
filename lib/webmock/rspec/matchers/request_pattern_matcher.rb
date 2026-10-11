@@ -52,20 +52,22 @@ module WebMock
       self
     end
 
+    # Counts only the requests that also match the given conditions, which
+    # take the same options and block as RequestPattern#with. Like
+    # RequestPattern#with, calling it again adds to the conditions. The stub
+    # or request pattern under test is not changed.
     def with(options = {}, &block)
-      @request_pattern_with = [options, block]
+      (@conditions ||= RequestPattern.new(:any, ANY_URI)).with(options, &block)
       self
     end
 
     def matches?(request_pattern)
-      @request_execution_verifier.request_pattern = request_pattern
-      @request_execution_verifier.request_pattern.with(@request_pattern_with[0], &@request_pattern_with[1]) if @request_pattern_with
+      @request_execution_verifier.request_pattern = with_conditions(request_pattern)
       @request_execution_verifier.matches?
     end
 
     def does_not_match?(request_pattern)
-      @request_execution_verifier.request_pattern = request_pattern
-      @request_execution_verifier.request_pattern.with(@request_pattern_with[0], &@request_pattern_with[1]) if @request_pattern_with
+      @request_execution_verifier.request_pattern = with_conditions(request_pattern)
       @request_execution_verifier.does_not_match?
     end
 
@@ -83,5 +85,36 @@ module WebMock
 
     # RSpec 2 compatibility:
     alias_method :negative_failure_message, :failure_message_when_negated
+
+    private
+
+    ANY_URI = ->(_uri) { true }
+    private_constant :ANY_URI
+
+    # How the description of conditions starts when nothing was given to
+    # #with. What was given follows it, as in ' with body "abc"'.
+    EMPTY_CONDITIONS = RequestPattern.new(:any, ANY_URI).to_s.freeze
+    private_constant :EMPTY_CONDITIONS
+
+    def with_conditions(request_pattern)
+      @conditions ? PatternWithConditions.new(request_pattern, @conditions) : request_pattern
+    end
+
+    # Matches a request when both the pattern and the conditions match it.
+    class PatternWithConditions
+      def initialize(pattern, conditions)
+        @pattern = pattern
+        @conditions = conditions
+      end
+
+      def matches?(request_signature)
+        @pattern.matches?(request_signature) && @conditions.matches?(request_signature)
+      end
+
+      def to_s
+        "#{@pattern} (only requests#{@conditions.to_s.delete_prefix(EMPTY_CONDITIONS)})"
+      end
+    end
+    private_constant :PatternWithConditions
   end
 end

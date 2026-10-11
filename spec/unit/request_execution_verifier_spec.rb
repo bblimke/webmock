@@ -125,6 +125,19 @@ describe WebMock::RequestExecutionVerifier do
       expect(@verifier.failure_message).not_to include("Hint:")
     end
 
+    it "does not call a callable URI again while building the failure message" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:get, "www.example.com")
+      )
+      calls = 0
+      @verifier.request_pattern = WebMock::RequestPattern.new(:get, ->(_uri) { calls += 1; false })
+
+      expect(@verifier.matches?).to be false
+      expect(calls).to eq(1)
+      @verifier.failure_message
+      expect(calls).to eq(1)
+    end
+
     it "does not add the hint when showing the body diff is turned off" do
       WebMock.hide_body_diff!
       @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')

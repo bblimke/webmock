@@ -751,7 +751,7 @@ expect(a_request(:post, "www.example.com").
 ### Setting expectations in RSpec on the stub
 
 ```ruby
-stub = stub_request(:get, "www.example.com")
+stub = stub_request(:post, "www.example.com")
 
 # ... make requests ...
 
@@ -759,6 +759,8 @@ expect(stub).to have_been_requested.twice
 expect(stub).to have_been_requested.once.with(body: {"a" => [1, 2, 3]})
 expect(stub).to have_been_requested.once.with(body: {"a" => [4, 5, 6]})
 ```
+
+Options and a block given to `with` take the same form as in `stub_request(...).with`. The expectation then counts only the requests that match both the stub and those conditions. The stub itself does not change.
 
 ## Clearing stubs and request history
 

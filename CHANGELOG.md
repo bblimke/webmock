@@ -1,5 +1,13 @@
 # Changelog
 
+# Unreleased
+
+* Allow narrowing an RSpec expectation on a stub with `with`, as in `expect(stub).to have_been_requested.once.with(body: "abc")` (#1128)
+
+    The expectation counts only the requests that match both the stub and the conditions given to `with`. The stub itself does not change.
+
+    Thanks to [Sébastien S.](https://github.com/inkstak)
+
 # 3.29.0
 
 * Show a body diff for JSON requests whose content type has a `+json` suffix, such as `application/vnd.api+json`, and for the other content types WebMock already matches as JSON (#734)

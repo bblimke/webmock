@@ -875,6 +875,14 @@ shared_context "request expectations" do |*adapter_info|
         expect(stub).to have_been_requested.once
       end
 
+      it "should count only requests matching the conditions given to with" do
+        stub = stub_request(:post, "http://www.example.com/")
+        http_request(:post, "http://www.example.com/", body: "abc")
+        http_request(:post, "http://www.example.com/", body: "def")
+        expect(stub).to have_been_requested.once.with(body: "abc")
+        expect(stub).to have_been_requested.twice
+      end
+
       it "should fail if request not expected to be made was made" do
         expect {
           stub = stub_request(:get, "http://www.example.com")
