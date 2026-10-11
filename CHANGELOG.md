@@ -1,12 +1,16 @@
 # Changelog
 
-# Unreleased
+# 3.29.0
 
 * Show a body diff for JSON requests whose content type has a `+json` suffix, such as `application/vnd.api+json`, and for the other content types WebMock already matches as JSON (#734)
 
     Thanks to [Olivier Brisse](https://github.com/ouranos)
 
 * Ignore the case of JSON, XML and url-encoded content types when matching request bodies, and match bodies of any `+json` or `+xml` media type, such as `image/svg+xml`, as JSON or XML
+
+* Suggest declaring a JSON body as a hash when a request fails to match only because the JSON is formatted differently (#649)
+
+    A body declared as a string must match the request body exactly, including key order and whitespace. When that is the only difference, the error for an unregistered request and the failure message of a request expectation now say so, and suggest `with(body: JSON.parse(json_string))`. Matching JSON strings regardless of key order by default is planned for the next major version (#485).
 
 # 3.28.0
 
