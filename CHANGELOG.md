@@ -10,6 +10,12 @@
 
 * Show the JSON body hint for expectations narrowed with `with` too, and no longer show it when a block is given to the stub or expectation, since checking would mean calling the block
 
+* Allow a full URL with a path in `disable_net_connect!(allow: ...)` without writing the default port, as in `allow: "https://github.com/mozilla/geckodriver/releases/latest"` (#977)
+
+    The URL must match exactly, including any query string. Allowing `scheme://host` still allows every path on that host.
+
+    Thanks to [Henry Blyth](https://github.com/henrahmagix)
+
 # 3.29.0
 
 * Show a body diff for JSON requests whose content type has a `+json` suffix, such as `application/vnd.api+json`, and for the other content types WebMock already matches as JSON (#734)

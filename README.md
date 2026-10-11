@@ -573,6 +573,18 @@ RestClient.get('www.example.org', '/')      # ===> Failure
 RestClient.get('www.example.org:8080', '/') # ===> Allowed
 ```
 
+With a `String` specifying a full URL:
+
+```ruby
+WebMock.disable_net_connect!(allow: 'https://www.example.org/health')
+
+RestClient.get('https://www.example.org/health')    # ===> Allowed
+RestClient.get('https://www.example.org/health/db') # ===> Failure
+RestClient.get('https://www.example.org/')          # ===> Failure
+```
+
+A URL with a path allows only that exact URL, including any query string. To allow every path under a prefix, use a `Regexp`.
+
 With a `Regexp` matching the URI:
 
 ```ruby

@@ -45,6 +45,30 @@ describe "WebMock" do
       end
     end
 
+    context 'disabled with an allowed URL string' do
+      after do
+        WebMock.disable_net_connect!
+      end
+
+      [
+        ["https://github.com/mozilla/geckodriver/releases/latest", "https://github.com/mozilla/geckodriver/releases/latest", true],
+        ["https://github.com:443/mozilla/geckodriver/releases/latest", "https://github.com/mozilla/geckodriver/releases/latest", true],
+        ["http://example.com/", "http://example.com/", true],
+        ["http://example.com", "http://example.com/", true],
+        ["http://example.com", "http://example.com/foobar", true],
+        ["http://example.com", "http://example.com:80/foobar", true],
+        ["http://example.com/foo", "http://example.com/foo/bar", false],
+        ["http://example.com/foo", "http://example.com:8080/foo", false],
+        ["http://example.com/foo", "http://example.com/foo?x=1", false],
+        ["https://example.com/foo", "http://example.com/foo", false]
+      ].each do |allowed, request_uri, expected|
+        it "#{expected ? 'allows' : 'does not allow'} #{request_uri} when #{allowed} is allowed" do
+          WebMock.disable_net_connect!(allow: allowed)
+          expect(WebMock.net_connect_allowed?(request_uri)).to eq(expected)
+        end
+      end
+    end
+
     context 'disabled globally' do
       before do
         WebMock.disable_net_connect!
