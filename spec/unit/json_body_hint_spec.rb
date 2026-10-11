@@ -90,8 +90,9 @@ describe WebMock::JsonBodyHint do
     expect(applies?(pattern('[1,1]'))).to be false
   end
 
-  it "does not raise for a declared body in an encoding it cannot be read in" do
-    expect(applies?(pattern('{"a":1,"b":2}'.dup.force_encoding("UTF-16LE")))).to be false
+  it "does not raise for a declared body tagged with an encoding that does not fit its bytes" do
+    # json 2.1 on older Rubies reads these bytes as UTF-8; newer versions reject them.
+    expect { applies?(pattern('{"a":1,"b":2}'.dup.force_encoding("UTF-16LE"))) }.not_to raise_error
   end
 
   it "does not call a block given to the pattern" do
