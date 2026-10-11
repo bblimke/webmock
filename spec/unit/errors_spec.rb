@@ -70,6 +70,10 @@ describe "errors" do
         before do
           WebMock.hide_body_diff!
         end
+
+        after do
+          WebMock.show_body_diff!
+        end
         it "should not show body diff" do
           allow(WebMock::StubRegistry.instance).to receive(:request_stubs).and_return([request_stub])
           allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
@@ -109,6 +113,7 @@ describe "errors" do
           allow(WebMock::StubRequestSnippet).to receive(:new).
             with(request_stub).and_return(stub_result)
           allow(request_stub).to receive(:request_pattern).and_return(body_pattern)
+          allow_any_instance_of(WebMock::RequestBodyDiff).to receive(:body_diff).and_return({})
 
           expected =  \
             "Real HTTP connections are disabled. Unregistered request: #{request_signature}" \
