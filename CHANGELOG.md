@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.30.0
 
 * Allow narrowing an RSpec expectation on a stub with `with`, as in `expect(stub).to have_been_requested.once.with(body: "abc")` (#1128)
 
