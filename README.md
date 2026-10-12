@@ -578,12 +578,15 @@ With a `String` specifying a full URL:
 ```ruby
 WebMock.disable_net_connect!(allow: 'https://www.example.org/health')
 
-RestClient.get('https://www.example.org/health')    # ===> Allowed
-RestClient.get('https://www.example.org/health/db') # ===> Failure
-RestClient.get('https://www.example.org/')          # ===> Failure
+RestClient.get('https://www.example.org/health')        # ===> Allowed
+RestClient.get('https://www.example.org/health?full=1') # ===> Failure
+RestClient.get('https://www.example.org/health/db')     # ===> Failure
+RestClient.get('https://www.example.org/')              # ===> Failure
 ```
 
-A URL with a path allows only that exact URL, including any query string. To allow every path under a prefix, use a `Regexp`.
+A URL with a path allows only that path and query string. URLs are compared the same way as in stubs, so the default port, letter case in the host, and the order and encoding of query parameters don't matter.
+
+A URL without a path or query, such as `https://www.example.org`, allows every path on that scheme, host and port. Adding the trailing slash (`https://www.example.org/`) allows only the root path `/` with no query string. To allow every path under a prefix, use a `Regexp`.
 
 With a `Regexp` matching the URI:
 
@@ -648,6 +651,8 @@ This forces WebMock Net::HTTP adapter to always connect on `Net::HTTP.start`. At
 ```ruby
 WebMock.allow_net_connect!(net_http_connect_on_start: "www.example.com")
 ```
+
+The path is not known when the connection is made, so a URL with a path given here never matches.
 
 ## Setting Expectations
 

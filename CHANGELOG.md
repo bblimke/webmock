@@ -10,9 +10,9 @@
 
 * Show the JSON body hint for expectations narrowed with `with` too, and no longer show it when a block is given to the stub or expectation, since checking would mean calling the block
 
-* Allow a full URL with a path in `disable_net_connect!(allow: ...)` without writing the default port, as in `allow: "https://github.com/mozilla/geckodriver/releases/latest"` (#977)
+* Allow a full URL with a path in `disable_net_connect!(allow: ...)`, as in `allow: "https://github.com/mozilla/geckodriver/releases/latest"` (#977)
 
-    The URL must match exactly, including any query string. Allowing `scheme://host` still allows every path on that host.
+    URLs are compared the same way as in stubs, so the default port, letter case in the host, and the order and encoding of query parameters don't matter. A URL without a path or query allows every path on that scheme, host and port; a trailing slash restricts requests to `/` with no query string. Credentials in either URL are ignored.
 
     Thanks to [Henry Blyth](https://github.com/henrahmagix)
 

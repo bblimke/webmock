@@ -87,20 +87,40 @@ module WebMock
     when Array
       allowed.any? { |allowed_item| net_connect_explicit_allowed?(allowed_item, uri) }
     when Regexp
-      (uri.to_s =~ allowed) != nil ||
-      (uri.omit(:port).to_s =~ allowed) != nil && uri.port == uri.default_port
+      allowed.match?(uri.to_s) ||
+      (uri.port == uri.default_port && allowed.match?(uri.omit(:port).to_s))
     when String
-      allowed == uri.to_s ||
       allowed == uri.host ||
       allowed == "#{uri.host}:#{uri.port}" ||
-      allowed == "#{uri.scheme}://#{uri.host}:#{uri.port}" ||
-      (allowed == "#{uri.scheme}://#{uri.host}" || allowed == uri.omit(:port).to_s) && uri.port == uri.default_port
+      net_connect_allowed_url?(allowed, uri)
     else
       if allowed.respond_to?(:call)
         allowed.call(uri)
       end
     end
   end
+
+  def self.net_connect_allowed_url?(allowed, uri)
+    return false unless allowed.match?(%r{\Ahttps?://}i)
+
+    # Normalization turns an empty path into "/", so check the original URL.
+    allowed_uri = Addressable::URI.parse(allowed)
+    allow_any_path = allowed_uri.path.empty? && allowed_uri.query.nil?
+
+    # Connection URIs have no request path to match yet.
+    return false if uri.path.empty? && !allowed_uri.path.empty?
+
+    allowed_uri = WebMock::Util::URI.normalize_uri(allowed_uri)
+    request_uri = WebMock::Util::URI.normalize_uri(uri)
+
+    return false unless allowed_uri.origin == request_uri.origin
+    return true if allow_any_path
+
+    allowed_uri.path == request_uri.path && allowed_uri.query == request_uri.query
+  rescue Addressable::URI::InvalidURIError
+    false
+  end
+  private_class_method :net_connect_allowed_url?
 
   def self.show_body_diff!
     Config.instance.show_body_diff = true
