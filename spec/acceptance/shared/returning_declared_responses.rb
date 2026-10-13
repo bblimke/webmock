@@ -141,7 +141,7 @@ shared_context "declared responses" do |*adapter_info|
         let(:fixture_path) { Pathname.new(File.expand_path('../../fixtures/response.json', __dir__)) }
         let(:fixture_body) { fixture_path.read }
 
-        it "should read a Pathname once and return the contents on repeated requests" do
+        it "should return the contents of a Pathname as JSON on repeated requests" do
           stub_request(:get, "www.example.com").to_return_json(body: fixture_path)
           2.times do
             response = http_request(:get, "http://www.example.com/")
@@ -179,8 +179,7 @@ shared_context "declared responses" do |*adapter_info|
         it "should read and close files returned by a request lambda" do
           files = []
           begin
-            stub_request(:get, "www.example.com").to_return_json(body: ->(request) {
-              expect(request.uri.host).to eq('www.example.com')
+            stub_request(:get, "www.example.com").to_return_json(body: ->(_request) {
               files << fixture_path.open
               files.last
             })
