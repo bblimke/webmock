@@ -289,6 +289,8 @@ if defined?(Curl)
         curb_or_webmock { super }
       ensure
         reset_webmock_method
+        # The body given to http_post or http_patch is for this request only.
+        @post_body = nil
       end
 
       def put_data= data

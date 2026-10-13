@@ -442,6 +442,16 @@ unless RUBY_PLATFORM =~ /java/
         }.to raise_error(WebMock::NetConnectNotAllowedError, %r(Real HTTP connections are disabled. Unregistered request: GET http://www.example.com))
       end
 
+      it "should not record the body of an earlier request on the same object" do
+        stub_request(:post, "www.example.com")
+        c = Curl::Easy.new("http://www.example.com")
+        c.http_post("01234")
+        c.reset
+        c.url = "http://www.example.com"
+        c.http(:POST)
+        expect(a_request(:post, "www.example.com").with(body: "01234")).to have_been_made.once
+      end
+
       it "should work with blank arguments for post" do
         stub_request(:post, "www.example.com").with(body: "01234")
         c = Curl::Easy.new

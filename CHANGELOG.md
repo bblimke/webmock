@@ -24,6 +24,10 @@
 
     Thanks to [Andy Williams](https://github.com/sobakasu)
 
+* Record a curb request sent without a body as having none, even after an earlier `http_post` or `http_patch` call with a body on the same `Curl::Easy` object
+
+    For example, after `c.http_post("a=1")`, `c.reset` and `c.http(:POST)`, the second request was recorded with the body `a=1`, so a stub for that body matched it.
+
 # 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)
