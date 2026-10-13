@@ -15,7 +15,15 @@ module WebMock
       # This will be removed in Ruby 3.5. In Ruby 3.4, const_remove will warn.
       HAS_LEGACY_CONSTANT = Net.const_defined?(:HTTPSession)
 
+      # Objects created while WebMock was enabled are instances of WebMock's
+      # Net::HTTP class, so they check this to act like Net::HTTP once
+      # WebMock is disabled.
+      def self.enabled?
+        @enabled
+      end
+
       def self.enable!
+        @enabled = true
         Net.send(:remove_const, :HTTP)
         Net.send(:const_set, :HTTP, @webMockNetHTTP)
         if HAS_LEGACY_CONSTANT
@@ -25,6 +33,7 @@ module WebMock
       end
 
       def self.disable!
+        @enabled = false
         Net.send(:remove_const, :HTTP)
         Net.send(:const_set, :HTTP, OriginalNetHTTP)
         if HAS_LEGACY_CONSTANT
@@ -83,6 +92,12 @@ module WebMock
         end
 
         def request(request, body = nil, &block)
+          unless webmock_enabled?
+            # Reconnect for real if started with WebMock's stub socket.
+            ensure_actual_connection if started?
+            return super
+          end
+
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
@@ -148,6 +163,8 @@ module WebMock
         alias_method :start_with_connect, :start
 
         def start(&block)
+          return super unless webmock_enabled?
+
           uri = Addressable::URI.parse(WebMock::NetHTTPUtility.get_uri(self))
 
           if WebMock.net_http_connect_on_start?(uri)
@@ -203,6 +220,12 @@ module WebMock
             WebMock::NetHTTPUtility.puts_warning_for_right_http_if_needed
             @@already_checked_for_right_http_connection = true
           end
+        end
+
+        private
+
+        def webmock_enabled?
+          WebMock::HttpLibAdapters::NetHttpAdapter.enabled?
         end
       end
       @webMockNetHTTP.version_1_2
