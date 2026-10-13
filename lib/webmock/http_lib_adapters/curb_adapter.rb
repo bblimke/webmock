@@ -265,7 +265,7 @@ if defined?(Curl)
       if method_defined?(:http_patch)
         def http_patch *data
           @webmock_method = :patch
-          @post_body = data.join('&') if data && !data.empty?
+          @post_body = data.join('&') unless data.empty?
           super
         end
       end
@@ -279,7 +279,7 @@ if defined?(Curl)
 
       def http_post *data
         @webmock_method = :post
-        @post_body = data.join('&') if data && !data.empty?
+        @post_body = data.join('&') unless data.empty?
         super
       end
       alias post http_post
