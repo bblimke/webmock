@@ -1,5 +1,13 @@
 # Changelog
 
+# Unreleased
+
+* Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)
+
+    The file is read and closed as it is for `to_return`: when the stub is declared, or on each request when it comes from a lambda.
+
+    Thanks to [Alex](https://github.com/ac1982)
+
 # 3.30.0
 
 * Allow narrowing an RSpec expectation on a stub with `with`, as in `expect(stub).to have_been_requested.once.with(body: "abc")` (#1128)

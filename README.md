@@ -363,14 +363,18 @@ stub_request(:any, "www.example.com").
 Net::HTTP.get('www.example.com', '/') # ===> "{\"foo\": \"bar\"}"
 ```
 
-`to_return_json` also accepts a `File` or `Pathname` containing an already-encoded
-JSON response, including one returned by a body lambda. As with `to_return`, file
-bodies are read and closed when the response is prepared; a lambda should open a
-new file for each request.
+A `File` or `Pathname` body is returned as it is, so it should hold JSON that is already encoded:
 
 ```ruby
 stub_request(:get, "www.example.com").
   to_return_json(body: Pathname.new('spec/fixtures/response.json'))
+```
+
+As with `to_return`, the file is read and closed when the stub is declared, so later changes to it don't affect the response. To read the file on every request, return it from a lambda. A lambda that returns a `File` must open a new one each time, since each one is closed after it is read.
+
+```ruby
+stub_request(:get, "www.example.com").
+  to_return_json(body: -> { Pathname.new('spec/fixtures/response.json') })
 ```
 
 ### Response with custom status message
