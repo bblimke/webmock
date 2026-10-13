@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.32.0
 
 * Make a `Net::HTTP` object created while WebMock was enabled behave like any other `Net::HTTP` object after `WebMock.disable!` (#1067)
 
