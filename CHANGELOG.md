@@ -1,5 +1,11 @@
 # Changelog
 
+# Unreleased
+
+* Fix `ArgumentError` when a `Net::HTTP` object created while WebMock was enabled is used after `WebMock.disable!`, as net-http-persistent and Capybara with Selenium do with their cached connections (#1067)
+
+    Thanks to [Mike Taylor](https://github.com/sealabcore) and [James Rodovich](https://github.com/rodovich)
+
 # 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)

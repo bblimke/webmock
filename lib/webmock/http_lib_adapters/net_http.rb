@@ -88,7 +88,7 @@ module WebMock
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-            @socket = Net::HTTP.socket_type.new
+            @socket = self.class.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
             build_net_http_response(webmock_response, request.uri, &block)
@@ -125,24 +125,16 @@ module WebMock
           raise IOError, 'HTTP session already opened' if @started
           if block_given?
             begin
-              @socket = Net::HTTP.socket_type.new
+              @socket = self.class.socket_type.new
               @started = true
               return yield(self)
             ensure
               do_finish
             end
           end
-          @socket = socket_type_check.new
+          @socket = self.class.socket_type.new
           @started = true
           self
-        end
-
-        def socket_type_check
-          if Net::HTTP.socket_type == Net::BufferedIO
-            StubSocket
-          else
-            Net::HTTP.socket_type
-          end
         end
 
         def ensure_actual_connection

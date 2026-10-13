@@ -230,6 +230,35 @@ describe "Net:HTTP" do
     end
   end
 
+  describe "using a Net::HTTP object created while WebMock was enabled, after WebMock is disabled" do
+    let(:http) { Net::HTTP.new("www.example.com") }
+
+    before do
+      stub_request(:get, "www.example.com").to_return(body: "stubbed")
+      http
+      WebMock.disable!
+    end
+
+    after do
+      WebMock.enable!
+    end
+
+    it "can be started" do
+      http.start
+      expect(http.started?).to be true
+    ensure
+      http.finish if http.started?
+    end
+
+    it "can be started with a block" do
+      expect(http.start { |started_http| started_http.started? }).to be true
+    end
+
+    it "returns a stubbed response" do
+      expect(http.request(Net::HTTP::Get.new("/")).body).to eq("stubbed")
+    end
+  end
+
   describe "connecting on Net::HTTP.start" do
     before(:each) do
       @http = Net::HTTP.new('www.google.com', 443)
