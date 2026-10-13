@@ -12,6 +12,12 @@
 
     Such a retry used to raise `NoMethodError` (undefined method `closed?` for nil). It now tries to connect again, and raises the connection error if that fails too.
 
+* Drop the `Transfer-Encoding` header from stubbed async-http responses, as WebMock already does with `Content-Length` (#1044)
+
+    A stub with a `Transfer-Encoding` header, such as `chunked`, used to fail with "Message contains both transfer encoding and content length". async-http sets both headers itself from the body, and its responses from real servers don't include them either.
+
+    Thanks to [Tim Mertens](https://github.com/tmertens)
+
 # 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)

@@ -160,6 +160,18 @@ unless RUBY_PLATFORM =~ /java/
       expect(http_request(:get, "http://www.example.com").body).to eq("abc")
     end
 
+    it 'works with responses that list several transfer encodings' do
+      stub_request(:get, 'http://www.example.com').to_return(
+        body: 'abc',
+        headers: { 'Transfer-Encoding' => ['gzip', 'chunked'] }
+      )
+      expect(make_request(:get, 'http://www.example.com')).to eq(
+        status: 200,
+        headers: {},
+        body: 'abc'
+      )
+    end
+
     it 'works with to_timeout' do
       stub_request(:get, 'http://www.example.com').to_timeout
       expect { make_request(:get, 'http://www.example.com') }.to raise_error Async::TimeoutError

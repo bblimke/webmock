@@ -207,6 +207,10 @@ if defined?(Async::HTTP)
       module WebMockApplication
         WEBMOCK_REQUEST_ID_HEADER = 'x-webmock-request-id'.freeze
 
+        # async-http sets these from the body itself. A stub's own values would
+        # conflict, as Transfer-Encoding does with the Content-Length it adds.
+        FRAMING_HEADERS = %w[content-length transfer-encoding].freeze
+
         class << self
           def call(request)
             request.read
@@ -231,20 +235,12 @@ if defined?(Async::HTTP)
             @webmock_responses ||= {}
           end
 
-          def strip_header?(key:, value:)
-            # WebMock's internal processing will not handle the body
-            # correctly if the header indicates that it is chunked, unless
-            # we also create all the chunks.
-            # It's far easier just to remove the header.
-            key =~ /transfer-encoding/i && value =~/chunked/i
-          end
-
           def build_response(webmock_response)
             headers = (webmock_response.headers || {}).each_with_object([]) do |(k, value), o|
-              next if strip_header?(key: k, value: value)
+              next if FRAMING_HEADERS.include?(k.downcase)
 
               Array(value).each do |v|
-                o.push [k, v] unless k.downcase == 'content-length' # async-http appends the exact content-length automatically
+                o.push [k, v]
               end
             end
 
