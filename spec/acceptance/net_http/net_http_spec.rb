@@ -260,6 +260,18 @@ describe "Net:HTTP" do
       expect(http.request(Net::HTTP::Get.new("/")).body).to eq("hello world")
     end
 
+    it "raises the connection error again when a failed reconnect is retried" do
+      closed_port = TCPServer.open("127.0.0.1", 0) { |server| server.addr[1] }
+      WebMock.enable!
+      unreachable = Net::HTTP.new("127.0.0.1", closed_port)
+      unreachable.start
+      WebMock.disable!
+
+      2.times do
+        expect { unreachable.request(Net::HTTP::Get.new("/")) }.to raise_error(Errno::ECONNREFUSED)
+      end
+    end
+
     it "returns stubbed responses again once WebMock is enabled again" do
       WebMock.enable!
       expect(http.request(Net::HTTP::Get.new("/")).body).to eq("stubbed")

@@ -8,6 +8,10 @@
 
     Thanks to [Mike Taylor](https://github.com/sealabcore) and [James Rodovich](https://github.com/rodovich)
 
+* Connect again when a request is retried on a `Net::HTTP` object that WebMock started without connecting and whose first real connection failed
+
+    Such a retry used to raise `NoMethodError` (undefined method `closed?` for nil). It now tries to connect again, and raises the connection error if that fails too.
+
 # 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)

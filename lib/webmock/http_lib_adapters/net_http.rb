@@ -154,8 +154,8 @@ module WebMock
 
         def ensure_actual_connection
           if @socket.is_a?(StubSocket)
-            @socket&.close
-            @socket = nil
+            # Keep the closed stub socket, so a failed connect is retried.
+            @socket.close
             do_start
           end
         end
