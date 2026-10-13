@@ -137,6 +137,65 @@ shared_context "declared responses" do |*adapter_info|
     end
 
     describe "when response was declared via to_return_json" do
+      describe "and the body is a JSON fixture" do
+        let(:fixture_path) { Pathname.new(File.expand_path('../../support/response.json', __dir__)) }
+        let(:fixture_body) { fixture_path.read }
+
+        it "should read a Pathname once and return the contents on repeated requests" do
+          stub_request(:get, "www.example.com").to_return_json(body: fixture_path)
+          2.times do
+            response = http_request(:get, "http://www.example.com/")
+            expect(response.body).to eq(fixture_body)
+            expect(response.headers['Content-Type']).to eq('application/json')
+          end
+        end
+
+        it "should read and close a File at declaration time" do
+          file = fixture_path.open
+          begin
+            stub_request(:get, "www.example.com").to_return_json(body: file)
+            expect(file).to be_closed
+            2.times do
+              expect(http_request(:get, "http://www.example.com/").body).to eq(fixture_body)
+            end
+          ensure
+            file.close unless file.closed?
+          end
+        end
+
+        it "should read a Pathname returned by a zero-argument lambda for every request" do
+          calls = 0
+          stub_request(:get, "www.example.com").to_return_json(body: -> {
+            calls += 1
+            fixture_path
+          })
+          expect(calls).to eq(0)
+          2.times do
+            expect(http_request(:get, "http://www.example.com/").body).to eq(fixture_body)
+          end
+          expect(calls).to eq(2)
+        end
+
+        it "should read and close files returned by a request lambda" do
+          files = []
+          begin
+            stub_request(:get, "www.example.com").to_return_json(body: ->(request) {
+              expect(request.uri.host).to eq('www.example.com')
+              files << fixture_path.open
+              files.last
+            })
+            expect(files).to be_empty
+            2.times do
+              expect(http_request(:get, "http://www.example.com/").body).to eq(fixture_body)
+              expect(files.last).to be_closed
+            end
+            expect(files.size).to eq(2)
+          ensure
+            files.each { |file| file.close unless file.closed? }
+          end
+        end
+      end
+
       describe "and declared response body is lamba" do
         it "should evaluate the response body at the time of returning the response" do
           record = double("SomeRecord")

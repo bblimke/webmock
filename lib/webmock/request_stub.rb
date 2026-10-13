@@ -39,13 +39,10 @@ module WebMock
             else
               body.call
             end
-            b = b.to_json unless b.is_a?(String)
-            b
+            json_response_body(b)
           }
-        elsif !body.is_a?(String)
-          body.to_json
         else
-          body
+          json_response_body(body)
         end
 
         resp_h.merge(
@@ -129,6 +126,17 @@ module WebMock
         stub.with(headers: signature.headers)
       end
       stub
+    end
+
+    private
+
+    def json_response_body(body)
+      case body
+      when String, IO, Pathname
+        body
+      else
+        body.to_json
+      end
     end
   end
 end
