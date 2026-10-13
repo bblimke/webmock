@@ -4,7 +4,7 @@
 
 * Make a `Net::HTTP` object created while WebMock was enabled behave like any other `Net::HTTP` object after `WebMock.disable!` (#1067)
 
-    Such an object, like a connection cached by net-http-persistent or by Capybara with Selenium, used to raise `ArgumentError` or keep using stubs after WebMock was disabled. It now sends real requests until WebMock is enabled again.
+    Such an object, like a connection cached by net-http-persistent or by Capybara with Selenium, used to raise `ArgumentError` on `start` or a stubbed request, and `WebMock::NetConnectNotAllowedError` on any other request, after WebMock was disabled. It now sends real requests until WebMock is enabled again.
 
     Thanks to [Mike Taylor](https://github.com/sealabcore) and [James Rodovich](https://github.com/rodovich)
 

@@ -244,9 +244,9 @@ describe "Net:HTTP" do
       WebMock.enable!
     end
 
-    it "can be started" do
+    it "connects for real when started" do
       http.start
-      expect(http.started?).to be true
+      expect(http.instance_variable_get(:@socket)).to be_a(Net::BufferedIO)
     end
 
     it "makes a real request instead of returning the stubbed response" do
