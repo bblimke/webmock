@@ -8,6 +8,14 @@
 
     Thanks to [Alex](https://github.com/ac1982)
 
+* Match HTTP methods given as a string or in upper case, as in `stub_request("get", ...)`, `a_request("GET", ...)` or `assert_requested("post", ...)` (#821)
+
+    Before, such a method never matched, so the stub never applied and negative expectations like `assert_not_requested("get", ...)` always passed. A test that passed only because of this can now fail.
+
+    The method of a request is now always a lower case Symbol too. A request made with an upper case method, as Typhoeus does with `method: :POST`, now matches a `:post` stub, and callbacks and `with` blocks see `:post`.
+
+    Thanks to [Euisan Kim](https://github.com/euisan)
+
 # 3.30.0
 
 * Allow narrowing an RSpec expectation on a stub with `with`, as in `expect(stub).to have_been_requested.once.with(body: "abc")` (#1128)

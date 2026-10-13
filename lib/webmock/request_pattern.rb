@@ -94,8 +94,11 @@ module WebMock
 
 
   class MethodPattern
+    # Request signatures store the method as a lower case Symbol, so a method
+    # given as a String or in upper case, like "get" or :GET, matches too.
+    # Anything else, such as nil, is kept as given and never matches.
     def initialize(pattern)
-      @pattern = pattern.to_sym
+      @pattern = pattern.respond_to?(:to_sym) ? pattern.to_sym.downcase : pattern
     end
 
     def matches?(method)

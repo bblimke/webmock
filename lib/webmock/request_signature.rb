@@ -4,11 +4,11 @@ module WebMock
 
   class RequestSignature
 
-    attr_accessor :method, :uri, :body
-    attr_reader :headers
+    attr_accessor :uri, :body
+    attr_reader :method, :headers
 
     def initialize(method, uri, options = {})
-      self.method = method.to_sym
+      self.method = method
       self.uri = uri.is_a?(Addressable::URI) ? uri : WebMock::Util::URI.normalize_uri(uri)
       assign_options(options)
     end
@@ -21,6 +21,10 @@ module WebMock
         string << " with headers #{WebMock::Util::Headers.sorted_headers_string(headers)}"
       end
       string
+    end
+
+    def method=(method)
+      @method = method.to_sym.downcase
     end
 
     def headers=(headers)

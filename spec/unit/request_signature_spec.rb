@@ -28,8 +28,18 @@ describe WebMock::RequestSignature do
       expect(WebMock::RequestSignature.new(:get, "www.example.com", body: "abc").body).to eq("abc")
     end
 
-    it "symbolizes the method" do
-      expect(WebMock::RequestSignature.new('get', "www.example.com", body: "abc").method).to eq(:get)
+    it "symbolizes and downcases the method" do
+      expect(WebMock::RequestSignature.new('GET', "www.example.com", body: "abc").method).to eq(:get)
+    end
+
+    it "symbolizes and downcases a method assigned later" do
+      signature = WebMock::RequestSignature.new(:get, "www.example.com")
+      signature.method = 'POST'
+      expect(signature.method).to eq(:post)
+    end
+
+    it "raises for a nil method" do
+      expect { WebMock::RequestSignature.new(nil, "www.example.com") }.to raise_error(NoMethodError)
     end
   end
 

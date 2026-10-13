@@ -21,6 +21,29 @@ shared_context "request expectations" do |*adapter_info|
         }.not_to raise_error
       end
 
+      it "should satisfy expectation when method is given as a string" do
+        expect {
+          http_request(:get, "http://www.example.com/")
+          expect(a_request("GET", "http://www.example.com")).to have_been_made.once
+          expect(WebMock).to have_requested("get", "http://www.example.com")
+          assert_requested("get", "http://www.example.com")
+        }.not_to raise_error
+      end
+
+      it "should fail if request with method given as a string was not expected but executed" do
+        expect {
+          http_request(:get, "http://www.example.com/")
+          expect(a_request("get", "http://www.example.com")).not_to have_been_made
+        }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
+      end
+
+      it "should fail assert_not_requested with a method given as a string when the request was executed" do
+        expect {
+          http_request(:get, "http://www.example.com/")
+          assert_not_requested("get", "http://www.example.com")
+        }.to fail_with(%r(The request GET http://www.example.com/ was not expected to execute but it executed 1 time))
+      end
+
       it "should satisfy expectation if request was not expected and not executed" do
         expect {
           expect(a_request(:get, "http://www.example.com")).not_to have_been_made

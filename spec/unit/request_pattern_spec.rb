@@ -91,9 +91,26 @@ describe WebMock::RequestPattern do
         to match(WebMock::RequestSignature.new(:get, "www.example.com"))
     end
 
-    it "should match if method is described as string" do
-      expect(WebMock::RequestPattern.new("any", "www.example.com")).
-        to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    ["get", "GET", :GET, "any", "ANY"].each do |method|
+      it "should match if method is given as #{method.inspect}" do
+        expect(WebMock::RequestPattern.new(method, "www.example.com")).
+          to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+      end
+    end
+
+    it "should not match if method given as a string is different" do
+      expect(WebMock::RequestPattern.new("post", "www.example.com")).
+        not_to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    end
+
+    it "should match a request made with an upper case method" do
+      expect(WebMock::RequestPattern.new(:get, "www.example.com")).
+        to match(WebMock::RequestSignature.new("GET", "www.example.com"))
+    end
+
+    it "should not match any request, and not raise, if method is nil" do
+      expect(WebMock::RequestPattern.new(nil, "www.example.com")).
+        not_to match(WebMock::RequestSignature.new(:get, "www.example.com"))
     end
 
     it "should match if request has unescaped uri" do

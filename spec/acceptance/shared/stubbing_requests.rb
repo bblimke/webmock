@@ -84,6 +84,16 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         expect(http_request('get', "http://www.example.com/").status).to eq("200")
       end
 
+      it "should return stubbed response when stub method is given as a string" do
+        stub_request("get", "www.example.com")
+        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+      end
+
+      it "should return stubbed response when stub method is given as an upper case string" do
+        stub_request("GET", "www.example.com")
+        expect(http_request(:get, "http://www.example.com/").status).to eq("200")
+      end
+
       it "should raise error if stubbed request has different method" do
         stub_request(:get, "www.example.com")
         expect(http_request(:get, "http://www.example.com/").status).to eq("200")
