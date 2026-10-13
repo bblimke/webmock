@@ -273,8 +273,14 @@ describe "Net:HTTP" do
     end
 
     it "returns stubbed responses again once WebMock is enabled again" do
+      http.start
+      expect(http.request(Net::HTTP::Get.new("/")).body).to eq("hello world")
+      real_socket = http.instance_variable_get(:@socket)
+
       WebMock.enable!
+
       expect(http.request(Net::HTTP::Get.new("/")).body).to eq("stubbed")
+      expect(real_socket).to be_closed
     end
   end
 
