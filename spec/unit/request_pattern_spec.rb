@@ -91,6 +91,11 @@ describe WebMock::RequestPattern do
         to match(WebMock::RequestSignature.new(:get, "www.example.com"))
     end
 
+    it "should match if method is described as string" do
+      expect(WebMock::RequestPattern.new("any", "www.example.com")).
+        to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+    end
+
     it "should match if request has unescaped uri" do
       expect(WebMock::RequestPattern.new(:get, "www.example.com/my%20path")).
         to match(WebMock::RequestSignature.new(:get, "www.example.com/my path"))
