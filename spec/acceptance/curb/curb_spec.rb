@@ -16,14 +16,6 @@ unless RUBY_PLATFORM =~ /java/
           status).to eq("200")
       end
     end
-
-    describe "when doing PATCHes" do
-      it "should stub them" do
-        stub_request(:patch, "www.example.com").with(body: "01234")
-        expect(http_request(:patch, "http://www.example.com", body: "01234").
-          status).to eq("200")
-      end
-    end
   end
 
   describe "Curb features" do
@@ -474,13 +466,31 @@ unless RUBY_PLATFORM =~ /java/
         expect(c.response_code).to eq(200)
       end
 
-      it "should work with blank arguments for patch" do
-        stub_request(:patch, "www.example.com").with(body: "01234")
-        c = Curl::Easy.new
-        c.url = "http://www.example.com"
-        c.patch_body = "01234"
-        c.http_patch
-        expect(c.response_code).to eq(200)
+      describe "when doing PATCHes" do
+        before do
+          skip "this curb version has no http_patch" unless Curl::Easy.method_defined?(:http_patch)
+        end
+
+        it "should stub them" do
+          stub_request(:patch, "www.example.com").with(body: "01234")
+          c = Curl::Easy.new("http://www.example.com")
+          c.http_patch("01234")
+          expect(c.response_code).to eq(200)
+        end
+
+        it "should work with blank arguments" do
+          stub_request(:patch, "www.example.com").with(body: "01234")
+          c = Curl::Easy.new("http://www.example.com")
+          c.post_body = "01234"
+          c.http_patch
+          expect(c.response_code).to eq(200)
+        end
+
+        it "should work with several body arguments using the class method" do
+          stub_request(:patch, "www.example.com").with(body: "a=1&b=2")
+          c = Curl::Easy.http_patch("http://www.example.com", "a=1", "b=2")
+          expect(c.response_code).to eq(200)
+        end
       end
 
       it "should work with multiple arguments for post" do

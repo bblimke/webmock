@@ -18,6 +18,12 @@
 
     Thanks to [Tim Mertens](https://github.com/tmertens)
 
+* Record requests made with curb's `http_patch` as PATCH requests with their body (#1112)
+
+    curb has `http_patch` since 1.0.8. WebMock recorded such a request as a GET, or as a POST after `post_body=`, so a PATCH stub never matched it.
+
+    Thanks to [Andy Williams](https://github.com/sobakasu)
+
 # 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)
