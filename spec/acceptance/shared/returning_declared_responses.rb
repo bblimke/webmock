@@ -138,7 +138,7 @@ shared_context "declared responses" do |*adapter_info|
 
     describe "when response was declared via to_return_json" do
       describe "and the body is a JSON fixture" do
-        let(:fixture_path) { Pathname.new(File.expand_path('../../support/response.json', __dir__)) }
+        let(:fixture_path) { Pathname.new(File.expand_path('../../fixtures/response.json', __dir__)) }
         let(:fixture_body) { fixture_path.read }
 
         it "should read a Pathname once and return the contents on repeated requests" do
