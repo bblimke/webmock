@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.31.0
 
 * Return the contents of a `File` or `Pathname` body given to `to_return_json`, or returned by its body lambda, instead of encoding the object as a JSON string (#1119)
 
