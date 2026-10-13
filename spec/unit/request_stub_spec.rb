@@ -107,6 +107,21 @@ describe WebMock::RequestStub do
       expect(@request_stub.response.body.call(double(WebMock::RequestSignature))).to eq('{"what":"something else callable"}.')
     end
 
+    it "should propagate a missing fixture error at declaration time" do
+      path = Pathname.new(File.join(__dir__, 'missing-json-fixture.json'))
+      expect {
+        @request_stub.to_return_json(body: path)
+      }.to raise_error(Errno::ENOENT)
+    end
+
+    it "should propagate a missing dynamic fixture error at response time" do
+      path = Pathname.new(File.join(__dir__, 'missing-json-fixture.json'))
+      @request_stub.to_return_json(body: -> { path })
+      expect {
+        @request_stub.response.evaluate(WebMock::RequestSignature.new(:get, "www.example.com"))
+      }.to raise_error(Errno::ENOENT)
+    end
+
     it "should apply the content_type header" do
       @request_stub.to_return_json(body: {abc: "def"}, status: 500)
       expect(@request_stub.response.headers).to eq({"Content-Type"=>"application/json"})
