@@ -354,6 +354,13 @@ shared_context "declared responses" do |*adapter_info|
         expect(http_request(:get, "http://www.example.com/compute").status).to eq("200")
       end
 
+      it "should pass the host to the rack app" do
+        stub_request(:any, //).to_rack(lambda {|env| [200, {}, [env['HTTP_HOST']]] })
+        expect(http_request(:get, "http://www.example.com:8080/").body).to eq("www.example.com:8080")
+        # Excon before 1.0 sends the default port in its own Host header.
+        expect(http_request(:get, "http://www.example.com/").body).to match(/\Awww\.example\.com(:80)?\z/)
+      end
+
       it "preserves content-type header when proxying to a rack app" do
         stub_request(:any, //).to_rack(lambda {|req| [200, {}, ["OK"]] })
 

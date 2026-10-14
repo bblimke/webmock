@@ -57,6 +57,10 @@ module WebMock
         env["HTTP_#{k.tr('-','_').upcase}"] = v
       end
 
+      # Several clients add the Host header only when they send the request,
+      # so it is often missing here. Use what they would send.
+      env['HTTP_HOST'] ||= uri.port == uri.default_port ? uri.host : "#{uri.host}:#{uri.port}"
+
       env
     end
   end

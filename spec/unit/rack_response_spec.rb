@@ -82,6 +82,31 @@ describe WebMock::RackResponse do
     end
   end
 
+  describe "HTTP_HOST" do
+    def rack_env_for(request)
+      JSON.parse(@rack_response.evaluate(request).body)
+    end
+
+    {
+      'http://www.example.com/env' => 'www.example.com',
+      'https://www.example.com/env' => 'www.example.com',
+      'http://www.example.com:8080/env' => 'www.example.com:8080',
+      'https://www.example.com:80/env' => 'www.example.com:80',
+      'http://[::1]:8080/env' => '[::1]:8080'
+    }.each do |url, host|
+      it "is #{host} for a request to #{url} without a Host header" do
+        request = WebMock::RequestSignature.new(:get, url)
+        expect(rack_env_for(request)['HTTP_HOST']).to eq(host)
+        expect(request.headers).to be_nil
+      end
+    end
+
+    it "is the Host header when the request has one" do
+      request = WebMock::RequestSignature.new(:get, 'http://www.example.com:8080/env', headers: {'Host' => 'other.example.com'})
+      expect(rack_env_for(request)['HTTP_HOST']).to eq('other.example.com')
+    end
+  end
+
   it "shouldn't set a rack.session" do
     request = WebMock::RequestSignature.new(:get, 'www.example.com/env')
     response = @rack_response.evaluate(request)

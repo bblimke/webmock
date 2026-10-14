@@ -18,6 +18,12 @@
 
     Previously, with Minitest or Test::Unit, messages showed `#<WebMock::Matchers::AnyArgMatcher:0x...>`, for example for `with(query: hash_including(:a))`. RSpec's own matchers already showed `anything`.
 
+* Set `HTTP_HOST` for Rack apps given to `to_rack` when the request has no Host header (#1084)
+
+    Previously, a Rack app saw no `HTTP_HOST` for requests from Net::HTTP with a path, HTTPClient, Typhoeus or Curb, which add the Host header only when they send the request. Host checks such as Sinatra's `HostAuthorization` then saw an empty host. The app now gets the request's host, with the port when it isn't the default, as those clients send it.
+
+    Thanks to [Benoit Tigeot](https://github.com/benoittgt)
+
 # 3.33.0
 
 * Return `effective_url` as a String for stubbed Typhoeus responses (#869)
