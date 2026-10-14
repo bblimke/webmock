@@ -94,7 +94,8 @@ describe WebMock::RackResponse do
       [:get, "http://www.example.com/", {}],
       [:post, "http://www.example.com/", {body: '{"a":1}', headers: {"Content-Type" => "application/json", "Content-Length" => "7"}}],
       [:get, "https://user:pass@www.example.com/", {headers: {"Accept" => ["text/html", "application/json"], "Cookie" => ["a=1", "b=2"]}}],
-      [:post, "http://[::1]:8080/", {body: "caf\u00e9"}]
+      [:post, "http://[::1]:8080/", {body: "caf\u00e9"}],
+      [:post, "http://www.example.com/", {body: "a", headers: {"Content-Type" => "text/plain; name=caf\u00e9", "X-Name" => "caf\u00e9"}}]
     ].each do |method, url, options|
       it "passes Rack::Lint for #{method.upcase} #{url} with #{options}" do
         lint_app = Rack::Lint.new(lambda { |_| [200, {"content-type" => "text/plain"}, ["ok"]] })
@@ -108,8 +109,26 @@ describe WebMock::RackResponse do
       expect(env.values_at('SERVER_PORT', 'CONTENT_LENGTH', 'SERVER_PROTOCOL')).to eq(["80", "5", "HTTP/1.1"])
     end
 
-    it "leaves out CONTENT_TYPE and CONTENT_LENGTH for a request without a body or those headers" do
-      expect(env_for(:get, "http://www.example.com/").keys).not_to include('CONTENT_TYPE', 'CONTENT_LENGTH')
+    it "leaves out CONTENT_TYPE and gives CONTENT_LENGTH as 0 for a request without a body or those headers" do
+      env = env_for(:get, "http://www.example.com/")
+      expect(env).not_to include('CONTENT_TYPE')
+      expect(env['CONTENT_LENGTH']).to eq("0")
+    end
+
+    it "uses the default port for a URI without one" do
+      env = env_for(:get, Addressable::URI.parse("http://www.example.com/"))
+      expect(env.values_at('SERVER_PORT', 'HTTP_HOST')).to eq(["80", "www.example.com"])
+    end
+
+    it "leaves out Transfer-Encoding, as the body is already decoded" do
+      env = env_for(:post, "http://www.example.com/", body: "hello", headers: {"Transfer-Encoding" => "chunked"})
+      expect(env).not_to include('HTTP_TRANSFER_ENCODING')
+      expect(env['CONTENT_LENGTH']).to eq("5")
+    end
+
+    it "gives header values as bytes, even repeated values in different encodings" do
+      env = env_for(:get, "http://www.example.com/", headers: {"X-A" => ["caf\u00e9", "\xff".b]})
+      expect(env['HTTP_X_A']).to eq("caf\u00e9, \xff".b)
     end
 
     it "gives a Content-Length header as CONTENT_LENGTH only" do

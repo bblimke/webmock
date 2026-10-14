@@ -20,13 +20,13 @@
 
 * Set `HTTP_HOST` for Rack apps given to `to_rack` when the request has no Host header (#1084)
 
-    Previously, requests from Net::HTTP with a path, HTTPClient, Typhoeus or Curb reached the app without `HTTP_HOST`, since these clients add the Host header only when sending, so host checks such as Sinatra's `HostAuthorization` saw an empty host. The app now gets the host, with the port when it isn't the default.
+    Previously, requests from Net::HTTP with a path, HTTPClient, Typhoeus, Curb, Patron or async-http reached the app without `HTTP_HOST`, since these clients add the Host header only when sending, so host checks such as Sinatra's `HostAuthorization` saw an empty host. The app now gets the host, with the port when it isn't the default.
 
     Thanks to [Benoit Tigeot](https://github.com/benoittgt)
 
 * Make the Rack env given to `to_rack` apps follow the Rack spec
 
-    Previously, the env failed `Rack::Lint`. It now matches what a server such as Puma passes: `SERVER_PORT` and `CONTENT_LENGTH` are strings, `SERVER_PROTOCOL` is set, `CONTENT_TYPE` and `CONTENT_LENGTH` are left out when the request has none, a `Content-Length` header no longer also appears as `HTTP_CONTENT_LENGTH`, repeated header values are joined into one string, and `rack.input` holds the body as binary.
+    Previously, the env failed `Rack::Lint`. Now `SERVER_PORT` and `CONTENT_LENGTH` are strings, `SERVER_PROTOCOL` is set, `CONTENT_TYPE` is left out when the request has none, and a `Content-Length` header no longer also appears as `HTTP_CONTENT_LENGTH`. Header values are bytes, repeated ones are joined into one string, `Transfer-Encoding` is left out since the body is already decoded, and `rack.input` holds the body as bytes.
 
     If your app or tests read these values directly, expect strings, for example `env['SERVER_PORT'] == "80"`.
 

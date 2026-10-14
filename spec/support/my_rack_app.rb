@@ -24,7 +24,7 @@ class MyRackApp
       when ['GET', '/locked']
         [200, {}, ["Single threaded response."]]
       when ['POST', '/greet']
-        name = env["rack.input"].read
+        name = env["rack.input"].read(env["CONTENT_LENGTH"].to_i)
         name = name.force_encoding("UTF-8") if name.respond_to? :force_encoding
         name = name[/name=([^&]*)/, 1] || "World"
         [200, {}, ["Good to meet you, #{name}!"]]
