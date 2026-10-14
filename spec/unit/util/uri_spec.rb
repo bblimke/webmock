@@ -341,6 +341,26 @@ describe WebMock::Util::URI do
       expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq(uri)
     end
 
+    it "should strip_default_port_from_uri strips 80 from http followed by a query" do
+      uri = "http://example.com:80?a=b"
+      expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq("http://example.com?a=b")
+    end
+
+    it "should strip_default_port_from_uri strips 80 from http with an IPv6 host" do
+      uri = "http://[::1]:80/foo"
+      expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq("http://[::1]/foo")
+    end
+
+    it "should strip_default_port_from_uri does not strip 80 from the path" do
+      uri = "http://example.com:8080/foo:80/bar"
+      expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq(uri)
+    end
+
+    it "should strip_default_port_from_uri does not strip 80 from the end of the query string" do
+      uri = "http://example.com/?a=:80"
+      expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq(uri)
+    end
+
     it "should strip_default_port_from_uri does not modify strings that do not start with http or https" do
       uri = "httpz://example.com:80/"
       expect(WebMock::Util::URI.strip_default_port_from_uri_string(uri)).to eq(uri)

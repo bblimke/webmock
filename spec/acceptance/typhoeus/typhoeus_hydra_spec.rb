@@ -65,6 +65,20 @@ unless RUBY_PLATFORM =~ /java/
             expect(response.effective_url).to eq 'http://www.example.com/'
           end
         end
+
+        context 'original request url uses https' do
+          it "returns effective_url as string with no default port" do
+            stub_request(:get, "https://www.example.com:443")
+            response = Typhoeus.get("https://www.example.com:443")
+            expect(response.effective_url).to eq 'https://www.example.com/'
+          end
+
+          it "returns effective_url as string with port 80, which is not the default for https" do
+            stub_request(:get, "https://www.example.com:80")
+            response = Typhoeus.get("https://www.example.com:80")
+            expect(response.effective_url).to eq 'https://www.example.com:80/'
+          end
+        end
       end
 
       describe "when params are used" do

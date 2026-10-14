@@ -58,8 +58,8 @@ module WebMock
 
       def self.strip_default_port_from_uri_string(uri_string)
         case uri_string
-        when %r{^http://}  then uri_string.sub(%r{:80(/|$)}, '\1')
-        when %r{^https://} then uri_string.sub(%r{:443(/|$)}, '\1')
+        when %r{^http://}  then uri_string.sub(%r{\A(http://[^/?#]+):80(?=[/?#]|\z)}, '\1')
+        when %r{^https://} then uri_string.sub(%r{\A(https://[^/?#]+):443(?=[/?#]|\z)}, '\1')
         else uri_string
         end
       end

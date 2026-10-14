@@ -1,5 +1,17 @@
 # Changelog
 
+# Unreleased
+
+* Return the `effective_url` of a stubbed Typhoeus response as a String without the default port, as Typhoeus does, instead of an `Addressable::URI` (#869)
+
+    Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
+
+    Thanks to [Tom Brammar](https://github.com/tbrammar)
+
+* Remove only the port after the host when WebMock shows a URL without its default port, as in error messages
+
+    A `:80` or `:443` in the path or query, as in `http://example.com:8080/foo:80/bar`, is now kept, and a default port right before a query string is now removed.
+
 # 3.32.0
 
 * Make a `Net::HTTP` object created while WebMock was enabled behave like any other `Net::HTTP` object after `WebMock.disable!` (#1067)
