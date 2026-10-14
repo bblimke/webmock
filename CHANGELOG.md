@@ -12,6 +12,12 @@
 
     A `:80` or `:443` in the path or query, as in `http://example.com:8080/foo:80/bar`, is now kept, and a default port right before a query string is now removed.
 
+* Set the `return_code` of a stubbed Typhoeus response to `:ok`, as libcurl does for every completed transfer whatever the HTTP status, and build its `response_headers` from the stubbed status and headers (#736)
+
+    `return_message` is now "No error" instead of nil. `response_headers` used to start with `HTTP/1.1 200 OK` whatever the stubbed status, and was nil for a stub without headers, in which case `headers` is now an empty hash instead of nil. A timeout keeps `:operation_timedout` and now has empty `response_headers`.
+
+    Thanks to [Michael Spiz](https://github.com/spizm)
+
 # 3.32.0
 
 * Make a `Net::HTTP` object created while WebMock was enabled behave like any other `Net::HTTP` object after `WebMock.disable!` (#1067)

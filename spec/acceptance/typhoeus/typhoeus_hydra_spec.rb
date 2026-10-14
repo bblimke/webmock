@@ -81,6 +81,28 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe "return_code and response_headers" do
+        it "returns :ok and the stubbed status and headers for a completed request" do
+          stub_request(:get, "http://www.example.com").to_return(status: [404, "Not Found"], headers: {'X-Test' => '1'})
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.return_code).to eq :ok
+          expect(response.response_headers).to eq "HTTP/1.1 404 Not Found\r\nX-Test: 1\r\n\r\n"
+        end
+
+        it "puts each value of a repeated header on its own line" do
+          stub_request(:get, "http://www.example.com").to_return(status: [200, "OK"], headers: {'Set-Cookie' => ['a=1', 'b=2']})
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.response_headers).to eq "HTTP/1.1 200 OK\r\nSet-Cookie: a=1\r\nSet-Cookie: b=2\r\n\r\n"
+        end
+
+        it "returns :operation_timedout and no response_headers for a timeout" do
+          stub_request(:get, "http://www.example.com").to_timeout
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.return_code).to eq :operation_timedout
+          expect(response.response_headers).to eq ""
+        end
+      end
+
       describe "when params are used" do
         it "should take into account params for POST request" do
           stub_request(:post, "www.example.com/?hello=world").with(query: {hello: 'world'})

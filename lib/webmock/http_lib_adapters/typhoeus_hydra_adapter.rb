@@ -97,6 +97,7 @@ if defined?(Typhoeus)
               body: "",
               headers: {},
               return_code: :operation_timedout,
+              response_headers: "",
               total_time: 0.0,
               starttransfer_time: 0.0,
               appconnect_time: 0.0,
@@ -112,6 +113,7 @@ if defined?(Typhoeus)
               body: webmock_response.body,
               headers: webmock_response.headers,
               return_code: :ok,
+              response_headers: response_headers_string(webmock_response),
               effective_url: WebMock::Util::URI.strip_default_port_from_uri_string(request_signature.uri.to_s),
               total_time: 0.0,
               starttransfer_time: 0.0,
@@ -124,6 +126,16 @@ if defined?(Typhoeus)
           end
           response.mock = :webmock
           response
+        end
+
+        # Without response_headers, Typhoeus builds them for a mocked response
+        # from its return_code, as in "HTTP/1.1 ok Mock Reason Phrase".
+        def self.response_headers_string(webmock_response)
+          lines = ["HTTP/1.1 #{webmock_response.status.join(' ')}"]
+          (webmock_response.headers || {}).each do |name, values|
+            Array(values).each { |value| lines << "#{name}: #{value}" }
+          end
+          lines.join("\r\n") + "\r\n\r\n"
         end
 
         def self.request_hash(request_signature)
