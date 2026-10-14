@@ -299,12 +299,13 @@ Net::HTTP.get('www.example.com',
   '/thing/5.json?x=1&y=2&z=3&anyParam=4')    # ===> Success
 ```
 
-### Allow query params
+### Matching any query params
 
 ```ruby
 stub_request(:get, "www.example.com").with(query: :any)
 
 RestClient.get("http://www.example.com/?q=example")    # ===> Success
+RestClient.get("http://www.example.com/")              # ===> Success
 ```
 
 ### Matching query params using hash

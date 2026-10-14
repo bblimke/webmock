@@ -30,6 +30,12 @@ describe WebMock::RequestPattern do
       )
     end
 
+    it "should report string describing itself with any query params" do
+      expect(WebMock::RequestPattern.new(:get, "www.example.com", query: :any).to_s).to eq(
+        "GET http://www.example.com/ with query params anything"
+      )
+    end
+
     it "should report string describing itself with body as hash including matcher" do
       expect(WebMock::RequestPattern.new(:get, /.*example.*/,
       body: WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s).to eq(
@@ -255,6 +261,11 @@ describe WebMock::RequestPattern do
     describe "when matching requests on query params" do
 
       describe "when uri is described as regexp" do
+        it "should match request query params declared as :any" do
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: :any)).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
+        end
+
         it "should match request query params" do
           expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: {"a" => ["b", "c"]})).
             to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
@@ -633,6 +644,29 @@ describe WebMock::RequestPattern do
           expect(WebMock::RequestPattern.new(:get, "www.example.com",
           query: RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({"b" => /\A\d\z/}))).
             not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        it "should match a request with any query params when query params are declared as :any" do
+          expect(WebMock::RequestPattern.new(:get, "www.example.com", query: :any)).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
+        end
+
+        it "should match a request without query params when query params are declared as :any" do
+          expect(WebMock::RequestPattern.new(:get, "www.example.com", query: :any)).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com"))
+        end
+
+        it "should not match a request to another path when query params are declared as :any" do
+          expect(WebMock::RequestPattern.new(:get, "www.example.com/a", query: :any)).
+            not_to match(WebMock::RequestSignature.new(:get, "www.example.com/b?x=1"))
+        end
+
+        it "should raise an ArgumentError when query params are declared as an unsupported value" do
+          [:foo, 1, ["a=b"]].each do |query|
+            expect {
+              WebMock::RequestPattern.new(:get, "www.example.com", query: query)
+            }.to raise_error(ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query.inspect}")
+          end
         end
 
         context "when using query values notation as flat array" do

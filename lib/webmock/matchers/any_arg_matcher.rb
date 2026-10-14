@@ -10,6 +10,10 @@ module WebMock
       def ==(other)
         true
       end
+
+      def inspect
+        "anything"
+      end
     end
   end
 end

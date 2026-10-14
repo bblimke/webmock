@@ -138,8 +138,10 @@ module WebMock
         WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
       elsif rSpecHashExcludingMatcher?(query_params)
         WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(query_params)
-      else
+      elsif query_params.nil? || query_params.is_a?(String)
         WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation)
+      else
+        raise ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query_params.inspect}"
       end
     end
 

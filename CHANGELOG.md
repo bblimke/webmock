@@ -1,5 +1,21 @@
 # Changelog
 
+# Unreleased
+
+* Allow `with(query: :any)` to match any query string (#1099)
+
+    `stub_request(:get, "www.example.com").with(query: :any)` matches requests with any query string, or none. Previously, this raised `NoMethodError`, and you had to write `with(query: hash_including({}))`.
+
+    Thanks to [nightpool](https://github.com/nightpool)
+
+* Raise a clear `ArgumentError` for an unsupported `query` option
+
+    Previously, a value such as `with(query: :all)` raised `NoMethodError` (undefined method `split`). The new error lists the supported values.
+
+* Show `anything` in messages for a value that matches anything
+
+    Previously, messages showed `#<WebMock::Matchers::AnyArgMatcher:0x...>`, for example for `with(query: hash_including(:a))`.
+
 # 3.33.0
 
 * Return `effective_url` as a String for stubbed Typhoeus responses (#869)
