@@ -111,6 +111,7 @@ if defined?(Typhoeus)
               status_message: webmock_response.status[1],
               body: webmock_response.body,
               headers: webmock_response.headers,
+              return_code: :ok,
               effective_url: WebMock::Util::URI.strip_default_port_from_uri_string(request_signature.uri.to_s),
               total_time: 0.0,
               starttransfer_time: 0.0,
