@@ -24,6 +24,12 @@
 
     Thanks to [Benoit Tigeot](https://github.com/benoittgt)
 
+* Make the Rack env given to `to_rack` apps follow the Rack spec
+
+    Previously, the env failed `Rack::Lint`. It now matches what a server such as Puma passes: `SERVER_PORT` and `CONTENT_LENGTH` are strings, `SERVER_PROTOCOL` is set, `CONTENT_TYPE` and `CONTENT_LENGTH` are left out when the request has none, a `Content-Length` header no longer also appears as `HTTP_CONTENT_LENGTH`, repeated header values are joined into one string, and `rack.input` holds the body as binary.
+
+    If your app or tests read these values directly, expect strings, for example `env['SERVER_PORT'] == "80"`.
+
 # 3.33.0
 
 * Return `effective_url` as a String for stubbed Typhoeus responses (#869)

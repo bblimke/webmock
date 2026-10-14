@@ -28,19 +28,24 @@ module WebMock
     def build_rack_env(request)
       uri = request.uri
       headers = (request.headers || {}).dup
-      body = request.body || ''
+      body = (request.body || '').b
+      content_type = headers.delete('Content-Type')
+      content_length = headers.delete('Content-Length')
 
       env = {
         # CGI variables specified by Rack
-        'REQUEST_METHOD' => request.method.to_s.upcase,
-        'CONTENT_TYPE'   => headers.delete('Content-Type'),
-        'CONTENT_LENGTH' => body.bytesize,
-        'PATH_INFO'      => uri.path,
-        'QUERY_STRING'   => uri.query || '',
-        'SERVER_NAME'    => uri.host,
-        'SERVER_PORT'    => uri.port,
-        'SCRIPT_NAME'    => ""
+        'REQUEST_METHOD'  => request.method.to_s.upcase,
+        'PATH_INFO'       => uri.path,
+        'QUERY_STRING'    => uri.query || '',
+        'SERVER_NAME'     => uri.host,
+        'SERVER_PORT'     => uri.port.to_s,
+        'SERVER_PROTOCOL' => 'HTTP/1.1',
+        'SCRIPT_NAME'     => ""
       }
+
+      # Like a server, only set these when the request has them.
+      env['CONTENT_TYPE'] = Array(content_type).join(', ') if content_type
+      env['CONTENT_LENGTH'] = body.bytesize.to_s if content_length || !body.empty?
 
       env['HTTP_AUTHORIZATION'] = 'Basic ' + [uri.userinfo].pack('m').delete("\r\n") if uri.userinfo
 
@@ -48,13 +53,17 @@ module WebMock
       env['rack.input']      = StringIO.new(body)
       env['rack.errors']     = $stderr
       if !Rack.const_defined?(:RELEASE) || Rack::RELEASE < "3"
-        env['rack.version']    = Rack::VERSION
+        env['rack.version']      = Rack::VERSION
+        env['rack.multithread']  = false
+        env['rack.multiprocess'] = false
       end
       env['rack.url_scheme'] = uri.scheme
       env['rack.run_once']   = true
 
+      # Servers join repeated headers into one value. Rack splits cookies on
+      # "; ", so join them that way.
       headers.each do |k, v|
-        env["HTTP_#{k.tr('-','_').upcase}"] = v
+        env["HTTP_#{k.tr('-','_').upcase}"] = Array(v).join(k == 'Cookie' ? '; ' : ', ')
       end
 
       # Many clients add Host only when sending, so fill it in as they would.

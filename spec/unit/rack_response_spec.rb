@@ -82,6 +82,54 @@ describe WebMock::RackResponse do
     end
   end
 
+  describe "env" do
+    def env_for(method, url, options = {})
+      env = nil
+      app = lambda { |rack_env| env = rack_env; [200, {"content-type" => "text/plain"}, ["ok"]] }
+      WebMock::RackResponse.new(app).evaluate(WebMock::RequestSignature.new(method, url, options))
+      env
+    end
+
+    [
+      [:get, "http://www.example.com/", {}],
+      [:post, "http://www.example.com/", {body: '{"a":1}', headers: {"Content-Type" => "application/json", "Content-Length" => "7"}}],
+      [:get, "https://user:pass@www.example.com/", {headers: {"Accept" => ["text/html", "application/json"], "Cookie" => ["a=1", "b=2"]}}],
+      [:post, "http://[::1]:8080/", {body: "caf\u00e9"}]
+    ].each do |method, url, options|
+      it "passes Rack::Lint for #{method.upcase} #{url} with #{options}" do
+        lint_app = Rack::Lint.new(lambda { |_| [200, {"content-type" => "text/plain"}, ["ok"]] })
+        request = WebMock::RequestSignature.new(method, url, options)
+        expect(WebMock::RackResponse.new(lint_app).evaluate(request).body).to eq("ok")
+      end
+    end
+
+    it "has the port, body length and protocol as strings, like a server" do
+      env = env_for(:post, "http://www.example.com/", body: "caf\u00e9")
+      expect(env.values_at('SERVER_PORT', 'CONTENT_LENGTH', 'SERVER_PROTOCOL')).to eq(["80", "5", "HTTP/1.1"])
+    end
+
+    it "leaves out CONTENT_TYPE and CONTENT_LENGTH for a request without a body or those headers" do
+      expect(env_for(:get, "http://www.example.com/").keys).not_to include('CONTENT_TYPE', 'CONTENT_LENGTH')
+    end
+
+    it "gives a Content-Length header as CONTENT_LENGTH only" do
+      env = env_for(:post, "http://www.example.com/", body: "abc", headers: {"Content-Length" => "3"})
+      expect(env['CONTENT_LENGTH']).to eq("3")
+      expect(env).not_to include('HTTP_CONTENT_LENGTH')
+    end
+
+    it "joins repeated header values, and cookies with a semicolon" do
+      env = env_for(:get, "http://www.example.com/", headers: {"Accept" => ["text/html", "application/json"], "Cookie" => ["a=1", "b=2"]})
+      expect(env['HTTP_ACCEPT']).to eq("application/json, text/html")
+      expect(env['HTTP_COOKIE']).to eq("a=1; b=2")
+    end
+
+    it "gives the body as binary" do
+      input = env_for(:post, "http://www.example.com/", body: "caf\u00e9")['rack.input']
+      expect(input.read).to eq("caf\u00e9".b)
+    end
+  end
+
   describe "HTTP_HOST" do
     def rack_env_for(request)
       JSON.parse(@rack_response.evaluate(request).body)
