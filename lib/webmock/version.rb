@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module WebMock
-  VERSION = '3.32.0' unless defined?(::WebMock::VERSION)
+  VERSION = '3.33.0' unless defined?(::WebMock::VERSION)
 end

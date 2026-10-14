@@ -1,22 +1,34 @@
 # Changelog
 
-# Unreleased
+# 3.33.0
 
-* Return the `effective_url` of a stubbed Typhoeus response as a String, the request URL as curl reports it, instead of an `Addressable::URI` (#869)
+* Return `effective_url` as a String for stubbed Typhoeus responses (#869)
 
-    It keeps the port, query and encoding of the request. Like curl, it adds `http://` when the scheme is missing and `/` for an empty path, resolves `.` and `..` in the path, and drops an empty query or fragment. A stubbed timeout now has one too. Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
+    Previously, this was an `Addressable::URI`. If your code calls methods such as `effective_url.host`, parse the returned string into a URI first.
+
+    The URL keeps the request's port, query order and encoding. It follows curl's formatting: for example, `http://example.com:80` becomes `http://example.com:80/`. Stubbed timeouts now provide an `effective_url` too.
 
     Thanks to [Tom Brammar](https://github.com/tbrammar)
 
-* Remove only the port after the host when WebMock shows a URL without its default port, as in error messages
+* Fix incorrect removal of default ports from displayed URLs
 
-    A `:80` or `:443` in the path or query, as in `http://example.com:8080/foo:80/bar`, is now kept, and a default port right before a query string is now removed.
+    WebMock could accidentally remove `:80` or `:443` from a URL's path or query. For example, an error message could show `/foo/bar` instead of `/foo:80/bar`.
 
-* Set the `return_code` of a stubbed Typhoeus response to `:ok`, as libcurl does for every completed transfer whatever the HTTP status, and build its `response_headers` from the stubbed status and headers (#736)
+    Only the host's default port is now removed. This also works when the port is immediately followed by a query string, as in `http://example.com:80?a=b`.
 
-    `return_message` is now "No error" instead of nil. `response_headers` used to start with `HTTP/1.1 200 OK` whatever the stubbed status, and was nil for a stub without headers. For such a stub, `headers` is now an empty hash instead of nil. Like a real response, `response_headers` is a binary string. A timeout keeps `:operation_timedout` and now has empty `response_headers`.
+* Set `return_code` to `:ok` for completed stubbed Typhoeus requests (#736)
+
+    `return_code` is now `:ok` and `return_message` is now `"No error"`; both were previously `nil`. This includes HTTP error responses such as 404: `:ok` means the transfer completed. Stubbed timeouts still return `:operation_timedout`.
 
     Thanks to [Michael Spiz](https://github.com/spizm)
+
+* Fix the raw headers returned by stubbed Typhoeus responses
+
+    The `response_headers` string now uses the stubbed HTTP status. For example, a 404 stub no longer reports `HTTP/1.1 200 OK`.
+
+    Stubs without headers now return an empty `headers` hash (`{}`) instead of `nil`. Their `response_headers` contains the status line instead of being `nil`.
+
+    The raw headers use binary string encoding, matching real responses. For timeouts, `response_headers` is now an empty string.
 
 # 3.32.0
 
