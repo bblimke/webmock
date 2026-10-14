@@ -1,12 +1,12 @@
 # Changelog
 
-# Unreleased
+# 3.34.0
 
 * Allow `with(query: :any)` to match any query string (#1099)
 
     `stub_request(:get, "www.example.com").with(query: :any)` matches requests with any query string, or none. RSpec's `anything` works the same way. Previously, this raised `NoMethodError`, and you had to write `with(query: hash_including({}))`.
 
-    Combining `query: :any` with a URI that already has a query raises an `ArgumentError`, since no request could match it.
+    Use a URL without query parameters when passing `query: :any`. Otherwise, WebMock raises `ArgumentError`.
 
     Thanks to [nightpool](https://github.com/nightpool)
 
@@ -18,17 +18,23 @@
 
     Previously, with Minitest or Test::Unit, messages showed `#<WebMock::Matchers::AnyArgMatcher:0x...>`, for example for `with(query: hash_including(:a))`. RSpec's own matchers already showed `anything`.
 
-* Set `HTTP_HOST` for Rack apps given to `to_rack` when the request has no Host header (#1084)
+* Provide `HTTP_HOST` to `to_rack` apps when the client has not supplied a Host header (#1084)
 
-    Previously, requests from Net::HTTP with a path, HTTPClient, Typhoeus, Curb, Patron or async-http reached the app without `HTTP_HOST`, since these clients add the Host header only when sending, so host checks such as Sinatra's `HostAuthorization` saw an empty host. The app now gets the host, with the port when it isn't the default.
+    Previously, requests from some HTTP clients reached the Rack app without `HTTP_HOST`. This caused host checks such as Sinatra's `HostAuthorization` to see an empty host.
+
+    WebMock now fills in the host from the request URL, including the port when it is not the default. An explicit Host header is preserved.
 
     Thanks to [Benoit Tigeot](https://github.com/benoittgt)
 
-* Make the Rack env given to `to_rack` apps follow the Rack spec
+* Fix Rack compatibility for `to_rack` apps
 
-    Previously, the env failed `Rack::Lint`. Now `SERVER_PORT` and `CONTENT_LENGTH` are strings, `SERVER_PROTOCOL` is set, `CONTENT_TYPE` is left out when the request has none, and a `Content-Length` header no longer also appears as `HTTP_CONTENT_LENGTH`. Header values are bytes, repeated ones are joined into one string, `Transfer-Encoding` is left out since the body is already decoded, and `rack.input` holds the body as bytes.
+    The request environment now passes `Rack::Lint`.
 
-    If your app or tests read these values directly, expect strings, for example `env['SERVER_PORT'] == "80"`.
+    `SERVER_PORT` and `CONTENT_LENGTH` are now strings. If your app or tests read them directly, use string comparisons, such as `env['SERVER_PORT'] == "80"`. The environment also includes `SERVER_PROTOCOL`.
+
+    `CONTENT_TYPE` is omitted when the request has no content type. The `Content-Length` header is passed only as `CONTENT_LENGTH`, without an extra `HTTP_CONTENT_LENGTH` entry. `Transfer-Encoding` is removed because the body has already been decoded.
+
+    Repeated header values are joined into one string. Header values and the body read from `rack.input` now use binary (`ASCII-8BIT`) strings.
 
 # 3.33.0
 
