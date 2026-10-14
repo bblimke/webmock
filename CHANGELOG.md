@@ -2,9 +2,9 @@
 
 # Unreleased
 
-* Return the `effective_url` of a stubbed Typhoeus response as a String without the default port, as Typhoeus does, instead of an `Addressable::URI` (#869)
+* Return the `effective_url` of a stubbed Typhoeus response as a String, the request URL as curl reports it, instead of an `Addressable::URI` (#869)
 
-    Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
+    The port, query and encoding stay as they were in the request, so `http://example.com` gives `http://example.com/` and `http://example.com:80` keeps its port. A stubbed timeout now has an `effective_url` too. Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
 
     Thanks to [Tom Brammar](https://github.com/tbrammar)
 

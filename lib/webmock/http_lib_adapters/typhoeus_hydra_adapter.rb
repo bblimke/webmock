@@ -89,7 +89,7 @@ if defined?(Typhoeus)
           webmock_response
         end
 
-        def self.generate_typhoeus_response(request_signature, webmock_response)
+        def self.generate_typhoeus_response(request_signature, webmock_response, request)
           response = if webmock_response.should_timeout
             ::Typhoeus::Response.new(
               code: 0,
@@ -98,6 +98,7 @@ if defined?(Typhoeus)
               headers: {},
               return_code: :operation_timedout,
               response_headers: "",
+              effective_url: effective_url(request),
               total_time: 0.0,
               starttransfer_time: 0.0,
               appconnect_time: 0.0,
@@ -114,7 +115,7 @@ if defined?(Typhoeus)
               headers: webmock_response.headers,
               return_code: :ok,
               response_headers: response_headers_string(webmock_response),
-              effective_url: WebMock::Util::URI.strip_default_port_from_uri_string(request_signature.uri.to_s),
+              effective_url: effective_url(request),
               total_time: 0.0,
               starttransfer_time: 0.0,
               appconnect_time: 0.0,
@@ -136,6 +137,16 @@ if defined?(Typhoeus)
             Array(values).each { |value| lines << "#{name}: #{value}" }
           end
           lines.join("\r\n") + "\r\n\r\n"
+        end
+
+        # The request URL as curl reports it: with a lower case scheme and at
+        # least "/" as the path, but otherwise as given, including its port,
+        # query and encoding.
+        def self.effective_url(request)
+          uri = WebMock::Util::URI.heuristic_parse(request.url)
+          uri.scheme = uri.scheme&.downcase
+          uri.path = "/" if uri.path.empty?
+          uri.to_s
         end
 
         def self.request_hash(request_signature)
@@ -180,7 +191,7 @@ if defined?(Typhoeus)
 
             if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
               # ::WebMock::HttpLibAdapters::TyphoeusAdapter.stub_typhoeus(request_signature, webmock_response, self)
-              response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(request_signature, webmock_response)
+              response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(request_signature, webmock_response, request)
               if request.respond_to?(:on_headers)
                 request.execute_headers_callbacks(response)
               end

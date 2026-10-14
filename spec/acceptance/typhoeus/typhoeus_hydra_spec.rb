@@ -51,10 +51,10 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         context 'original request url is provided with standard port' do
-          it "returns effective_url as string with no port" do
+          it "returns effective_url as string with the port, as curl does" do
             stub_request(:get, "http://www.example.com:80").to_return(headers: {'X-Test' => '1'})
             response = Typhoeus.get("http://www.example.com:80")
-            expect(response.effective_url).to eq 'http://www.example.com/'
+            expect(response.effective_url).to eq 'http://www.example.com:80/'
           end
         end
 
@@ -66,17 +66,25 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
-        context 'original request url uses https' do
-          it "returns effective_url as string with no default port" do
-            stub_request(:get, "https://www.example.com:443")
-            response = Typhoeus.get("https://www.example.com:443")
-            expect(response.effective_url).to eq 'https://www.example.com/'
+        context 'original request url has a query' do
+          it "returns effective_url with the query in its original order and encoding" do
+            stub_request(:get, "http://www.example.com/?b=2&a=%41")
+            response = Typhoeus.get("http://www.example.com/?b=2&a=%41")
+            expect(response.effective_url).to eq 'http://www.example.com/?b=2&a=%41'
           end
 
-          it "returns effective_url as string with port 80, which is not the default for https" do
-            stub_request(:get, "https://www.example.com:80")
-            response = Typhoeus.get("https://www.example.com:80")
-            expect(response.effective_url).to eq 'https://www.example.com:80/'
+          it "returns effective_url with params given as an option" do
+            stub_request(:get, "http://www.example.com/?b=2&a=1")
+            response = Typhoeus.get("http://www.example.com", params: {b: 2, a: 1})
+            expect(response.effective_url).to eq 'http://www.example.com/?b=2&a=1'
+          end
+        end
+
+        context 'request times out' do
+          it "returns effective_url" do
+            stub_request(:get, "http://www.example.com").to_timeout
+            response = Typhoeus.get("http://www.example.com")
+            expect(response.effective_url).to eq 'http://www.example.com/'
           end
         end
       end
