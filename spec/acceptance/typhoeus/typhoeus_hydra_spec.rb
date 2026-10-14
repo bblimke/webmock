@@ -66,6 +66,30 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
+        context 'original request url has no scheme' do
+          it "returns effective_url with http://, as curl does" do
+            stub_request(:get, "http://localhost:3000/foo")
+            response = Typhoeus.get("localhost:3000/foo")
+            expect(response.effective_url).to eq 'http://localhost:3000/foo'
+          end
+        end
+
+        context 'original request url has a single slash after the scheme' do
+          it "returns effective_url with two slashes, as curl does" do
+            stub_request(:get, "http://www.example.com/foo")
+            response = Typhoeus.get("http:/www.example.com/foo")
+            expect(response.effective_url).to eq 'http://www.example.com/foo'
+          end
+        end
+
+        context 'original request url has dot segments and an empty query' do
+          it "returns effective_url without them, as curl does" do
+            stub_request(:get, "http://www.example.com/a/c")
+            response = Typhoeus.get("http://www.example.com/a/./b/../c?")
+            expect(response.effective_url).to eq 'http://www.example.com/a/c'
+          end
+        end
+
         context 'original request url has a query' do
           it "returns effective_url with the query in its original order and encoding" do
             stub_request(:get, "http://www.example.com/?b=2&a=%41")
@@ -87,6 +111,20 @@ unless RUBY_PLATFORM =~ /java/
           response = Typhoeus.get("http://www.example.com")
           expect(response.return_code).to eq :ok
           expect(response.response_headers).to eq "HTTP/1.1 404 Not Found\r\nX-Test: 1\r\n\r\n"
+        end
+
+        it "returns \"No error\" and empty headers for a stub without headers" do
+          stub_request(:get, "http://www.example.com").to_return(status: [200, "OK"])
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.return_message).to eq "No error"
+          expect(response.response_headers).to eq "HTTP/1.1 200 OK\r\n\r\n"
+          expect(response.headers).to eq({})
+        end
+
+        it "returns response_headers as bytes, even for values in different encodings" do
+          stub_request(:get, "http://www.example.com").to_return(status: [200, "OK"], headers: {'X-A' => "\xC3\xA9".b, 'X-B' => "\u00FC"})
+          response = Typhoeus.get("http://www.example.com")
+          expect(response.response_headers).to eq "HTTP/1.1 200 OK\r\nX-A: \xC3\xA9\r\nX-B: \xC3\xBC\r\n\r\n".b
         end
 
         it "puts each value of a repeated header on its own line" do

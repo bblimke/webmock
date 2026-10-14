@@ -126,21 +126,30 @@ if defined?(Typhoeus)
         # Without response_headers, Typhoeus builds them for a mocked response
         # from its return_code, as in "HTTP/1.1 ok Mock Reason Phrase".
         def self.response_headers_string(webmock_response)
-          lines = ["HTTP/1.1 #{webmock_response.status.join(' ')}"]
+          code, reason = webmock_response.status
+          lines = ["HTTP/1.1 #{code} #{reason}"]
           (webmock_response.headers || {}).each do |name, values|
             Array(values).each { |value| lines << "#{name}: #{value}" }
           end
-          lines.join("\r\n") + "\r\n\r\n"
+          # Bytes, as in a real response, so values in different encodings join.
+          lines.map(&:b).join("\r\n") + "\r\n\r\n"
         end
 
-        # The request URL as curl reports it: with a lower case scheme and at
-        # least "/" as the path, but otherwise as given, including its port,
-        # query and encoding.
+        # The request URL as curl reports it: with its port, query and encoding as
+        # given, but with a lower case scheme, http:// when there is none, dot
+        # segments resolved, "/" for an empty path and no empty query or
+        # fragment. Like curl's, it is a binary string.
         def self.effective_url(url)
+          # A scheme needs at least one slash after it, so localhost:3000 has
+          # none. heuristic_parse turns http:/ and http:/// into http://.
+          url = "http://#{url}" unless url.match?(%r{\A[a-z][a-z0-9+.\-]*:/}i)
           uri = WebMock::Util::URI.heuristic_parse(url)
-          uri.scheme = uri.scheme&.downcase
+          uri.scheme = uri.scheme.downcase
+          uri.path = Addressable::URI.normalize_path(uri.path)
           uri.path = "/" if uri.path.empty?
-          uri.to_s
+          uri.query = nil if uri.query == ""
+          uri.fragment = nil if uri.fragment == ""
+          uri.to_s.b
         end
 
         def self.request_hash(request_signature)
