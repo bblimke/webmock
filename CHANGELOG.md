@@ -4,7 +4,7 @@
 
 * Return the `effective_url` of a stubbed Typhoeus response as a String, the request URL as curl reports it, instead of an `Addressable::URI` (#869)
 
-    The port, query and encoding stay as they were in the request, so `http://example.com` gives `http://example.com/` and `http://example.com:80` keeps its port. A stubbed timeout now has an `effective_url` too. Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
+    It keeps the port, query and encoding of the request, and adds `/` for an empty path. A stubbed timeout now has one too. Code that called URI methods on it, like `effective_url.host`, now has to parse it first.
 
     Thanks to [Tom Brammar](https://github.com/tbrammar)
 
@@ -14,7 +14,7 @@
 
 * Set the `return_code` of a stubbed Typhoeus response to `:ok`, as libcurl does for every completed transfer whatever the HTTP status, and build its `response_headers` from the stubbed status and headers (#736)
 
-    `return_message` is now "No error" instead of nil. `response_headers` used to start with `HTTP/1.1 200 OK` whatever the stubbed status, and was nil for a stub without headers, in which case `headers` is now an empty hash instead of nil. A timeout keeps `:operation_timedout` and now has empty `response_headers`.
+    `return_message` is now "No error" instead of nil. `response_headers` used to start with `HTTP/1.1 200 OK` whatever the stubbed status, and was nil for a stub without headers. For such a stub, `headers` is now an empty hash instead of nil. A timeout keeps `:operation_timedout` and now has empty `response_headers`.
 
     Thanks to [Michael Spiz](https://github.com/spizm)
 

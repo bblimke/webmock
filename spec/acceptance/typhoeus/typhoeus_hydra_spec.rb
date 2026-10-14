@@ -79,14 +79,6 @@ unless RUBY_PLATFORM =~ /java/
             expect(response.effective_url).to eq 'http://www.example.com/?b=2&a=1'
           end
         end
-
-        context 'request times out' do
-          it "returns effective_url" do
-            stub_request(:get, "http://www.example.com").to_timeout
-            response = Typhoeus.get("http://www.example.com")
-            expect(response.effective_url).to eq 'http://www.example.com/'
-          end
-        end
       end
 
       describe "return_code and response_headers" do
@@ -103,11 +95,12 @@ unless RUBY_PLATFORM =~ /java/
           expect(response.response_headers).to eq "HTTP/1.1 200 OK\r\nSet-Cookie: a=1\r\nSet-Cookie: b=2\r\n\r\n"
         end
 
-        it "returns :operation_timedout and no response_headers for a timeout" do
+        it "returns :operation_timedout, no response_headers and the effective_url for a timeout" do
           stub_request(:get, "http://www.example.com").to_timeout
           response = Typhoeus.get("http://www.example.com")
           expect(response.return_code).to eq :operation_timedout
           expect(response.response_headers).to eq ""
+          expect(response.effective_url).to eq 'http://www.example.com/'
         end
       end
 
