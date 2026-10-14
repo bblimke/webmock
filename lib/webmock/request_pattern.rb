@@ -10,6 +10,10 @@ module WebMock
     def rSpecHashExcludingMatcher?(matcher)
       matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashExcludingMatcher/
     end
+
+    def rSpecAnyArgMatcher?(matcher)
+      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::AnyArgMatcher/
+    end
   end
 
   class RequestPattern
@@ -129,7 +133,9 @@ module WebMock
     def add_query_params(query_params)
       @query_params = if query_params.is_a?(Hash)
         query_params
-      elsif query_params == :any
+      elsif query_params.equal?(:any) \
+              || query_params.is_a?(WebMock::Matchers::AnyArgMatcher) \
+              || rSpecAnyArgMatcher?(query_params)
         WebMock::Matchers::AnyArgMatcher.new(nil)
       elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher) \
               || query_params.is_a?(WebMock::Matchers::HashExcludingMatcher)
@@ -141,7 +147,7 @@ module WebMock
       elsif query_params.nil? || query_params.is_a?(String)
         WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation)
       else
-        raise ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query_params.inspect}"
+        raise ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query_params.class}"
       end
     end
 
@@ -156,6 +162,10 @@ module WebMock
     end
 
     private
+
+    def raise_any_query_with_uri_query
+      raise ArgumentError, "query: :any can't be combined with a query in the URI #{pattern_inspect}, because no request would match. Remove the query from the URI."
+    end
 
     def pattern_inspect
       @pattern.inspect
@@ -184,12 +194,17 @@ module WebMock
 
   class URIAddressablePattern  < URIPattern
     def add_query_params(query_params)
+      super(query_params)
+      # With query params, the template is matched against the URI without its
+      # query, so a literal query in the template can never match.
+      if @query_params.is_a?(WebMock::Matchers::AnyArgMatcher) && @pattern.pattern.gsub(/\{[^}]*\}/, '').include?('?')
+        raise_any_query_with_uri_query
+      end
       @@add_query_params_warned ||= false
       if not @@add_query_params_warned
         @@add_query_params_warned = true
         warn "WebMock warning: ignoring query params in RFC 6570 template and checking them with WebMock"
       end
-      super(query_params)
     end
 
     private
@@ -234,6 +249,9 @@ module WebMock
         query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query, notation: Config.instance.query_values_notation) || {}).merge(@query_params)
         @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash, notation: WebMock::Config.instance.query_values_notation)
         @query_params = nil
+      elsif @query_params.is_a?(WebMock::Matchers::AnyArgMatcher) && @pattern.query
+        # The URI is then compared without its query, so it could never match.
+        raise_any_query_with_uri_query
       end
     end
 

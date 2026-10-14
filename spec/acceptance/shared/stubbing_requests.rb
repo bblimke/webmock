@@ -62,6 +62,12 @@ shared_examples_for "stubbing requests" do |*adapter_info|
         expect(http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1").body).to eq("abc")
       end
 
+      it "should return stubbed response for any query params when stub declares query params as :any" do
+        stub_request(:get, "www.example.com").with(query: :any).to_return(body: "abc")
+        expect(http_request(:get, "http://www.example.com/?a[]=b&a[]=c&b=1").body).to eq("abc")
+        expect(http_request(:get, "http://www.example.com/").body).to eq("abc")
+      end
+
       it 'should return stubbed response when stub expects exclude part of query params' do
         stub_request(:get, 'www.example.com').with(query: hash_excluding(a: ['b', 'c'])).to_return(body: 'abc')
         expect(http_request(:get, 'http://www.example.com/?a[]=c&a[]=d&b=1').body).to eq('abc')

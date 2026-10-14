@@ -17,6 +17,12 @@ module WebMock
         expect(HashIncludingMatcher.new(a: 1).inspect).to eq "hash_including(#{{"a" => 1}})"
       end
 
+      it "describes a key given without a value as anything" do
+        description = HashIncludingMatcher.new(a: AnyArgMatcher.new(nil)).inspect
+        expect(description).to include("anything")
+        expect(description).not_to include("AnyArgMatcher")
+      end
+
       describe "success" do
         it "matches the same hash" do
           expect(HashIncludingMatcher.new("a" => 1, "b" => 2)).to eq("a" => 1, "b" => 2)

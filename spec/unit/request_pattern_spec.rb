@@ -36,6 +36,13 @@ describe WebMock::RequestPattern do
       )
     end
 
+    it "should report string describing itself with query params as an empty hash including matcher" do
+      expect(WebMock::RequestPattern.new(:get, "www.example.com",
+      query: WebMock::Matchers::HashIncludingMatcher.new({})).to_s).to eq(
+        "GET http://www.example.com/ with query params hash_including({})"
+      )
+    end
+
     it "should report string describing itself with body as hash including matcher" do
       expect(WebMock::RequestPattern.new(:get, /.*example.*/,
       body: WebMock::Matchers::HashIncludingMatcher.new({'a' => ['b', 'c']})).to_s).to eq(
@@ -446,6 +453,17 @@ describe WebMock::RequestPattern do
       end
 
       describe "when uri is described as Addressable::Template" do
+        it "should match any query params declared as :any when the template has a query expansion" do
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/thing{?x,y}"), query: :any)).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com/thing?z=1"))
+        end
+
+        it "should raise an ArgumentError when query params are declared as :any and the template has a literal query" do
+          expect {
+            WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/search?q={q}"), query: :any)
+          }.to raise_error(ArgumentError, /query: :any can't be combined with a query in the URI/)
+        end
+
         it "should raise error if query params are specified" do
           expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com"), query: {"a" => ["b", "c"]})).
             to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
@@ -665,8 +683,28 @@ describe WebMock::RequestPattern do
           [:foo, 1, ["a=b"]].each do |query|
             expect {
               WebMock::RequestPattern.new(:get, "www.example.com", query: query)
-            }.to raise_error(ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query.inspect}")
+            }.to raise_error(ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query.class}")
           end
+        end
+
+        it "should match a request with any query params when query params are declared as an anything matcher" do
+          [WebMock::Matchers::AnyArgMatcher.new(nil), RSpec::Mocks::ArgumentMatchers::AnyArgMatcher::INSTANCE].each do |matcher|
+            pattern = WebMock::RequestPattern.new(:get, "www.example.com", query: matcher)
+            expect(pattern).to match(WebMock::RequestSignature.new(:get, "www.example.com?a=1"))
+            expect(pattern.to_s).to eq("GET http://www.example.com/ with query params anything")
+          end
+        end
+
+        it "should raise an ArgumentError when query params are declared as :any for a uri with a query" do
+          expect {
+            WebMock::RequestPattern.new(:get, "www.example.com/?a=1", query: :any)
+          }.to raise_error(ArgumentError, "query: :any can't be combined with a query in the URI http://www.example.com/?a=1, because no request would match. Remove the query from the URI.")
+        end
+
+        it "should raise an ArgumentError when query params are declared as :any after query params declared as hash" do
+          expect {
+            WebMock::RequestPattern.new(:get, "www.example.com", query: {"a" => "1"}).with(query: :any)
+          }.to raise_error(ArgumentError, /query: :any can't be combined with a query in the URI/)
         end
 
         context "when using query values notation as flat array" do
