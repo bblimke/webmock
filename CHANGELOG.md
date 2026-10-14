@@ -20,7 +20,7 @@
 
 * Set `HTTP_HOST` for Rack apps given to `to_rack` when the request has no Host header (#1084)
 
-    Previously, a Rack app saw no `HTTP_HOST` for requests from Net::HTTP with a path, HTTPClient, Typhoeus or Curb, which add the Host header only when they send the request. Host checks such as Sinatra's `HostAuthorization` then saw an empty host. The app now gets the request's host, with the port when it isn't the default, as those clients send it.
+    Previously, requests from Net::HTTP with a path, HTTPClient, Typhoeus or Curb reached the app without `HTTP_HOST`, since these clients add the Host header only when sending, so host checks such as Sinatra's `HostAuthorization` saw an empty host. The app now gets the host, with the port when it isn't the default.
 
     Thanks to [Benoit Tigeot](https://github.com/benoittgt)
 

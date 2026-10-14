@@ -92,13 +92,19 @@ describe WebMock::RackResponse do
       'https://www.example.com/env' => 'www.example.com',
       'http://www.example.com:8080/env' => 'www.example.com:8080',
       'https://www.example.com:80/env' => 'www.example.com:80',
-      'http://[::1]:8080/env' => '[::1]:8080'
+      'http://[::1]:8080/env' => '[::1]:8080',
+      'http://user:pass@www.example.com/env' => 'www.example.com'
     }.each do |url, host|
       it "is #{host} for a request to #{url} without a Host header" do
         request = WebMock::RequestSignature.new(:get, url)
         expect(rack_env_for(request)['HTTP_HOST']).to eq(host)
-        expect(request.headers).to be_nil
       end
+    end
+
+    it "is not added to the request headers" do
+      request = WebMock::RequestSignature.new(:get, 'http://www.example.com/env')
+      rack_env_for(request)
+      expect(request.headers).to be_nil
     end
 
     it "is the Host header when the request has one" do
