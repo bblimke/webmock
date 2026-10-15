@@ -43,6 +43,19 @@ describe WebMock::RequestSignature do
     end
   end
 
+  describe "#dup" do
+    it "is equal to the original but shares no mutable state with it" do
+      original = WebMock::RequestSignature.new(:post, "www.example.com/a?b=c", body: "abc", headers: {'A' => 'a', 'B' => ['b', 'c']})
+      copy = original.dup
+      expect(copy).to eq(original)
+      copy.body << "d"
+      copy.headers['A'] << "x"
+      copy.headers['B'].first << "x"
+      copy.uri.path = "/other"
+      expect(original.to_s).to eq(WebMock::RequestSignature.new(:post, "www.example.com/a?b=c", body: "abc", headers: {'A' => 'a', 'B' => ['b', 'c']}).to_s)
+    end
+  end
+
   describe "#to_s" do
     it "describes itself" do
       expect(WebMock::RequestSignature.new(:get, "www.example.com",

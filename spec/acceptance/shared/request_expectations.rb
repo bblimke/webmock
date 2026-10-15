@@ -127,6 +127,15 @@ shared_context "request expectations" do |*adapter_info|
         expect(WebMock).to have_requested(:post, "www.example.com").with(body: "def")
       end
 
+      it "should list the requests made in order, repeats included" do
+        http_request(:get, "http://www.example.com/")
+        http_request(:post, "http://www.example.com/", body: "abc")
+        http_request(:get, "http://www.example.com/")
+        requests = WebMock.executed_requests
+        expect(requests.map(&:method)).to eq([:get, :post, :get])
+        expect(requests[1].body).to eq("abc")
+      end
+
       describe "when matching requests with escaped or unescaped uris" do
         before(:each) do
           WebMock.disable_net_connect!

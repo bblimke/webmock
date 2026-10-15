@@ -64,7 +64,7 @@ if defined?(Curl)
     class WebMockCurlEasy < Curl::Easy
       def curb_or_webmock
         request_signature = build_request_signature
-        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+        WebMock::RequestRegistry.instance.put(request_signature)
 
         if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           build_curb_response(webmock_response)

@@ -23,6 +23,16 @@ module WebMock
       string
     end
 
+    # A copy that shares no mutable state with the original.
+    def initialize_copy(original)
+      super
+      @uri = original.uri.dup
+      @body = original.body.dup if original.body
+      if original.headers
+        @headers = original.headers.transform_values { |value| value.is_a?(Array) ? value.map(&:dup) : value.dup }
+      end
+    end
+
     def method=(method)
       @method = method.to_sym.downcase
     end

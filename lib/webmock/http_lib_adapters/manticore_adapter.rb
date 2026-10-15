@@ -54,7 +54,7 @@ if defined?(Manticore)
 
           def response_object_for(request, context, &block)
             request_signature = generate_webmock_request_signature(request, context)
-            WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+            WebMock::RequestRegistry.instance.put(request_signature)
 
             if webmock_response = registered_response_for(request_signature)
               webmock_response.raise_error_if_any

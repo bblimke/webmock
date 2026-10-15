@@ -1,5 +1,15 @@
 # Changelog
 
+# Unreleased
+
+* Add `executed_requests` to inspect the requests made (#1069)
+
+    `WebMock.executed_requests` returns every request made since the last reset, in order, including repeated ones. You can assert on each one's body or headers, for example `JSON.parse(WebMock.executed_requests.last.body)`.
+
+    Previously, this needed WebMock internals such as `WebMock::RequestRegistry.instance.requested_signatures.hash.keys`, which list each distinct request only once.
+
+    Thanks to [John Gallagher](https://github.com/johngallagher)
+
 # 3.36.0
 
 * Fix matching of indexed arrays nested inside arrays of hashes (#1144)

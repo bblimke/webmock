@@ -53,7 +53,7 @@ if defined?(Excon)
 
         def self.handle_request(params)
           mock_request  = self.build_request params.dup
-          WebMock::RequestRegistry.instance.requested_signatures.put(mock_request)
+          WebMock::RequestRegistry.instance.put(mock_request)
 
           if mock_response = WebMock::StubRegistry.instance.response_for_request(mock_request)
             self.perform_callbacks(mock_request, mock_response, real_request: false)

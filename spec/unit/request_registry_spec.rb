@@ -92,56 +92,108 @@ describe WebMock::RequestRegistry do
     end
   end
 
-  describe "requests_made" do
-    it "returns the requests made" do
-      request_registry = WebMock::RequestRegistry.instance
-      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com"))
-      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:put, "www.example.org"))
-      expect(request_registry.requests_made.count).to eq(2)
-      expect(request_registry.requests_made[0].method).to eq(:get)
-      expect(request_registry.requests_made[0].uri).to eq(Addressable::URI.parse("http://www.example.com/"))
-      expect(request_registry.requests_made[1].method).to eq(:put)
-      expect(request_registry.requests_made[1].uri).to eq(Addressable::URI.parse("http://www.example.org/"))
+  describe "executed_requests" do
+    let(:registry) { WebMock::RequestRegistry.instance }
+
+    it "lists every request put through the registry, in order, repeats included" do
+      other_request = WebMock::RequestSignature.new(:put, "www.example.org")
+      registry.put(@request_signature)
+      registry.put(other_request)
+      registry.put(@request_signature)
+      expect(registry.executed_requests).to eq([@request_signature, other_request, @request_signature])
+      expect(registry.times_executed(@request_pattern)).to eq(2)
     end
 
-    it "returns the headers of the request" do
-      request_registry = WebMock::RequestRegistry.instance
-      request_registry.requested_signatures.put(WebMock::RequestSignature.new(:get, "www.example.com", headers: { 'Content-Type' => 'application/json' }))
-      expect(request_registry.requests_made.first.headers).to eq({ 'Content-Type' => 'application/json' })
+    it "returns a frozen copy" do
+      registry.put(@request_signature)
+      requests = registry.executed_requests
+      registry.put(@request_signature)
+      expect(requests).to be_frozen
+      expect(requests.size).to eq(1)
     end
 
-    it "only stores references to existing signatures" do
-      request_registry = WebMock::RequestRegistry.instance
-      signature = WebMock::RequestSignature.new(:get, "www.example.com")
-      duplicate_signature = WebMock::RequestSignature.new(:get, "www.example.com")
-      request_registry.requested_signatures.put(signature)
-      request_registry.requested_signatures.put(duplicate_signature)
-      expect(request_registry.requests_made[0].object_id).to eq(signature.object_id)
-      expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
+    it "returns copies, so changing one does not change WebMock's records" do
+      registry.put(WebMock::RequestSignature.new(:get, "www.example.com", headers: {"X" => "1"}))
+      registry.executed_requests.first.headers["X"] = "2"
+      expect(registry.executed_requests.first.headers["X"]).to eq("1")
+      expect(registry.times_executed(WebMock::RequestPattern.new(:get, "www.example.com", headers: {"X" => "1"}))).to eq(1)
     end
 
-    context "when storing the same signature with a count" do
-      it "adds two references to the signature" do
-        request_registry = WebMock::RequestRegistry.instance
-        signature = WebMock::RequestSignature.new(:get, "www.example.com")
-        request_registry.requested_signatures.put(signature, 2)
-        expect(request_registry.requests_made[0].object_id).to eq(signature.object_id)
-        expect(request_registry.requests_made[1].object_id).to eq(signature.object_id)
+    it "keeps the body a request had when it was made, even if the caller reuses its buffer" do
+      buffer = +"first"
+      registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))
+      buffer.replace("second")
+      expect(registry.executed_requests.first.body).to eq("first")
+    end
+
+    it "returns nil from put" do
+      expect(registry.put(@request_signature)).to be_nil
+    end
+
+    it "does not deadlock when a matcher block reads the list while another thread records a request" do
+      registry.put(@request_signature)
+      inside = Queue.new
+      go = Queue.new
+      pattern = WebMock::RequestPattern.new(:get, "www.example.com").with { |_| inside << true; go.pop; registry.executed_requests; true }
+      matcher = Thread.new { registry.times_executed(pattern) }
+      inside.pop
+      recorder = Thread.new { registry.put(@request_signature) }
+      sleep 0.1
+      go << true
+      expect(matcher.join(5)).to be_truthy
+      expect(recorder.join(5)).to be_truthy
+    ensure
+      # Without this, a deadlock would hang the rest of the suite.
+      [matcher, recorder].compact.each(&:kill)
+    end
+
+    it "makes a reset wait until a request is recorded in both the counter and the list" do
+      counter = registry.requested_signatures
+      between_updates = Queue.new
+      finish = Queue.new
+      allow(counter).to receive(:put).and_wrap_original do |put, *args|
+        stored = put.call(*args)
+        between_updates << true
+        finish.pop
+        stored
       end
+      recorder = Thread.new { registry.put(@request_signature) }
+      between_updates.pop
+      resetter = Thread.new { registry.reset! }
+      sleep 0.1
+      expect(resetter).to be_alive
+      finish << true
+      [recorder, resetter].each(&:join)
+      expect(registry.times_executed(@request_pattern)).to eq(0)
+      expect(registry.executed_requests).to eq([])
     end
 
-    context "with a JSON request" do
-      it "returns the body of the request" do
-        request_registry = WebMock::RequestRegistry.instance
-        request_registry.requested_signatures.put(json_request_with_body(a: 1))
-        expect(request_registry.requests_made.first.body).to eq({ a: 1 }.to_json)
+    it "lets a Timeout stop a thread waiting to record a request" do
+      lock = registry.instance_variable_get(:@lock)
+      lock.lock
+      waiter = Thread.new do
+        Timeout.timeout(0.2) { registry.put(@request_signature) }
+      rescue Timeout::Error
+        :timed_out
       end
+      expect(waiter.join(5)&.value).to eq(:timed_out)
+    ensure
+      lock.unlock if lock&.owned?
+      # If the Timeout did not fire, let the waiter finish before the next example.
+      waiter&.join(5)
+      registry.reset!
     end
-  end
 
-  private
+    it "keeps the counter and the list in step when requests come from several threads" do
+      10.times.map { Thread.new { 50.times { registry.put(@request_signature) } } }.each(&:join)
+      expect(registry.executed_requests.size).to eq(500)
+      expect(registry.times_executed(@request_pattern)).to eq(500)
+    end
 
-  def json_request_with_body(body)
-    WebMock::RequestSignature.new(:get, "www.example.com", body: JSON.generate(body))
+    it "is emptied by reset!" do
+      registry.put(@request_signature)
+      registry.reset!
+      expect(registry.executed_requests).to eq([])
+    end
   end
 end

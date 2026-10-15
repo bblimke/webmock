@@ -72,8 +72,8 @@ module WebMock
       WebMock::RequestRegistry.instance.reset!
     end
 
-    def requests_made
-      WebMock::RequestRegistry.instance.requests_made
+    def executed_requests
+      WebMock::RequestRegistry.instance.executed_requests
     end
 
     private

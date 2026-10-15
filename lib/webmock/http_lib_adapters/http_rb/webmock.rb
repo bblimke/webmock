@@ -29,7 +29,7 @@ module HTTP
     end
 
     def register_request(signature)
-      ::WebMock::RequestRegistry.instance.requested_signatures.put(signature)
+      ::WebMock::RequestRegistry.instance.put(signature)
     end
 
     def replay

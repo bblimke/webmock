@@ -8,26 +8,42 @@ module WebMock
     attr_accessor :requested_signatures
 
     def initialize
+      @lock = ::Mutex.new
       reset!
     end
 
+    # The counter and the list change together, under one lock, so they
+    # always agree.
     def reset!
-      self.requested_signatures = Util::HashCounter.new
+      atomically do
+        self.requested_signatures = Util::HashCounter.new
+        @executed_requests = []
+      end
+    end
+
+    # Records a request made through an HTTP client adapter. The list holds
+    # the copy the counter keeps of each distinct request, so a caller reusing
+    # its body buffer cannot change it, and a suite that never resets keeps
+    # one copy of each distinct request.
+    def put(request_signature)
+      atomically do
+        @executed_requests << requested_signatures.put(request_signature)
+      end
+      nil
+    end
+
+    # Every request made since the last reset, in order, repeats included,
+    # as copies, so a test cannot change WebMock's records.
+    def executed_requests
+      requests = @lock.synchronize { @executed_requests.dup }
+      copies = {}.compare_by_identity
+      requests.map { |request| copies[request] ||= request.dup }.freeze
     end
 
     def times_executed(request_pattern)
       self.requested_signatures.select do |request_signature|
         request_pattern.matches?(request_signature)
       end.inject(0) { |sum, (_, times_executed)| sum + times_executed }
-    end
-
-    def requests_made
-      to_a
-    end
-
-    def to_a
-      requested_signatures.
-        array
     end
 
     def to_s
@@ -42,5 +58,15 @@ module WebMock
       end
     end
 
+
+    private
+
+    # An interrupt such as Timeout can still stop a thread waiting for the
+    # lock, but not one between the two updates, where nothing blocks.
+    def atomically(&block)
+      Thread.handle_interrupt(Object => :on_blocking) do
+        @lock.synchronize(&block)
+      end
+    end
   end
 end

@@ -241,7 +241,7 @@ if defined?(::Patron::Session)
         # response, which is nil when a real request is allowed
         def self.register_request(req)
           request_signature = build_request_signature(req)
-          WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+          WebMock::RequestRegistry.instance.put(request_signature)
 
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           if webmock_response.nil? && !WebMock.net_connect_allowed?(request_signature.uri)

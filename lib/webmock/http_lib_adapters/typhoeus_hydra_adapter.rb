@@ -192,7 +192,7 @@ if defined?(Typhoeus)
             request_signature = ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request, url)
             request.block_connection = false;
 
-            ::WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+            ::WebMock::RequestRegistry.instance.put(request_signature)
 
             if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
               response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(webmock_response, url)

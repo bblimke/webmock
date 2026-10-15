@@ -100,7 +100,7 @@ module WebMock
 
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
-          WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+          WebMock::RequestRegistry.instance.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
             # Close the real connection left by an earlier request, if any.

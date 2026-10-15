@@ -63,7 +63,7 @@ if defined?(::HTTPClient)
 
       request_signature = build_request_signature(req, :reuse_existing)
 
-      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+      WebMock::RequestRegistry.instance.put(request_signature)
 
       if webmock_responses[request_signature]
         webmock_response = webmock_responses.delete(request_signature)
@@ -242,10 +242,12 @@ if defined?(::HTTPClient)
     # an extra response from the stub sequence. The thread only delivers what the caller
     # already evaluated, mirroring do_get's stubbed branch.
     def async_conn_for_stubbed_request(req, request_signature, webmock_response)
+      # Record the request here, in the caller, so it is listed in the order
+      # it was made and is not recorded after a reset.
+      WebMock::RequestRegistry.instance.put(request_signature)
       conn = HTTPClient::Connection.new
       conn.async_thread = Thread.new do
         begin
-          WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
           response = build_httpclient_response(webmock_response, true, req.header)
           @request_filter.each do |filter|
             filter.filter_response(req, response)

@@ -802,6 +802,24 @@ expect(stub).to have_been_requested.once.with(body: {"a" => [4, 5, 6]})
 
 Options and a block given to `with` take the same form as in `stub_request(...).with`. The expectation then counts only the requests that match both the stub and those conditions. The stub itself does not change.
 
+### Inspecting the requests made
+
+`WebMock.executed_requests` returns every request made since the last `WebMock.reset!` or `WebMock.reset_executed_requests!`, in order, including repeated ones. Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too. The list holds copies of the request objects that `with` blocks and `after_request` callbacks receive, so changing them doesn't affect WebMock's records. Repeated requests share one copy.
+
+```ruby
+stub_request(:post, "www.example.com/orders")
+
+Net::HTTP.post(URI("http://www.example.com/orders"), '{"name":"John"}', "Content-Type" => "application/json")
+
+request = WebMock.executed_requests.last
+request.method                   # ===> :post
+request.uri.path                 # ===> "/orders"
+request.headers["Content-Type"]  # ===> "application/json"
+JSON.parse(request.body)         # ===> {"name" => "John"}
+```
+
+The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
+
 ## Clearing stubs and request history
 
 If you want to reset all current stubs and history of requests use `WebMock.reset!`

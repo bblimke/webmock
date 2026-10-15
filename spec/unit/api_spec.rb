@@ -161,7 +161,7 @@ describe WebMock::API do
     let(:request_pattern)   { WebMock::RequestPattern.new(:get, "www.example.com") }
 
     before do
-      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+      WebMock::RequestRegistry.instance.put(request_signature)
     end
 
     it 'resets request registry counter' do
@@ -171,20 +171,21 @@ describe WebMock::API do
         WebMock::RequestRegistry.instance.times_executed(request_pattern)
       }.from(1).to(0)
     end
+
+    it 'empties the list of executed requests' do
+      expect { subject }.to change { WebMock.executed_requests.size }.from(1).to(0)
+    end
   end
 
-  describe '#requests_made' do
-    subject { WebMock::API.requests_made }
-
+  describe '#executed_requests' do
     let(:request_signature) { WebMock::RequestSignature.new(:get, "www.example.com") }
-    let(:request_pattern)   { WebMock::RequestPattern.new(:get, "www.example.com") }
 
     before do
-      WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+      WebMock::RequestRegistry.instance.put(request_signature)
     end
 
-    it 'returns the number of requests made' do
-      expect(subject.count).to eq(1)
+    it 'returns the requests made' do
+      expect(WebMock.executed_requests).to eq([request_signature])
     end
   end
 end

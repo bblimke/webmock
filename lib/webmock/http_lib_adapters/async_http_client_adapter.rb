@@ -66,7 +66,7 @@ if defined?(Async::HTTP)
           request.authority ||= self.authority
 
           request_signature = build_request_signature(request)
-          WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+          WebMock::RequestRegistry.instance.put(request_signature)
           webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           net_connect_allowed = WebMock.net_connect_allowed?(request_signature.uri)
           real_request = false

@@ -107,7 +107,7 @@ if defined?(EventMachine::HttpClient)
       end
 
       def send_request(head, body)
-        WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
+        WebMock::RequestRegistry.instance.put(request_signature)
 
         if stubbed_webmock_response
           WebMock::CallbackRegistry.invoke_callbacks({lib: :em_http_request}, request_signature, stubbed_webmock_response)
