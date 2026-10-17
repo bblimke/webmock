@@ -189,6 +189,63 @@ describe "Net:HTTP" do
     expect(response.body).to be_a(Net::ReadAdapter)
   end
 
+  if Net::HTTP.method_defined?(:response_body_encoding=)
+    describe "response body encoding" do
+      let(:utf8_body) { "caf\xC3\xA9".b }
+
+      it "should leave the body encoding unchanged by default, like Net::HTTP" do
+        stub_request(:get, "www.example.com").to_return(body: utf8_body, headers: {"Content-Type" => "text/plain; charset=utf-8"})
+        response = Net::HTTP.new("www.example.com", 80).request(Net::HTTP::Get.new("/"))
+        expect(response.body.encoding).to eq(Encoding::BINARY)
+      end
+
+      it "should use the charset of the Content-Type header when response_body_encoding is true" do
+        stub_request(:get, "www.example.com").to_return(body: utf8_body, headers: {"Content-Type" => "text/plain; charset=utf-8"})
+        http = Net::HTTP.new("www.example.com", 80)
+        http.response_body_encoding = true
+        response = http.request(Net::HTTP::Get.new("/"))
+        expect(response.body.encoding).to eq(Encoding::UTF_8)
+        expect(response.body).to eq("café")
+      end
+
+      it "should use the charset of a meta tag when response_body_encoding is true" do
+        stub_request(:get, "www.example.com").to_return(body: '<html><head><meta charset="Shift_JIS"></head></html>', headers: {"Content-Type" => "text/html"})
+        http = Net::HTTP.new("www.example.com", 80)
+        http.response_body_encoding = true
+        response = http.request(Net::HTTP::Get.new("/"))
+        expect(response.body.encoding).to eq(Encoding::Shift_JIS)
+      end
+
+      it "should force the encoding given to response_body_encoding" do
+        stub_request(:get, "www.example.com").to_return(body: "caf\xE9".b, headers: {"Content-Type" => "text/plain"})
+        http = Net::HTTP.new("www.example.com", 80)
+        http.response_body_encoding = "ISO-8859-1"
+        response = http.request(Net::HTTP::Get.new("/"))
+        expect(response.body.encoding).to eq(Encoding::ISO_8859_1)
+        expect(response.body.encode(Encoding::UTF_8)).to eq("café")
+      end
+
+      it "should use the encoding set with body_encoding= on the response before the body is read" do
+        stub_request(:get, "www.example.com").to_return(body: utf8_body)
+        body = nil
+        Net::HTTP.new("www.example.com", 80).request(Net::HTTP::Get.new("/")) do |response|
+          response.body_encoding = "UTF-8"
+          body = response.body
+        end
+        expect(body.encoding).to eq(Encoding::UTF_8)
+      end
+
+      it "should not change the encoding of the stubbed body" do
+        stub_request(:get, "www.example.com").to_return(body: utf8_body, headers: {"Content-Type" => "text/plain; charset=utf-8"})
+        http = Net::HTTP.new("www.example.com", 80)
+        http.response_body_encoding = true
+        http.request(Net::HTTP::Get.new("/")).body
+        response = Net::HTTP.new("www.example.com", 80).request(Net::HTTP::Get.new("/"))
+        expect(response.body.encoding).to eq(Encoding::BINARY)
+      end
+    end
+  end
+
   it "should have request 1 time executed in registry after 1 real request", net_connect: true do
     WebMock.allow_net_connect!
     http = Net::HTTP.new('localhost', port)

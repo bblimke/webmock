@@ -192,6 +192,7 @@ module WebMock
           response.instance_variable_set(:@read, true)
 
           response.uri = request_uri
+          response.body_encoding = response_body_encoding if respond_to?(:response_body_encoding)
 
           response.extend Net::WebMockHTTPResponse
 
