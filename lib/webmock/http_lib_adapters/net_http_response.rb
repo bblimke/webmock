@@ -20,7 +20,10 @@ module Net
       if !(defined?(@__read_body_previously_called).nil?) && @__read_body_previously_called
         return super
       end
-      return @body if dest.nil? && block.nil?
+      if dest.nil? && block.nil?
+        apply_body_encoding
+        return @body
+      end
       raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
       return nil if @body.nil?
 
@@ -30,6 +33,19 @@ module Net
     ensure
       # allow subsequent calls to #read_body to proceed as normal, without our hack...
       @__read_body_previously_called = true
+    end
+
+    private
+
+    # Net::HTTPResponse#read_body applies the encoding set with #body_encoding=
+    # (or Net::HTTP#response_body_encoding=) to the body it reads, so do the
+    # same for a body that was set without reading it.
+    def apply_body_encoding
+      encoding = defined?(@body_encoding) && @body_encoding
+      return unless encoding && @body.is_a?(String)
+
+      encoding = detect_encoding(@body) unless encoding.is_a?(Encoding)
+      @body = @body.dup.force_encoding(encoding) if encoding
     end
   end
 end
