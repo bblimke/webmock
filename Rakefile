@@ -32,6 +32,16 @@ RSpec::Core::RakeTask.new(:spec) do |t|
     --require ./spec/spec_helper.rb
   ]
   t.pattern = 'spec/**/*_spec.rb'
+  t.exclude_pattern = 'spec/acceptance/http.rb/**/*_spec.rb'
+end
+
+# The http.rb gem defines HTTP, as the http gem does, so its examples run on their own.
+RSpec::Core::RakeTask.new(:spec_http_dot_rb) do |t|
+  t.rspec_opts = %w[
+    --force-color
+    --format progress
+  ]
+  t.pattern = 'spec/acceptance/http.rb/**/*_spec.rb'
 end
 
 RSpec::Core::RakeTask.new(:spec_http_without_webmock) do |t|
@@ -57,4 +67,4 @@ Rake::TestTask.new(:minitest) do |test|
   test.warning = false
 end
 
-task default: [:spec, :spec_http_without_webmock, :test, :minitest]
+task default: [:spec, :spec_http_dot_rb, :spec_http_without_webmock, :test, :minitest]

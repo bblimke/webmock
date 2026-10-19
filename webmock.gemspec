@@ -36,6 +36,7 @@ Gem::Specification.new do |s|
   end
 
   s.add_development_dependency 'http',            '>= 0.8.0'
+  s.add_development_dependency 'http.rb',         '>= 1.7.0' if RUBY_VERSION >= '3.2'
   s.add_development_dependency 'manticore',       '>= 0.5.1' if RUBY_PLATFORM =~ /java/
   s.add_development_dependency 'rack',            '> 1.6'
   s.add_development_dependency 'rspec',           '>= 3.1.0'

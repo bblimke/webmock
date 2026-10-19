@@ -1,4 +1,11 @@
 require 'rubygems'
+
+# The http.rb gem has a lib/http.rb defining HTTP too, which can come before the http
+# gem's on the load path. Its examples load it themselves, in a process of their own.
+if Gem.loaded_specs['http.rb'] && !defined?(HTTP)
+  $LOAD_PATH.reject!{|path| Gem.loaded_specs['http.rb'].full_require_paths.include?(path)}
+end
+
 require 'httpclient'
 unless RUBY_PLATFORM =~ /java/
   require 'curb'
