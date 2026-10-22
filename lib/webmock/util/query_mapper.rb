@@ -225,7 +225,7 @@ module WebMock::Util
           end
         end
         if hash != {} && hash.keys.all? { |key| key =~ /^\d+$/ }
-          hash.sort.inject([]) do |accu, (_, value)|
+          hash.sort_by { |key, _| key.to_i }.inject([]) do |accu, (_, value)|
             accu << value; accu
           end
         else
