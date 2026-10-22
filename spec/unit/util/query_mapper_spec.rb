@@ -71,6 +71,18 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a']).to eq('foo')
     end
 
+    it "should keep indexed array values in numeric order" do
+      query = (0..11).map { |i| "a[#{i}]=v#{i}" }.join("&")
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq((0..11).map { |i| "v#{i}" })
+    end
+
+    it "should keep indexed nested hashes in numeric order" do
+      query = (0..10).map { |i| "a[#{i}][b]=v#{i}" }.join("&")
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq((0..10).map { |i| {'b' => "v#{i}"} })
+    end
+
     it "should parse hash query with key starting with non word character" do
       query = "a[$in]=1".freeze
       hsh = subject.query_to_values(query)
