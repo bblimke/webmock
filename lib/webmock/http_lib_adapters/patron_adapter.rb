@@ -107,14 +107,30 @@ if defined?(::Patron::Session)
           status_line   = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}"
           header_data   = ([status_line] + header_fields).join("\r\n")
 
-          ::Patron::Response.new(
-            "".dup,
-            webmock_response.status[0],
-            0,
-            header_data,
-            webmock_response.body.dup,
-            default_response_charset
-          )
+          if patron_response_takes_keywords?
+            ::Patron::Response.new(
+              url: "".dup,
+              status: webmock_response.status[0],
+              redirect_count: 0,
+              header_data: header_data,
+              body: webmock_response.body.dup,
+              default_charset: default_response_charset
+            )
+          else
+            ::Patron::Response.new(
+              "".dup,
+              webmock_response.status[0],
+              0,
+              header_data,
+              webmock_response.body.dup,
+              default_response_charset
+            )
+          end
+        end
+
+        # Patron 1.0 moved Response.new to keyword arguments, see https://github.com/toland/patron/issues/209
+        def self.patron_response_takes_keywords?
+          ::Patron::Response.instance_method(:initialize).parameters.include?([:keyreq, :url])
         end
 
         def self.build_webmock_response(patron_response)

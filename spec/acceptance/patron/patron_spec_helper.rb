@@ -17,9 +17,7 @@ module PatronSpecHelper
     sess.max_redirects = 0
     uri = "#{uri.path}#{uri.query ? '?' : ''}#{uri.query}"
     uri = uri.gsub(' ','%20')
-    response = sess.request(method, uri, options[:headers] || {}, {
-      data: options[:body]
-    })
+    response = sess.request(method, uri, options[:headers] || {}, data: options[:body])
     headers = {}
     if response.headers
       response.headers.each do |k,v|
