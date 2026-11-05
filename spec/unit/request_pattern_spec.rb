@@ -283,6 +283,11 @@ describe WebMock::RequestPattern do
             not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c"))
         end
 
+        it "should match request query params with an array nested in an array of hashes" do
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: {"a" => [{"b" => [{"c" => "1"}]}]})).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a[][b][][c]=1"))
+        end
+
         it "should match when query params are declared as HashIncluding matcher matching params" do
           expect(WebMock::RequestPattern.new(:get, /.*example.*/,
           query: WebMock::Matchers::HashIncludingMatcher.new({"a" => ["b", "c"]}))).

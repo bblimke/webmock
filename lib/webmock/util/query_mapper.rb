@@ -65,7 +65,7 @@ module WebMock::Util
           if options[:notation] == :flat_array
             accumulator << [key, value]
           else
-            accumulator[key] = value.kind_of?(Hash) ? dehash(value) : value
+            accumulator[key] = dehash_value(value)
           end
           accumulator
         end
@@ -220,9 +220,7 @@ module WebMock::Util
 
       def dehash(hash)
         hash.each do |(key, value)|
-          if value.is_a?(::Hash)
-            hash[key] = self.dehash(value)
-          end
+          hash[key] = self.dehash_value(value)
         end
         if hash != {} && hash.keys.all? { |key| key =~ /^\d+$/ }
           hash.sort.inject([]) do |accu, (_, value)|
@@ -230,6 +228,16 @@ module WebMock::Util
           end
         else
           hash
+        end
+      end
+
+      # A query such as a[][b][0][c]=1 produces an array whose element holds
+      # {"0" => ...}, so the numeric keys have to be collapsed inside arrays too.
+      def dehash_value(value)
+        case value
+        when ::Hash  then dehash(value)
+        when ::Array then value.map { |element| dehash_value(element) }
+        else value
         end
       end
 
