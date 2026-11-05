@@ -65,6 +65,12 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a'][0]['c']).to eq(['two'])
     end
 
+    it "should parse indexed hashes nested in an array" do
+      query = "a[][b][0][c]=1&a[][b][1][c]=2"
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq([{"b" => [{"c" => "1"}, {"c" => "2"}]}])
+    end
+
     it 'should not attempt to mutate its query argument' do
       query = "a=foo".freeze
       hsh = subject.query_to_values(query)
@@ -144,6 +150,13 @@ describe WebMock::Util::QueryMapper do
   it 'converts complex nested array of hashes, vice versa' do
     query = "one%5B%5D[foo]=bar&one%5B%5D[foo]=bar&one%5B%5D[zoo]=car" # one[][foo]=bar&one[][foo]=bar&one[][zoo]=car
     values = {"one" => [{"foo" => "bar"}, {"foo" => "bar", "zoo" => "car"}]}
+    expect(subject.values_to_query values).to eq query
+    expect(subject.query_to_values query).to eq values
+  end
+
+  it 'converts an array nested in an array of hashes, vice versa' do
+    query = "one%5B%5D[two][0][three]=four" # one[][two][0][three]=four
+    values = {"one" => [{"two" => [{"three" => "four"}]}]}
     expect(subject.values_to_query values).to eq query
     expect(subject.query_to_values query).to eq values
   end
