@@ -173,7 +173,10 @@ if defined?(::HTTPClient)
       end
 
       uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
-      uri.query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation) if req.header.request_query
+      if req.header.request_query
+        query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation)
+        uri.query = [uri.query, query].compact.reject(&:empty?).join('&') if query
+      end
       uri.port = req.header.request_uri.port
 
       headers = req.header.all.inject({}) do |hdrs, header|
