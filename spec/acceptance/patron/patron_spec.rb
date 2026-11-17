@@ -42,16 +42,42 @@ unless RUBY_PLATFORM =~ /java/
           expect(File.read(@file_path)).to eq("abc")
         end
 
-        it "should raise same error as Patron if file is not readable for get request" do
-          stub_request(:get, "www.example.com")
+        if Patron::Session.public_method_defined?(:stream)
+          it "should raise same error as Patron if file is not writable for get request" do
+            stub_request(:get, "www.example.com")
 
-          allow(File).to receive(:open).and_call_original
-          allow(File).to receive(:open).with(@file_path, "w").and_raise(Errno::EACCES)
+            allow(File).to receive(:open).and_call_original
+            allow(File).to receive(:open).with(@file_path, "wb").and_raise(Errno::EACCES)
 
-          expect {
-            @sess.get_file("/", @file_path)
-          }.to raise_error(ArgumentError, "Unable to open specified file.")
+            expect {
+              @sess.get_file("/", @file_path)
+            }.to raise_error(Errno::EACCES)
+          end
 
+          it "should match the stub for get_file" do
+            stub_request(:get, "www.example.com").to_return(status: [201, "Created"], body: "abc")
+            response = @sess.get_file("/", @file_path)
+            expect(response.status).to eq(201)
+            expect(a_request(:get, "www.example.com")).to have_been_made.once
+          end
+
+          it "should match the stub for a GET request with the file option" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            @sess.request(:get, "/", {}, file: @file_path)
+            expect(File.read(@file_path)).to eq("abc")
+          end
+        else
+          it "should raise same error as Patron if file is not readable for get request" do
+            stub_request(:get, "www.example.com")
+
+            allow(File).to receive(:open).and_call_original
+            allow(File).to receive(:open).with(@file_path, "w").and_raise(Errno::EACCES)
+
+            expect {
+              @sess.get_file("/", @file_path)
+            }.to raise_error(ArgumentError, "Unable to open specified file.")
+
+          end
         end
 
         it "should work with put_file" do
@@ -73,6 +99,125 @@ unless RUBY_PLATFORM =~ /java/
           }.to raise_error(ArgumentError, "Unable to open specified file.")
         end
 
+      end
+
+      if Patron::Session.public_method_defined?(:stream)
+        describe "streamed requests" do
+          after(:each) do
+            WebMock.disable_net_connect!
+            WebMock::CallbackRegistry.reset
+          end
+
+          it "should yield the stubbed head and body" do
+            stub_request(:get, "www.example.com/stream").
+              to_return(status: [201, "Created"], headers: {"Content-Type" => "text/plain"}, body: "abcdef")
+
+            chunks = []
+            stats = @sess.get_stream("/stream") do |stream|
+              expect(stream.status).to eq(201)
+              expect(stream.status_line).to eq("HTTP/1.1 201 Created")
+              expect(stream.headers["Content-Type"]).to eq("text/plain")
+              expect(stream.content_type).to eq("text/plain")
+              chunks << stream.readpartial(4)
+              chunks << stream.read
+              expect(stream.eof?).to be(true)
+            end
+
+            expect(chunks).to eq(["abcd", "ef"])
+            expect(stats).to be_a(Patron::TransferStats)
+            expect(stats.status).to eq(201)
+            expect(stats.headers["Content-Type"]).to eq("text/plain")
+            expect(stats.downloaded_bytes).to eq(6)
+            expect(stats.complete?).to be(true)
+          end
+
+          it "should yield the stubbed body in chunks and lines" do
+            stub_request(:get, "www.example.com").to_return(body: "a\nb\nc")
+            chunks = []
+            lines = []
+            @sess.get_stream("/") { |stream| stream.each { |chunk| chunks << chunk } }
+            @sess.get_stream("/") { |stream| stream.each_line { |line| lines << line } }
+            expect(chunks).to eq(["a\nb\nc"])
+            expect(lines).to eq(["a\n", "b\n", "c"])
+          end
+
+          it "should report a stubbed body left unread as incomplete" do
+            stub_request(:get, "www.example.com").to_return(body: "abcdef")
+            stats = @sess.get_stream("/") { |stream| stream.read(2) }
+            expect(stats.downloaded_bytes).to eq(2)
+            expect(stats.complete?).to be(false)
+          end
+
+          it "should report a drained body as complete" do
+            stub_request(:get, "www.example.com").to_return(body: "abcdef")
+            drained = nil
+            stats = @sess.get_stream("/") { |stream| drained = stream.drain! }
+            expect(drained).to eq(6)
+            expect(stats.complete?).to be(true)
+          end
+
+          it "should close the stream when the block ends" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            stream = nil
+            @sess.get_stream("/") { |s| stream = s }
+            expect(stream.closed?).to be(true)
+            expect { stream.read }.to raise_error(IOError)
+          end
+
+          it "should match the request body of post_stream" do
+            stub_request(:post, "www.example.com").with(body: "abc").to_return(body: "def")
+            body = nil
+            stats = @sess.post_stream("/", "abc") { |stream| body = stream.read }
+            expect(body).to eq("def")
+            expect(stats.uploaded_bytes).to eq(3)
+          end
+
+          it "should raise Patron::TimeoutError for a stubbed timeout" do
+            stub_request(:get, "www.example.com").to_timeout
+            expect {
+              @sess.get_stream("/") { |stream| stream.read }
+            }.to raise_error(Patron::TimeoutError)
+          end
+
+          it "should raise the stubbed exception" do
+            stub_request(:get, "www.example.com").to_raise(Patron::ConnectionFailed)
+            expect {
+              @sess.get_stream("/") { |stream| stream.read }
+            }.to raise_error(Patron::ConnectionFailed)
+          end
+
+          it "should raise NetConnectNotAllowedError for an unstubbed request" do
+            expect {
+              @sess.get_stream("/") { |stream| stream.read }
+            }.to raise_error(WebMock::NetConnectNotAllowedError)
+          end
+
+          it "should raise NetConnectNotAllowedError for an unstubbed get_file" do
+            expect {
+              @sess.get_file("/", @file_path || File.join(Dir.tmpdir, "webmock-unused"))
+            }.to raise_error(WebMock::NetConnectNotAllowedError)
+          end
+
+          it "should invoke after_request callbacks with the stubbed response" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            responses = []
+            WebMock.after_request { |_, response| responses << response }
+            @sess.get_stream("/") { |stream| stream.read }
+            expect(responses.map(&:body)).to eq(["abc"])
+          end
+
+          it "should make a real request when net connect is allowed" do
+            WebMock.allow_net_connect!
+            sess = Patron::Session.new
+            sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
+            statuses = []
+            WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
+            body = nil
+            sess.get_stream("/") { |stream| body = stream.read }
+            expect(body).to eq("hello world")
+            expect(statuses).to eq([[200, "OK"]])
+          end
+        end
       end
 
       describe "handling errors same way as patron" do
