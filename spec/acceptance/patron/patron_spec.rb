@@ -34,12 +34,32 @@ unless RUBY_PLATFORM =~ /java/
 
         after(:each) do
           FileUtils.rm_rf(@dir_path) if File.exist?(@dir_path)
+          WebMock.disable_net_connect!
+          WebMock::CallbackRegistry.reset
         end
 
         it "should work with get_file" do
           stub_request(:get, "www.example.com").to_return(body: "abc")
           @sess.get_file("/", @file_path)
           expect(File.read(@file_path)).to eq("abc")
+        end
+
+        it "should raise NetConnectNotAllowedError for an unstubbed get_file" do
+          expect {
+            @sess.get_file("/", @file_path)
+          }.to raise_error(WebMock::NetConnectNotAllowedError)
+        end
+
+        it "should make a real get_file request when net connect is allowed" do
+          WebMock.allow_net_connect!
+          sess = Patron::Session.new
+          sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
+          statuses = []
+          WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
+          sess.get_file("/", @file_path)
+          expect(File.read(@file_path)).to eq("hello world")
+          expect(statuses).to eq([[200, "OK"]])
+          expect(a_request(:get, "http://#{WebMockServer.instance.host_with_port}/")).to have_been_made.once
         end
 
         if Patron::Session.public_method_defined?(:stream)
@@ -192,10 +212,13 @@ unless RUBY_PLATFORM =~ /java/
             }.to raise_error(WebMock::NetConnectNotAllowedError)
           end
 
-          it "should raise NetConnectNotAllowedError for an unstubbed get_file" do
-            expect {
-              @sess.get_file("/", @file_path || File.join(Dir.tmpdir, "webmock-unused"))
-            }.to raise_error(WebMock::NetConnectNotAllowedError)
+          it "should match the headers and query of a streamed request" do
+            stub_request(:get, "www.example.com/events").
+              with(query: {"a" => "1"}, headers: {"Accept" => "text/event-stream"}).
+              to_return(body: "data: x\n\n")
+            body = nil
+            @sess.get_stream("/events", {"Accept" => "text/event-stream"}, query: {a: 1}) { |stream| body = stream.read }
+            expect(body).to eq("data: x\n\n")
           end
 
           it "should invoke after_request callbacks with the stubbed response" do
@@ -206,6 +229,35 @@ unless RUBY_PLATFORM =~ /java/
             expect(responses.map(&:body)).to eq(["abc"])
           end
 
+          it "should close the stream and invoke callbacks when the block breaks" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            callbacks = 0
+            WebMock.after_request { callbacks += 1 }
+            stream = nil
+            @sess.get_stream("/") do |s|
+              stream = s
+              break
+            end
+            expect(stream.closed?).to be(true)
+            expect(callbacks).to eq(1)
+            expect(a_request(:get, "www.example.com")).to have_been_made.once
+          end
+
+          it "should close the stream and invoke callbacks when the block raises" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            callbacks = 0
+            WebMock.after_request { callbacks += 1 }
+            stream = nil
+            expect {
+              @sess.get_stream("/") do |s|
+                stream = s
+                raise ArgumentError, "boom"
+              end
+            }.to raise_error(ArgumentError, "boom")
+            expect(stream.closed?).to be(true)
+            expect(callbacks).to eq(1)
+          end
+
           it "should make a real request when net connect is allowed" do
             WebMock.allow_net_connect!
             sess = Patron::Session.new
@@ -213,8 +265,19 @@ unless RUBY_PLATFORM =~ /java/
             statuses = []
             WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
             body = nil
-            sess.get_stream("/") { |stream| body = stream.read }
+            stats = sess.get_stream("/") { |stream| body = stream.read }
             expect(body).to eq("hello world")
+            expect(stats.complete?).to be(true)
+            expect(statuses).to eq([[200, "OK"]])
+          end
+
+          it "should invoke callbacks for a real request when the block breaks" do
+            WebMock.allow_net_connect!
+            sess = Patron::Session.new
+            sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
+            statuses = []
+            WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
+            sess.get_stream("/") { break }
             expect(statuses).to eq([[200, "OK"]])
           end
         end

@@ -16,74 +16,74 @@ if defined?(::Patron::Session)
 
         OriginalPatronSession = ::Patron::Session unless const_defined?(:OriginalPatronSession)
 
+        # Patron 1.0 moved Response.new to keyword arguments, see https://github.com/toland/patron/issues/209
+        PATRON_RESPONSE_TAKES_KEYWORDS =
+          ::Patron::Response.instance_method(:initialize).parameters.include?([:keyreq, :url])
+
         class WebMockPatronSession < ::Patron::Session
           def handle_request(req)
-            request_signature =
-              WebMock::HttpLibAdapters::PatronAdapter.build_request_signature(req)
+            request_signature, webmock_response =
+              WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
 
-            WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
-
-            if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+            if webmock_response
               WebMock::HttpLibAdapters::PatronAdapter.
                 handle_file_name(req, webmock_response)
               res = WebMock::HttpLibAdapters::PatronAdapter.
                 build_patron_response(webmock_response, default_response_charset)
-              WebMock::CallbackRegistry.invoke_callbacks(
-                {lib: :patron}, request_signature, webmock_response)
-              res
-            elsif WebMock.net_connect_allowed?(request_signature.uri)
-              res = super
-              if WebMock::CallbackRegistry.any_callbacks?
-                webmock_response = WebMock::HttpLibAdapters::PatronAdapter.
-                  build_webmock_response(res)
-                WebMock::CallbackRegistry.invoke_callbacks(
-                  {lib: :patron, real_request: true}, request_signature,
-                    webmock_response)
-              end
+              WebMock::HttpLibAdapters::PatronAdapter.
+                invoke_callbacks(request_signature, webmock_response)
               res
             else
-              raise WebMock::NetConnectNotAllowedError.new(request_signature)
+              res = super
+              WebMock::HttpLibAdapters::PatronAdapter.
+                invoke_real_request_callbacks(request_signature, res)
+              res
             end
           end
 
           # Patron 1.1 sends #get_file and streamed requests past
-          # #handle_request, so they are caught where they start
+          # #handle_request
           if ::Patron::Session.public_method_defined?(:stream)
-            def request(action, url, headers = {}, *positional, **options)
-              all_options = options
-              if positional.first.is_a?(Hash)
-                all_options = positional.first.transform_keys(&:to_sym).merge(options)
-              end
-              file = all_options[:file]
-              unless file && !all_options[:multipart] && action.to_s.casecmp?("get")
-                return super
-              end
-
-              without_file = all_options.reject { |name, _| name == :file }
-              req = build_request(action, url, headers, **without_file)
-              WebMock::HttpLibAdapters::PatronAdapter.handle_streamed_request(req) do |webmock_response|
-                if webmock_response
-                  res = WebMock::HttpLibAdapters::PatronAdapter.
-                    build_patron_response(webmock_response, default_response_charset)
-                  File.open(file, "wb") { |f| f.write(webmock_response.body) }
-                  res
-                else
-                  super
-                end
-              end
-            end
-
             def stream(action, url, headers = {}, **options, &block)
               return super unless block
 
               req = build_request(action, url, headers, **options)
-              WebMock::HttpLibAdapters::PatronAdapter.handle_streamed_request(req) do |webmock_response, request_signature|
-                if webmock_response
+              request_signature, webmock_response =
+                WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
+
+              if webmock_response
+                WebMock::HttpLibAdapters::PatronAdapter.
+                  stream_stubbed_response(webmock_response, request_signature, default_response_charset, &block)
+              else
+                # Callbacks run once the head has arrived, so they also run
+                # when the block leaves before the end of the body
+                super(action, url, headers, **options) do |stream|
                   WebMock::HttpLibAdapters::PatronAdapter.
-                    stream_stubbed_response(webmock_response, request_signature, default_response_charset, &block)
-                else
-                  super
+                    invoke_real_request_callbacks(request_signature, stream)
+                  yield stream
                 end
+              end
+            end
+
+            private
+
+            # Called by #get_file, and by #request for a GET with a file
+            def download(req, path)
+              request_signature, webmock_response =
+                WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
+
+              if webmock_response
+                res = WebMock::HttpLibAdapters::PatronAdapter.
+                  build_patron_response(webmock_response, default_response_charset)
+                File.open(path, "wb") { |f| f.write(webmock_response.body) }
+                WebMock::HttpLibAdapters::PatronAdapter.
+                  invoke_callbacks(request_signature, webmock_response)
+                res
+              else
+                res = super
+                WebMock::HttpLibAdapters::PatronAdapter.
+                  invoke_real_request_callbacks(request_signature, res)
+                res
               end
             end
           end
@@ -230,11 +230,9 @@ if defined?(::Patron::Session)
           raise ::Patron::TimeoutError if webmock_response.should_timeout
           webmock_response.raise_error_if_any
 
-          header_fields = (webmock_response.headers || []).map { |(k, vs)| Array(vs).map { |v| "#{k}: #{v}" } }.flatten
-          status_line   = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}"
-          header_data   = ([status_line] + header_fields).join("\r\n")
+          header_data = build_header_data(webmock_response)
 
-          if patron_response_takes_keywords?
+          if PATRON_RESPONSE_TAKES_KEYWORDS
             ::Patron::Response.new(
               url: "".dup,
               status: webmock_response.status[0],
@@ -255,37 +253,38 @@ if defined?(::Patron::Session)
           end
         end
 
-        # Patron 1.0 moved Response.new to keyword arguments, see https://github.com/toland/patron/issues/209
-        def self.patron_response_takes_keywords?
-          ::Patron::Response.instance_method(:initialize).parameters.include?([:keyreq, :url])
-        end
-
-        # Yields the stubbed response for req, or nil when a real request is
-        # allowed, and returns what the block does
-        def self.handle_streamed_request(req)
+        # Records the request and returns its signature with the stubbed
+        # response, which is nil when a real request is allowed
+        def self.register_request(req)
           request_signature = build_request_signature(req)
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
-          if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-            result = yield webmock_response, request_signature
-            WebMock::CallbackRegistry.invoke_callbacks(
-              {lib: :patron}, request_signature, webmock_response)
-            result
-          elsif WebMock.net_connect_allowed?(request_signature.uri)
-            result = yield nil, request_signature
-            if WebMock::CallbackRegistry.any_callbacks?
-              WebMock::CallbackRegistry.invoke_callbacks(
-                {lib: :patron, real_request: true}, request_signature,
-                  build_webmock_response(result))
-            end
-            result
-          else
+          webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+          if webmock_response.nil? && !WebMock.net_connect_allowed?(request_signature.uri)
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
+
+          [request_signature, webmock_response]
         end
 
+        def self.invoke_callbacks(request_signature, webmock_response)
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {lib: :patron}, request_signature, webmock_response)
+        end
+
+        def self.invoke_real_request_callbacks(request_signature, patron_response)
+          return unless WebMock::CallbackRegistry.any_callbacks?
+
+          WebMock::CallbackRegistry.invoke_callbacks(
+            {lib: :patron, real_request: true}, request_signature,
+              build_webmock_response(patron_response))
+        end
+
+        # Callbacks run before the block, so they also run when it leaves
+        # before the end of the body
         def self.stream_stubbed_response(webmock_response, request_signature, default_response_charset)
           head = build_patron_response(webmock_response, default_response_charset)
+          invoke_callbacks(request_signature, webmock_response)
           stream = StubbedResponseStream.new(head, webmock_response.body)
           begin
             yield stream
@@ -312,8 +311,8 @@ if defined?(::Patron::Session)
           ([status_line] + header_fields).join("\r\n")
         end
 
-        # Takes a Patron::Response, or the Patron::TransferStats of a streamed
-        # request, which has no body
+        # Takes a Patron::Response, or the Patron::ResponseStream of a streamed
+        # request, whose body is not read here
         def self.build_webmock_response(patron_response)
           webmock_response = WebMock::Response.new
           reason = patron_response.status_line.

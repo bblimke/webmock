@@ -1,5 +1,29 @@
 # Changelog
 
+# Unreleased
+
+* Fix `get_file` with Patron 1.1 (#1147)
+
+    Previously, with Patron 1.1, `get_file` ignored stubs: it made a real request and wrote the real response to the file, even when real connections were disabled.
+
+    With Patron 1.1, `get_file` to a file that cannot be written raises `Errno::EACCES`, as Patron does, instead of `ArgumentError`.
+
+    Thanks to [Bob Aman](https://github.com/sporkmonger)
+
+* Stub and block streamed requests with Patron 1.1 (#1147)
+
+    Previously, WebMock did not see requests made with `Session#stream` or the `get_stream`, `post_stream`, `put_stream` and `patch_stream` methods added in Patron 1.1, so they always reached the network.
+
+    A stubbed streamed request yields a stream that reads the stubbed body, and returns a `Patron::TransferStats`. After-request callbacks run before the block, so they also run when the block exits early. For a real streamed request, callbacks receive the status and headers without the body.
+
+    Thanks to [Bob Aman](https://github.com/sporkmonger)
+
+* Fix a deprecation warning with Patron 1.0 and later (#1142)
+
+    Previously, the first stubbed request printed `Patron::Response.new with positional arguments is deprecated`.
+
+    Thanks to [Julik Tarkhanov](https://github.com/julik)
+
 # 3.34.0
 
 * Allow `with(query: :any)` to match any query string (#1099)
