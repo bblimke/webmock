@@ -22,21 +22,16 @@ if defined?(::Patron::Session)
 
         class WebMockPatronSession < ::Patron::Session
           def handle_request(req)
-            request_signature, webmock_response =
-              WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
+            request_signature, webmock_response = PatronAdapter.register_request(req)
 
             if webmock_response
-              WebMock::HttpLibAdapters::PatronAdapter.
-                handle_file_name(req, webmock_response)
-              res = WebMock::HttpLibAdapters::PatronAdapter.
-                build_patron_response(webmock_response, default_response_charset)
-              WebMock::HttpLibAdapters::PatronAdapter.
-                invoke_callbacks(request_signature, webmock_response)
+              PatronAdapter.handle_file_name(req, webmock_response)
+              res = PatronAdapter.build_patron_response(webmock_response, default_response_charset)
+              PatronAdapter.invoke_callbacks(request_signature, webmock_response)
               res
             else
               res = super
-              WebMock::HttpLibAdapters::PatronAdapter.
-                invoke_real_request_callbacks(request_signature, res)
+              PatronAdapter.invoke_real_request_callbacks(request_signature, res)
               res
             end
           end
@@ -48,18 +43,16 @@ if defined?(::Patron::Session)
               return super unless block
 
               req = build_request(action, url, headers, **options)
-              request_signature, webmock_response =
-                WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
+              request_signature, webmock_response = PatronAdapter.register_request(req)
 
               if webmock_response
-                WebMock::HttpLibAdapters::PatronAdapter.
-                  stream_stubbed_response(webmock_response, request_signature, default_response_charset, &block)
+                PatronAdapter.stream_stubbed_response(webmock_response, request_signature,
+                  default_response_charset, &block)
               else
                 # Callbacks run once the head has arrived, so they also run
                 # when the block leaves before the end of the body
                 super(action, url, headers, **options) do |stream|
-                  WebMock::HttpLibAdapters::PatronAdapter.
-                    invoke_real_request_callbacks(request_signature, stream)
+                  PatronAdapter.invoke_real_request_callbacks(request_signature, stream)
                   yield stream
                 end
               end
@@ -69,21 +62,17 @@ if defined?(::Patron::Session)
 
             # Called by #get_file, and by #request for a GET with a file
             def download(req, path)
-              request_signature, webmock_response =
-                WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
+              request_signature, webmock_response = PatronAdapter.register_request(req)
 
               if webmock_response
                 # Like Patron, with the body in the file only
-                res = WebMock::HttpLibAdapters::PatronAdapter.
-                  build_patron_response(webmock_response, default_response_charset, with_body: false)
+                res = PatronAdapter.build_patron_response(webmock_response, default_response_charset, with_body: false)
                 File.open(path, "wb") { |f| f.write(webmock_response.body) }
-                WebMock::HttpLibAdapters::PatronAdapter.
-                  invoke_callbacks(request_signature, webmock_response)
+                PatronAdapter.invoke_callbacks(request_signature, webmock_response)
                 res
               else
                 res = super
-                WebMock::HttpLibAdapters::PatronAdapter.
-                  invoke_real_request_callbacks(request_signature, res)
+                PatronAdapter.invoke_real_request_callbacks(request_signature, res)
                 res
               end
             end
@@ -110,12 +99,12 @@ if defined?(::Patron::Session)
 
           def read(length = nil, outbuf = nil)
             ensure_open!
-            outbuf ? @body.read(length, outbuf) : @body.read(length)
+            @body.read(length, outbuf)
           end
 
           def readpartial(maxlen, outbuf = nil)
             ensure_open!
-            outbuf ? @body.readpartial(maxlen, outbuf) : @body.readpartial(maxlen)
+            @body.readpartial(maxlen, outbuf)
           end
 
           def each
@@ -284,7 +273,7 @@ if defined?(::Patron::Session)
         # Callbacks run before the block, so they also run when it leaves
         # before the end of the body
         def self.stream_stubbed_response(webmock_response, request_signature, default_response_charset)
-          head = build_patron_response(webmock_response, default_response_charset)
+          head = build_patron_response(webmock_response, default_response_charset, with_body: false)
           invoke_callbacks(request_signature, webmock_response)
           stream = StubbedResponseStream.new(head, webmock_response.body)
           begin

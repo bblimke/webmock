@@ -17,6 +17,20 @@ unless RUBY_PLATFORM =~ /java/
         @sess.base_url = "http://www.example.com"
       end
 
+      after(:each) do
+        WebMock.disable_net_connect!
+        WebMock.reset_callbacks
+      end
+
+      let(:real_statuses) { [] }
+
+      # Allows real requests and records the status of each one
+      def real_session
+        WebMock.allow_net_connect!
+        WebMock.after_request(real_requests_only: true) { |_, response| real_statuses << response.status }
+        Patron::Session.new.tap { |sess| sess.base_url = "http://#{WebMockServer.instance.host_with_port}/" }
+      end
+
       it "should allow stubbing PATCH request with body" do
         stub_request(:patch, "http://www.example.com/")
           .with(body: "abc")
@@ -34,8 +48,6 @@ unless RUBY_PLATFORM =~ /java/
 
         after(:each) do
           FileUtils.rm_rf(@dir_path) if File.exist?(@dir_path)
-          WebMock.disable_net_connect!
-          WebMock::CallbackRegistry.reset
         end
 
         it "should work with get_file" do
@@ -51,15 +63,11 @@ unless RUBY_PLATFORM =~ /java/
         end
 
         it "should make a real get_file request when net connect is allowed" do
-          WebMock.allow_net_connect!
-          sess = Patron::Session.new
-          sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
-          statuses = []
-          WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
+          sess = real_session
           sess.get_file("/", @file_path)
           expect(File.read(@file_path)).to eq("hello world")
-          expect(statuses).to eq([[200, "OK"]])
-          expect(a_request(:get, "http://#{WebMockServer.instance.host_with_port}/")).to have_been_made.once
+          expect(real_statuses).to eq([[200, "OK"]])
+          expect(a_request(:get, sess.base_url)).to have_been_made.once
         end
 
         if Patron::Session.public_method_defined?(:stream)
@@ -130,11 +138,6 @@ unless RUBY_PLATFORM =~ /java/
 
       if Patron::Session.public_method_defined?(:stream)
         describe "streamed requests" do
-          after(:each) do
-            WebMock.disable_net_connect!
-            WebMock::CallbackRegistry.reset
-          end
-
           it "should yield the stubbed head and body" do
             stub_request(:get, "www.example.com/stream").
               to_return(status: [201, "Created"], headers: {"Content-Type" => "text/plain"}, body: "abcdef")
@@ -266,26 +269,16 @@ unless RUBY_PLATFORM =~ /java/
           end
 
           it "should make a real request when net connect is allowed" do
-            WebMock.allow_net_connect!
-            sess = Patron::Session.new
-            sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
-            statuses = []
-            WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
             body = nil
-            stats = sess.get_stream("/") { |stream| body = stream.read }
+            stats = real_session.get_stream("/") { |stream| body = stream.read }
             expect(body).to eq("hello world")
             expect(stats.complete?).to be(true)
-            expect(statuses).to eq([[200, "OK"]])
+            expect(real_statuses).to eq([[200, "OK"]])
           end
 
           it "should invoke callbacks for a real request when the block breaks" do
-            WebMock.allow_net_connect!
-            sess = Patron::Session.new
-            sess.base_url = "http://#{WebMockServer.instance.host_with_port}/"
-            statuses = []
-            WebMock.after_request(real_requests_only: true) { |_, response| statuses << response.status }
-            sess.get_stream("/") { break }
-            expect(statuses).to eq([[200, "OK"]])
+            real_session.get_stream("/") { break }
+            expect(real_statuses).to eq([[200, "OK"]])
           end
         end
       end
