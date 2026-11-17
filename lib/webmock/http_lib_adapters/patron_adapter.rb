@@ -73,8 +73,9 @@ if defined?(::Patron::Session)
                 WebMock::HttpLibAdapters::PatronAdapter.register_request(req)
 
               if webmock_response
+                # Like Patron, with the body in the file only
                 res = WebMock::HttpLibAdapters::PatronAdapter.
-                  build_patron_response(webmock_response, default_response_charset)
+                  build_patron_response(webmock_response, default_response_charset, with_body: false)
                 File.open(path, "wb") { |f| f.write(webmock_response.body) }
                 WebMock::HttpLibAdapters::PatronAdapter.
                   invoke_callbacks(request_signature, webmock_response)
@@ -226,7 +227,7 @@ if defined?(::Patron::Session)
           request_signature
         end
 
-        def self.build_patron_response(webmock_response, default_response_charset)
+        def self.build_patron_response(webmock_response, default_response_charset, with_body: true)
           raise ::Patron::TimeoutError if webmock_response.should_timeout
           webmock_response.raise_error_if_any
 
@@ -238,7 +239,7 @@ if defined?(::Patron::Session)
               status: webmock_response.status[0],
               redirect_count: 0,
               header_data: header_data,
-              body: webmock_response.body.dup,
+              body: with_body ? webmock_response.body.dup : nil,
               default_charset: default_response_charset
             )
           else

@@ -6,6 +6,8 @@
 
     Previously, with Patron 1.1, `get_file` ignored stubs: it made a real request and wrote the real response to the file, even when real connections were disabled.
 
+    With Patron 1.1, a stubbed `get_file` returns a response with a `nil` body, as Patron does. Read the body from the file.
+
     With Patron 1.1, `get_file` to a file that cannot be written raises `Errno::EACCES`, as Patron does, instead of `ArgumentError`.
 
     Thanks to [Bob Aman](https://github.com/sporkmonger)

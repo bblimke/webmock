@@ -81,6 +81,13 @@ unless RUBY_PLATFORM =~ /java/
             expect(a_request(:get, "www.example.com")).to have_been_made.once
           end
 
+          it "should return a response without a body for get_file, as Patron does" do
+            stub_request(:get, "www.example.com").to_return(body: "abc")
+            response = @sess.get_file("/", @file_path)
+            expect(response.body).to be_nil
+            expect(File.read(@file_path)).to eq("abc")
+          end
+
           it "should match the stub for a GET request with the file option" do
             stub_request(:get, "www.example.com").to_return(body: "abc")
             @sess.request(:get, "/", {}, file: @file_path)
