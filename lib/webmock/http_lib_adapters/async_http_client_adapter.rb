@@ -129,17 +129,30 @@ if defined?(Async::HTTP)
         end
 
         def build_webmock_response(response)
-          body = response.read
-          response.body = ::Protocol::HTTP::Body::Buffered.wrap(body)
+          head_length = response.body.length if head_body?(response.body)
+
+          if head_length.nil?
+            body = response.read
+            response.body = ::Protocol::HTTP::Body::Buffered.wrap(body)
+          end
 
           webmock_response = WebMock::Response.new
           webmock_response.status = [
             response.status,
             WebMock::HttpLibAdapters::AsyncHttpClientAdapter.status_descriptions[response.status]
           ]
-          webmock_response.headers = build_webmock_response_headers(response)
+          headers = build_webmock_response_headers(response)
+          # The response to a HEAD request carries its size only in the framing,
+          # which async-http moves from the headers onto the body. Keep that
+          # body, and record the size as the Content-Length the server sent.
+          headers['content-length'] ||= [head_length.to_s] if head_length
+          webmock_response.headers = headers
           webmock_response.body = body
           webmock_response
+        end
+
+        def head_body?(body)
+          defined?(::Protocol::HTTP::Body::Head) && body.is_a?(::Protocol::HTTP::Body::Head)
         end
 
         def build_webmock_response_headers(response)
@@ -215,7 +228,7 @@ if defined?(Async::HTTP)
           def call(request)
             request.read
             webmock_response = get_webmock_response(request)
-            build_response(webmock_response)
+            build_response(webmock_response, head: request.method == 'HEAD')
           end
 
           def add_webmock_response(request, webmock_response)
@@ -235,19 +248,30 @@ if defined?(Async::HTTP)
             @webmock_responses ||= {}
           end
 
-          def build_response(webmock_response)
+          def build_response(webmock_response, head: false)
+            content_length = nil
             headers = (webmock_response.headers || {}).each_with_object([]) do |(k, value), o|
-              next if FRAMING_HEADERS.include?(k.downcase)
+              if FRAMING_HEADERS.include?(k.downcase)
+                content_length = Array(value).first if k.casecmp?('content-length')
+                next
+              end
 
               Array(value).each do |v|
                 o.push [k, v]
               end
             end
 
+            body = webmock_response.body
+            # A HEAD response has no body to take its length from, so the
+            # stub's Content-Length is the only size it can declare.
+            if head && content_length.to_s.match?(/\A\d+\z/) && defined?(::Protocol::HTTP::Body::Head)
+              body = ::Protocol::HTTP::Body::Head.new(Integer(content_length, 10))
+            end
+
             ::Protocol::HTTP::Response[
               webmock_response.status[0],
               headers,
-              webmock_response.body
+              body
             ]
           end
         end
