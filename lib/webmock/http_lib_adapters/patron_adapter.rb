@@ -93,7 +93,7 @@ if defined?(::Patron::Session)
 
           def initialize(head, body)
             @head = head
-            @body = StringIO.new(body.to_s.b)
+            @body = body
             @closed = false
           end
 
@@ -141,14 +141,6 @@ if defined?(::Patron::Session)
 
           def closed?
             @closed
-          end
-
-          def downloaded_bytes
-            @body.pos
-          end
-
-          def complete?
-            @body.eof?
           end
 
           def inspect
@@ -201,7 +193,9 @@ if defined?(::Patron::Session)
             end
           end
 
-          headers = req.headers
+          # A copy, so the Authorization header added below for matching is
+          # not sent with a real request
+          headers = req.headers.dup
 
           if req.credentials
             headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(req.credentials)
@@ -275,7 +269,10 @@ if defined?(::Patron::Session)
         def self.stream_stubbed_response(webmock_response, request_signature, default_response_charset)
           head = build_patron_response(webmock_response, default_response_charset, with_body: false)
           invoke_callbacks(request_signature, webmock_response)
-          stream = StubbedResponseStream.new(head, webmock_response.body)
+          # Kept out of the stream, so the stream has only the methods of
+          # Patron::ResponseStream
+          body = StringIO.new(webmock_response.body.to_s.b)
+          stream = StubbedResponseStream.new(head, body)
           begin
             yield stream
           ensure
@@ -287,10 +284,10 @@ if defined?(::Patron::Session)
             status: head.status,
             redirect_count: head.redirect_count,
             header_data: build_header_data(webmock_response),
-            downloaded_bytes: stream.downloaded_bytes,
+            downloaded_bytes: body.pos,
             uploaded_bytes: request_signature.body.to_s.bytesize,
             timings: {},
-            complete: stream.complete?,
+            complete: body.eof?,
             default_charset: default_response_charset
           )
         end

@@ -5,6 +5,7 @@ unless RUBY_PLATFORM =~ /java/
   require 'acceptance/patron/patron_spec_helper'
   require 'tmpdir'
   require 'fileutils'
+  require 'socket'
 
   describe "Patron" do
     include PatronSpecHelper
@@ -186,6 +187,13 @@ unless RUBY_PLATFORM =~ /java/
             expect(stats.complete?).to be(true)
           end
 
+          it "should yield a stream with the public methods of Patron::ResponseStream" do
+            stub_request(:get, "www.example.com")
+            stream_methods = nil
+            @sess.get_stream("/") { |stream| stream_methods = stream.public_methods - Object.public_instance_methods }
+            expect(stream_methods).to match_array(Patron::ResponseStream.public_instance_methods - Object.public_instance_methods)
+          end
+
           it "should close the stream when the block ends" do
             stub_request(:get, "www.example.com").to_return(body: "abc")
             stream = nil
@@ -279,6 +287,49 @@ unless RUBY_PLATFORM =~ /java/
           it "should invoke callbacks for a real request when the block breaks" do
             real_session.get_stream("/") { break }
             expect(real_statuses).to eq([[200, "OK"]])
+          end
+        end
+      end
+
+      describe "real requests with credentials" do
+        # Serves one request and returns the head that the session sent
+        def request_head_sent_by
+          server = TCPServer.new("127.0.0.1", 0)
+          thread = Thread.new do
+            client = server.accept
+            lines = []
+            while (line = client.gets) && line != "\r\n"
+              lines << line
+            end
+            client.write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok")
+            client.close
+            lines.join
+          end
+          thread.report_on_exception = false
+
+          WebMock.allow_net_connect!
+          sess = Patron::Session.new
+          sess.base_url = "http://127.0.0.1:#{server.addr[1]}"
+          sess.username = "user"
+          sess.password = "pass"
+          sess.auth_type = :digest
+          yield sess
+          thread.value
+        ensure
+          server.close if server
+        end
+
+        it "should not add a Basic Authorization header to the request" do
+          head = request_head_sent_by { |sess| sess.get("/") }
+          expect(head).not_to match(/^Authorization:/i)
+        end
+
+        if Patron::Session.public_method_defined?(:stream)
+          it "should not add a Basic Authorization header to a get_file request" do
+            Dir.mktmpdir("webmock-") do |dir|
+              head = request_head_sent_by { |sess| sess.get_file("/", File.join(dir, "file")) }
+              expect(head).not_to match(/^Authorization:/i)
+            end
           end
         end
       end

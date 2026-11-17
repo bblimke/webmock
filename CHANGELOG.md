@@ -8,8 +8,6 @@
 
     With Patron 1.1, a stubbed `get_file` returns a response with a `nil` body, as Patron does. Read the body from the file.
 
-    With Patron 1.1, `get_file` to a file that cannot be written raises `Errno::EACCES`, as Patron does, instead of `ArgumentError`.
-
     Thanks to [Bob Aman](https://github.com/sporkmonger)
 
 * Stub and block streamed requests with Patron 1.1 (#1147)
@@ -19,6 +17,10 @@
     A stubbed streamed request yields a stream that reads the stubbed body, and returns a `Patron::TransferStats`. After-request callbacks run before the block, so they also run when the block exits early. For a real streamed request, callbacks receive the status and headers without the body.
 
     Thanks to [Bob Aman](https://github.com/sporkmonger)
+
+* Fix Patron digest authentication when real requests are allowed
+
+    Previously, when a Patron session had a username and password and a request reached the network, WebMock added an `Authorization: Basic ...` header to it. A session with `auth_type: :digest` sent the password in that header instead of waiting for the server's digest challenge.
 
 * Fix a deprecation warning with Patron 1.0 and later (#1142)
 
