@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)
 
