@@ -9,7 +9,7 @@ end
 # Other libraries define a top-level HTTP with a VERSION too, and
 # `require "http"` can load one of them, so look for the HTTP::Client
 # this adapter patches as well.
-if defined?(HTTP) && defined?(HTTP::VERSION) && defined?(HTTP::Client)
+if defined?(HTTP::VERSION) && defined?(HTTP::Client)
   WebMock::VersionChecker.new("HTTP Gem", HTTP::VERSION, "0.6.0").check_version!
 
   module WebMock

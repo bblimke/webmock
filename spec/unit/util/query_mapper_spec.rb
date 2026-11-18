@@ -83,6 +83,16 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a']).to eq((0..10).map { |i| {'b' => "v#{i}"} })
     end
 
+    it "should order indexes with leading zeros the same way whatever their order in the query" do
+      expect(subject.query_to_values("a[1]=y&a[01]=x")['a']).to eq(["x", "y"])
+      expect(subject.query_to_values("a[01]=x&a[1]=y")['a']).to eq(["x", "y"])
+    end
+
+    it "should keep a hash when a key only has digits on one of its lines" do
+      hsh = subject.query_to_values("a[x%0A1]=foo&a[2]=bar")
+      expect(hsh['a']).to eq({"x\n1" => "foo", "2" => "bar"})
+    end
+
     it "should parse hash query with key starting with non word character" do
       query = "a[$in]=1".freeze
       hsh = subject.query_to_values(query)

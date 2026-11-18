@@ -28,6 +28,20 @@
 
     Thanks to [Julik Tarkhanov](https://github.com/julik)
 
+* Fix `require "webmock"` failing next to other libraries that define `HTTP::VERSION` (#1139)
+
+    Previously, WebMock loaded its adapter for the `http` gem whenever a top-level `HTTP` with a `VERSION` was defined. Other libraries define one too, such as the gem published on RubyGems as `http.rb` (a different gem from `http`, which is also called http.rb). With such a library installed, `require "webmock"` raised `NameError: undefined method 'perform' for class 'HTTP::Client'`.
+
+    Thanks to [thoran](https://github.com/thoran)
+
+* Fix matching of indexed params with more than ten entries (#1141)
+
+    Previously, WebMock ordered indexed params such as `a[0]` to `a[10]` as text, so `a[10]` came right after `a[1]`. A stub with the values in index order, such as `with(body: {"a" => [...]})`, did not match a form body with more than ten indexed values, or a query with more than ten indexed hashes.
+
+    If a stub lists such values in the old order, for example one copied from WebMock's suggested stub, put them in index order.
+
+    Thanks to [Andrii Furmanets](https://github.com/afurm)
+
 # 3.34.0
 
 * Allow `with(query: :any)` to match any query string (#1099)

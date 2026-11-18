@@ -224,10 +224,9 @@ module WebMock::Util
             hash[key] = self.dehash(value)
           end
         end
-        if hash != {} && hash.keys.all? { |key| key =~ /^\d+$/ }
-          hash.sort_by { |key, _| key.to_i }.inject([]) do |accu, (_, value)|
-            accu << value; accu
-          end
+        if hash != {} && hash.keys.all? { |key| key =~ /\A\d+\z/ }
+          # By number, then by text, so "01" and "1" keep a fixed order
+          hash.sort_by { |key, _| [key.to_i, key] }.map(&:last)
         else
           hash
         end

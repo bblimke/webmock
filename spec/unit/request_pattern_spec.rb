@@ -267,6 +267,14 @@ describe WebMock::RequestPattern do
 
     describe "when matching requests on query params" do
 
+      it "should match more than ten indexed hashes in index order" do
+        query = (0..10).map { |i| "a[#{i}][b]=#{i}" }.join("&")
+        pattern_query = {"a" => (0..10).map { |i| {"b" => i.to_s} }}
+        signature = WebMock::RequestSignature.new(:get, "www.example.com?#{query}")
+        expect(WebMock::RequestPattern.new(:get, "www.example.com", query: pattern_query)).to match(signature)
+        expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: pattern_query)).to match(signature)
+      end
+
       describe "when uri is described as regexp" do
         it "should match request query params declared as :any" do
           expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: :any)).
