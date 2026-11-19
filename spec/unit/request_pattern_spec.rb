@@ -891,6 +891,15 @@ describe WebMock::RequestPattern do
             end
           end
 
+          context 'body is an hash with indexed hashes nested in an array of hashes' do
+            let(:body_hash) { {a: [{'b' => [{'c' => '1'}, {'c' => '2'}]}]} }
+
+            it "should match when hash matches body" do
+              expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
+                to match(WebMock::RequestSignature.new(:post, "www.example.com", body: 'a[][b][0][c]=1&a[][b][1][c]=2'))
+            end
+          end
+
           context 'body is an hash with an array of hashes with multiple keys' do
             let(:body_hash) { {a: [{'b' => '1', 'a' => '2'}, {'b' => '3'}]} }
 

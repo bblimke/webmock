@@ -1,5 +1,15 @@
 # Changelog
 
+# Unreleased
+
+* Fix matching of indexed arrays nested inside arrays of hashes (#1144)
+
+    Previously, WebMock read indexed arrays nested inside an array of hashes, such as `a[][b][0][c]=1`, as hashes with `"0"`, `"1"` keys. WebMock writes that form itself, so `with(query: {"a" => [{"b" => [{"c" => "1"}]}]})` with a regexp URI did not match `?a[][b][][c]=1`, and a Typhoeus request with that hash as its body did not match a stub with the same hash.
+
+    If a stub uses the old shape, such as `{"a" => [{"b" => {"0" => {"c" => "1"}}}]}`, for example one copied from WebMock's suggested stub, use arrays instead.
+
+    Thanks to [Hamza Tarar](https://github.com/ihamzatarar)
+
 # 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)
