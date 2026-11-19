@@ -21,15 +21,17 @@ module Net
         return super
       end
       if dest.nil? && block.nil?
-        apply_body_encoding
+        webmock_apply_body_encoding
         return @body
       end
       raise ArgumentError.new("both arg and block given for HTTP method") if dest && block
       return nil if @body.nil?
 
       dest ||= ::Net::ReadAdapter.new(block)
-      dest << @body.dup
+      dest << @body
       @body = dest
+      webmock_apply_body_encoding
+      @body
     ensure
       # allow subsequent calls to #read_body to proceed as normal, without our hack...
       @__read_body_previously_called = true
@@ -38,14 +40,22 @@ module Net
     private
 
     # Net::HTTPResponse#read_body applies the encoding set with #body_encoding=
-    # (or Net::HTTP#response_body_encoding=) to the body it reads, so do the
-    # same for a body that was set without reading it.
-    def apply_body_encoding
-      encoding = defined?(@body_encoding) && @body_encoding
-      return unless encoding && @body.is_a?(String)
+    # (or Net::HTTP#response_body_encoding=) once, to the body it reads, which
+    # happens in the request block or right after it. A stubbed body is set
+    # without reading, so apply the encoding the first time the body is read
+    # or when the request block returns, and ignore later changes to it.
+    def webmock_apply_body_encoding
+      return if defined?(@__body_encoding_applied) && @__body_encoding_applied
+      @__body_encoding_applied = true
 
-      encoding = detect_encoding(@body) unless encoding.is_a?(Encoding)
-      @body = @body.dup.force_encoding(encoding) if encoding
+      encoding = defined?(@body_encoding) && @body_encoding
+      # A frozen body was assigned in the request block, which Net::HTTP
+      # would replace with the body it reads, so leave it as it is
+      return unless encoding && @body.is_a?(String) && !@body.frozen?
+
+      # Net::HTTP detects the encoding from the bytes it read
+      encoding = detect_encoding(@body.b) unless encoding.is_a?(Encoding)
+      @body.force_encoding(encoding) if encoding
     end
   end
 end

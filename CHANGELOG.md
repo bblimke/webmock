@@ -18,6 +18,18 @@
 
     Queries that mix a value and nested keys under the same name, such as `a[][b]=1&a[][b][c]=2` or `a[c]=1&a[c][]=2`, no longer raise `IndexError` or join the values into one string.
 
+* Apply Net::HTTP `response_body_encoding` to stubbed response bodies (#1138)
+
+    Previously, stubbed Net::HTTP responses ignored `Net::HTTP#response_body_encoding=` and `Net::HTTPResponse#body_encoding=`. A body stubbed as binary, for example from a raw response file, stayed `ASCII-8BIT` even with `http.response_body_encoding = true` and a `Content-Type` of `text/plain; charset=utf-8`.
+
+    Stubbed bodies now get the encoding real responses get: with `true`, the charset from the `Content-Type` header or an HTML `<meta>` tag, and otherwise the encoding the setting names. Without the setting, a body keeps the encoding it was stubbed with.
+
+    Thanks to [Yang Bai](https://github.com/ybai08)
+
+* Give each stubbed Net::HTTP response its own copy of the body
+
+    Previously, a stubbed Net::HTTP response returned the stubbed body string itself. A body stubbed with a frozen string, such as a literal in a file with `# frozen_string_literal: true`, made `response.body.force_encoding("UTF-8")` raise `FrozenError`, which a real response never does. Changing the body in place, for example with `response.body << "!"`, changed it for later requests to the same stub too.
+
 # 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)

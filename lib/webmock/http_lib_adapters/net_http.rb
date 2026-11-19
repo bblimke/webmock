@@ -118,6 +118,8 @@ module WebMock
                   {lib: :net_http, real_request: true}, request_signature, webmock_response)
               end
               response.extend Net::WebMockHTTPResponse
+              # Net::HTTP has read the body and applied its encoding already
+              response.instance_variable_set(:@__body_encoding_applied, true)
               block.call response if block
               response
             end
@@ -181,7 +183,9 @@ module WebMock
           body = webmock_response.body
           body = nil if webmock_response.status[0].to_s == '204'
 
-          response.instance_variable_set(:@body, body)
+          # A copy, so that changing the response body, for example its
+          # encoding, does not change the stubbed body
+          response.instance_variable_set(:@body, body&.dup)
           webmock_response.headers.to_a.each do |name, values|
             values = [values] unless values.is_a?(Array)
             values.each do |value|
@@ -203,6 +207,7 @@ module WebMock
           webmock_response.raise_error_if_any
 
           yield response if block_given?
+          response.send(:webmock_apply_body_encoding)
 
           response
         end
