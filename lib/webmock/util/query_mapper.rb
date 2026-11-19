@@ -125,49 +125,63 @@ module WebMock::Util
       def fill_accumulator_for_subscript(accumulator, key, value)
         current_node = accumulator
         subkeys = key.split(/(?=\[[^\[\]]+)/)
-        subkeys[0..-2].each do |subkey|
+        subkeys[0..-2].each_with_index do |subkey, index|
           node = subkey =~ /\[\]\z/ ? [] : {}
+          current_node = array_element_for(current_node, subkeys[index..-1]) if current_node.is_a? Array
           subkey = subkey.gsub(/[\[\]]/, '')
-          if current_node.is_a? Array
-            container = current_node.find { |n| n.is_a?(Hash) && n.has_key?(subkey) }
-            if container
-              current_node = container[subkey]
-            else
-              current_node << {subkey => node}
-              current_node = node
-            end
-          else
-            current_node[subkey] = node unless current_node[subkey]
-            current_node = current_node[subkey]
-          end
+          current_node[subkey] = node unless current_node[subkey]
+          current_node = current_node[subkey]
         end
         last_key = subkeys.last
         array_value = !!(last_key =~ /\[\]$/)
         last_key = last_key.gsub(/[\[\]]/, '')
         if current_node.is_a? Array
-          last_container = current_node.select { |n| n.is_a?(Hash) }.last
-          if last_container && !last_container.has_key?(last_key)
-            if array_value
-              last_container[last_key] ||= []
-              last_container[last_key] << value
-            else
-              last_container[last_key] = value
-            end
+          # Unlike in Rack, a final key that the last hash already has starts
+          # a new hash even with [], so a[][b][]=1&a[][b][]=2 makes two hashes
+          last = current_node.last
+          current_node << {} unless last.is_a?(Hash) && !last.key?(last_key)
+          if array_value
+            (current_node.last[last_key] ||= []) << value
           else
-            if array_value
-              current_node << {last_key => [value]}
-            else
-              current_node << {last_key => value}
-            end
+            current_node.last[last_key] = value
           end
         else
           if array_value
-            current_node[last_key] ||= []
+            if current_node.is_a?(Hash)
+              current_node[last_key] = [current_node[last_key]].compact unless current_node[last_key].is_a?(Array)
+            else
+              # A value is in the way, as in x=5&x[5][]=1, so do what older versions did
+              current_node[last_key] ||= []
+            end
             current_node[last_key] << value unless value.nil?
           else
             current_node[last_key] = value
           end
         end
+      end
+
+      # Returns the hash in an array of hashes that a nested key goes into.
+      # As in Rack, that is the last hash, unless the rest of the key is
+      # already set there, so a[][b][c]=1&a[][b][c]=2 makes two hashes.
+      def array_element_for(array, subkeys)
+        last = array.last
+        return last if last.is_a?(Hash) && key_path_free?(last, subkeys)
+        array << {}
+        array.last
+      end
+
+      # Whether the rest of a key fits into the hash without replacing a
+      # value. A part ending in [] fits while it holds an array.
+      def key_path_free?(hash, subkeys)
+        subkeys.each_with_index do |subkey, index|
+          key = subkey.gsub(/[\[\]]/, '')
+          return true unless hash.key?(key)
+          value = hash[key]
+          return value.is_a?(Array) if subkey.end_with?('[]')
+          return false if index == subkeys.size - 1 || !value.is_a?(Hash)
+          hash = value
+        end
+        false
       end
 
       ##

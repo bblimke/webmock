@@ -267,6 +267,12 @@ describe WebMock::RequestPattern do
 
     describe "when matching requests on query params" do
 
+      it "should not match a query that repeats a nested key under [] with other values" do
+        pattern = WebMock::RequestPattern.new(:get, "www.example.com/?items[][address][city]=X&items[][address][city]=Y")
+        expect(pattern).to match(WebMock::RequestSignature.new(:get, "www.example.com/?items[][address][city]=X&items[][address][city]=Y"))
+        expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "www.example.com/?items[][address][city]=Z&items[][address][city]=Y"))
+      end
+
       it "should match more than ten indexed hashes in index order" do
         query = (0..10).map { |i| "a[#{i}][b]=#{i}" }.join("&")
         pattern_query = {"a" => (0..10).map { |i| {"b" => i.to_s} }}
@@ -897,6 +903,15 @@ describe WebMock::RequestPattern do
             it "should match when hash matches body" do
               expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
                 to match(WebMock::RequestSignature.new(:post, "www.example.com", body: 'a[][b][0][c]=1&a[][b][1][c]=2'))
+            end
+          end
+
+          context 'body is an hash with an array of hashes with the same nested keys' do
+            let(:body_hash) { {items: [{'address' => {'city' => 'X'}}, {'address' => {'city' => 'Y'}}]} }
+
+            it "should match when hash matches body" do
+              expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: body_hash)).
+                to match(WebMock::RequestSignature.new(:post, "www.example.com", body: 'items[][address][city]=X&items[][address][city]=Y'))
             end
           end
 

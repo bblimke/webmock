@@ -65,6 +65,41 @@ describe WebMock::Util::QueryMapper do
       expect(hsh['a'][0]['c']).to eq(['two'])
     end
 
+    it "should start a new hash in an array when a nested key repeats" do
+      query = "items[][address][city]=X&items[][address][city]=Y"
+      hsh = subject.query_to_values(query)
+      expect(hsh['items']).to eq([{"address" => {"city" => "X"}}, {"address" => {"city" => "Y"}}])
+    end
+
+    it "should add a new nested key to the last hash in an array" do
+      query = "a[][b]=1&a[][c][d]=2&a[][b]=3&a[][c][d]=4"
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq([{"b" => "1", "c" => {"d" => "2"}}, {"b" => "3", "c" => {"d" => "4"}}])
+    end
+
+    it "should not raise when a nested key names a value of an earlier hash in an array" do
+      query = "a[][c]=1&a[][b][c]=2&a[][b][c]=3&a[][c][b]=4"
+      hsh = subject.query_to_values(query)
+      expect(hsh['a']).to eq([{"c" => "1", "b" => {"c" => "2"}}, {"b" => {"c" => "3"}, "c" => {"b" => "4"}}])
+    end
+
+    it "should start a new hash in an array when a nested key runs into a value" do
+      expect(subject.query_to_values("a[][b]=1&a[][b][c]=2")['a']).to eq([{"b" => "1"}, {"b" => {"c" => "2"}}])
+      expect(subject.query_to_values("a[][b][c]=1&a[][b][c][]=2")['a']).to eq([{"b" => {"c" => "1"}}, {"b" => {"c" => ["2"]}}])
+    end
+
+    it "should not join a value and a [] value of the same key into one string" do
+      expect(subject.query_to_values("a[c]=1&a[c][]=2")).to eq({"a" => {"c" => ["1", "2"]}})
+    end
+
+    it "should not raise when a [] key runs into a value that contains its name" do
+      expect(subject.query_to_values("x=5&x[5][]=1")).to eq({"x" => "5"})
+    end
+
+    it "should keep plain values between hashes of an array in order" do
+      expect(subject.query_to_values("a[][b]=1&a[]=x&a[][c]=2")['a']).to eq([{"b" => "1"}, "x", {"c" => "2"}])
+    end
+
     it "should parse indexed hashes nested in an array" do
       query = "a[][b][0][c]=1&a[][b][1][c]=2"
       hsh = subject.query_to_values(query)
@@ -181,6 +216,11 @@ describe WebMock::Util::QueryMapper do
     values = {"one" => [{"two" => [{"three" => "four"}]}]}
     expect(subject.values_to_query values).to eq query
     expect(subject.query_to_values query).to eq values
+  end
+
+  it 'converts arrays nested in several hashes of an array, vice versa' do
+    values = {"a" => [{"b" => [{"c" => "1"}]}, {"b" => [{"c" => "2"}, {"c" => "3"}]}]}
+    expect(subject.query_to_values(subject.values_to_query(values))).to eq values
   end
 
   it 'converts an empty array to ?' do

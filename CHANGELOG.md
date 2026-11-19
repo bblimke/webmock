@@ -10,6 +10,14 @@
 
     Thanks to [Hamza Tarar](https://github.com/ihamzatarar)
 
+* Fix matching of arrays of hashes that repeat a nested key
+
+    Previously, WebMock put a nested key repeated under `[]` into the first hash of the array, so `items[][address][city]=X&items[][address][city]=Y` was read as one item with the city `Y`. A stub listing both items did not match, and a stub for `X` and `Y` also matched a request for `Z` and `Y`. Rails and Faraday encode arrays of nested hashes this way.
+
+    Such keys now go into a new hash, as in Rack. If a stub lists such an array as one item, for example one copied from WebMock's suggested stub, list every item.
+
+    Queries that mix a value and nested keys under the same name, such as `a[][b]=1&a[][b][c]=2` or `a[c]=1&a[c][]=2`, no longer raise `IndexError` or join the values into one string.
+
 # 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)
