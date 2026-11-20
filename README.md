@@ -804,7 +804,7 @@ Options and a block given to `with` take the same form as in `stub_request(...).
 
 ### Inspecting the requests made
 
-`WebMock.executed_requests` returns every request made since the last `WebMock.reset!` or `WebMock.reset_executed_requests!`, in order, including repeated ones. Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too. The list holds copies of the request objects that `with` blocks and `after_request` callbacks receive, so changing them doesn't affect WebMock's records. Repeated requests share one copy.
+`WebMock.executed_requests` lists every request made since the last `WebMock.reset!` or `WebMock.reset_executed_requests!`, in the order they were made, including repeats. It lets you check what your code sent with plain Ruby.
 
 ```ruby
 stub_request(:post, "www.example.com/orders")
@@ -818,7 +818,17 @@ request.headers["Content-Type"]  # ===> "application/json"
 JSON.parse(request.body)         # ===> {"name" => "John"}
 ```
 
-The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
+In RSpec, Minitest and Test::Unit you can call it as `executed_requests`, and it starts empty in every test. For example, to check which requests were made and in what order:
+
+```ruby
+expect(executed_requests.map { |request| request.uri.path }).to eq(["/orders", "/orders/1/confirm"])
+```
+
+A few things to know:
+
+* The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
+* The requests are copies, so changing them doesn't change what WebMock recorded.
+* Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history
 
@@ -838,7 +848,7 @@ assert_not_requested :get, "www.example.com"    # ===> Success
 
 ## Clearing request counters
 
-If you want to reset **only** the counters of the executed requests use `WebMock.reset_executed_requests!`
+If you want to reset **only** the counters and the list of executed requests, and keep the stubs, use `WebMock.reset_executed_requests!`
 
 ```ruby
 stub  = stub_request(:get, "www.example.com")
