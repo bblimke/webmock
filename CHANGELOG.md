@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)
 
@@ -8,7 +8,29 @@
 
     Previously, this needed WebMock internals such as `WebMock::RequestRegistry.instance.requested_signatures.hash.keys`, which list each distinct request only once.
 
-    Thanks to [John Gallagher](https://github.com/johngallagher)
+    Thanks to [John Gallagher](https://github.com/johngallagher) for the idea, which we started pairing on at EuRuKo 2024 in Sarajevo.
+
+* Fix stub matching for consecutive Curb PUT requests on the same handle
+
+    After `curl.http_put("first")`, WebMock could match a subsequent `curl.http_put` against the previous body. It now matches the second request with an empty body.
+
+* Run HTTPClient request filters once per attempt on real requests
+
+    Previously, WebMock could run a filter twice, so a filter that generated a request ID could send a different ID to the server than the one WebMock recorded.
+
+* Fix async HTTPClient requests hanging when an `after_request` callback is registered
+
+    Previously, with real connections allowed, WebMock read the response body for the callback from the same stream as your code, so reading part of a `get_async` response before calling `join` could hang.
+
+* Match file and stream uploads by their content
+
+    Previously, a body pattern such as `with(body: "abc")` never matched a Curb, Patron or em-http-request request that uploaded a file or stream, because WebMock compared the pattern with the file object. Stubs now compare it with the uploaded bytes for Curb and Patron, and `assert_requested` does so for all three.
+
+    Blocks given to `stub_request(...).with` still receive the original file or stream.
+
+* Count em-http-request requests blocked by `disable_net_connect!`
+
+    Previously, WebMock did not record them, so `assert_requested` did not count them. They are now counted, as with other HTTP clients.
 
 # 3.36.0
 

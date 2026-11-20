@@ -1314,6 +1314,34 @@ People who submitted patches and new features or suggested improvements. Many th
 * Erik Berlin
 * Josch Bockler
 * Leslie Hoare
+* Chris Gunther
+* hikmetba-bit
+* Daniel Pepper
+* Christian Bruckmayer
+* Chris
+* Jan Graichen
+* Olivier Brisse
+* Henry Blyth
+* Sébastien S.
+* Euisan Kim
+* Alex
+* Andy Williams
+* Tim Mertens
+* Mike Taylor
+* James Rodovich
+* Michael Spiz
+* Tom Brammar
+* Benoit Tigeot
+* nightpool
+* Andrii Furmanets
+* thoran
+* Julik Tarkhanov
+* Bob Aman
+* AmeenKhan12345
+* Andrew K. Fader
+* Yang Bai
+* Hamza Tarar
+* John Gallagher
 
 For a full list of contributors you can visit the
 [contributors](https://github.com/bblimke/webmock/contributors) page.
