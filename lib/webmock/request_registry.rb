@@ -5,6 +5,10 @@ module WebMock
   class RequestRegistry
     include Singleton
 
+    # Used by #atomically, allocated once rather than on every request.
+    DEFER_INTERRUPTS = { Object => :on_blocking }.freeze
+    private_constant :DEFER_INTERRUPTS
+
     attr_accessor :requested_signatures
 
     def initialize
@@ -23,8 +27,9 @@ module WebMock
 
     # Records a request made through an HTTP client adapter. The list holds
     # the copy the counter keeps of each distinct request, so a caller reusing
-    # its body buffer cannot change it, and a suite that never resets keeps
-    # one copy of each distinct request.
+    # its body buffer cannot change it. A repeated request adds only a
+    # reference to that copy, so a suite that never resets keeps one copy of
+    # each distinct request.
     def put(request_signature)
       atomically do
         @executed_requests << requested_signatures.put(request_signature)
@@ -58,13 +63,12 @@ module WebMock
       end
     end
 
-
     private
 
     # An interrupt such as Timeout can still stop a thread waiting for the
     # lock, but not one between the two updates, where nothing blocks.
     def atomically(&block)
-      Thread.handle_interrupt(Object => :on_blocking) do
+      Thread.handle_interrupt(DEFER_INTERRUPTS) do
         @lock.synchronize(&block)
       end
     end

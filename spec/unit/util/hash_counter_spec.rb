@@ -38,8 +38,12 @@ describe WebMock::Util::HashCounter do
     buffer = +"first"
     counter.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))
     buffer.replace("second")
+    # Enough other keys that Ruby rehashes the table.
+    20.times { |i| counter.put(WebMock::RequestSignature.new(:get, "www.example.com/#{i}")) }
+    counter.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))
     counter.put(WebMock::RequestSignature.new(:post, "www.example.com", body: "first"))
     expect(counter.get(WebMock::RequestSignature.new(:post, "www.example.com", body: "first"))).to eq(2)
+    expect(counter.get(WebMock::RequestSignature.new(:post, "www.example.com", body: "second"))).to eq(1)
   end
 
   it "should let a select block use the counter" do

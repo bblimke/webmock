@@ -5,24 +5,32 @@ require 'thread'
 module WebMock
   module Util
     class HashCounter
+      # The key the counter holds, its count, and when it was last put.
+      Entry = Struct.new(:key, :count, :position)
+
       attr_accessor :hash
 
       def initialize
         self.hash = Hash.new(0)
-        @order = {}
-        @keys = {}
+        @entries = {}
         @max = 0
         @lock = ::Mutex.new
       end
 
       # Returns the key the counter holds: a copy of the first one put for an
-      # equal key, so a caller changing its key later cannot change the counts.
+      # equal key. The copy is also what the counter looks keys up by, so a
+      # caller changing its key later cannot change the counts.
       def put(key, num=1)
         @lock.synchronize do
-          key = @keys[key] ||= key.dup
-          hash[key] += num
-          @order[key] = @max += 1
-          key
+          entry = @entries[key]
+          unless entry
+            copy = key.dup
+            entry = @entries[copy] = Entry.new(copy, 0, 0)
+          end
+          entry.count += num
+          entry.position = @max += 1
+          hash[entry.key] = entry.count
+          entry.key
         end
       end
 
@@ -43,7 +51,7 @@ module WebMock
       # Like select, it yields from a snapshot, outside the lock.
       def each(&block)
         entries = @lock.synchronize do
-          @order.sort_by { |_, position| position }.map { |key, _| [key, hash[key]] }
+          @entries.values.sort_by(&:position).map { |entry| [entry.key, entry.count] }
         end
         entries.each { |key, count| yield(key, count) }
       end

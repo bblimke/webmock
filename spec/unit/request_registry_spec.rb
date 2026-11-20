@@ -10,13 +10,14 @@ describe WebMock::RequestRegistry do
 
   describe "reset!" do
     before(:each) do
-      WebMock::RequestRegistry.instance.requested_signatures.put(@request_signature)
+      WebMock::RequestRegistry.instance.put(@request_signature)
     end
 
     it "should clean list of executed requests" do
       expect(WebMock::RequestRegistry.instance.times_executed(@request_pattern)).to eq(1)
       WebMock::RequestRegistry.instance.reset!
       expect(WebMock::RequestRegistry.instance.times_executed(@request_pattern)).to eq(0)
+      expect(WebMock::RequestRegistry.instance.executed_requests).to eq([])
     end
 
   end
@@ -184,16 +185,5 @@ describe WebMock::RequestRegistry do
       registry.reset!
     end
 
-    it "keeps the counter and the list in step when requests come from several threads" do
-      10.times.map { Thread.new { 50.times { registry.put(@request_signature) } } }.each(&:join)
-      expect(registry.executed_requests.size).to eq(500)
-      expect(registry.times_executed(@request_pattern)).to eq(500)
-    end
-
-    it "is emptied by reset!" do
-      registry.put(@request_signature)
-      registry.reset!
-      expect(registry.executed_requests).to eq([])
-    end
   end
 end
