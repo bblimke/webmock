@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.36.0
 
 * Fix matching of indexed arrays nested inside arrays of hashes (#1144)
 
