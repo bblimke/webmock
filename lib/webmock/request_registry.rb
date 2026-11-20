@@ -21,6 +21,15 @@ module WebMock
       end.inject(0) { |sum, (_, times_executed)| sum + times_executed }
     end
 
+    def requests_made
+      to_a
+    end
+
+    def to_a
+      requested_signatures.
+        array
+    end
+
     def to_s
       if requested_signatures.hash.empty?
         "No requests were made."
