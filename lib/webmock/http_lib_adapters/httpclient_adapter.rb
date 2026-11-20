@@ -174,8 +174,9 @@ if defined?(::HTTPClient)
 
       uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
       if req.header.request_query
+        # HTTPClient sends the query argument after the query in the URI
         query = WebMock::Util::QueryMapper.values_to_query(req.header.request_query, notation: WebMock::Config.instance.query_values_notation)
-        uri.query = [uri.query, query].compact.reject(&:empty?).join('&') if query
+        uri.query = [uri.query, query].reject { |part| part.to_s.empty? }.join('&')
       end
       uri.port = req.header.request_uri.port
 

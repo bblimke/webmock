@@ -38,6 +38,14 @@
 
     Thanks to [Andrew K. Fader](https://github.com/andrewfader)
 
+* Keep the URI query of HTTPClient requests that pass a query argument (#1145)
+
+    Previously, WebMock dropped the query in the URI when an HTTPClient request also passed the query argument. `HTTPClient.new.get("http://example.com/?a=1", {"b" => "2"})` requests `/?a=1&b=2`, but WebMock saw `/?b=2`, and with `{}` as the query argument it saw no query at all. A stub or `a_request` expectation could match a URL that was never requested.
+
+    If a stub or expectation for such a request leaves out the query in the URI, add it, for example `stub_request(:get, "http://example.com/?a=1&b=2")`. Record VCR cassettes with such requests again.
+
+    Thanks to [AmeenKhan12345](https://github.com/AmeenKhan12345)
+
 # 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)

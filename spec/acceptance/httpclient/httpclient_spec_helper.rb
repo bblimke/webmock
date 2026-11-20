@@ -12,10 +12,7 @@ module HTTPClientSpecHelper
       c.force_basic_auth = true
       c.set_basic_auth(nil, options[:basic_auth][0], options[:basic_auth][1])
     end
-    query = WebMock::Util::QueryMapper.query_to_values(uri.query, notation: WebMock::Config.instance.query_values_notation)
-    uri_without_query = uri.normalize
-    uri_without_query.query = nil
-    params = [method, uri_without_query.to_s, query, options[:body], options[:headers] || {}]
+    params = [method, uri.normalize.to_s, nil, options[:body], options[:headers] || {}]
     if HTTPClientSpecHelper.async_mode
       connection = c.request_async(*params)
       connection.join

@@ -131,9 +131,15 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
   end
 
 
-  context "when the URI already has a query and the query argument is also passed" do
+  context "with a query argument" do
     before do
       stub_request(:get, /www\.example\.com/)
+    end
+
+    it "adds the query argument to a URI without a query" do
+      HTTPClient.new.get("http://www.example.com/", {"b" => "2"})
+
+      expect(a_request(:get, "www.example.com/?b=2")).to have_been_made.once
     end
 
     it "keeps the URI query and adds the query argument" do
@@ -146,18 +152,6 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
       HTTPClient.new.get("http://www.example.com/?a=1", {})
 
       expect(a_request(:get, "www.example.com/?a=1")).to have_been_made.once
-    end
-
-    it "keeps the URI query when the query argument is nil" do
-      HTTPClient.new.get("http://www.example.com/?a=1", nil)
-
-      expect(a_request(:get, "www.example.com/?a=1")).to have_been_made.once
-    end
-
-    it "uses the query argument when the URI has no query" do
-      HTTPClient.new.get("http://www.example.com/", {"b" => "2"})
-
-      expect(a_request(:get, "www.example.com/?b=2")).to have_been_made.once
     end
   end
 
