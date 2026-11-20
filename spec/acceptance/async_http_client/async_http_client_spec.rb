@@ -179,30 +179,36 @@ unless RUBY_PLATFORM =~ /java/
       )
     end
 
-    it 'keeps the Content-Length of a stubbed response to a HEAD request' do
-      stub_request(:head, 'http://www.example.com').to_return(
-        headers: { 'Content-Length' => '42' }
-      )
+    context 'with a stubbed response to a HEAD request' do
+      it 'gives the body the size from the Content-Length' do
+        stub_request(:head, 'http://www.example.com').to_return(
+          headers: { 'Content-Length' => '42' }
+        )
 
-      length = Async do
-        Async::HTTP::Client.open(Async::HTTP::Endpoint.parse('http://www.example.com')) do |client|
-          client.head('/').body&.length
-        end
-      end.wait
+        expect(make_request(:head, 'http://www.example.com', &:body).length).to eq(42)
+      end
 
-      expect(length).to eq(42)
-    end
+      it 'gives the body the size of the stubbed body without a Content-Length' do
+        stub_request(:head, 'http://www.example.com').to_return(body: 'abc')
 
-    it 'serves a stubbed response to a HEAD request without a Content-Length with no body' do
-      stub_request(:head, 'http://www.example.com')
+        expect(make_request(:head, 'http://www.example.com', &:body).length).to eq(3)
+      end
 
-      body = Async do
-        Async::HTTP::Client.open(Async::HTTP::Endpoint.parse('http://www.example.com')) do |client|
-          client.head('/').body
-        end
-      end.wait
+      it 'has no body without a Content-Length or a body' do
+        stub_request(:head, 'http://www.example.com')
 
-      expect(body).to be_nil
+        expect(make_request(:head, 'http://www.example.com', &:body)).to be_nil
+      end
+
+      it 'prefers the Content-Length to the size of the stubbed body over HTTP/2' do
+        stub_request(:head, 'http://www.example.com').to_return(
+          body: 'abc',
+          headers: { 'Content-Length' => '42' }
+        )
+
+        body = make_request(:head, 'http://www.example.com', protocol: Async::HTTP::Protocol::HTTP2, &:body)
+        expect(body.length).to eq(42)
+      end
     end
 
     it 'works with to_timeout' do
@@ -253,19 +259,13 @@ unless RUBY_PLATFORM =~ /java/
         expect(recorded_response.status).to eq([200, 'OK'])
       end
 
-      it 'keeps the Content-Length of a response to a HEAD request' do
+      it 'keeps the size of a response to a HEAD request' do
         WebMock.allow_net_connect!
 
         recorded_response = nil
         WebMock.after_request { |_request, response| recorded_response = response }
 
-        length = Async do
-          Async::HTTP::Client.open(Async::HTTP::Endpoint.parse(server_url)) do |client|
-            client.head('/').body&.length
-          end
-        end.wait
-
-        expect(length).to eq(11)
+        expect(make_request(:head, server_url, &:body).length).to eq(11)
         expect(recorded_response.headers).to include('Content-Length' => '11')
       end
     end
@@ -469,7 +469,7 @@ unless RUBY_PLATFORM =~ /java/
               headers,
               body
             )
-            response_to_hash(response)
+            block_given? ? yield(response) : response_to_hash(response)
           end
         rescue Async::TimeoutError => e
           e

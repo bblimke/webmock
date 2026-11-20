@@ -30,6 +30,14 @@
 
     Previously, a stubbed Net::HTTP response returned the stubbed body string itself. A body stubbed with a frozen string, such as a literal in a file with `# frozen_string_literal: true`, made `response.body.force_encoding("UTF-8")` raise `FrozenError`, which a real response never does. Changing the body in place, for example with `response.body << "!"`, changed it for later requests to the same stub too.
 
+* Keep the size of async-http responses to HEAD requests (#1143)
+
+    async-http gives the size of a response to a HEAD request as `response.body.length`, not as a header. Previously, a response stubbed with `stub_request(:head, url).to_return(headers: {"Content-Length" => "42"})` ignored the `Content-Length`: its body was `nil` over HTTP/1 and had a length of 0 over HTTP/2. A real response lost its size, with a `nil` body, when a `WebMock.after_request` callback was registered, for example while VCR was recording, and the recorded response had no `Content-Length`.
+
+    A stubbed response now takes its size from the stubbed `Content-Length`, or from the stubbed body without one, as before. A real response keeps its size when a callback is registered, and the recorded response has it as its `Content-Length`.
+
+    Thanks to [Andrew K. Fader](https://github.com/andrewfader)
+
 # 3.35.0
 
 * Fix `get_file` with Patron 1.1 (#1147)
