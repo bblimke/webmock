@@ -74,6 +74,8 @@ rake install
 
 WebMock 2.x has changed somewhat since version 1.x. Changes are listed in [CHANGELOG.md](CHANGELOG.md)
 
+## Setup
+
 ### Cucumber
 
 Create a file `features/support/webmock.rb` with the following contents:
