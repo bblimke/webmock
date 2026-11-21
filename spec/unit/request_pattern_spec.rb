@@ -378,6 +378,38 @@ describe WebMock::RequestPattern do
             query: WebMock::Matchers::HashExcludingMatcher.new({"a" => 2}))).to match(signature)
         end
 
+        it "should compare Integer values in nested matchers as strings" do
+          signature = WebMock::RequestSignature.new(:get, "www.example.com?filter[page]=2&x=1")
+          [
+            WebMock::Matchers::HashIncludingMatcher.new({filter: WebMock::Matchers::HashIncludingMatcher.new({page: 2})}),
+            RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({filter: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({page: 2})}),
+            {"filter" => RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({page: 2}), "x" => 1}
+          ].each do |query|
+            expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: query)).to match(signature)
+          end
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: {"filter" => RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({page: 2}), "x" => 1})).
+            not_to match(signature)
+        end
+
+        it "should compare values in nested RSpec matchers the way RSpec does" do
+          signature = WebMock::RequestSignature.new(:get, "www.example.com?filter[tags][]=ruby")
+          including = RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"tags" => [/^rub/]})
+          excluding = RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({"tags" => [/^rub/]})
+          [
+            RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"filter" => including}),
+            {"filter" => including}
+          ].each do |query|
+            expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: query)).to match(signature)
+          end
+          [
+            RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"filter" => excluding}),
+            {"filter" => excluding}
+          ].each do |query|
+            expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: query)).not_to match(signature)
+          end
+        end
+
         it "should keep matchers given as query values in HashIncluding matchers" do
           expect(WebMock::RequestPattern.new(:get, /.*example.*/,
             query: WebMock::Matchers::HashIncludingMatcher.new({"a" => /\A\d\z/}))).
@@ -655,6 +687,46 @@ describe WebMock::RequestPattern do
         it "should match when query params are the same as declared both in query option or url" do
           expect(WebMock::RequestPattern.new(:get, "www.example.com/?x=3", query: "a[]=b&a[]=c")).
             to match(WebMock::RequestSignature.new(:get, "www.example.com/?x=3&a[]=b&a[]=c"))
+        end
+
+        it "should match a nested matcher in a query hash, with the query in the url too" do
+          pattern = WebMock::RequestPattern.new(:get, "www.example.com/?a=1",
+            query: {filter: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({page: 2})})
+          expect(pattern).to match(WebMock::RequestSignature.new(:get, "www.example.com/?a=1&filter[page]=2&filter[sort]=date"))
+          expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "www.example.com/?filter[page]=2"))
+          expect(pattern.to_s).to start_with("GET http://www.example.com/ with query params")
+        end
+
+        it "should keep the url query and a nested matcher when query params are declared again" do
+          pattern = WebMock::RequestPattern.new(:get, "www.example.com/?tenant=acme",
+            query: {filter: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({status: "open"})})
+          pattern.with(query: {page: "2"})
+          expect(pattern).to match(WebMock::RequestSignature.new(:get, "www.example.com/?tenant=acme&filter[status]=open&page=2"))
+          expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "www.example.com/?filter[status]=open&page=2"))
+          expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "www.example.com/?tenant=acme&page=2"))
+          pattern.with(query: {filter: {status: "open"}})
+          expect(pattern.to_s).to eq("GET http://www.example.com/?filter%5Bstatus%5D=open&page=2&tenant=acme")
+        end
+
+        it "should raise an ArgumentError when query params are declared as :any after a nested matcher" do
+          pattern = WebMock::RequestPattern.new(:get, "www.example.com",
+            query: {filter: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({status: "open"})})
+          expect { pattern.with(query: :any) }.to raise_error(ArgumentError, /query: :any can't be combined with a query in the URI/)
+        end
+
+        it "should keep query values that are neither numbers nor booleans as given" do
+          case_insensitive = Class.new(String) { def ===(other) casecmp(other) == 0 end }
+          proxy = Class.new(BasicObject) { def to_s; "OK" end }.new
+          tenant_filter = Class.new(WebMock::Matchers::HashIncludingMatcher) do
+            def initialize(key, value) super(key => value) end
+          end
+          expect(WebMock::RequestPattern.new(:get, "www.example.com",
+            query: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({key: case_insensitive.new("ok")}))).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?key=OK"))
+          expect(WebMock::RequestPattern.new(:get, "www.example.com", query: tenant_filter.new(:key, "OK"))).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?key=OK"))
+          expect(WebMock::RequestPattern.new(:get, "www.example.com", query: {key: [proxy]})).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?key[]=OK"))
         end
 
         it "should match when query params are declared as HashIncluding matcher matching params" do
@@ -1086,6 +1158,47 @@ describe WebMock::RequestPattern do
             let(:content_type) { 'image/svg+xml' }
             it_behaves_like "a xml body"
           end
+        end
+      end
+
+      describe "when body in a pattern has nested RSpec hash matchers" do
+        let(:signature) do
+          WebMock::RequestSignature.new(:post, "www.example.com",
+            headers: {content_type: 'application/json'}, body: '{"outer":{"tags":["ok!"],"b":{"c":"1"},"x":1}}')
+        end
+
+        it "should compare nested values the way RSpec does" do
+          including = RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({"tags" => [/^ok/], "b" => {"c" => /\d/}})
+          excluding = RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({"tags" => [/^ok/]})
+          expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {outer: including})).to match(signature)
+          expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {outer: excluding})).not_to match(signature)
+        end
+
+        it "should match symbol keys against the parsed body" do
+          including = RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({tags: [/^ok/], b: {c: "1"}})
+          expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {outer: including})).to match(signature)
+        end
+
+        it "should match symbol keys of hashes in RSpec array matchers" do
+          signature = WebMock::RequestSignature.new(:post, "www.example.com",
+            headers: {content_type: 'application/json'}, body: '{"items":[{"id":2}]}')
+          [
+            [RSpec::Mocks::ArgumentMatchers::ArrayIncludingMatcher.new([{id: 2}]), true],
+            [RSpec::Mocks::ArgumentMatchers::ArrayIncludingMatcher.new([RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({id: 2})]), true],
+            [RSpec::Mocks::ArgumentMatchers::ArrayIncludingMatcher.new([RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({id: 2})]), false],
+            [RSpec::Mocks::ArgumentMatchers::ArrayExcludingMatcher.new([{id: 2}]), false]
+          ].each do |items, matches|
+            pattern = WebMock::RequestPattern.new(:post, "www.example.com",
+              body: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({items: items}))
+            expect(pattern.matches?(signature)).to(matches ? be_truthy : be_falsey)
+          end
+        end
+
+        it "should keep a custom matcher that is a BasicObject" do
+          matcher = Class.new(BasicObject) { def ===(other) ::String === other end }.new
+          expect(WebMock::RequestPattern.new(:post, "www.example.com", body: {outer: {"tags" => [matcher]}})).
+            to match(WebMock::RequestSignature.new(:post, "www.example.com",
+              headers: {content_type: 'application/json'}, body: '{"outer":{"tags":["ok!"]}}'))
         end
       end
 

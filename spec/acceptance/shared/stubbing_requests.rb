@@ -210,6 +210,24 @@ shared_examples_for "stubbing requests" do |*adapter_info|
                     body: "foo[xyz]=1")
                 }.to raise_error(WebMock::NetConnectNotAllowedError)
               end
+
+              it "should match a nested hash_including given symbol keys against a json body" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: hash_including(a: 1, b: hash_including(c: 3)))
+                expect(http_request(
+                         :post, "http://www.example.com/", headers: {'Content-Type' => 'application/json'},
+                         body: '{"a":1,"b":{"c":3,"d":4}}').status).to eq("200")
+              end
+
+              it "should not match a nested hash_excluding given symbol keys when the json body has the key" do
+                WebMock.reset!
+                stub_request(:post, "www.example.com").with(body: {a: 1, b: hash_excluding(c: 3)})
+                expect {
+                  http_request(:post, "http://www.example.com/",
+                    headers: {'Content-Type' => 'application/json'},
+                    body: '{"a":1,"b":{"c":3,"d":4}}')
+                }.to raise_error(WebMock::NetConnectNotAllowedError)
+              end
             end
 
             context "when using hash_excluding to match the request body" do

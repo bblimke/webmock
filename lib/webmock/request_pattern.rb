@@ -21,6 +21,10 @@ module WebMock
       rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::Hash(In|Ex)cludingMatcher/
     end
 
+    def rSpecArrayMatcher?(matcher)
+      rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::Array(In|Ex)cludingMatcher/
+    end
+
     # The class name of a possible RSpec matcher, or nil for values that
     # can't be one, which are most values in a pattern. A custom matcher can
     # be a BasicObject, which has no #class.

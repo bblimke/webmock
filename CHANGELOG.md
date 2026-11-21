@@ -38,6 +38,14 @@
 
     WebMock now raises its usual error, and the suggested stub shows such a body as a string.
 
+* Fix nested `hash_including` and `hash_excluding` with symbol keys in RSpec (#900)
+
+    Previously, in RSpec, `with(body: {user: hash_including(role: "admin")})` never matched the JSON body `{"user":{"role":"admin"}}`. WebMock converted the keys of the outer hash to strings, but not those of a matcher inside it, and the parsed body has string keys. For the same reason, a nested `hash_excluding` with symbol keys never excluded anything, so `with(body: {user: hash_excluding(role: "admin")})` matched that body too.
+
+    The same applied to query patterns: `with(query: hash_including(filter: hash_excluding(role: "admin")))` matched `?filter[role]=admin`.
+
+    Nested matchers now get string keys too, as do hashes inside RSpec's `array_including` and `array_excluding`. A test that passed only because a nested `hash_excluding` excluded nothing will now fail.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)
