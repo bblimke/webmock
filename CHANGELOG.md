@@ -8,7 +8,7 @@
 
     Previously, a block given to either method was ignored: it never ran, and the new settings stayed for the rest of the run.
 
-    The settings are global, so other threads see them while the block runs.
+    The settings are global, so other threads see them while the block runs. Don't run such blocks in several threads at once, because they can restore each other's settings in the wrong order.
 
     Thanks to [Yegor Bugayenko](https://github.com/yegor256)
 

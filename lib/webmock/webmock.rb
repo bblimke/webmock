@@ -44,39 +44,37 @@ module WebMock
   end
 
   def self.allow_net_connect!(options = {}, &block)
-    with_restored_net_connect_config(block) do
-      Config.instance.allow_net_connect = true
-      Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
-    end
+    return restoring_net_connect_settings { allow_net_connect!(options); block.call } if block
+
+    Config.instance.allow_net_connect = true
+    Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
 
   def self.disable_net_connect!(options = {}, &block)
-    with_restored_net_connect_config(block) do
-      Config.instance.allow_net_connect = false
-      Config.instance.allow_localhost = options[:allow_localhost]
-      Config.instance.allow = options[:allow]
-      Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
-    end
+    return restoring_net_connect_settings { disable_net_connect!(options); block.call } if block
+
+    Config.instance.allow_net_connect = false
+    Config.instance.allow_localhost = options[:allow_localhost]
+    Config.instance.allow = options[:allow]
+    Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
   end
 
   NET_CONNECT_SETTINGS = %i[allow_net_connect allow_localhost allow net_http_connect_on_start].freeze
   private_constant :NET_CONNECT_SETTINGS
 
-  # Without a block, applies the settings. With a block, applies them only
-  # while the block runs and then restores the settings from before the call,
-  # ignoring any changes made inside the block.
-  def self.with_restored_net_connect_config(block)
-    return yield unless block
-
+  # Runs the block, then puts back the net connect settings from before it,
+  # even if the block raises. Settings assigned inside the block are undone.
+  # An allow list changed in place stays changed, and blocks overlapping in
+  # different threads can restore each other's settings in the wrong order.
+  def self.restoring_net_connect_settings
     saved = NET_CONNECT_SETTINGS.map { |name| [name, Config.instance.public_send(name)] }
     begin
       yield
-      block.call
     ensure
       saved.each { |name, value| Config.instance.public_send(:"#{name}=", value) }
     end
   end
-  private_class_method :with_restored_net_connect_config
+  private_class_method :restoring_net_connect_settings
 
   class << self
     alias :enable_net_connect!   :allow_net_connect!

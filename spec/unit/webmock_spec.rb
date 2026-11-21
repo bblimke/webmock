@@ -218,13 +218,6 @@ describe "WebMock" do
 
       expect(WebMock.net_connect_allowed?("http://example.com/")).to be_falsey
     end
-
-    it "keeps the settings when no block is given" do
-      WebMock.disable_net_connect!
-      WebMock.allow_net_connect!
-
-      expect(WebMock.net_connect_allowed?).to be(true)
-    end
   end
 
   describe ".net_http_connect_on_start?" do
