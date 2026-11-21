@@ -114,10 +114,14 @@ module WebMock
       stub = self.new(signature.method.to_sym, signature.uri.to_s)
 
       if signature.body.to_s != ''
-        body = if signature.url_encoded?
-          WebMock::Util::QueryMapper.query_to_values(signature.body, notation: Config.instance.query_values_notation)
-        else
-          signature.body
+        body = signature.body
+        if signature.url_encoded? && BodyPattern.form_parseable?(body)
+          begin
+            body = WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
+          rescue ArgumentError
+            # Some notations, such as :flat, reject a repeated key, so the
+            # stub shows the body as it is.
+          end
         end
         stub.with(body: body)
       end

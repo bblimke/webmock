@@ -26,6 +26,18 @@
 
     Such stubs now match with every kind of URI.
 
+* Fix stubs with a hash body pattern raising on binary request bodies (#333)
+
+    Previously, a stub such as `stub_request(:post, url).with(body: {"name" => "x"})` raised `ArgumentError: invalid byte sequence in UTF-8` when the request body was binary data, such as an uploaded image. Since WebMock checks the newest stub first, this also broke requests that an older stub would have answered.
+
+    Such a body now doesn't match the hash pattern, so WebMock moves on to the next stub, as it already did for a body that isn't valid JSON.
+
+* Fix unstubbed requests with some form bodies raising `ArgumentError` instead of WebMock's error
+
+    Previously, when a request with a URL encoded body matched no stub, WebMock could raise `ArgumentError` while it built the suggested stub for its error message. This happened when the body was binary data, or when it repeated a key, as in `a=1&a=2`, with `query_values_notation` set to `:flat`.
+
+    WebMock now raises its usual error, and the suggested stub shows such a body as a string.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

@@ -284,4 +284,25 @@ describe WebMock::RequestStub do
 
   end
 
+  describe ".from_request_signature" do
+    it "keeps a form body that isn't valid UTF-8 as a string" do
+      body = "\xFF\xD8\xFFa=1".b
+      signature = WebMock::RequestSignature.new(:post, "www.example.com",
+        headers: {content_type: 'application/x-www-form-urlencoded'}, body: body)
+      stub = WebMock::RequestStub.from_request_signature(signature)
+      expect(stub.request_pattern.body_pattern.pattern).to eq(body)
+    end
+
+    it "keeps a form body as a string when the query notation can't parse it" do
+      WebMock::Config.instance.query_values_notation = :flat
+      body = "tags%5B%5D=a&tags%5B%5D=b"
+      signature = WebMock::RequestSignature.new(:post, "www.example.com",
+        headers: {content_type: 'application/x-www-form-urlencoded'}, body: body)
+      stub = WebMock::RequestStub.from_request_signature(signature)
+      expect(stub.request_pattern.body_pattern.pattern).to eq(body)
+    ensure
+      WebMock::Config.instance.query_values_notation = nil
+    end
+  end
+
 end

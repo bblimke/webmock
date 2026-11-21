@@ -326,6 +326,16 @@ module WebMock
   class BodyPattern
     include RSpecMatcherDetector
 
+    # A String body that isn't valid UTF-8, such as an uploaded file, can't
+    # be a URL encoded form, so it isn't parsed as one.
+    def self.form_parseable?(body)
+      return true unless body.is_a?(String)
+      return true if body.ascii_only?
+
+      body = body.dup.force_encoding(Encoding::UTF_8) unless body.encoding == Encoding::UTF_8
+      body.valid_encoding?
+    end
+
     # Kept so existing references to the constant still resolve.
     BODY_FORMATS = WebMock::Util::ContentType::BODY_FORMATS
 
@@ -376,6 +386,9 @@ module WebMock
       when :xml then
         WebMock::Util::Parsers::XML.parse(body)
       else
+        # A body that isn't valid UTF-8, such as an uploaded file, can't be
+        # a URL encoded form, so it doesn't match a hash.
+        return unless self.class.form_parseable?(body)
         WebMock::Util::QueryMapper.query_to_values(body, notation: Config.instance.query_values_notation)
       end
     rescue WebMock::Util::Parsers::ParseError

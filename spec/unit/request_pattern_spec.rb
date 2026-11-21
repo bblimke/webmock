@@ -854,6 +854,17 @@ describe WebMock::RequestPattern do
           not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
       end
 
+      it "should not match if pattern body is a hash and the request body is binary data that is not valid UTF-8" do
+        expect(WebMock::RequestPattern.new(:put, "www.example.com", body: {a: '1'})).
+          not_to match(WebMock::RequestSignature.new(:put, "www.example.com",
+            headers: {content_type: 'image/jpeg'}, body: "\xFF\xD8\xFF\xE0a=1".b))
+      end
+
+      it "should not match if pattern body is a hash and the request body without a content type is not valid UTF-8" do
+        expect(WebMock::RequestPattern.new(:put, "www.example.com", body: {a: '1'})).
+          not_to match(WebMock::RequestSignature.new(:put, "www.example.com", body: "\xFF\xD8\xFF\xE0a=1".b))
+      end
+
       it "should not match if pattern body is an array but request has no body and content type is json" do
         expect(WebMock::RequestPattern.new(:post, "www.example.com", body: [{a: '1'}])).
           not_to match(WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}))
