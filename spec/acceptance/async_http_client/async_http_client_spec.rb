@@ -270,6 +270,93 @@ unless RUBY_PLATFORM =~ /java/
       end
     end
 
+    context 'when a library takes a connection from the pool' do
+      # async-websocket, for example, uses the pool instead of #call.
+      after { WebMock.disable_net_connect! }
+
+      it 'gets the real pool for a host that allows real connections' do
+        WebMock.disable_net_connect!(allow_localhost: true)
+        authority = WebMockServer.instance.host_with_port
+
+        status = Async do
+          Async::HTTP::Client.open(Async::HTTP::Endpoint.parse("http://#{authority}")) do |client|
+            client.pool.acquire do |connection|
+              request = Protocol::HTTP::Request.new('http', authority, 'GET', '/', nil, Protocol::HTTP::Headers.new, nil)
+              connection.call(request).tap(&:read).status
+            end
+          end
+        end.wait
+
+        expect(status).to eq(200)
+      end
+
+      it 'raises for a host that does not allow real connections' do
+        WebMock.disable_net_connect!
+
+        # Async 1 raises a task result that is an exception, so return its class.
+        error_class = Async do
+          begin
+            Async::HTTP::Client.open(Async::HTTP::Endpoint.parse('http://www.example.com'), &:pool)
+          rescue WebMock::NetConnectNotAllowedError => e
+            e.class
+          end
+        end.wait
+
+        expect(error_class).to eq(WebMock::NetConnectNotAllowedError)
+      end
+
+      def pool_result(url, **options)
+        Async do
+          begin
+            client = Async::HTTP::Client.new(Async::HTTP::Endpoint.parse(url), **options)
+            client.pool.respond_to?(:acquire)
+          rescue WebMock::NetConnectNotAllowedError => e
+            e.class
+          ensure
+            client&.close
+          end
+        end.wait
+      end
+
+      it 'checks a WebSocket endpoint as HTTP' do
+        WebMock.disable_net_connect!(allow_localhost: true)
+        expect(pool_result('ws://127.0.0.1:12345/')).to eq(true)
+        expect(pool_result('wss://localhost/')).to eq(true)
+      end
+
+      it 'checks the endpoint it connects to, not an authority given for requests' do
+        WebMock.disable_net_connect!(allow_localhost: true)
+        expect(pool_result('http://www.example.com/', authority: 'localhost')).to eq(WebMock::NetConnectNotAllowedError)
+      end
+
+      it 'checks the host the endpoint connects to, which can differ from its URL' do
+        WebMock.disable_net_connect!(allow_localhost: true)
+        allowed = Async::HTTP::Endpoint.parse('http://www.example.com/', hostname: '127.0.0.1')
+        blocked = Async::HTTP::Endpoint.parse('http://localhost/', hostname: '192.0.2.1')
+        results = [allowed, blocked].map do |endpoint|
+          Async do
+            begin
+              client = Async::HTTP::Client.new(endpoint)
+              client.pool.respond_to?(:acquire)
+            rescue WebMock::NetConnectNotAllowedError => e
+              e.class
+            ensure
+              client&.close
+            end
+          end.wait
+        end
+        expect(results).to eq([true, WebMock::NetConnectNotAllowedError])
+      end
+
+      it "follows WebMock's own settings when an integration such as VCR allows every request" do
+        WebMock.disable_net_connect!
+        # VCR makes net_connect_allowed? allow every request and decides each
+        # one in a global stub, which a connection from the pool bypasses.
+        allow(WebMock).to receive(:net_connect_allowed?).and_return(true)
+        expect(pool_result('http://www.example.com/')).to eq(WebMock::NetConnectNotAllowedError)
+      end
+    end
+
     context 'scheme and protocol' do
       let(:default_response_headers) { {} }
 

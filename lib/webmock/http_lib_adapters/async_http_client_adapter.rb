@@ -103,6 +103,23 @@ if defined?(Async::HTTP)
           @webmock_client.close
         end
 
+        # Some libraries, such as async-websocket, take a connection from the
+        # pool instead of calling #call. WebMock can't see or stub what they
+        # send, so hand out the real pool only when WebMock's own settings
+        # allow real connections to the host the pool connects to: the
+        # endpoint's, whatever authority the requests name, with a ws or wss
+        # endpoint checked as http or https. VCR can't record or replay such
+        # connections, so it can't allow them.
+        def pool
+          host = @endpoint.hostname
+          host = "[#{host}]" if host.include?(":") && !host.start_with?("[")
+          uri = Addressable::URI.new(scheme: @endpoint.secure? ? "https" : "http", host: host, port: @endpoint.port, path: "/")
+          unless WebMock.net_connect_allowed_by_settings?(uri)
+            raise WebMock::NetConnectNotAllowedError.new(WebMock::RequestSignature.new(:get, uri))
+          end
+          @network_client.pool
+        end
+
         private
 
         def build_request_signature(request)

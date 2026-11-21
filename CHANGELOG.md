@@ -14,6 +14,12 @@
 
     WebMock now records the body of a URL encoded form given as a hash or an array of pairs, as Net::HTTP encodes it, and leaves sending the request to Net::HTTP. A multipart form, or a form given as another enumerable, which may be read only once, is recorded without a body, as before. If VCR, hooked into WebMock, matches requests on their body, record cassettes that contain such requests again.
 
+* Fix async-websocket connections failing with WebMock enabled (#953)
+
+    Previously, connecting with `Async::WebSocket::Client` raised `NoMethodError: undefined method 'acquire' for nil`, even to a host that allowed real connections. async-websocket takes a connection from the async-http client's pool, and WebMock's version of the client had no pool.
+
+    The client now hands out its real connection pool when WebMock's settings allow real connections to the host, and raises `WebMock::NetConnectNotAllowedError` otherwise. WebMock can't stub or record what a library sends over such a connection, and neither can VCR, so with VCR hooked into WebMock, allow the host with `WebMock.disable_net_connect!(allow: ...)`.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

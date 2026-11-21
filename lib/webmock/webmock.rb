@@ -82,6 +82,14 @@ module WebMock
   end
 
   def self.net_connect_allowed?(uri = nil)
+    net_connect_allowed_by_settings?(uri)
+  end
+
+  # Whether WebMock's own settings allow a real connection. VCR, for one,
+  # redefines net_connect_allowed? to allow every request and decides each
+  # one in a global stub, so a connection that no stub sees, such as one
+  # taken from an async-http connection pool, is checked with this.
+  def self.net_connect_allowed_by_settings?(uri = nil)
     return !!Config.instance.allow_net_connect if uri.nil?
 
     if uri.is_a?(String)
