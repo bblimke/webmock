@@ -889,6 +889,28 @@ expect(stub).not_to have_been_requested
 expect(stub2).not_to have_been_requested
 ```
 
+## Global stubs
+
+`WebMock.reset!` removes the stubs declared with `stub_request`, and `webmock/rspec`, `webmock/minitest`, `webmock/test_unit` and `webmock/cucumber` call it after every test or scenario. To answer some requests in every test, for example calls to a metrics service, declare a global stub once when the test suite starts:
+
+```ruby
+WebMock.globally_stub_request do |request|
+  { status: 200, body: "{}" } if request.uri.host == "metrics.example.com"
+end
+```
+
+The block receives each request and returns a response hash with the same keys as `to_return`, or `nil` to let other stubs handle the request. `WebMock.reset!` doesn't remove global stubs, and there is no way to remove only one, so declare each of them once, for example in RSpec's `before(:suite)`.
+
+Global stubs are checked before the stubs declared with `stub_request`. Pass `:after_local_stubs` to check them last, so a test can override them with its own stubs:
+
+```ruby
+WebMock.globally_stub_request(:after_local_stubs) do |request|
+  { status: 200, body: "{}" } if request.uri.host == "metrics.example.com"
+end
+```
+
+Requests answered by a global stub are recorded like any other, so `a_request`, `assert_requested` and `executed_requests` include them.
+
 ## Disabling and enabling WebMock or only some http client adapters
 
 ```ruby
