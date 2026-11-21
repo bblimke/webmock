@@ -3,6 +3,7 @@ require 'acceptance/webmock_shared'
 
 unless RUBY_PLATFORM =~ /java/
   require 'acceptance/curb/curb_spec_helper'
+  require 'zlib'
 
   shared_examples_for "Curb" do
     include CurbSpecHelper
@@ -47,6 +48,40 @@ unless RUBY_PLATFORM =~ /java/
       expect(stream.pos).to eq(7)
       stream.string.replace("changed")
       expect(executed_requests.last.body).to eq("data")
+    end
+
+    it "forgets the previous upload when the handle is reset" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      curl = Curl::Easy.new(url)
+      File.open(__FILE__, "rb") { |file| curl.http_put(file) }
+      curl.reset
+      curl.url = url
+      curl.http_put
+      expect(executed_requests.last.body.to_s).to be_empty
+    end
+
+    it "respects Content-Length when recording a stream upload" do
+      url = "http://example.com/upload"
+      stub_request(:put, url).with(body: "abc")
+      curl = Curl::Easy.new(url)
+      curl.headers["Content-Length"] = "3"
+      stream = StringIO.new("abcdef")
+      curl.http_put(stream)
+      expect(stream.pos).to eq(0)
+      expect(executed_requests.last.body).to eq("abc")
+    end
+
+    it "reads a gzip upload through the reader and restores its uncompressed position" do
+      url = "http://example.com/upload"
+      stub_request(:put, url).with(body: "payload")
+      source = StringIO.new(Zlib.gzip("prefix:payload"))
+      Zlib::GzipReader.wrap(source) do |reader|
+        reader.read(7)
+        Curl::Easy.new(url).http_put(reader)
+        expect(reader.read).to eq("payload")
+      end
+      expect(executed_requests.last.body).to eq("payload")
     end
 
     it "leaves a pipe available for Curb to read" do

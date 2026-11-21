@@ -828,7 +828,7 @@ A few things to know:
 
 * The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
 * The requests are copies, so changing them doesn't change what WebMock recorded.
-* For Curb PUT uploads, a regular file or `StringIO` body contains the bytes from the upload's starting position. Other streams, such as pipes, are represented by their `to_s` so Curb can still read them.
+* For Curb PUT uploads, history captures bytes from the reader’s current position, up to the specified `Content-Length`. This works with regular files, `StringIO`, and rewindable readers over them. Pipes and other one-pass streams are represented by their `to_s` so the client can still read them.
 * Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history

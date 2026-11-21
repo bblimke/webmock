@@ -181,13 +181,19 @@ if defined?(::Patron::Session)
           uri.path = uri.normalized_path.gsub("[^:]//","/")
 
           if [:put, :post, :patch].include?(req.action)
-            if req.file_name
-              if !File.exist?(req.file_name) || !File.readable?(req.file_name)
+            data = req.upload_data
+            path = req.file_name || (data.to_path if data.respond_to?(:to_path))
+            if path
+              if !File.exist?(path) || !File.readable?(path)
                 raise ArgumentError.new("Unable to open specified file.")
               end
-              request_body = File.read(req.file_name)
-            elsif req.upload_data
-              request_body = req.upload_data
+              # A named pipe or device must be left for Patron to open.
+              request_body = File.file?(path) ? File.binread(path) : path.to_s
+            elsif data.respond_to?(:read) && OriginalPatronSession.public_method_defined?(:stream)
+              # Patron 1.1 added streaming uploads and Session#stream together.
+              request_body = WebMock::Util::UploadBody.read(data, req.headers)
+            elsif data
+              request_body = data.to_s
             else
               raise ArgumentError.new("Must provide either data or a filename when doing a PUT or POST")
             end

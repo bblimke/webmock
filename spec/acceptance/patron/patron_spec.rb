@@ -116,6 +116,18 @@ unless RUBY_PLATFORM =~ /java/
           end
         end
 
+        it "records the whole file when the request body has a path" do
+          contents = "abc\xFF".b
+          File.binwrite(@file_path, contents)
+          stub_request(:post, "www.example.com").with(body: contents)
+          File.open(@file_path, "rb") do |file|
+            file.read(1)
+            @sess.post("/", file)
+            expect(file.pos).to eq(1)
+          end
+          expect(executed_requests.last.body).to eq(contents)
+        end
+
         it "should work with put_file" do
           File.open(@file_path, "w") {|f| f.write "abc"}
           stub_request(:put, "www.example.com").with(body: "abc")
