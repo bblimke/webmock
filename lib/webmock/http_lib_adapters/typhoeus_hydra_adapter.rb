@@ -2,6 +2,7 @@
 
 begin
   require 'typhoeus'
+  require 'pathname'
 rescue LoadError
   # typhoeus not found
 end
@@ -80,6 +81,18 @@ if defined?(Typhoeus)
           request_signature
         end
 
+        def self.signature_for_history(signature)
+          return signature unless signature.body.is_a?(Array)
+
+          # Ethon uploads file parts by path and stringifies non-scalar form values.
+          signature.with_body_values do |value|
+            case value
+            when File, Tempfile then Pathname.new(value.path)
+            when String, Numeric, Symbol, TrueClass, FalseClass, NilClass then value
+            else value.to_s
+            end
+          end
+        end
 
         def self.build_webmock_response(typhoeus_response)
           webmock_response = WebMock::Response.new
@@ -192,7 +205,8 @@ if defined?(Typhoeus)
             request_signature = ::WebMock::HttpLibAdapters::TyphoeusAdapter.build_request_signature(request, url)
             request.block_connection = false;
 
-            ::WebMock::RequestRegistry.instance.put(request_signature)
+            recorded = ::WebMock::HttpLibAdapters::TyphoeusAdapter.signature_for_history(request_signature)
+            ::WebMock::RequestRegistry.instance.put(recorded)
 
             if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
               response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(webmock_response, url)

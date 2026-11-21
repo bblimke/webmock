@@ -284,6 +284,18 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     if defined?(EventMachine::HttpConnection)
+      it "records an open file body as bytes and leaves its position available for sending" do
+        url = "http://www.example.com/"
+        File.open(__FILE__, "rb") do |file|
+          file.read(5)
+          expected = File.binread(__FILE__, 10, 5)
+          stub_request(:post, url).with { |req| req.body.equal?(file) }
+          http_request(:post, url, body: file, headers: {"Content-Length" => "10"})
+          expect(file.read(10)).to eq(expected)
+          expect(executed_requests.last.body).to eq(expected)
+        end
+      end
+
       it "should work when a file is passed as body" do
         stub_request(:post, "www.example.com").with(body: File.read(__FILE__)).to_return(body: "ok")
         expect(http_request(:post, "http://www.example.com", file: __FILE__).body).to eq("ok")

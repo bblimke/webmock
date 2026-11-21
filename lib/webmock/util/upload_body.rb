@@ -16,17 +16,18 @@ module WebMock
         _, length = headers.find { |name, _| name.to_s.casecmp?('Content-Length') }
         return ''.b if length && length.to_i.zero?
 
-        # IO#pos can discard bytes from ungetbyte. sysseek gives the file
-        # offset only when Ruby has no buffered input. Otherwise restore
-        # the bytes through the reader's buffer.
-        if source.is_a?(IO) && stream.respond_to?(:sysseek) && stream.respond_to?(:ungetbyte)
-          # Switch a read/write file to reading before asking for its offset.
-          # Pending writes otherwise leave the descriptor behind the reader.
+        if defined?(Zlib::GzipReader) && stream.is_a?(Zlib::GzipReader)
+          # Rewinding a gzip reader loses its pushed-back, uncompressed bytes.
+          # GzipReader#ungetc accepts the whole string, including binary data.
+          pushback = :ungetc
+        elsif source.is_a?(IO) && stream.respond_to?(:sysseek) && stream.respond_to?(:ungetbyte)
+          # Flush pending writes before checking the descriptor offset.
+          # sysseek rejects buffered input, which IO#pos would discard.
           stream.read(0)
           begin
             position = stream.sysseek(0, IO::SEEK_CUR)
           rescue IOError
-            buffered = true
+            pushback = :ungetbyte
           end
         else
           position = stream.pos
@@ -35,8 +36,8 @@ module WebMock
         each_chunk(stream, length&.to_i) { |chunk| body << chunk.b }
         body
       ensure
-        if buffered && body && !body.empty?
-          stream.ungetbyte(body)
+        if pushback && body && !body.empty?
+          stream.public_send(pushback, body)
         elsif position
           if stream.respond_to?(:seek)
             stream.seek(position)

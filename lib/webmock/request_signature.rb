@@ -23,11 +23,17 @@ module WebMock
       string
     end
 
+    # Build a signature for history while preserving the original client
+    # objects for stub matchers and callbacks. Keep nested form structure.
+    def with_body_values(&block)
+      self.class.new(method, uri, body: map_body_values(body, &block), headers: headers)
+    end
+
     # A copy that shares no mutable state with the original.
     def initialize_copy(original)
       super
       @uri = @uri.dup
-      @body = @body.dup
+      @body = map_body_values(@body, &:dup)
       @headers = @headers&.transform_values { |value| value.is_a?(Array) ? value.map(&:dup) : value.dup }
     end
 
@@ -71,6 +77,19 @@ module WebMock
     end
 
     private
+
+    def map_body_values(body, &block)
+      case body
+      when Array
+        body.map { |item| map_body_values(item, &block) }
+      when Hash
+        body.each_with_object({}) do |(key, value), copy|
+          copy[map_body_values(key, &block)] = map_body_values(value, &block)
+        end
+      else
+        yield body
+      end
+    end
 
     def assign_options(options)
       self.body = options[:body] if options.has_key?(:body)

@@ -144,6 +144,49 @@ unless RUBY_PLATFORM =~ /java/
       expect(executed_requests.last.body).to eq("abc")
     end
 
+    it "records multipart PUT fields and gives live stubs the original field" do
+      url = "http://example.com/upload"
+      field = Curl::PostField.content("label", +"hello", "text/plain")
+      curl = Curl::Easy.new(url)
+      curl.multipart_form_post = true
+      stub_request(:put, url).with { |req| req.body.equal?(field) }
+      2.times { curl.http_put(field) }
+      field.content.replace("changed")
+      snapshot = executed_requests.first.body
+      expect([snapshot.name, snapshot.content, snapshot.content_type]).to eq(["label", "hello", "text/plain"])
+      expect(snapshot.to_s).to eq("label=hello")
+      snapshot.content.replace("edited")
+      expect(a_request(:put, url).with { |req| req.body.content == "hello" }).to have_been_made.twice
+    end
+
+    it "records a list of multipart fields without invoking upload blocks again" do
+      url = "http://example.com/upload"
+      calls = 0
+      field = Curl::PostField.file("upload", "remote.txt") { calls += 1; "bytes" }
+      curl = Curl::Easy.new(url)
+      curl.multipart_form_post = true
+      stub_request(:put, url)
+      curl.http_put([field, Curl::PostField.content("label", "hello")])
+      recorded = executed_requests.last.body
+      expect(recorded.map(&:name)).to eq(["upload", "label"])
+      expect(recorded.first.remote_file).to eq("remote.txt")
+      expect(calls).to eq(1)
+    end
+
+    it "restores pushed-back gzip bytes after inspecting a limited upload" do
+      url = "http://example.com/upload"
+      stub_request(:put, url).with(body: "Zb")
+      curl = Curl::Easy.new(url)
+      curl.headers["Content-Length"] = "2"
+      Zlib::GzipReader.wrap(StringIO.new(Zlib.gzip("abc"))) do |reader|
+        reader.read(1)
+        reader.ungetbyte("Z")
+        curl.http_put(reader)
+        expect(reader.read).to eq("Zbc")
+      end
+      expect(executed_requests.last.body).to eq("Zb")
+    end
+
     it "reads a gzip upload through the reader and restores its uncompressed position" do
       url = "http://example.com/upload"
       stub_request(:put, url).with(body: "payload")

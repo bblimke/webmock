@@ -20,6 +20,30 @@ unless RUBY_PLATFORM =~ /java/
         WebMock.reset!
       end
 
+      it "isolates nested array bodies from the caller and from history readers" do
+        url = "http://example.com/"
+        stub_request(:post, url)
+        payload = [{"field" => [+"before"]}]
+        Typhoeus.post(url, body: payload)
+        executed_requests.last.body.first["field"].first.replace("edited")
+        expect(payload.first["field"]).to eq(["before"])
+        payload.first["field"].first.replace("later")
+        expect(executed_requests.last.body).to eq([{"field" => ["before"]}])
+      end
+
+      it "records file parts inside an array by path and counts repeated uploads" do
+        url = "http://example.com/"
+        File.open(__FILE__, "rb") do |file|
+          stub_request(:post, url).with { |req| req.body.first["file"].equal?(file) }
+          2.times { Typhoeus.post(url, body: [{"file" => file}]) }
+        end
+        stub_request(:post, url)
+        Typhoeus.post(url, body: [{"file" => __FILE__}])
+        path = Pathname.new(__FILE__)
+        expect(executed_requests.map { |req| req.body.first["file"] }).to eq([path, path, __FILE__])
+        expect(a_request(:post, url).with { |req| req.body.first["file"] == path }).to have_been_made.twice
+      end
+
       describe "supposed response fields" do
         it "present" do
           stub_request(:get, "http://www.example.com").to_return(headers: {'X-Test' => '1'})

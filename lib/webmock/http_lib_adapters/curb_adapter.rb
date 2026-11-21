@@ -62,9 +62,28 @@ if defined?(Curl)
 
   module Curl
     class WebMockCurlEasy < Curl::Easy
+      # Curb's native PostField cannot be duplicated. Its public attributes
+      # describe the field without running a content callback or opening a file.
+      MultipartField = Struct.new(:name, :content, :content_type, :local_file, :remote_file) do
+        def self.from(field)
+          new(*members.map { |attribute| field.public_send(attribute)&.to_s })
+        end
+
+        def to_s
+          return super unless content && !local_file && !remote_file
+          Curl::PostField.content(name, content).to_s
+        end
+
+        def initialize_copy(original)
+          super
+          each_pair { |attribute, value| self[attribute] = value.dup }
+        end
+      end
+      private_constant :MultipartField
+
       def curb_or_webmock
         request_signature = build_request_signature
-        WebMock::RequestRegistry.instance.put(request_signature)
+        WebMock::RequestRegistry.instance.put(signature_for_history(request_signature))
 
         if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
           build_curb_response(webmock_response)
@@ -85,6 +104,13 @@ if defined?(Curl)
           raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
       end
+
+      def signature_for_history(signature)
+        body = signature.body
+        return signature unless body.is_a?(Curl::PostField) || (body.is_a?(Array) && multipart_form_post?)
+        signature.with_body_values { |field| MultipartField.from(field) }
+      end
+      private :signature_for_history
 
       def build_request_signature
         method = @webmock_method.to_s.downcase.to_sym
