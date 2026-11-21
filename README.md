@@ -726,6 +726,8 @@ assert_requested(stub_get)
 assert_not_requested(stub_post)
 ```
 
+See [What an expectation on a stub counts](#what-an-expectation-on-a-stub-counts) for which requests these assertions count.
+
 
 ### Setting expectations in RSpec on `WebMock` module
  This style is borrowed from [fakeweb-matcher](http://github.com/pat/fakeweb-matcher)
@@ -801,6 +803,22 @@ expect(stub).to have_been_requested.once.with(body: {"a" => [4, 5, 6]})
 ```
 
 Options and a block given to `with` take the same form as in `stub_request(...).with`. The expectation then counts only the requests that match both the stub and those conditions. The stub itself does not change.
+
+### What an expectation on a stub counts
+
+An expectation on a stub, such as `assert_requested(stub)` or `expect(stub).to have_been_requested`, uses the stub's request pattern. It counts every request made since the last `WebMock.reset!` or `WebMock.reset_executed_requests!` that matches the pattern, including requests answered by another stub, requests made before the stub was declared and requests made after it was removed with `remove_request_stub`.
+
+```ruby
+stub_any  = stub_request(:post, "www.example.com")
+stub_body = stub_request(:post, "www.example.com").with(body: "abc")
+
+Net::HTTP.post(URI("http://www.example.com"), "abc")    # answered by stub_body
+
+expect(stub_body).to have_been_requested.once    # ===> Success
+expect(stub_any).to have_been_requested.once     # ===> Success, as its pattern matches too
+```
+
+To make an expectation stricter, give the stub its own conditions, such as `with(body: "")` for requests without a body, or pass them to the expectation's `with` as shown above. To count from zero, call `WebMock.reset_executed_requests!`.
 
 ### Inspecting the requests made
 
