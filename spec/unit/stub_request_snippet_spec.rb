@@ -112,4 +112,58 @@ stub_request(:post, "http://www.example.com/").
     end
 
   end
+
+  describe "to_s for a registered stub" do
+    def snippet(stub)
+      WebMock::StubRequestSnippet.new(stub).to_s(false)
+    end
+
+    it "writes a URI template as Ruby" do
+      stub = WebMock::RequestStub.new(:get, Addressable::Template.new("http://localhost:9200/{index}/_search"))
+      expect(snippet(stub)).to eq('stub_request(:get, Addressable::Template.new("http://localhost:9200/{index}/_search"))')
+    end
+
+    it "writes a regexp as Ruby" do
+      expect(snippet(WebMock::RequestStub.new(:get, /example\.org/))).to eq('stub_request(:get, /example\.org/)')
+    end
+
+    it "keeps a lambda in quotes, as before" do
+      expect(snippet(WebMock::RequestStub.new(:get, ->(_uri) { true }))).to start_with('stub_request(:get, "#<Proc:')
+    end
+
+    it "writes a query given to a template as the query option" do
+      stub = WebMock::RequestStub.new(:get, Addressable::Template.new("http://localhost:9200/{index}/_count")).
+        with(query: {"a" => "b"})
+      expect(snippet(stub)).to eq(
+        %(stub_request(:get, Addressable::Template.new("http://localhost:9200/{index}/_count")).\n  with(\n    query: #{{"a" => "b"}.inspect}))
+      )
+    end
+
+    it "writes a query matcher of a string URI as the query option" do
+      stub = WebMock::RequestStub.new(:get, "www.example.com").with(query: hash_including("a" => "1"))
+      expect(snippet(stub)).to eq(
+        %(stub_request(:get, "http://www.example.com/").\n  with(\n    query: hash_including(#{{"a" => "1"}.inspect})))
+      )
+    end
+
+    it "writes any query as :any" do
+      stub = WebMock::RequestStub.new(:get, /example/).with(query: :any)
+      expect(snippet(stub)).to eq(%(stub_request(:get, /example/).\n  with(\n    query: :any)))
+    end
+
+    it "writes a :flat_array query as a string" do
+      WebMock::Config.instance.query_values_notation = :flat_array
+      stub = WebMock::RequestStub.new(:get, /example/).with(query: "a=2&a=1")
+      expect(snippet(stub)).to eq(%(stub_request(:get, /example/).\n  with(\n    query: "a=1&a=2")))
+    ensure
+      WebMock::Config.instance.query_values_notation = nil
+    end
+
+    it "writes the query before the body" do
+      stub = WebMock::RequestStub.new(:post, /example/).with(query: {"a" => "b"}, body: "x")
+      expect(snippet(stub)).to eq(
+        %(stub_request(:post, /example/).\n  with(\n    query: #{{"a" => "b"}.inspect},\n    body: "x"))
+      )
+    end
+  end
 end

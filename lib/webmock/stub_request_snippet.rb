@@ -13,11 +13,16 @@ module WebMock
     def to_s(with_response = true)
       request_pattern = @request_stub.request_pattern
       string = "stub_request(:#{request_pattern.method_pattern.to_s},".dup
-      string << " \"#{request_pattern.uri_pattern.to_s}\")"
+      string << " #{request_pattern.uri_pattern.to_snippet})"
 
       with = "".dup
 
+      if (query = request_pattern.uri_pattern.query_snippet)
+        with << "\n    query: #{query}"
+      end
+
       if (request_pattern.body_pattern)
+        with << "," unless with.empty?
         # In UTF-8, so a body and headers in other encodings can be joined.
         with << "\n    body: #{WebMock::Util::MessageString.utf8(request_pattern.body_pattern.to_s)}"
       end

@@ -50,6 +50,12 @@
 
     Such messages now show the failure, with bytes that aren't valid UTF-8 written as escapes, such as `\xFF`.
 
+* Show URI templates, regexps and query options as Ruby in the list of registered stubs (#938)
+
+    Previously, the registered stubs listed for an unstubbed request put every URI in quotes, so a template stub was shown as `stub_request(:get, ""http://localhost:9200/{index}/_search"")`, a regexp as a string, and a query given to `with` was written inside the quotes.
+
+    The list now shows `stub_request(:get, Addressable::Template.new("http://localhost:9200/{index}/_search"))`, a regexp as a regexp, and a query that isn't part of the URL as `with(query: ...)`. The suggested stub for the unmatched request is unchanged.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

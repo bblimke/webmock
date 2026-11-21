@@ -205,6 +205,22 @@ module WebMock
       str
     end
 
+    # Ruby source for the URI argument of stub_request, for snippets.
+    def to_snippet
+      pattern_inspect
+    end
+
+    # Ruby source for the query option of with, for snippets, or nil.
+    def query_snippet
+      case @query_params
+      when nil then nil
+      when WebMock::Matchers::AnyArgMatcher then ":any"
+      # Pairs of the :flat_array notation, which a query string describes
+      when Array then WebMock::Util::QueryMapper.values_to_query(@query_params, notation: :flat_array).inspect
+      else @query_params.inspect
+      end
+    end
+
     private
 
     def raise_any_query_with_uri_query
@@ -232,6 +248,12 @@ module WebMock
   end
 
   class URICallablePattern  < URIPattern
+    # A lambda can't be written as Ruby source, so it is shown in quotes, as
+    # before.
+    def to_snippet
+      "\"#{pattern_inspect}\""
+    end
+
     private
 
     def pattern_matches?(uri)
@@ -260,6 +282,10 @@ module WebMock
         @@add_query_params_warned = true
         warn "WebMock warning: ignoring query params in RFC 6570 template and checking them with WebMock"
       end
+    end
+
+    def to_snippet
+      "Addressable::Template.new(#{pattern_inspect})"
     end
 
     private
@@ -343,6 +369,10 @@ module WebMock
         # The URI is then compared without its query, so it could never match.
         raise_any_query_with_uri_query
       end
+    end
+
+    def to_snippet
+      "\"#{pattern_inspect}\""
     end
 
     private
