@@ -82,6 +82,15 @@ describe WebMock::RequestPattern do
     end
   end
 
+  describe "with called again with options only" do
+    it "should keep the block given earlier" do
+      pattern = WebMock::RequestPattern.new(:post, "www.example.com").with { |request| request.body == "abc" }
+      pattern.with(headers: {"A" => "a"})
+      expect(pattern).not_to match(WebMock::RequestSignature.new(:post, "www.example.com", body: "xyz", headers: {"A" => "a"}))
+      expect(pattern).to match(WebMock::RequestSignature.new(:post, "www.example.com", body: "abc", headers: {"A" => "a"}))
+    end
+  end
+
   describe "when matching" do
 
     it "should match if uri matches and method matches" do

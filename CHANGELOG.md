@@ -70,6 +70,12 @@
 
     WebMock now reads each request's URL with the current notation. A stub keeps the query as WebMock read it when the stub was declared, so set the notation before declaring stubs.
 
+* Keep a `with` block when `with` is called again with options only
+
+    Previously, `stub_request(:post, url).with { |request| request.body == "yes" }.with(headers: {"X-A" => "1"})` dropped the block, so the stub also matched a request with that header and the body `"no"`. A later `with` call already kept the options it didn't give, such as `body:`, and now keeps the block too. The same applies to `a_request`.
+
+    A stub or request expectation that matched only because the block was dropped no longer matches. Calling `with` again with a block, or with an option given before, still replaces it.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)
