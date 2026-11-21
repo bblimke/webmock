@@ -99,40 +99,19 @@ if defined?(::HTTPClient)
     private_constant :RecordingConnection, :RecordingSessionManager, :RecordingSession, :ResponseFilter
 
     def do_get_block(req, proxy, conn, &block)
-      @request_filter.each { |filter| filter.filter_request(req) }
+      filters = apply_request_filters(req, proxy)
       request_signature = build_request_signature(req)
       WebMock::RequestRegistry.instance.put(request_signature)
       webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
       if webmock_response
         response = build_httpclient_response(webmock_response, false, req.header, &block)
-        @request_filter.each do |filter|
-          filter.filter_response(req, response)
-        end
+        filters.each { |filter| filter.filter_response(req, response) }
         res = conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
           {lib: :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
-        if block
-          body = ''
-          do_get_block_without_webmock(req, proxy, conn) do |http_res, chunk|
-            if chunk && chunk.bytesize > 0
-              body += chunk
-              block.call(http_res, chunk)
-            end
-          end
-        else
-          do_get_block_without_webmock(req, proxy, conn)
-        end
-        res = conn.pop
-        conn.push(res)
-        if WebMock::CallbackRegistry.any_callbacks?
-          webmock_response = build_webmock_response(res, body)
-          WebMock::CallbackRegistry.invoke_callbacks(
-            {lib: :httpclient, real_request: true}, request_signature,
-            webmock_response)
-        end
-        res
+        clone(freeze: false).send_prepared_sync_request(req, proxy, conn, filters, request_signature, &block)
       else
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
@@ -161,7 +140,7 @@ if defined?(::HTTPClient)
             conn.push(response)
             WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient}, request_signature, webmock_response)
           else
-            clone(freeze: false).send_prepared_request(req, proxy, conn, filters, request_signature)
+            clone(freeze: false).send_prepared_async_request(req, proxy, conn, filters, request_signature)
           end
         rescue Exception => e
           conn.push e
@@ -240,7 +219,31 @@ if defined?(::HTTPClient)
 
     # Only the per-request copy changes its filter list. It shares the client's
     # sessions and lets HTTPClient run the response filters at the normal time.
-    def send_prepared_request(req, proxy, conn, filters, request_signature)
+    def send_prepared_sync_request(req, proxy, conn, filters, request_signature, &block)
+      @request_filter = filters.map { |filter| ResponseFilter.new(filter) }
+      if block
+        body = ''
+        do_get_block_without_webmock(req, proxy, conn) do |http_res, chunk|
+          if chunk && chunk.bytesize > 0
+            body += chunk
+            block.call(http_res, chunk)
+          end
+        end
+      else
+        do_get_block_without_webmock(req, proxy, conn)
+      end
+      res = conn.pop
+      conn.push(res)
+      if WebMock::CallbackRegistry.any_callbacks?
+        webmock_response = build_webmock_response(res, body)
+        WebMock::CallbackRegistry.invoke_callbacks(
+          {lib: :httpclient, real_request: true}, request_signature,
+          webmock_response)
+      end
+      res
+    end
+
+    def send_prepared_async_request(req, proxy, conn, filters, request_signature)
       @request_filter = filters.map { |filter| ResponseFilter.new(filter) }
       if WebMock::CallbackRegistry.any_callbacks?
         recorder = RecordingConnection.new(conn)

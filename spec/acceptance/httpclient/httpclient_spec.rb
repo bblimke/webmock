@@ -46,6 +46,39 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
     headers: {"a" => ["c", "b"]}).status).to eq("200")
   end
 
+  it "records and counts the request IDs sent on real synchronous and asynchronous requests" do
+    WebMock.allow_net_connect!
+    server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
+      Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
+    server.mount_proc("/") { |req, res| res.body = req["X-Request-Id"] }
+    thread = Thread.new { server.start }
+    url = "http://127.0.0.1:#{server.config[:Port]}/"
+    client = HTTPClient.new
+    filter = double("request ID filter", filter_response: nil)
+    next_id = 0
+    allow(filter).to receive(:filter_request) do |req|
+      req.header.set("X-Request-Id", (next_id += 1).to_s)
+    end
+    client.request_filter << filter
+
+    received = [client.get(url).body]
+    streamed_body = +""
+    client.get(url) { |chunk| streamed_body << chunk }
+    received << streamed_body
+    connection = client.get_async(url)
+    connection.join
+    received << connection.pop.content.read
+    expect(received).to eq(%w[1 2 3])
+    expect(executed_requests.map { |req| req.headers["X-Request-Id"] }).to eq(received)
+    received.each do |id|
+      expect(a_request(:get, url).with(headers: {"X-Request-Id" => id})).to have_been_made.once
+    end
+    expect(filter).to have_received(:filter_response).exactly(3).times
+  ensure
+    server.shutdown if server
+    thread.join if thread
+  end
+
   describe "when using async requests" do
     before(:each) do
       HTTPClientSpecHelper.async_mode = true
@@ -73,32 +106,6 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
       connection.join
       expect(connection.pop.content.read).to eq("outer")
       expect(executed_requests.map { |request| request.uri.path }).to eq(["/outer", "/inner"])
-    end
-
-    it "records and counts the request ID sent on a real async request" do
-      WebMock.allow_net_connect!
-      server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
-        Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
-      server.mount_proc("/") { |req, res| res.body = req["X-Request-Id"] }
-      thread = Thread.new { server.start }
-      url = "http://127.0.0.1:#{server.config[:Port]}/"
-      client = HTTPClient.new
-      filter = double("request ID filter", filter_response: nil)
-      next_id = 0
-      allow(filter).to receive(:filter_request) do |req|
-        req.header.set("X-Request-Id", (next_id += 1).to_s)
-      end
-      client.request_filter << filter
-
-      connection = client.get_async(url)
-      connection.join
-      sent_id = connection.pop.content.read
-      expect(sent_id).to eq("1")
-      expect(executed_requests.map { |req| req.headers["X-Request-Id"] }).to eq([sent_id])
-      expect(a_request(:get, url).with(headers: {"X-Request-Id" => sent_id})).to have_been_made.once
-    ensure
-      server.shutdown if server
-      thread.join if thread
     end
 
     it "records the whole response when the caller reads part of the async stream before joining" do
