@@ -143,7 +143,7 @@ Examples without the tag then make real requests. Create HTTP clients inside eac
 
 Enabling WebMock and allowing real requests are separate settings. `WebMock.enable!` and `WebMock.disable!` decide whether WebMock intercepts requests at all. `WebMock.disable_net_connect!` and `WebMock.allow_net_connect!` decide what happens to an intercepted request that no stub matches. While WebMock is disabled, it doesn't intercept requests, so these settings only take effect once it is enabled again.
 
-WebMock intercepts requests by replacing classes such as `Net::HTTP`, `HTTPClient` and `Curl::Easy` while it is enabled. `webmock/rspec` enables WebMock just before the first example, after your app and spec files have loaded. A class that inherits from `Net::HTTP`, or an HTTP client object such as a `Net::HTTP` or `HTTPClient` instance, created while they load uses the original class, and its requests reach the network. A client that creates its HTTP object for each request is not affected. If your app defines such a class or creates such an object while it loads, enable WebMock right after requiring it:
+For HTTP clients such as Net::HTTP, HTTPClient and Curb, WebMock intercepts requests by replacing their classes while it is enabled. `webmock/rspec` enables WebMock just before the first example, after your app and spec files have loaded. A class that inherits from `Net::HTTP`, or an HTTP client object such as a `Net::HTTP` or `HTTPClient` instance, created while they load uses the original class, and its requests reach the network. A client that creates its HTTP object for each request is not affected. If your app defines such a class or creates such an object while it loads, enable WebMock right after requiring it:
 
 ```ruby
 require 'webmock/rspec'
