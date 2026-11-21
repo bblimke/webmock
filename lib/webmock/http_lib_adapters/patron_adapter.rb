@@ -187,8 +187,15 @@ if defined?(::Patron::Session)
               if !File.exist?(path) || !File.readable?(path)
                 raise ArgumentError.new("Unable to open specified file.")
               end
-              # A named pipe or device must be left for Patron to open.
-              request_body = File.file?(path) ? File.binread(path) : path.to_s
+              request_body = if !File.file?(path)
+                # Leave a named pipe or device for Patron to open.
+                path.to_s
+              elsif req.file_name
+                # Keep the encoding used by existing post_file and put_file stubs.
+                File.read(path)
+              else
+                File.binread(path)
+              end
             elsif data.respond_to?(:read) && OriginalPatronSession.public_method_defined?(:stream)
               # Patron 1.1 added streaming uploads and Session#stream together.
               request_body = WebMock::Util::UploadBody.read(data, req.headers)

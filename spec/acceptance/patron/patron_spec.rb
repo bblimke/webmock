@@ -134,6 +134,14 @@ unless RUBY_PLATFORM =~ /java/
           @sess.put_file("/", @file_path)
         end
 
+        it "matches a post_file stub against the text read from the file" do
+          File.write(@file_path, "café")
+          contents = File.read(@file_path)
+          stub_request(:post, "www.example.com").with(body: contents)
+          @sess.post_file("/", @file_path)
+          expect(executed_requests.last.body.encoding).to eq(contents.encoding)
+        end
+
         it "should work with post_file" do
           File.open(@file_path, "w") {|f| f.write "abc"}
           stub_request(:post, "www.example.com").with(body: "abc")
