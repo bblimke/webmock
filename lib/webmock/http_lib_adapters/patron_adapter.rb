@@ -200,7 +200,9 @@ if defined?(::Patron::Session)
               # Patron 1.1 added streaming uploads and Session#stream together.
               request_body = WebMock::Util::UploadBody.read(data, req.headers)
             elsif data
-              request_body = data.to_s
+              # A multipart post keeps its form fields as a Hash. The copy
+              # lets stubs and callbacks still receive the caller's Hash.
+              request_body = data.is_a?(Hash) ? data.dup : data.to_s
             else
               raise ArgumentError.new("Must provide either data or a filename when doing a PUT or POST")
             end

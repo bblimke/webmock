@@ -157,6 +157,14 @@ unless RUBY_PLATFORM =~ /java/
           @sess.post_file("/", @file_path)
         end
 
+        it "records the form fields of a multipart post without a file" do
+          fields = {"a" => "1"}
+          stub = stub_request(:post, "www.example.com").with { |req| req.body.equal?(fields) }
+          @sess.post_multipart("/", fields, nil)
+          assert_requested(stub)
+          expect(executed_requests.last.body).to eq({"a" => "1"})
+        end
+
         it "should raise same error as Patron if file is not readable for post request" do
           stub_request(:post, "www.example.com").with(body: "abc")
           expect {
