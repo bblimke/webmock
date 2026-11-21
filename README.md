@@ -379,6 +379,23 @@ RestClient.get("http://www.example.com/?a=b")    # ===> Failure
 RestClient.get("http://www.example.com/?a=c")    # ===> Success
 ```
 
+### Matching repeated query params
+
+By default WebMock reads a query the way Rack and Rails do, so a key repeated without brackets keeps only its last value: `?a=1&a=2` is read as `?a=2`. To match repeated keys, switch to the `:flat_array` notation and give the query as a string:
+
+```ruby
+WebMock::Config.instance.query_values_notation = :flat_array
+
+stub_request(:get, "www.example.com/?a=1&a=2")
+# or
+stub_request(:get, "www.example.com").with(query: "a=1&a=2")
+
+RestClient.get("http://www.example.com/?a=1&a=2")    # ===> Success
+RestClient.get("http://www.example.com/?a=2")        # ===> Failure
+```
+
+The notation applies to every stub and request. Hashes can't describe repeated keys, so with `:flat_array`, `hash_including`, `hash_excluding`, query hashes given with a regexp or template URI, and form bodies given as a hash don't match. Set the notation only in the tests that need it, and set it back to `:subscript` afterwards.
+
 ### Stubbing with custom response
 
 ```ruby
