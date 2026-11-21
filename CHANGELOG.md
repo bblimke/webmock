@@ -52,6 +52,12 @@
 
     Both now match. As with string URIs, a stub can't tell such an encoded character from the character itself.
 
+* Ignore letter case in allowed host names (#819)
+
+    Previously, `WebMock.disable_net_connect!(allow: "Anachronic.local")` blocked requests to that host, because WebMock compared the allowed name with the request's host, which it writes in lowercase. The same applied to a host with a port, such as `"Anachronic.local:8080"`, and to host names given as `net_http_connect_on_start`.
+
+    Such requests are now allowed and reach the real server. Host names are not case sensitive, and allowed URLs have ignored the letter case of the host since 3.30.0.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

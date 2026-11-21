@@ -111,8 +111,10 @@ module WebMock
       allowed.match?(uri.to_s) ||
       (uri.port == uri.default_port && allowed.match?(uri.omit(:port).to_s))
     when String
-      allowed == uri.host ||
-      allowed == "#{uri.host}:#{uri.port}" ||
+      # Host names are case insensitive. casecmp folds ASCII letters only,
+      # unlike casecmp?, which would also equate "straße" and "strasse".
+      (uri.host && allowed.casecmp(uri.host) == 0) ||
+      allowed.casecmp("#{uri.host}:#{uri.port}") == 0 ||
       net_connect_allowed_url?(allowed, uri)
     else
       if allowed.respond_to?(:call)

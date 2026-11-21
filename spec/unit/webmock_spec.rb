@@ -45,6 +45,39 @@ describe "WebMock" do
       end
     end
 
+    context 'disabled with an allowed host name in mixed case' do
+      after do
+        WebMock.disable_net_connect!
+      end
+
+      it 'allows the host regardless of case' do
+        WebMock.disable_net_connect!(allow: "Anachronic.LOCAL")
+        expect(WebMock.net_connect_allowed?("http://anachronic.local/")).to be_truthy
+        expect(WebMock.net_connect_allowed?("http://other.local/")).to be_falsey
+      end
+
+      it 'does not fold letters beyond ASCII' do
+        WebMock.disable_net_connect!(allow: "straße.test")
+        expect(WebMock.net_connect_allowed?("http://strasse.test/")).to be_falsey
+      end
+
+      it 'does not take an empty allowed host for a URI without a host' do
+        WebMock.disable_net_connect!(allow: "")
+        expect(WebMock.net_connect_allowed?(Addressable::URI.parse("/health"))).to be_falsey
+      end
+
+      it 'allows the host and port regardless of case' do
+        WebMock.disable_net_connect!(allow: "Anachronic.LOCAL:8080")
+        expect(WebMock.net_connect_allowed?("http://anachronic.local:8080/")).to be_truthy
+        expect(WebMock.net_connect_allowed?("http://anachronic.local:8081/")).to be_falsey
+      end
+
+      it 'connects on start to the host regardless of case' do
+        WebMock.disable_net_connect!(net_http_connect_on_start: "Anachronic.LOCAL")
+        expect(WebMock.net_http_connect_on_start?(Addressable::URI.parse("http://anachronic.local:80"))).to be(true)
+      end
+    end
+
     context 'disabled with an allow list' do
       after do
         WebMock.disable_net_connect!
