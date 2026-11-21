@@ -292,6 +292,56 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      # VCR's Typhoeus hook, for example, can run before WebMock's and answer
+      # a request from a cassette.
+      describe "a request answered by an earlier before callback" do
+        let(:answer) do
+          proc do |request|
+            request.finish(Typhoeus::Response.new(code: 200, body: "cassette"))
+            false
+          end
+        end
+        let(:reported) { [] }
+
+        before do
+          WebMock.after_request { |request_signature, _response| reported << request_signature }
+          Typhoeus.before.unshift(answer)
+        end
+
+        after do
+          Typhoeus.before.delete(answer)
+          WebMock.reset_callbacks
+        end
+
+        it "isn't reported to after_request callbacks" do
+          expect(Typhoeus.get("http://www.example.com").body).to eq("cassette")
+          expect(reported).to eq([])
+        end
+
+        it "isn't reported with the signature of an earlier run" do
+          stub_request(:get, "www.example.com")
+          request = Typhoeus::Request.new("http://www.example.com")
+          Typhoeus.before.delete(answer)
+          request.run
+          Typhoeus.before.unshift(answer)
+          request.run
+
+          expect(request.response.body).to eq("cassette")
+          expect(reported.size).to eq(1)
+        end
+
+        it "isn't reported with the signature of an earlier blocked run" do
+          request = Typhoeus::Request.new("http://www.example.com")
+          Typhoeus.before.delete(answer)
+          expect { request.run }.to raise_error(WebMock::NetConnectNotAllowedError)
+          Typhoeus.before.unshift(answer)
+          request.run
+
+          expect(request.response.body).to eq("cassette")
+          expect(reported).to eq([])
+        end
+      end
+
       describe "timeouts" do
         it "should support native typhoeus timeouts" do
           stub_request(:any, "example.com").to_timeout

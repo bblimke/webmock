@@ -26,6 +26,12 @@
 
     WebMock now records the header, unless the request sets its own Cookie header, which is then the one sent, or uses libcurl's cookie engine with `cookiefile`, `cookiejar` or `cookielist`, which adds its own cookies to it. If VCR, hooked into WebMock, matches requests on their headers, record cassettes that contain such requests again. VCR now records the cookie too, so filter it, for example with `filter_sensitive_data`, if it is a secret.
 
+* Fix VCR failing to replay Typhoeus requests when hooked into both Typhoeus and WebMock (#973)
+
+    Previously, with `hook_into :typhoeus, :webmock`, VCR warned that "There appears to be a bug in WebMock's after_request hook", and replaying a Typhoeus request from a cassette raised `ArgumentError`. VCR's Typhoeus hook answered the request before WebMock saw it, and WebMock still passed the request to `after_request` callbacks, as `nil`.
+
+    WebMock now leaves out requests it didn't see. On older versions, `hook_into :webmock` alone records and replays Typhoeus requests too.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

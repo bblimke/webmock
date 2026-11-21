@@ -213,7 +213,12 @@ if defined?(Typhoeus)
 
         AFTER_REQUEST_CALLBACK = Proc.new do |response|
           request = response.request
-          request_signature = request.instance_variable_get(:@__webmock_request_signature)
+          # Another before callback, such as VCR's Typhoeus hook, can answer a
+          # request before WebMock's runs, and then WebMock has nothing to
+          # report. The signature is taken once, so a request that runs again
+          # isn't reported with the one from its earlier run.
+          next unless request.instance_variable_defined?(:@__webmock_request_signature)
+          request_signature = request.remove_instance_variable(:@__webmock_request_signature)
           webmock_response =
             ::WebMock::HttpLibAdapters::TyphoeusAdapter.
               build_webmock_response(response)
@@ -257,6 +262,9 @@ if defined?(Typhoeus)
               webmock_response.raise_error_if_any
               res = false
             elsif !WebMock.net_connect_allowed?(request_signature.uri)
+              # The request doesn't complete, so the callback that takes the
+              # signature off it doesn't run.
+              request.remove_instance_variable(:@__webmock_request_signature)
               raise WebMock::NetConnectNotAllowedError.new(request_signature)
             end
           end
