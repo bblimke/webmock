@@ -54,13 +54,13 @@ module WebMock
     end
 
     def hash
-      [method, uri, body, body_encoding, headers].hash
+      [method, uri, body, headers].hash
     end
 
     def eql?(other)
       other.is_a?(RequestSignature) &&
         method == other.method && uri.eql?(other.uri) &&
-        body.eql?(other.body) && body_encoding == other.body_encoding && headers.eql?(other.headers)
+        body.eql?(other.body) && headers.eql?(other.headers)
     end
     alias == eql?
 
@@ -76,12 +76,6 @@ module WebMock
 
     def json_headers?
       WebMock::Util::ContentType.body_format(content_type) == :json
-    end
-
-    protected
-
-    def body_encoding
-      body.encoding if body.is_a?(String)
     end
 
     private

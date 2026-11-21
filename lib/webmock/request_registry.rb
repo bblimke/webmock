@@ -66,20 +66,8 @@ module WebMock
       token = base.match_token if base.is_a?(RequestPattern)
       counts, observations = @lock.synchronize { [requested_signatures.snapshot, @live_matches[token]&.dup] }
 
-      # The built-in matcher checks the method first. Custom matchers can
-      # accept other methods, so they still get a copy of each signature.
-      if request_pattern.instance_of?(RequestPattern) && request_pattern.method(:matches?).owner == RequestPattern
-        method_pattern = request_pattern.method_pattern
-        uri_pattern = request_pattern.simple_uri_pattern
-      end
-
-      counts.sum do |stored, total|
-        next 0 if method_pattern && !method_pattern.matches?(stored.method)
-        next(uri_pattern.matches?(stored.uri) ? total : 0) if uri_pattern
-        observed = observations && observations[stored]
-        # A user matcher may mutate its argument. The stored signature also
-        # serves as a counter key and is shared by repeated history entries.
-        signature = stored.dup
+      counts.sum do |signature, total|
+        observed = observations && observations[signature]
         if observed
           # The same snapshot can represent both a stream and a string.
           # Only recheck the requests for which the stub wasn't evaluated.

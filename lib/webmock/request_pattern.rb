@@ -53,13 +53,6 @@ module WebMock
       matched
     end
 
-    # A plain string URI can be checked against the recorded URI without
-    # exposing the signature, its headers or its body to a user matcher.
-    def simple_uri_pattern
-      return if @body_pattern || @headers_pattern || @with_block
-      @uri_pattern if @uri_pattern.instance_of?(URIStringPattern) && @uri_pattern.singleton_methods.empty?
-    end
-
     def to_s
       string = "#{@method_pattern.to_s.upcase}".dup
       string << " #{@uri_pattern.to_s}"

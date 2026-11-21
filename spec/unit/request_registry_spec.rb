@@ -120,53 +120,6 @@ describe WebMock::RequestRegistry do
       expect(registry.times_executed(WebMock::RequestPattern.new(:get, "www.example.com", headers: {"X" => "1"}))).to eq(1)
     end
 
-    it "keeps recorded bytes and counts intact when a verification block changes the body" do
-      signature = WebMock::RequestSignature.new(:post, "www.example.com", body: "sample".b)
-      2.times { registry.put(signature) }
-      WebMock::API.assert_requested(:post, "www.example.com", times: 2) do |request|
-        request.body.force_encoding("UTF-8") == "sample"
-      end
-      registry.put(signature)
-      expect(registry.executed_requests.map { |request| request.body.encoding }).to eq([Encoding::BINARY] * 3)
-      expect(registry.requested_signatures.get(signature)).to eq(3)
-    end
-
-    it "skips copying a recorded request when its method rules it out" do
-      registry.put(@request_signature)
-      stored = registry.requested_signatures.hash.keys.fetch(0)
-      expect(stored).not_to receive(:dup)
-      WebMock::API.assert_not_requested(:delete, "www.example.com")
-    end
-
-    it "counts literal URI matches without copying the recorded requests" do
-      2.times { registry.put(@request_signature) }
-      registry.put(WebMock::RequestSignature.new(:get, "www.example.net"))
-      registry.requested_signatures.hash.each_key { |stored| expect(stored).not_to receive(:dup) }
-      WebMock::API.assert_requested(:any, "http://www.example.com:80/", times: 2)
-      WebMock::API.assert_requested(:get, "www.example.net")
-    end
-
-    it "gives a callable URI matcher a copy of the recorded URI" do
-      registry.put(@request_signature)
-      change_path = lambda do |uri|
-        uri.path = "/changed"
-        true
-      end
-      WebMock::API.assert_requested(:get, change_path)
-      WebMock::API.assert_requested(:get, "www.example.com")
-    end
-
-    it "lets an overridden matcher inspect a copy even when its declared method differs" do
-      registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: "original"))
-      pattern = WebMock::RequestPattern.new(:delete, "www.example.com")
-      pattern.define_singleton_method(:matches?) do |request|
-        request.body.replace("changed")
-        request.method == :post
-      end
-      expect(registry.times_executed(pattern)).to eq(1)
-      expect(registry.executed_requests.first.body).to eq("original")
-    end
-
     it "keeps the body a request had when it was made, even if the caller reuses its buffer" do
       buffer = +"first"
       registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))
