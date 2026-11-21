@@ -62,6 +62,19 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
       expect(WebMock.executed_requests.map { |request| request.uri.path }).to eq(["/first", "/second"])
     end
 
+    it "records the async request before its response block makes another request" do
+      client = HTTPClient.new
+      stub_request(:get, "www.example.com/inner")
+      stub_request(:get, "www.example.com/outer").to_return do
+        client.get("http://www.example.com/inner")
+        {body: "outer"}
+      end
+      connection = client.get_async("http://www.example.com/outer")
+      connection.join
+      expect(connection.pop.content.read).to eq("outer")
+      expect(executed_requests.map { |request| request.uri.path }).to eq(["/outer", "/inner"])
+    end
+
     it "evaluates a stubbed response only once per async request even if the async thread starts early" do
       # Reproduces two races that made the async thread evaluate the stub registry again and consume
       # an extra response from the stub sequence: starting work before the caller finished wiring up
