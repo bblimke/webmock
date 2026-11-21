@@ -4,6 +4,7 @@ require 'acceptance/webmock_shared'
 unless RUBY_PLATFORM =~ /java/
   require 'acceptance/curb/curb_spec_helper'
   require 'zlib'
+  require 'tempfile'
 
   shared_examples_for "Curb" do
     include CurbSpecHelper
@@ -37,6 +38,31 @@ unless RUBY_PLATFORM =~ /java/
         expect(file.pos).to eq(0)
       end
       expect(executed_requests.last.body).to eq(contents)
+    end
+
+    it "preserves pushed-back bytes for both stub matching and the upload reader" do
+      url = "http://example.com/upload"
+      path = File.expand_path("../../fixtures/test.txt", __dir__)
+      expected = "Z".b + File.binread(path).byteslice(1..-1)
+      stub_request(:put, url).with(body: expected)
+      File.open(path, "rb") do |file|
+        file.read(1)
+        file.ungetbyte("Z")
+        Curl::Easy.new(url).http_put(file)
+        expect(file.read).to eq(expected)
+      end
+      expect(executed_requests.last.body).to eq(expected)
+    end
+
+    it "keeps the upload position after buffered writes to a tempfile" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      Tempfile.create("upload") do |file|
+        file.write("abc")
+        Curl::Easy.new(url).http_put(file)
+        expect(file.pos).to eq(3)
+      end
+      expect(executed_requests.last.body).to eq("")
     end
 
     it "records a StringIO upload from its current position" do

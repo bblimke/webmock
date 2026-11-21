@@ -14,12 +14,30 @@ module WebMock
           (stream.respond_to?(:seek) || stream.respond_to?(:rewind))
 
         _, length = headers.find { |name, _| name.to_s.casecmp?('Content-Length') }
-        position = stream.pos
+        return ''.b if length && length.to_i.zero?
+
+        # IO#pos can discard bytes from ungetbyte. sysseek gives the file
+        # offset only when Ruby has no buffered input. Otherwise restore
+        # the bytes through the reader's buffer.
+        if source.is_a?(IO) && stream.respond_to?(:sysseek) && stream.respond_to?(:ungetbyte)
+          # Switch a read/write file to reading before asking for its offset.
+          # Pending writes otherwise leave the descriptor behind the reader.
+          stream.read(0)
+          begin
+            position = stream.sysseek(0, IO::SEEK_CUR)
+          rescue IOError
+            buffered = true
+          end
+        else
+          position = stream.pos
+        end
         body = ''.b
         each_chunk(stream, length&.to_i) { |chunk| body << chunk.b }
         body
       ensure
-        if position
+        if buffered && body && !body.empty?
+          stream.ungetbyte(body)
+        elsif position
           if stream.respond_to?(:seek)
             stream.seek(position)
           else
