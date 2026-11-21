@@ -868,7 +868,8 @@ A few things to know:
 * The requests are copies, so changing them doesn't change what WebMock recorded.
 * When a request uploads a file or stream, its body is the uploaded bytes. WebMock reads them without moving the stream, from regular files, tempfiles, `StringIO` and gzip readers over those. Other streams, such as pipes, are listed with the stream's `to_s`.
 * Multipart fields of a Curb PUT are listed with their `name`, `content`, `content_type`, `local_file` and `remote_file`. Files in a Typhoeus body given as an array are listed as `Pathname` objects.
-* Blocks given to `stub_request(...).with` and `after_request` callbacks still receive the original file or stream, and `assert_requested(stub)` counts the requests that stub matched.
+* Blocks given to `stub_request(...).with` and `after_request` callbacks still receive the original file or stream, not the bytes.
+* An expectation on a stub, such as `assert_requested(stub)`, reuses the decision the stub made when the upload happened, so a stub block that checks the stream gives the same result in the expectation. If the stub never saw the request because another stub answered first, the expectation checks the uploaded bytes, as `a_request(...)` always does.
 * Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history
