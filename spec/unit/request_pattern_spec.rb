@@ -881,6 +881,20 @@ describe WebMock::RequestPattern do
               to match(WebMock::RequestSignature.new(:get, "www.example.com?a=b&a=c"))
           end
 
+          it "should match repeated query params declared as a string in another order, as in the URL" do
+            signature = WebMock::RequestSignature.new(:get, "www.example.com?a=c&a=b")
+            expect(WebMock::RequestPattern.new(:get, "www.example.com", query: "a=c&a=b")).to match(signature)
+            expect(WebMock::RequestPattern.new(:get, "www.example.com/?a=c&a=b")).to match(signature)
+            unsorted = WebMock::RequestSignature.new(:get, Addressable::URI.parse("http://www.example.com:80/?a=c&a=b"))
+            expect(WebMock::RequestPattern.new(:get, "www.example.com", query: "a=b&a=c")).to match(unsorted)
+          end
+
+          it "should match a repeated key that has no value" do
+            pattern = WebMock::RequestPattern.new(:get, "www.example.com", query: "a=2&a")
+            expect(pattern).to match(WebMock::RequestSignature.new(:get, "www.example.com?a&a=2"))
+            expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a=&a=2"))
+          end
+
           after :all do
             WebMock::Config.instance.query_values_notation = nil
           end

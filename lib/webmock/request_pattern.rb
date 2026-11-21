@@ -189,7 +189,7 @@ module WebMock
               || rSpecAnyArgMatcher?(query_params)
         WebMock::Matchers::AnyArgMatcher.new(nil)
       elsif query_params.nil? || query_params.is_a?(String)
-        WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation)
+        sorted_query_values(WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation))
       else
         raise ArgumentError, "Query should be a String, Hash, :any, nil, or a hash_including or hash_excluding matcher. Got: #{query_params.class}"
       end
@@ -216,7 +216,18 @@ module WebMock
     end
 
     def query_params_matches?(uri)
-      @query_params.nil? || @query_params == WebMock::Util::QueryMapper.query_to_values(uri.query, notation: Config.instance.query_values_notation)
+      return true if @query_params.nil?
+
+      actual = WebMock::Util::QueryMapper.query_to_values(uri.query, notation: Config.instance.query_values_notation)
+      actual = sorted_query_values(actual) if @query_params.is_a?(Array)
+      @query_params == actual
+    end
+
+    # With :flat_array the values are pairs in the order given, so both
+    # sides are sorted, as the queries of normalized URIs are. Adapters
+    # pass normalized URIs, but a signature can be given any URI.
+    def sorted_query_values(values)
+      values.is_a?(Array) ? WebMock::Util::URI.sort_query_values(values) : values
     end
   end
 

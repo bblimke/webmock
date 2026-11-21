@@ -86,6 +86,16 @@
 
     Callbacks, `WebMock.executed_requests` and VCR see the header too, and the stub suggested for an unmatched request includes it and shows a form body as a hash. Update assertions that compare all the headers of such a request. If VCR, hooked into WebMock, matches requests on their headers, record the affected cassettes again.
 
+* Match `with(query: "...")` pairs in any order with `:flat_array`
+
+    Previously, with `WebMock::Config.instance.query_values_notation = :flat_array`, `with(query: "b=2&a=1")` didn't match a request for `?b=2&a=1`, and `with(query: "a=2&a=1")` didn't match `?a=2&a=1`. Only patterns with their pairs in sorted order matched.
+
+    Such patterns now match their pairs in any order, as a query in the stub's URL already did. A stub can't tell `?a=1&a=2` from `?a=2&a=1`.
+
+* Fix URLs that repeat a query key without a value raising with `:flat_array`
+
+    Previously, with `:flat_array`, any request for a URL such as `?a&a=2` raised `ArgumentError`. It now matches `with(query: "a&a=2")`, but not `with(query: "a=&a=2")`, since the key has no value rather than an empty one.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

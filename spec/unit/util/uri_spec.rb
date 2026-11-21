@@ -317,6 +317,16 @@ describe WebMock::Util::URI do
         sorted_query = WebMock::Util::URI.sort_query_values([["b","two"],["a","one_b"],["a","one_a"]])
         expect(sorted_query).to eq([["a","one_a"],["a","one_b"],["b","two"]])
       end
+
+      it "puts a key without a value before the same key with one" do
+        sorted_query = WebMock::Util::URI.sort_query_values([["a","2"],["a",""],["a",nil]])
+        expect(sorted_query).to eq([["a",nil],["a",""],["a","2"]])
+      end
+
+      it "compares values that aren't strings as they are" do
+        sorted_query = WebMock::Util::URI.sort_query_values([["id",10],["id",2]])
+        expect(sorted_query).to eq([["id",2],["id",10]])
+      end
     end
   end
 

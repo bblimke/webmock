@@ -80,8 +80,13 @@ module WebMock
       private
 
       def self.sort_query_values(query_values)
-        sorted_query_values = query_values.sort
-        query_values.is_a?(Hash) ? Hash[*sorted_query_values.inject([]) { |values, pair| values + pair}] : sorted_query_values
+        if query_values.is_a?(Hash)
+          Hash[*query_values.sort.inject([]) { |values, pair| values + pair}]
+        else
+          # Pairs from :flat_array. A key without "=" has a nil value, which
+          # can't be compared with a string, so it comes first.
+          query_values.sort_by { |key, value| value.nil? ? [key, 0, ""] : [key, 1, value] }
+        end
       end
 
       def self.uris_with_inferred_port_and_without(uris)
