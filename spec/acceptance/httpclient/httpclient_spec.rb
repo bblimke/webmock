@@ -101,6 +101,37 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
       thread.join if thread
     end
 
+    it "records the whole response when the caller reads part of the async stream before joining" do
+      WebMock.allow_net_connect!
+      callback_bodies = []
+      WebMock.after_request { |_, response| callback_bodies << response.body }
+      send_remainder = Queue.new
+      server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
+        Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
+      server.mount_proc("/") do |_, response|
+        response["Content-Length"] = "6"
+        response.body = proc do |out|
+          out.write("abc")
+          send_remainder.pop
+          out.write("def")
+        end
+      end
+      thread = Thread.new { server.start }
+      Timeout.timeout(10) do
+        connection = HTTPClient.new.get_async("http://127.0.0.1:#{server.config[:Port]}/")
+        stream = connection.pop.content
+        expect(stream.read(3)).to eq("abc")
+        send_remainder << true
+        connection.join
+        expect(stream.read).to eq("def")
+        expect(callback_bodies).to eq(["abcdef"])
+      end
+    ensure
+      send_remainder << true if send_remainder
+      server.shutdown if server
+      thread.join if thread
+    end
+
     it "delivers an async loopback response to both the callback and the caller" do
       WebMock.allow_net_connect!
       client = HTTPClient.new

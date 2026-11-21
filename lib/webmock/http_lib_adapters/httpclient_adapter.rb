@@ -9,6 +9,7 @@ rescue LoadError
 end
 
 if defined?(::HTTPClient)
+  require 'delegate'
 
   module WebMock
     module HttpLibAdapters
@@ -45,14 +46,45 @@ if defined?(::HTTPClient)
   end
 
   module WebMockHTTPClients
-    # HTTPClient publishes the response through push. Some versions return
-    # a different value from do_get_stream, including nil for loopback replies.
-    class AsyncConnection < ::HTTPClient::Connection
-      attr_reader :response
+    # HTTPClient publishes headers before it writes the body to the caller's
+    # pipe. Capture the chunks upstream so callbacks never read from that pipe.
+    class RecordingSession < SimpleDelegator
+      def initialize(session, body)
+        super(session)
+        @body = body
+      end
+
+      def get_body
+        __getobj__.get_body do |chunk|
+          @body << chunk.b
+          yield chunk
+        end
+      end
+    end
+
+    class RecordingSessionManager < Struct.new(:manager, :body)
+      def query(req, proxy)
+        RecordingSession.new(manager.query(req, proxy), body)
+      end
+
+      def keep(session)
+        manager.keep(session.__getobj__)
+      end
+    end
+
+    class RecordingConnection
+      attr_reader :response, :body
+
+      def initialize(connection)
+        @connection = connection
+        @body = ''.b
+      end
 
       def push(response)
         @response = response
-        super
+        # HTTPClient's loopback responses bypass the session entirely.
+        @body.replace(response.content.string) if response.content.is_a?(StringIO)
+        @connection.push(response)
       end
     end
 
@@ -64,7 +96,7 @@ if defined?(::HTTPClient)
         filter.filter_response(req, response)
       end
     end
-    private_constant :AsyncConnection, :ResponseFilter
+    private_constant :RecordingConnection, :RecordingSessionManager, :RecordingSession, :ResponseFilter
 
     def do_get_block(req, proxy, conn, &block)
       @request_filter.each { |filter| filter.filter_request(req) }
@@ -120,7 +152,7 @@ if defined?(::HTTPClient)
 
       # Keep the prepared request, including any headers its filters assigned.
       # HTTPClient's do_request_async would create a second request in the worker.
-      conn = AsyncConnection.new
+      conn = ::HTTPClient::Connection.new
       conn.async_thread = Thread.new do
         begin
           if webmock_response
@@ -129,11 +161,7 @@ if defined?(::HTTPClient)
             conn.push(response)
             WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient}, request_signature, webmock_response)
           else
-            clone(freeze: false).send_prepared_request(req, proxy, conn, filters)
-            if WebMock::CallbackRegistry.any_callbacks?
-              WebMock::CallbackRegistry.invoke_callbacks(
-                {lib: :httpclient, real_request: true}, request_signature, build_webmock_response(conn.response))
-            end
+            clone(freeze: false).send_prepared_request(req, proxy, conn, filters, request_signature)
           end
         rescue Exception => e
           conn.push e
@@ -212,9 +240,18 @@ if defined?(::HTTPClient)
 
     # Only the per-request copy changes its filter list. It shares the client's
     # sessions and lets HTTPClient run the response filters at the normal time.
-    def send_prepared_request(req, proxy, conn, filters)
+    def send_prepared_request(req, proxy, conn, filters, request_signature)
       @request_filter = filters.map { |filter| ResponseFilter.new(filter) }
-      protect_keep_alive_disconnected { do_get_stream(req, proxy, conn) }
+      if WebMock::CallbackRegistry.any_callbacks?
+        recorder = RecordingConnection.new(conn)
+        @session_manager = RecordingSessionManager.new(@session_manager, recorder.body)
+      end
+
+      protect_keep_alive_disconnected { do_get_stream(req, proxy, recorder || conn) }
+      if recorder
+        response = build_webmock_response(recorder.response, recorder.body)
+        WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient, real_request: true}, request_signature, response)
+      end
     end
 
     private
