@@ -58,6 +58,12 @@
 
     Such requests are now allowed and reach the real server. Host names are not case sensitive, and allowed URLs have ignored the letter case of the host since 3.30.0.
 
+* Fix Net::HTTP `OPTIONS *` requests raising `Addressable::URI::InvalidURIError` (#982)
+
+    Previously, `http.request(Net::HTTP::Options.new("*"))` raised `Invalid port number`, even with real connections allowed, because WebMock could not build a URI from the `*` request target.
+
+    WebMock now records such a request with the path `/*`, so stub it as `stub_request(:options, "www.example.com/*")`. Real requests still send `OPTIONS *`. Stubs and `assert_requested` can't tell such a request from an `OPTIONS` request for the path `/*`.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

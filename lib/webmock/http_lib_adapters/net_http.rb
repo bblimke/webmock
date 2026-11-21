@@ -295,6 +295,8 @@ module WebMock
       end
 
       path = WebMock::Util::URI.heuristic_parse(path).request_uri if path =~ /^http/
+      # OPTIONS * (asterisk form) has no path; a URI can only hold it as /*
+      path = "/*" if path == "*" && request.method == "OPTIONS"
 
       uri = get_uri(net_http, path)
       method = request.method.downcase.to_sym

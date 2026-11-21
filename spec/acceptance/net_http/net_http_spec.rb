@@ -11,6 +11,26 @@ describe "Net:HTTP" do
 
   let(:port) { WebMockServer.instance.port }
 
+  describe "OPTIONS with an asterisk request target" do
+    include LocalHTTPServer
+
+    it "can be stubbed as the path /*" do
+      stub_request(:options, "www.example.com/*").to_return(body: "abc")
+      response = Net::HTTP.new("www.example.com", 80).request(Net::HTTP::Options.new("*"))
+      expect(response.body).to eq("abc")
+    end
+
+    it "sends the asterisk form to the server when real requests are allowed" do
+      response = nil
+      heads = capture_request_heads do |port|
+        response = Net::HTTP.start("127.0.0.1", port) { |http| http.request(Net::HTTP::Options.new("*")) }
+      end
+
+      expect(response.code).to eq("200")
+      expect(heads.first.lines.first).to eq("OPTIONS * HTTP/1.1\r\n")
+    end
+  end
+
   describe "marshalling" do
     class TestMarshalingInWebMockNetHTTP
       attr_accessor :r
