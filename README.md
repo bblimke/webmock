@@ -23,7 +23,7 @@ Supported HTTP libraries
 ------------------------
 
 * [Async::HTTP::Client](https://github.com/socketry/async-http)
-* [Curb](https://github.com/taf2/curb) (currently only Curb::Easy)
+* [Curb](https://github.com/taf2/curb) (`Curl::Easy` only). `Curl::Multi` sends real requests even when a matching stub exists and `WebMock.disable_net_connect!` is in effect.
 * [EM-HTTP-Request](https://github.com/igrigorik/em-http-request)
 * [Excon](https://github.com/excon/excon)
 * [HTTPClient](https://github.com/nahi/httpclient)
