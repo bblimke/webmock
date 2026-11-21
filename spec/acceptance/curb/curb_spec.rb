@@ -50,6 +50,52 @@ unless RUBY_PLATFORM =~ /java/
       expect(executed_requests.last.body).to eq("data")
     end
 
+    it "can send a bodyless PUT after a file passed to http_put has closed" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      curl = Curl::Easy.new(url)
+      File.open(__FILE__, "rb") { |file| curl.http_put(file) }
+      curl.http_put
+      expect(executed_requests.last.body.to_s).to be_empty
+    end
+
+    it "can send a bodyless PUT after performing a configured file upload" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      curl = Curl::Easy.new(url)
+      File.open(__FILE__, "rb") do |file|
+        curl.put_data = file
+        curl.perform
+      end
+      curl.http_put
+      expect(executed_requests.last.body.to_s).to be_empty
+    end
+
+    it "discards a one-off PUT body even when the request fails" do
+      url = "http://example.com/upload"
+      curl = Curl::Easy.new(url)
+      expect { curl.http_put("first") }.to raise_error(WebMock::NetConnectNotAllowedError)
+      stub_request(:put, url)
+      curl.http_put
+      expect(executed_requests.last.body.to_s).to be_empty
+    end
+
+    it "captures a stringifiable PUT body when it is assigned" do
+      url = "http://example.com/upload"
+      curl = Curl::Easy.new(url)
+      data = {label: [+"first"]}
+      expected = data.to_s
+      stub_request(:put, url)
+      curl.put_data = data
+      data[:label].first.replace("second")
+      curl.perform
+
+      expect(executed_requests.last.body).to eq(expected)
+      executed_requests.last.body.replace("third")
+      expect(data[:label]).to eq(["second"])
+      expect(executed_requests.last.body).to eq(expected)
+    end
+
     it "forgets the previous upload when the handle is reset" do
       url = "http://example.com/upload"
       stub_request(:put, url)

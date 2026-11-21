@@ -274,10 +274,19 @@ if defined?(Curl)
         end
       end
 
-      def http_put data = nil
+      def http_put(data = nil)
+        # put_data= can supply the upcoming request's body until perform resets the method.
+        data = @put_data if data.nil? && @webmock_method == :put
         @webmock_method = :put
-        @put_data = data if data
-        super
+        @put_data = data
+        return super('') if data.nil?
+        return super(data) if data.is_a?(String) || data.respond_to?(:read) || multipart_form_post?
+
+        # Curb joins other positional arguments as it would form fields.
+        @put_data = [data].join('&')
+        super(@put_data)
+      ensure
+        @put_data = nil
       end
       alias put http_put
 
@@ -297,10 +306,12 @@ if defined?(Curl)
         @post_body = nil
       end
 
-      def put_data= data
+      def put_data=(data)
+        body = data.respond_to?(:read) ? data : data&.to_s
+        super(body)
         @webmock_method = :put
-        @put_data = data
-        super
+        @put_data = body
+        data
       end
 
       def post_body= data
