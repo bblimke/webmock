@@ -42,13 +42,13 @@ module WebMock
       self
     end
 
-    def matches?(request_signature, live = request_signature)
+    def matches?(request_signature)
       return false unless @method_pattern.matches?(request_signature.method) && @uri_pattern.matches?(request_signature.uri)
 
       token = @match_token
-      matched = (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, request_signature.content_type)) &&
+      matched = (@body_pattern.nil? || body_matches?(request_signature)) &&
         (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
-        (@with_block.nil? || @with_block.call(live))
+        (@with_block.nil? || @with_block.call(request_signature))
       yield(token, matched) if token && block_given?
       matched
     end
@@ -64,6 +64,10 @@ module WebMock
 
     private
 
+    def body_matches?(request)
+      serialized_body = request.serialized_body if request.respond_to?(:serialized_body)
+      @body_pattern.matches?(request.body, request.content_type, serialized_body)
+    end
 
     def assign_options(options)
       options = WebMock::Util::HashKeysStringifier.stringify_keys!(options, deep: true)
@@ -304,10 +308,17 @@ module WebMock
       end
     end
 
-    def matches?(body, content_type = "")
+    def matches?(body, content_type = "", serialized_body = nil)
       # Checked on the raw value, so body patterns used with mixed case
       # multipart content types keep working as in earlier versions.
       assert_non_multipart_body(content_type)
+
+      if serialized_body
+        case @pattern
+        when String, Regexp, Hash, Array, WebMock::Matchers::HashArgumentMatcher, nil
+          body = serialized_body
+        end
+      end
 
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?

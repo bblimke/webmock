@@ -5,11 +5,12 @@ module WebMock
   class RequestSignature
 
     attr_accessor :uri, :body
-    attr_reader :method, :headers
+    attr_reader :method, :headers, :serialized_body
 
     def initialize(method, uri, options = {})
       self.method = method
       self.uri = uri.is_a?(Addressable::URI) ? uri : WebMock::Util::URI.normalize_uri(uri)
+      @serialized_body = options[:serialized_body]
       assign_options(options)
     end
 
@@ -26,11 +27,13 @@ module WebMock
     # Build a signature for history while preserving the original client
     # objects for stub matchers and callbacks. Keep nested form structure.
     def with_body_values(&block)
-      with_body(map_body_values(body, &block))
+      self.class.new(method, uri, body: map_body_values(body, &block), headers: headers)
     end
 
-    def with_body(value)
-      self.class.new(method, uri, body: value, headers: headers)
+    # Keep the native upload available to custom matchers and callbacks while
+    # allowing string and structured body patterns to match its contents.
+    def with_upload_body(upload)
+      self.class.new(method, uri, body: upload, headers: headers, serialized_body: body)
     end
 
     # A copy that shares no mutable state with the original.
@@ -38,6 +41,7 @@ module WebMock
       super
       @uri = @uri.dup
       @body = map_body_values(@body, &:dup)
+      @serialized_body = @serialized_body&.dup
       @headers = @headers&.transform_values { |value| value.is_a?(Array) ? value.map(&:dup) : value.dup }
     end
 

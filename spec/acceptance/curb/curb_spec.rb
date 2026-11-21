@@ -43,6 +43,17 @@ unless RUBY_PLATFORM =~ /java/
       expect(executed_requests.last.body).to eq(contents)
     end
 
+    it "matches an upload file by identity" do
+      url = "http://example.com/upload"
+      File.open(__FILE__, "rb") do |file|
+        stub = stub_request(:put, url).with(body: file).to_return(body: "matched")
+        curl = Curl::Easy.new(url)
+        curl.http_put(file)
+        expect(curl.body_str).to eq("matched")
+        assert_requested(stub)
+      end
+    end
+
     it "preserves pushed-back bytes for both stub matching and the upload reader" do
       url = "http://example.com/upload"
       path = File.expand_path("../../fixtures/test.txt", __dir__)

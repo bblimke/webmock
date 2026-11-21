@@ -130,6 +130,13 @@ unless RUBY_PLATFORM =~ /java/
           expect(executed_requests.last.body).to eq(contents)
         end
 
+        it "matches an upload file by class" do
+          File.write(@file_path, "payload")
+          stub = stub_request(:post, "www.example.com").with(body: File).to_return(body: "matched")
+          File.open(@file_path, "rb") { |file| expect(@sess.post("/", file).body).to eq("matched") }
+          assert_requested(stub)
+        end
+
         it "should work with put_file" do
           File.open(@file_path, "w") {|f| f.write "abc"}
           stub_request(:put, "www.example.com").with(body: "abc")

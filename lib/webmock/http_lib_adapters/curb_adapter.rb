@@ -84,17 +84,16 @@ if defined?(Curl)
       def curb_or_webmock
         request_signature = build_request_signature
         recorded = signature_for_history(request_signature)
-        live = request_signature
         if request_signature.method == :put && @put_data.respond_to?(:read)
-          live = request_signature.with_body(@put_data)
+          request_signature = request_signature.with_upload_body(@put_data)
         end
 
         webmock_response = WebMock::StubRegistry.instance.response_for_request(
-          request_signature, record: recorded, live: live)
+          request_signature, record: recorded)
         if webmock_response
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
-            {lib: :curb}, live, webmock_response)
+            {lib: :curb}, request_signature, webmock_response)
           invoke_curb_callbacks
           true
         elsif WebMock.net_connect_allowed?(request_signature.uri)
@@ -102,7 +101,7 @@ if defined?(Curl)
           if WebMock::CallbackRegistry.any_callbacks?
             webmock_response = build_webmock_response
             WebMock::CallbackRegistry.invoke_callbacks(
-              {lib: :curb, real_request: true}, live,
+              {lib: :curb, real_request: true}, request_signature,
                 webmock_response)
           end
           res

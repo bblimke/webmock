@@ -50,6 +50,18 @@ describe WebMock::StubRegistry do
 
   describe "response for request" do
 
+    it "passes a single signature to a custom request pattern" do
+      pattern_class = Class.new(WebMock::RequestPattern) do
+        def matches?(request)
+          super(request)
+        end
+      end
+      @request_stub.request_pattern = pattern_class.new(:get, "www.example.com")
+      @request_stub.to_return(body: "matched")
+      WebMock::StubRegistry.instance.register_request_stub(@request_stub)
+      expect(WebMock::StubRegistry.instance.response_for_request(@request_signature).body).to eq("matched")
+    end
+
     it "should report registered evaluated response for request pattern" do
       @request_stub.to_return(body: "abc")
       WebMock::StubRegistry.instance.register_request_stub(@request_stub)

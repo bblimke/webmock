@@ -256,11 +256,11 @@ if defined?(::Patron::Session)
           recorded = build_request_signature(req)
           request_signature = recorded
           if recorded.body && !req.file_name && req.upload_data && !req.upload_data.equal?(recorded.body)
-            request_signature = recorded.with_body(req.upload_data)
+            request_signature = recorded.with_upload_body(req.upload_data)
           end
 
           webmock_response = WebMock::StubRegistry.instance.response_for_request(
-            recorded, record: recorded, live: request_signature)
+            request_signature, record: recorded)
           if webmock_response.nil? && !WebMock.net_connect_allowed?(request_signature.uri)
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
