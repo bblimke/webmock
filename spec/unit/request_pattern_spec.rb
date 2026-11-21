@@ -349,6 +349,40 @@ describe WebMock::RequestPattern do
           query: RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({"a" => ["b", "c"]}))).
             not_to match(WebMock::RequestSignature.new(:get, "www.example.com?a[]=b&a[]=c&b=1"))
         end
+
+        it "should compare Integer and boolean query values as strings" do
+          signature = WebMock::RequestSignature.new(:get, "www.example.com?a=1&b=true&c[]=2")
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: {"a" => 1, "b" => true, "c" => [2]})).
+            to match(signature)
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/, query: {"a" => 2, "b" => true, "c" => [2]})).
+            not_to match(signature)
+        end
+
+        it "should compare Integer values in HashIncluding matchers as strings" do
+          signature = WebMock::RequestSignature.new(:get, "www.example.com?a=1&b=2")
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: WebMock::Matchers::HashIncludingMatcher.new({"a" => 1}))).to match(signature)
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: RSpec::Mocks::ArgumentMatchers::HashIncludingMatcher.new({a: 1}))).to match(signature)
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: WebMock::Matchers::HashIncludingMatcher.new({"a" => 2}))).not_to match(signature)
+        end
+
+        it "should compare Integer values in HashExcluding matchers as strings" do
+          signature = WebMock::RequestSignature.new(:get, "www.example.com?a=1&b=2")
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: WebMock::Matchers::HashExcludingMatcher.new({"a" => 1}))).not_to match(signature)
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: RSpec::Mocks::ArgumentMatchers::HashExcludingMatcher.new({a: 1}))).not_to match(signature)
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: WebMock::Matchers::HashExcludingMatcher.new({"a" => 2}))).to match(signature)
+        end
+
+        it "should keep matchers given as query values in HashIncluding matchers" do
+          expect(WebMock::RequestPattern.new(:get, /.*example.*/,
+            query: WebMock::Matchers::HashIncludingMatcher.new({"a" => /\A\d\z/}))).
+            to match(WebMock::RequestSignature.new(:get, "www.example.com?a=1"))
+        end
       end
 
       describe "when uri is described as URI" do

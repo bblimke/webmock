@@ -3,16 +3,44 @@
 module WebMock
 
   module RSpecMatcherDetector
+    extend self
+
     def rSpecHashIncludingMatcher?(matcher)
-      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashIncludingMatcher/
+      rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::HashIncludingMatcher/
     end
 
     def rSpecHashExcludingMatcher?(matcher)
-      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::HashExcludingMatcher/
+      rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::HashExcludingMatcher/
     end
 
     def rSpecAnyArgMatcher?(matcher)
-      matcher.class.name =~ /R?Spec::Mocks::ArgumentMatchers::AnyArgMatcher/
+      rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::AnyArgMatcher/
+    end
+
+    def rSpecHashMatcher?(matcher)
+      rspec_argument_matcher_name(matcher) =~ /R?Spec::Mocks::ArgumentMatchers::Hash(In|Ex)cludingMatcher/
+    end
+
+    # The class name of a possible RSpec matcher, or nil for values that
+    # can't be one, which are most values in a pattern. A custom matcher can
+    # be a BasicObject, which has no #class.
+    def rspec_argument_matcher_name(matcher)
+      case matcher
+      when String, Symbol, Numeric, Regexp, Hash, Array, nil, true, false then nil
+      when ::Object then matcher.class.name
+      end
+    end
+
+    # Turns RSpec's hash_including or hash_excluding into WebMock's matcher,
+    # which compares string keys. Returns anything else as it is.
+    def webmock_hash_matcher(matcher)
+      if rSpecHashIncludingMatcher?(matcher)
+        WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(matcher)
+      elsif rSpecHashExcludingMatcher?(matcher)
+        WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(matcher)
+      else
+        matcher
+      end
     end
   end
 
@@ -144,19 +172,17 @@ module WebMock
     end
 
     def add_query_params(query_params)
-      @query_params = if query_params.is_a?(Hash)
-        query_params
+      query_params = webmock_hash_matcher(query_params)
+      @query_params = if query_params.is_a?(Hash) \
+              || query_params.is_a?(WebMock::Matchers::HashIncludingMatcher) \
+              || query_params.is_a?(WebMock::Matchers::HashExcludingMatcher)
+        # Query values are always strings, so expected values such as 1 or
+        # true are compared as "1" and "true", in nested matchers too.
+        WebMock::Util::ValuesStringifier.stringify_query_values(query_params)
       elsif query_params.equal?(:any) \
               || query_params.is_a?(WebMock::Matchers::AnyArgMatcher) \
               || rSpecAnyArgMatcher?(query_params)
         WebMock::Matchers::AnyArgMatcher.new(nil)
-      elsif query_params.is_a?(WebMock::Matchers::HashIncludingMatcher) \
-              || query_params.is_a?(WebMock::Matchers::HashExcludingMatcher)
-        query_params
-      elsif rSpecHashIncludingMatcher?(query_params)
-        WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(query_params)
-      elsif rSpecHashExcludingMatcher?(query_params)
-        WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(query_params)
       elsif query_params.nil? || query_params.is_a?(String)
         WebMock::Util::QueryMapper.query_to_values(query_params, notation: Config.instance.query_values_notation)
       else
@@ -257,12 +283,21 @@ module WebMock
 
   class URIStringPattern < URIPattern
     def add_query_params(query_params)
+      # A query hash with a matcher, kept from an earlier call.
+      earlier = @query_params if @query_params.is_a?(Hash)
       super
       if @query_params.is_a?(Hash) || @query_params.is_a?(String)
-        query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query, notation: Config.instance.query_values_notation) || {}).merge(@query_params)
-        @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash, notation: WebMock::Config.instance.query_values_notation)
-        @query_params = nil
-      elsif @query_params.is_a?(WebMock::Matchers::AnyArgMatcher) && @pattern.query
+        query_hash = (WebMock::Util::QueryMapper.query_to_values(@pattern.query, notation: Config.instance.query_values_notation) || {}).merge(earlier || {}).merge(@query_params)
+        if WebMock::Util::ValuesStringifier.includes_query_matcher?(query_hash)
+          # A matcher can't be written into the URI, so the whole query is
+          # compared on its own.
+          @pattern.query = nil
+          @query_params = query_hash
+        else
+          @pattern.query = WebMock::Util::QueryMapper.values_to_query(query_hash, notation: WebMock::Config.instance.query_values_notation)
+          @query_params = nil
+        end
+      elsif @query_params.is_a?(WebMock::Matchers::AnyArgMatcher) && (@pattern.query || earlier)
         # The URI is then compared without its query, so it could never match.
         raise_any_query_with_uri_query
       end
@@ -297,15 +332,7 @@ module WebMock
     attr_reader :pattern
 
     def initialize(pattern)
-      @pattern = if pattern.is_a?(Hash)
-        normalize_hash(pattern)
-      elsif rSpecHashIncludingMatcher?(pattern)
-        WebMock::Matchers::HashIncludingMatcher.from_rspec_matcher(pattern)
-      elsif rSpecHashExcludingMatcher?(pattern)
-        WebMock::Matchers::HashExcludingMatcher.from_rspec_matcher(pattern)
-      else
-        pattern
-      end
+      @pattern = pattern.is_a?(Hash) ? normalize_hash(pattern) : webmock_hash_matcher(pattern)
     end
 
     def matches?(body, content_type = "", serialized_body = nil)

@@ -10,7 +10,21 @@
 
     The settings are global, so other threads see them while the block runs. Don't run such blocks in several threads at once, because they can restore each other's settings in the wrong order.
 
-    Thanks to [Yegor Bugayenko](https://github.com/yegor256)
+    Thanks to [Yegor Bugayenko](https://github.com/yegor256) for the suggestion
+
+* Match numbers and boolean values in query patterns (#371)
+
+    Previously, `with(query: hash_including(page: 2))` never matched `?page=2`, because query values in a request are strings and WebMock compared them with the Integer `2`. A plain hash had the same problem when the stub's URI was a regexp, a template or a lambda, as in `stub_request(:get, /example/).with(query: {page: 2})`. With a string URI, an array of numbers such as `{tag: [2, 10]}` didn't match `?tag[]=2&tag[]=10`.
+
+    WebMock now compares numbers, `true` and `false` in query patterns as strings, including inside nested `hash_including` and `hash_excluding` matchers.
+
+    This also makes `hash_excluding` work with such values. Previously, `with(query: hash_excluding(page: 2))` matched `?page=2`. A test that passed only because of this will now fail.
+
+* Fix `hash_including` and `hash_excluding` nested in a query hash
+
+    Previously, `stub_request(:get, "www.example.com").with(query: {filter: hash_including("role" => "admin")})` never matched `?filter[role]=admin&filter[active]=true`, because WebMock wrote the matcher into the stub's URL as text. With a regexp, a template or a lambda URI, such a stub never matched in RSpec, where `hash_including` and `hash_excluding` are RSpec's own matchers.
+
+    Such stubs now match with every kind of URI.
 
 # 3.37.0
 
