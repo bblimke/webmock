@@ -62,6 +62,12 @@
 
     The diff now leaves out the values that such a regexp matches.
 
+* Leave the User-Agent header out of the suggested stub for an unmatched request (#596)
+
+    Previously, the stub that WebMock suggests, as in "You can stub this request with the following snippet", required the request's `User-Agent`, such as `'User-Agent'=>'Ruby'` or one with the client's version. A stub pasted from it stopped matching when the client was upgraded or the tests ran on another platform.
+
+    The suggestion now leaves `User-Agent` out, so it matches whatever the client sends. The message still shows the request with all its headers.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

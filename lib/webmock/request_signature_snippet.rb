@@ -9,8 +9,12 @@ module WebMock
 
     def initialize(request_signature)
       @request_signature = request_signature
-      @request_stub = RequestStub.from_request_signature(request_signature)
+      @request_stub = RequestStub.from_request_signature(signature_for_snippet(request_signature))
     end
+
+    # Headers that change with the client version or platform. A stub copied
+    # with them breaks when the client is upgraded or runs on another machine.
+    SNIPPET_OMITTED_HEADERS = %w[User-Agent].freeze
 
     def stubbing_instructions
       return unless WebMock.show_stubbing_instructions?
@@ -34,6 +38,17 @@ module WebMock
     end
 
     private
+
+    def signature_for_snippet(request_signature)
+      headers = request_signature.headers
+      return request_signature unless headers && (headers.keys & SNIPPET_OMITTED_HEADERS).any?
+
+      # A new signature rather than a copy, which would copy the body, and
+      # some bodies, such as Curb's Curl::PostField, can't be copied.
+      RequestSignature.new(request_signature.method, request_signature.uri,
+        body: request_signature.body,
+        headers: headers.reject { |name, _| SNIPPET_OMITTED_HEADERS.include?(name) })
+    end
 
     def add_body_diff(stub, text)
       body_diff_str = signature_stub_body_diff(stub)

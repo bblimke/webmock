@@ -37,6 +37,25 @@ RSpec.describe WebMock::RequestSignatureSnippet do
           "You can stub this request with the following snippet:"
         )
       end
+
+      it "leaves the User-Agent header out of the snippet" do
+        request_signature.headers = {"Content-Type" => "application/json", "User-Agent" => "Ruby"}
+
+        expect(subject.stubbing_instructions).not_to include("User-Agent")
+        expect(subject.stubbing_instructions).to include("'Content-Type'=>'application/json'")
+        expect(request_signature.headers).to include("User-Agent" => "Ruby")
+      end
+
+      it "leaves the User-Agent header out for a body that can't be copied, such as Curb's form fields" do
+        part = Object.new
+        def part.dup
+          raise TypeError, "allocator undefined"
+        end
+        request_signature.headers = {"User-Agent" => "Ruby"}
+        request_signature.body = [part]
+
+        expect(subject.stubbing_instructions).not_to include("User-Agent")
+      end
     end
   end
 
