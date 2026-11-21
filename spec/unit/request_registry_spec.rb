@@ -120,6 +120,17 @@ describe WebMock::RequestRegistry do
       expect(registry.times_executed(WebMock::RequestPattern.new(:get, "www.example.com", headers: {"X" => "1"}))).to eq(1)
     end
 
+    it "keeps recorded bytes and counts intact when a verification block changes the body" do
+      signature = WebMock::RequestSignature.new(:post, "www.example.com", body: "sample".b)
+      2.times { registry.put(signature) }
+      WebMock::API.assert_requested(:post, "www.example.com", times: 2) do |request|
+        request.body.force_encoding("UTF-8") == "sample"
+      end
+      registry.put(signature)
+      expect(registry.executed_requests.map { |request| request.body.encoding }).to eq([Encoding::BINARY] * 3)
+      expect(registry.requested_signatures.get(signature)).to eq(3)
+    end
+
     it "keeps the body a request had when it was made, even if the caller reuses its buffer" do
       buffer = +"first"
       registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))

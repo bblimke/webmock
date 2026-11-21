@@ -66,7 +66,7 @@ module WebMock
       return "" unless WebMock.show_body_diff? && too_few_requests_executed?
 
       requests = RequestRegistry.instance.requested_signatures.select do |request_signature, _|
-        JsonBodyHint.applies?(request_pattern, request_signature)
+        JsonBodyHint.applies?(request_pattern, request_signature.dup)
       end
       requests.empty? ? "" : "\n\n#{JsonBodyHint::EXPECTATION_HINT}"
     end

@@ -66,8 +66,11 @@ module WebMock
       token = base.match_token if base.is_a?(RequestPattern)
       counts, observations = @lock.synchronize { [requested_signatures.snapshot, @live_matches[token]&.dup] }
 
-      counts.sum do |signature, total|
-        observed = observations && observations[signature]
+      counts.sum do |stored, total|
+        observed = observations && observations[stored]
+        # A user matcher may mutate its argument. The stored signature also
+        # serves as a counter key and is shared by repeated history entries.
+        signature = stored.dup
         if observed
           # The same snapshot can represent both a stream and a string.
           # Only recheck the requests for which the stub wasn't evaluated.
