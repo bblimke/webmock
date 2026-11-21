@@ -273,9 +273,35 @@ module WebMock
         rescue Addressable::URI::InvalidURIError
           Addressable::Template.new(@pattern.pattern)
         end
-      WebMock::Util::URI.variations_of_uri_as_strings(uri).any? { |u|
+      variations = WebMock::Util::URI.variations_of_uri_as_strings(uri)
+      # Normalized URIs decode reserved characters such as ":", "/" and "=" in
+      # the query, while RFC 6570 query expansion expects them encoded. The
+      # strict variations keep the path as normalized, since decoding it
+      # could turn an encoded "/" or "?" into a different path.
+      # Encoding can only change a query with other characters than these,
+      # or with a second "=" in a pair.
+      strict_query = uri.query && uri.query.match?(/[^A-Za-z0-9\-._~%=&]|=[^&]*=/) && strictly_encoded_query(uri.query)
+      if strict_query && strict_query != uri.query
+        suffix = "?#{strict_query}#{"##{uri.fragment}" if uri.fragment}"
+        base = uri.omit(:query, :fragment)
+        bases = [base]
+        bases << base.omit(:port) if base.port == Addressable::URI.port_mapping[base.scheme]
+        variations = (variations + bases.map { |b| "#{b}#{suffix}" }).uniq
+      end
+      variations.any? { |u|
         template_matches_uri?(template, u)
       }
+    end
+
+    def strictly_encoded_query(query)
+      query.split("&").map { |pair|
+        pair.split("=", 2).map { |part|
+          Addressable::URI.encode_component(
+            Addressable::URI.unencode_component(part),
+            Addressable::URI::CharacterClasses::UNRESERVED
+          )
+        }.join("=")
+      }.join("&")
     end
 
     def template_matches_uri?(template, uri)

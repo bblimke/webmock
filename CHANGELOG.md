@@ -46,6 +46,12 @@
 
     Nested matchers now get string keys too, as do hashes inside RSpec's `array_including` and `array_excluding`. A test that passed only because a nested `hash_excluding` excluded nothing will now fail.
 
+* Fix URI templates not matching encoded characters in query values (#468)
+
+    Previously, `stub_request(:get, Addressable::Template.new("https://example.com/test{?q}"))` didn't match `https://example.com/test?q=env%3Aproduction`, although the template itself matches that URL. The same happened with `?q=env:production`, and with other punctuation such as `/`, `@` or `=`, encoded or not.
+
+    Both now match. As with string URIs, a stub can't tell such an encoded character from the character itself.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

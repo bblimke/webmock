@@ -543,6 +543,36 @@ describe WebMock::RequestPattern do
             to match(WebMock::RequestSignature.new(:get, "www.example.com/thing?z=1"))
         end
 
+        it "should match a query expansion whose value has an encoded reserved character" do
+          pattern = WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/test{?q}"))
+          ["env%3Aproduction", "a%2Fb", "user%40example.com"].each do |value|
+            expect(pattern).to match(WebMock::RequestSignature.new(:get, "https://example.com/test?q=#{value}"))
+          end
+          expect(pattern).not_to match(WebMock::RequestSignature.new(:get, "https://example.com/other?q=env%3Aproduction"))
+        end
+
+        it "should match a query expansion whose value has an encoded =" do
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/test{?q}"))).
+            to match(WebMock::RequestSignature.new(:get, "https://example.com/test?q=b%3Dc"))
+        end
+
+        it "should not match a request whose path has an encoded ?" do
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/a{?q}"))).
+            not_to match(WebMock::RequestSignature.new(:get, "https://example.com/a%3Fb?q=x:y"))
+        end
+
+        it "should not match a request whose path has an encoded /" do
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/a/b{?q}"))).
+            not_to match(WebMock::RequestSignature.new(:get, "https://example.com/a%2Fb?q=x:y"))
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/a/{part}{?q}"))).
+            to match(WebMock::RequestSignature.new(:get, "https://example.com/a/a%2Fb?q=x:y"))
+        end
+
+        it "should match a query expansion against a literal reserved character in the query" do
+          expect(WebMock::RequestPattern.new(:get, Addressable::Template.new("https://example.com/test{?q}"))).
+            to match(WebMock::RequestSignature.new(:get, "https://example.com/test?q=env:production"))
+        end
+
         it "should raise an ArgumentError when query params are declared as :any and the template has a literal query" do
           expect {
             WebMock::RequestPattern.new(:get, Addressable::Template.new("www.example.com/search?q={q}"), query: :any)
