@@ -712,7 +712,7 @@ end
 Net::HTTP.get('www.something.com', '/')    # ===> Failure
 ```
 
-Settings changed inside the block, for example by another call to `WebMock.disable_net_connect!`, are undone as well. The settings are global, so other threads see them while the block runs.
+Settings changed inside the block, for example by another call to `WebMock.disable_net_connect!`, are undone as well. The settings are global, so other threads see them while the block runs, and blocks that overlap in different threads can restore each other's settings in the wrong order. Use the block form only where tests run one at a time in each process.
 
 ## Connecting on Net::HTTP.start
 
@@ -870,7 +870,7 @@ Options and a block given to `with` take the same form as in `stub_request(...).
 
 ### What an expectation on a stub counts
 
-An expectation on a stub, such as `assert_requested(stub)` or `expect(stub).to have_been_requested`, uses the stub's request pattern. It counts every request made since the last `WebMock.reset!` or `WebMock.reset_executed_requests!` that matches the pattern, including requests answered by another stub, requests made before the stub was declared and requests made after it was removed with `remove_request_stub`.
+An expectation on a stub, such as `assert_requested(stub)` or `expect(stub).to have_been_requested`, counts the requests since the last `WebMock.reset!` or `WebMock.reset_executed_requests!` that match the stub's pattern. A matching request counts even if another stub answered it, if it was made before the stub was declared, or if it was made after the stub was removed with `remove_request_stub`.
 
 ```ruby
 stub_any  = stub_request(:post, "www.example.com")
@@ -882,7 +882,9 @@ expect(stub_body).to have_been_requested.once    # ===> Success
 expect(stub_any).to have_been_requested.once     # ===> Success, as its pattern matches too
 ```
 
-To make an expectation stricter, give the stub its own conditions, such as `with(body: "")` for requests without a body, or pass them to the expectation's `with` as shown above. To count from zero, call `WebMock.reset_executed_requests!`.
+To make an expectation stricter, give the stub its own conditions, such as `with(body: "")` for requests without a body. In RSpec you can also add them to the expectation with `with`, as shown above. With `assert_requested`, pass the method and URL instead of the stub, for example `assert_requested(:post, "www.example.com", body: "")`. To count from zero, call `WebMock.reset_executed_requests!`.
+
+WebMock may run a `with` block once for several identical requests and multiply the count, so keep such blocks free of side effects. To look at every request, use [`executed_requests`](#inspecting-the-requests-made).
 
 ### Inspecting the requests made
 
@@ -910,15 +912,15 @@ A few things to know:
 
 * The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
 * The requests are copies, so changing them doesn't change what WebMock recorded.
-* When a request uploads a file or stream, its body is the uploaded bytes. WebMock reads them without moving the stream, from regular files, tempfiles, `StringIO` and gzip readers over those. Other streams, such as pipes, are listed with the stream's `to_s`.
+* When a Curb, Patron or em-http-request request uploads a file or stream, its body is the uploaded bytes. WebMock reads them without moving the stream, from regular files, tempfiles, `StringIO` and gzip readers over those. Other streams, such as pipes, are listed with the stream's `to_s`.
 * Multipart fields of a Curb PUT are listed with their `name`, `content`, `content_type`, `local_file` and `remote_file`. Files in a Typhoeus body given as an array are listed as `Pathname` objects.
-* Blocks given to `stub_request(...).with` and `after_request` callbacks still receive the original file or stream, not the bytes.
-* An expectation on a stub, such as `assert_requested(stub)`, reuses the decision the stub made when the upload happened, so a stub block that checks the stream gives the same result in the expectation. If the stub never saw the request because another stub answered first, the expectation checks the uploaded bytes, as `a_request(...)` always does.
+* With these three clients, blocks given to `stub_request(...).with` and `after_request` callbacks still receive the original file or stream, not the bytes. With other clients, such as Net::HTTP and Excon, the stream is read when the request is made, and blocks and callbacks receive the bytes.
+* An expectation on a stub, such as `assert_requested(stub)`, reuses the decision the stub made when the upload happened, so a stub block that checks the stream gives the same result in the expectation. If the stub never saw the request, because another stub answered first or the stub was declared later, the expectation checks the uploaded bytes, as `a_request(...)` and conditions given to the expectation's `with` always do.
 * Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history
 
-If you want to reset all current stubs and history of requests use `WebMock.reset!`
+If you want to reset all current stubs and history of requests use `WebMock.reset!`. [Global stubs](#global-stubs) stay.
 
 ```ruby
 stub_request(:any, "www.example.com")
@@ -964,9 +966,9 @@ WebMock.globally_stub_request do |request|
 end
 ```
 
-The block receives each request and returns a response hash with the same keys as `to_return`, or `nil` to let other stubs handle the request. `WebMock.reset!` doesn't remove global stubs, and there is no way to remove only one, so declare each of them once, for example in RSpec's `before(:suite)`.
+WebMock calls the block with the request when it reaches the global stub. The block returns a response hash with the same keys as `to_return`, or `nil` to let other stubs handle the request. `WebMock.reset!` doesn't remove global stubs, and there is no way to remove only one, so declare each of them once, for example in RSpec's `before(:suite)`.
 
-Global stubs are checked before the stubs declared with `stub_request`. Pass `:after_local_stubs` to check them last, so a test can override them with its own stubs:
+Global stubs are checked before the stubs declared with `stub_request`. To check a global stub after them instead, so a test can override it with its own stubs, declare it with `:after_local_stubs`:
 
 ```ruby
 WebMock.globally_stub_request(:after_local_stubs) do |request|
@@ -1012,6 +1014,8 @@ stub_request(:get, "www.example.com").to_return(body: "def")
 
 Net::HTTP.get('www.example.com', '/')    # ====> "def"
 ```
+
+[Global stubs](#global-stubs) are checked before these stubs, or after them when declared with `:after_local_stubs`.
 
 ## Matching URIs
 
