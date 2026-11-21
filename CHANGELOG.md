@@ -38,6 +38,12 @@
 
     Stubbed requests now emit the same instrumentation events as real ones. Other features that HTTP.rb 6 runs around a request, such as caching and digest auth, still don't run for stubbed requests.
 
+* Fix Net::HTTP uploads raising `ArgumentError` for body streams whose `read` needs a length (#644)
+
+    Previously, a request with `body_stream` set to an object with `def read(length, buffer = nil)` raised `ArgumentError: wrong number of arguments`, even with real connections allowed, because WebMock called `read` without arguments. Net::HTTP itself always passes a length, so the upload worked without WebMock.
+
+    WebMock now reads such a stream in chunks.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

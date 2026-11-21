@@ -194,6 +194,94 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
+  describe "a body stream whose read needs a length" do
+    include LocalHTTPServer
+
+    # Like a stream that only supports the calls IO.copy_stream makes.
+    let(:stream_class) do
+      Class.new do
+        def initialize(data, at_end = nil)
+          @io = StringIO.new(data)
+          @at_end = at_end
+        end
+
+        def read(length, buffer = nil)
+          @io.read(length, buffer) || @at_end
+        end
+      end
+    end
+
+    def upload(http, stream, size)
+      req = Net::HTTP::Put.new("/")
+      req.body_stream = stream
+      req.content_length = size
+      http.request(req)
+    end
+
+    it "is matched by its content" do
+      data = "x" * 40_000
+      stub_request(:put, "www.example.com").with(body: data).to_return(body: "ok")
+      response = Net::HTTP.start("www.example.com") { |http| upload(http, stream_class.new(data), data.bytesize) }
+      expect(response.body).to eq("ok")
+    end
+
+    it "is read as before when read is answered by method_missing" do
+      # Without respond_to_missing?, so method(:read) raises NameError.
+      proxy_class = Class.new do
+        def initialize(target)
+          @target = target
+        end
+
+        def method_missing(name, *args, &block)
+          @target.public_send(name, *args, &block)
+        end
+      end
+      stub_request(:put, "www.example.com").with(body: "abc")
+      Net::HTTP.start("www.example.com") { |http| upload(http, proxy_class.new(StringIO.new("abc")), 3) }
+      expect(WebMock.executed_requests.last.body).to eq("abc")
+    end
+
+    it "is read with a buffer when read needs one, as IO.copy_stream reads it" do
+      stream = Object.new
+      io = StringIO.new("abc")
+      stream.define_singleton_method(:read) { |length, buffer| io.read(length, buffer) }
+      stub_request(:put, "www.example.com").with(body: "abc")
+      Net::HTTP.start("www.example.com") { |http| upload(http, stream, 3) }
+      expect(WebMock.executed_requests.last.body).to eq("abc")
+    end
+
+    it "is read until it raises EOFError" do
+      chunks = ["abc"]
+      stream = Object.new
+      stream.define_singleton_method(:read) { |_length, _buffer = nil| chunks.shift || raise(EOFError) }
+      stub_request(:put, "www.example.com").with(body: "abc")
+      Net::HTTP.start("www.example.com") { |http| upload(http, stream, 3) }
+      expect(WebMock.executed_requests.last.body).to eq("abc")
+    end
+
+    it "joins chunks in incompatible encodings as bytes" do
+      chunks = ["é", "\xFF".b]
+      stream = Object.new
+      stream.define_singleton_method(:read) { |_length, _buffer = nil| chunks.shift }
+      stub_request(:put, "www.example.com")
+      Net::HTTP.start("www.example.com") { |http| upload(http, stream, 3) }
+      expect(WebMock.executed_requests.last.body.b).to eq("\xC3\xA9\xFF".b)
+    end
+
+    it "is read until it returns an empty string" do
+      stub_request(:put, "www.example.com").with(body: "abc")
+      Net::HTTP.start("www.example.com") { |http| upload(http, stream_class.new("abc", ""), 3) }
+      expect(WebMock.executed_requests.last.body).to eq("abc")
+    end
+
+    it "is sent for real" do
+      requests = capture_requests do |port|
+        Net::HTTP.start("127.0.0.1", port) { |http| upload(http, stream_class.new("xxxxxxxxxx"), 10) }
+      end
+      expect(requests.first.last).to eq("xxxxxxxxxx")
+    end
+  end
+
   describe "a form set with set_form" do
     include LocalHTTPServer
 

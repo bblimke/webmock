@@ -304,7 +304,7 @@ module WebMock
       headers = Hash[*request.to_hash.map {|k,v| [k, v]}.inject([]) {|r,x| r + x}]
 
       if request.body_stream
-        body = request.body_stream.read
+        body = read_body_stream(request.body_stream)
         request.body_stream = nil
       end
 
@@ -324,6 +324,40 @@ module WebMock
       end
 
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
+    end
+
+    # Net::HTTP reads a body stream with IO.copy_stream, which always passes
+    # a length, so some streams only accept #read with one. Such a stream is
+    # read in chunks. A stream that answers #read only through method_missing
+    # is read without a length, as before.
+    def self.read_body_stream(stream)
+      arity = begin
+        stream.method(:read).arity
+      rescue NameError
+        -1
+      end
+      return stream.read if arity == 0 || arity == -1
+
+      body = String.new
+      # As IO.copy_stream reads it: with a buffer, unless read takes only a
+      # length, and until it returns nil or an empty string, or raises
+      # EOFError.
+      buffer = String.new
+      begin
+        loop do
+          chunk = arity == 1 ? stream.read(16 * 1024) : stream.read(16 * 1024, buffer)
+          break if chunk.nil? || chunk.empty?
+
+          begin
+            body << chunk
+          rescue Encoding::CompatibilityError
+            # Chunks in incompatible encodings are joined as bytes.
+            body.force_encoding(Encoding::BINARY) << chunk.b
+          end
+        end
+      rescue EOFError
+      end
+      body
     end
 
     # The body Net::HTTPGenericRequest#send_request_with_body_data sends for
