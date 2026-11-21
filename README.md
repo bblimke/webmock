@@ -106,6 +106,48 @@ Add the following code to `test/test_helper.rb`
 require 'webmock/test_unit'
 ```
 
+### What the test framework integrations do
+
+`webmock/rspec`, `webmock/minitest`, `webmock/test_unit` and `webmock/cucumber` do three things:
+
+* They enable WebMock. `webmock/rspec` does it in a `before(:suite)` hook and disables WebMock again in `after(:suite)`. The others enable it as soon as they are required.
+* They call `WebMock.reset!` after every example, test or scenario. This removes the stubs declared with `stub_request` and the history of requests, so a stub declared in RSpec's `before(:all)` or `before(:context)`, or in a minitest-hooks `before_all`, is gone after the first example. Declare such stubs in `before(:each)` or `setup` instead, or use [global stubs](#global-stubs), which `WebMock.reset!` keeps. If you override `teardown` in Minitest, call `super`, or WebMock's reset doesn't run.
+* They leave the net connect settings alone. By default WebMock blocks real requests. `WebMock.allow_net_connect!` allows them all, and `WebMock.disable_net_connect!` blocks them again, except for what its options allow, such as `allow_localhost: true`. Each setting stays in effect for every later example until you change it, and each call to `disable_net_connect!` replaces the `allow`, `allow_localhost` and `net_http_connect_on_start` options given before.
+
+Requiring one of these files in a spec helper or in any spec file enables WebMock for the whole run, not only for that file. To use WebMock only in some examples, require `webmock` and set it up yourself, for example for RSpec examples tagged with `:webmock`:
+
+```ruby
+require 'webmock'
+require 'webmock/rspec/matchers'
+
+WebMock::AssertionFailure.error_class = RSpec::Expectations::ExpectationNotMetError
+
+RSpec.configure do |config|
+  config.include WebMock::API, :webmock
+  config.include WebMock::Matchers, :webmock
+
+  config.around(:each, :webmock) do |example|
+    WebMock.enable!
+    WebMock.disable_net_connect!
+    example.run
+  ensure
+    WebMock.reset!
+    WebMock.disable!
+  end
+end
+```
+
+Examples without the tag then make real requests. Create HTTP clients inside each example: a client created while WebMock was disabled isn't intercepted, and a Curb or HTTPClient object created in a tagged example is still intercepted after it.
+
+Enabling WebMock and allowing real requests are separate settings. `WebMock.enable!` and `WebMock.disable!` decide whether WebMock intercepts requests at all. `WebMock.disable_net_connect!` and `WebMock.allow_net_connect!` decide what happens to an intercepted request that no stub matches. While WebMock is disabled, it doesn't intercept requests, so these settings only take effect once it is enabled again.
+
+WebMock intercepts requests by replacing classes such as `Net::HTTP`, `HTTPClient` and `Curl::Easy` while it is enabled. `webmock/rspec` enables WebMock just before the first example, after your app and spec files have loaded. A class that inherits from `Net::HTTP`, or an HTTP client object such as a `Net::HTTP` or `HTTPClient` instance, created while they load uses the original class, and its requests reach the network. A client that creates its HTTP object for each request is not affected. If your app defines such a class or creates such an object while it loads, enable WebMock right after requiring it:
+
+```ruby
+require 'webmock/rspec'
+WebMock.enable!
+```
+
 ### Outside a test framework
 
 You can also use WebMock outside a test framework:
