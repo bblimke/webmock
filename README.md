@@ -828,10 +828,9 @@ A few things to know:
 
 * The URI is normalized, with the port added and the query sorted, so compare its parts, such as `uri.host` or `uri.query_values`, rather than `uri.to_s`.
 * The requests are copies, so changing them doesn't change what WebMock recorded.
-* For Curb PUT uploads and EventMachine stream uploads, history captures bytes from the reader’s current position, up to the specified `Content-Length`. This works with regular files, tempfiles, `StringIO`, and `Zlib::GzipReader` over regular files or `StringIO`. For pipes and custom readers, history stores `to_s` and leaves the stream available to the client.
-* For Curb multipart PUTs, history exposes the field metadata (`name`, `content`, `content_type`, `local_file`, and `remote_file`). For a field supplied by a callback, `content` reflects the field attribute and can be `nil`.
-* Typhoeus array bodies keep their nested form structure in history. File parts appear as `Pathname` objects so you can distinguish a file upload from a string with the same path.
-* When a stub checks a native upload object, `assert_requested(stub)` uses the result of that check. If a higher-priority stub handled the request before that check ran, verification uses the recorded body. Additional conditions in `have_been_requested.with(...)` also apply to the recorded request.
+* When a request uploads a file or stream, its body is the uploaded bytes. WebMock reads them without moving the stream, from regular files, tempfiles, `StringIO` and gzip readers over those. Other streams, such as pipes, are listed with the stream's `to_s`.
+* Multipart fields of a Curb PUT are listed with their `name`, `content`, `content_type`, `local_file` and `remote_file`. Files in a Typhoeus body given as an array are listed as `Pathname` objects.
+* Blocks given to `stub_request(...).with` and `after_request` callbacks still receive the original file or stream, and `assert_requested(stub)` counts the requests that stub matched.
 * Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history
