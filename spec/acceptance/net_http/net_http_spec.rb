@@ -194,6 +194,115 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
+  describe "a form set with set_form" do
+    include LocalHTTPServer
+
+    def form_request(*form)
+      Net::HTTP::Post.new("/form").tap { |req| req.set_form(*form) }
+    end
+
+    it "is matched as the URL encoded body Net::HTTP sends" do
+      stub_request(:post, "www.example.com/form").with(body: {"foo" => "bar", "baz" => "1 2"})
+      response = Net::HTTP.start("www.example.com") do |http|
+        http.request(form_request([["foo", "bar"], ["baz", "1 2"]]))
+      end
+
+      expect(response.code).to eq("200")
+      expect(WebMock.executed_requests.last.body).to eq("foo=bar&baz=1+2")
+    end
+
+    it "is recorded without a body when it is multipart, as before" do
+      stub_request(:post, "www.example.com/form")
+      Net::HTTP.start("www.example.com") do |http|
+        http.request(form_request([["foo", "bar"]], "multipart/form-data", boundary: "webmock"))
+      end
+
+      expect(WebMock.executed_requests.last.body).to be_nil
+    end
+
+    it "is recorded without a body, and sent whole, when given as an enumerator, which may be read only once" do
+      requests = capture_requests do |port|
+        form = Enumerator.new { |yielder| yielder << ["name", "Alice"] }
+        Net::HTTP.start("127.0.0.1", port) { |http| http.request(form_request(form)) }
+      end
+
+      expect(requests.first.last).to eq("name=Alice")
+      expect(WebMock.executed_requests.last.body).to be_nil
+    end
+
+    it "is sent for real as Net::HTTP sends it" do
+      forms = lambda do
+        [
+          [[["foo", "bar"], ["baz", "1 2"]]],
+          [[["foo", "bar"], ["file", StringIO.new("abc"), {filename: "a.txt"}]],
+            "multipart/form-data", {boundary: "webmock"}]
+        ]
+      end
+      send_forms = lambda do
+        capture_requests(2) do |port|
+          forms.call.each { |form| Net::HTTP.start("127.0.0.1", port) { |http| http.request(form_request(*form)) } }
+        end.map do |head, body|
+          [head[/^content-type: .*$/i], head[/^content-length: .*$/i], body]
+        end
+      end
+
+      with_webmock = send_forms.call
+      WebMock.disable!
+      without_webmock = begin
+        send_forms.call
+      ensure
+        WebMock.enable!
+      end
+
+      expect(with_webmock).to eq(without_webmock)
+      expect(with_webmock.first.last).to eq("foo=bar&baz=1+2")
+    end
+
+    it "is sent chunked when the request is chunked, as Net::HTTP sends it" do
+      send_chunked = lambda do
+        capture_requests do |port|
+          req = form_request([["foo", "bar"]], "multipart/form-data", boundary: "webmock")
+          req["Transfer-Encoding"] = "chunked"
+          Net::HTTP.start("127.0.0.1", port) { |http| http.request(req) }
+        end.map { |head, body| [head[/^transfer-encoding: .*$/i], body] }
+      end
+
+      with_webmock = send_chunked.call
+      WebMock.disable!
+      without_webmock = begin
+        send_chunked.call
+      ensure
+        WebMock.enable!
+      end
+
+      body = "--webmock\r\nContent-Disposition: form-data; name=\"foo\"\r\n\r\nbar\r\n--webmock--\r\n"
+      expect(with_webmock).to eq(without_webmock)
+      expect(with_webmock.first.last).to eq(body)
+    end
+
+    it "encodes its form again when the request is sent again" do
+      params = {"some" => "first"}
+      req = form_request(params)
+      requests = capture_requests(2) do |port|
+        Net::HTTP.start("127.0.0.1", port) do |http|
+          http.request(req)
+          params["some"] = "second"
+          http.request(req)
+        end
+      end
+
+      expect(requests.map(&:last)).to eq(["some=first", "some=second"])
+      expect(WebMock.executed_requests.map(&:body)).to eq(["some=first", "some=second"])
+    end
+
+    it "keeps matching a stub on its Content-Type when sent again" do
+      stub_request(:post, "www.example.com/form").with(headers: {"Content-Type" => "multipart/form-data"})
+      req = form_request([["foo", "bar"]], "multipart/form-data")
+      codes = Array.new(2) { Net::HTTP.start("www.example.com") { |http| http.request(req) }.code }
+      expect(codes).to eq(["200", "200"])
+    end
+  end
+
   it "should behave like Net::HTTP and raise error if both request body and body argument are set" do
     stub_http_request(:post, "www.example.com").with(body: "my_params").to_return(body: "abc")
     req = Net::HTTP::Post.new("/")

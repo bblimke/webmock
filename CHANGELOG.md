@@ -8,6 +8,12 @@
 
     It now returns the response, as it already did for real requests.
 
+* Match and record Net::HTTP URL encoded forms set with `set_form` (#959)
+
+    Previously, WebMock saw no body for a request whose form was set with `request.set_form([["foo", "bar"]])`, because Net::HTTP encodes such a form only when it sends the request. A stub such as `with(body: {"foo" => "bar"})` didn't match, and callbacks and VCR recorded the request without its body.
+
+    WebMock now records the body of a URL encoded form given as a hash or an array of pairs, as Net::HTTP encodes it, and leaves sending the request to Net::HTTP. A multipart form, or a form given as another enumerable, which may be read only once, is recorded without a body, as before. If VCR, hooked into WebMock, matches requests on their body, record cassettes that contain such requests again.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

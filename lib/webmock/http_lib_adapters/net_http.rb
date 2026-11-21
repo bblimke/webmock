@@ -308,6 +308,15 @@ module WebMock
         request.body_stream = nil
       end
 
+      # A form set with #set_form is encoded by Net::HTTP when it sends the
+      # request. The request is left as it is, so it is sent as without
+      # WebMock and encodes its form again when sent again, and the
+      # signature gets the body it sends.
+      form = request.instance_variable_get(:@body_data)
+      if form && body.nil? && request.body.nil?
+        return WebMock::RequestSignature.new(method, uri, body: form_body(request, form), headers: headers)
+      end
+
       if body != nil && body.respond_to?(:read)
         request.set_body_internal body.read
       else
@@ -315,6 +324,18 @@ module WebMock
       end
 
       WebMock::RequestSignature.new(method, uri, body: request.body, headers: headers)
+    end
+
+    # The body Net::HTTPGenericRequest#send_request_with_body_data sends for
+    # a URL encoded form given as a Hash or an Array of pairs, which Net::HTTP
+    # encodes again when it sends the request. A multipart form, or a form
+    # given as another Enumerable, which may be read only once, gets no body,
+    # as before.
+    def self.form_body(request, form)
+      return unless form.is_a?(Hash) || form.is_a?(Array)
+      return if request.content_type =~ /\Amultipart\/form-data\z/i
+
+      URI.encode_www_form(form)
     end
 
     def self.get_uri(net_http, path = nil)
