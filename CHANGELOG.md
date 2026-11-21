@@ -44,6 +44,12 @@
 
     WebMock now reads such a stream in chunks.
 
+* Fix failure messages raising `Encoding::CompatibilityError` for bodies in different encodings (#668)
+
+    Previously, the message for an unstubbed request, or for a failed `assert_requested`, could raise `Encoding::CompatibilityError: incompatible character encodings: BINARY (ASCII-8BIT) and UTF-8` instead of showing the failure. This happened when the message listed a UTF-8 body with non ASCII characters, such as a stub `with(body: "café")`, next to a binary one, such as an uploaded image.
+
+    Such messages now show the failure, with bytes that aren't valid UTF-8 written as escapes, such as `\xFF`.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

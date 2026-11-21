@@ -17,9 +17,11 @@ module WebMock
     def to_s
       string = "#{self.method.to_s.upcase}".dup
       string << " #{WebMock::Util::URI.strip_default_port_from_uri_string(self.uri.to_s)}"
-      string << " with body '#{body.to_s}'" if body && body.to_s != ''
+      # In UTF-8, so a binary body and a UTF-8 header, or a UTF-16 body,
+      # can be joined into the message.
+      string << " with body '#{WebMock::Util::MessageString.utf8(body)}'" if body && body.to_s != ''
       if headers && !headers.empty?
-        string << " with headers #{WebMock::Util::Headers.sorted_headers_string(headers)}"
+        string << " with headers #{WebMock::Util::MessageString.utf8(WebMock::Util::Headers.sorted_headers_string(headers))}"
       end
       string
     end

@@ -18,13 +18,14 @@ module WebMock
       with = "".dup
 
       if (request_pattern.body_pattern)
-        with << "\n    body: #{request_pattern.body_pattern.to_s}"
+        # In UTF-8, so a body and headers in other encodings can be joined.
+        with << "\n    body: #{WebMock::Util::MessageString.utf8(request_pattern.body_pattern.to_s)}"
       end
 
       if (request_pattern.headers_pattern)
         with << "," unless with.empty?
 
-        with << "\n    headers: #{request_pattern.headers_pattern.pp_to_s}"
+        with << "\n    headers: #{WebMock::Util::MessageString.utf8(request_pattern.headers_pattern.pp_to_s)}"
       end
       string << ".\n  with(#{with})" unless with.empty?
       if with_response

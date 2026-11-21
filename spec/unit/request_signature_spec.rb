@@ -64,6 +64,14 @@ describe WebMock::RequestSignature do
       "GET http://www.example.com/ with body 'abc' with headers {'A'=>'a', 'B'=>'b'}"
       )
     end
+
+    it "describes a binary body next to a UTF-8 header, and a UTF-16 body" do
+      binary = WebMock::RequestSignature.new(:post, "www.example.com", body: "\xFF\xFE".b, headers: {"X-Name" => "zażółć"})
+      utf16 = WebMock::RequestSignature.new(:post, "www.example.com", body: "hi".encode("UTF-16LE"))
+
+      expect(binary.to_s).to eq("POST http://www.example.com/ with body '\\xFF\\xFE' with headers {'X-Name'=>'zażółć'}")
+      expect(utf16.to_s).to eq("POST http://www.example.com/ with body 'hi'")
+    end
   end
 
   it "distinguishes different headers with the same printable representation" do

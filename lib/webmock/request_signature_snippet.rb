@@ -24,7 +24,7 @@ module WebMock
 
       text = "registered request stubs:\n".dup
       WebMock::StubRegistry.instance.request_stubs.each do |stub|
-        text << "\n#{WebMock::StubRequestSnippet.new(stub).to_s(false)}"
+        text << "\n#{WebMock::Util::MessageString.utf8(WebMock::StubRequestSnippet.new(stub).to_s(false))}"
         if WebMock.show_body_diff?
           add_body_diff(stub, text)
           add_json_body_hint(stub, text)

@@ -88,7 +88,7 @@ module WebMock
       else
         text = "".dup
         self.requested_signatures.each do |request_signature, times_executed|
-          text << "#{request_signature} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
+          text << "#{Util::MessageString.utf8(request_signature)} was made #{times_executed} time#{times_executed == 1 ? '' : 's' }\n"
         end
         text
       end

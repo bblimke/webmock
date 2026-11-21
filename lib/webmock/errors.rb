@@ -10,7 +10,7 @@ module WebMock
         request_signature_snippet.stubbing_instructions,
         request_signature_snippet.request_stubs,
         "="*60
-      ].compact.join("\n\n")
+      ].compact.map { |part| Util::MessageString.utf8(part) }.join("\n\n")
       super(text)
     end
 

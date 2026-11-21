@@ -91,6 +91,18 @@ describe WebMock::RequestRegistry do
     it "should output info if no requests were executed" do
       expect(WebMock::RequestRegistry.instance.to_s).to eq("No requests were made.")
     end
+
+    it "lists bodies in incompatible encodings, with bytes that aren't UTF-8 escaped" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:post, "www.example.com", body: "voilà"))
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:post, "www.example.org", body: "\xFF\xFE".b))
+
+      expect(WebMock::RequestRegistry.instance.to_s).to eq(
+        "POST http://www.example.com/ with body 'voilà' was made 1 time\n" \
+        "POST http://www.example.org/ with body '\\xFF\\xFE' was made 1 time\n"
+      )
+    end
   end
 
   describe "executed_requests" do

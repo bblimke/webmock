@@ -3,6 +3,26 @@ require 'spec_helper'
 describe "errors" do
   describe WebMock::NetConnectNotAllowedError do
     describe "message" do
+      it "is built when a stub and the request have bodies in incompatible encodings" do
+        stub_request(:post, "www.example.com").with(body: "café")
+        signature = WebMock::RequestSignature.new(:post, "www.example.org", body: "\xFF\xFE".b)
+
+        message = WebMock::NetConnectNotAllowedError.new(signature).message
+
+        expect(message).to start_with(
+          "Real HTTP connections are disabled. Unregistered request: POST http://www.example.org/ with body '\\xFF\\xFE'")
+        expect(message).to include('body: "café"')
+      end
+
+      it "is built when the request body and a header have incompatible encodings" do
+        signature = WebMock::RequestSignature.new(:post, "www.example.org", body: "café", headers: {"X-Blob" => "\xFF".b})
+
+        message = WebMock::NetConnectNotAllowedError.new(signature).message
+
+        expect(message).to include("with body 'café' with headers {'X-Blob'=>'\\xFF'}")
+        expect(message).to include('body: "café"')
+      end
+
       it "should have message with request signature and snippet" do
         allow(WebMock::RequestStub).to receive(:from_request_signature).and_return(request_stub)
         allow(WebMock::StubRequestSnippet).to receive(:new).
