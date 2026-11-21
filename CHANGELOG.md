@@ -6,7 +6,7 @@
 
     `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` now take a block, for example `WebMock.disable_net_connect!(allow: "api.example.com") { ... }`. The settings apply only while the block runs. When it ends, even with an exception, the settings from before the call come back.
 
-    Previously, a block given to either method was ignored: it never ran, and the new settings stayed for the rest of the run.
+    Previously, either method ignored a block. In `WebMock.allow_net_connect! { Net::HTTP.get(uri) }`, the request never ran, and real requests stayed allowed until the settings changed again. Code in such a block now runs.
 
     The settings are global, so other threads see them while the block runs. Don't run such blocks in several threads at once, because they can restore each other's settings in the wrong order.
 
