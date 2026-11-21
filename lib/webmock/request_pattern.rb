@@ -42,13 +42,13 @@ module WebMock
       self
     end
 
-    def matches?(request_signature)
+    def matches?(request_signature, live = request_signature)
       return false unless @method_pattern.matches?(request_signature.method) && @uri_pattern.matches?(request_signature.uri)
 
       token = @match_token
       matched = (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, request_signature.content_type)) &&
         (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
-        (@with_block.nil? || @with_block.call(request_signature))
+        (@with_block.nil? || @with_block.call(live))
       yield(token, matched) if token && block_given?
       matched
     end

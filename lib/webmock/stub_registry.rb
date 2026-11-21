@@ -62,19 +62,21 @@ module WebMock
       request_stub_for(request_signature)
     end
 
-    def response_for_request(request_signature, record: nil)
+    # Uploads can have separate representations for body patterns, request
+    # history, and user blocks that expect the original client object.
+    def response_for_request(request_signature, record: nil, live: request_signature)
       if record
-        remember = RequestRegistry.instance.put(record, track_live_matches: !record.equal?(request_signature))
+        remember = RequestRegistry.instance.put(record, track_live_matches: !record.equal?(live))
       end
-      stub = request_stub_for(request_signature, &remember)
-      stub ? evaluate_response_for_request(stub.response, request_signature) : nil
+      stub = request_stub_for(request_signature, live, &remember)
+      stub ? evaluate_response_for_request(stub.response, live) : nil
     end
 
     private
 
-    def request_stub_for(request_signature, &remember)
+    def request_stub_for(request_signature, live = request_signature, &remember)
       (global_stubs[:before_local_stubs] + request_stubs + global_stubs[:after_local_stubs])
-        .detect { |stub| stub.request_pattern.matches?(request_signature, &remember) }
+        .detect { |stub| stub.request_pattern.matches?(request_signature, live, &remember) }
     end
 
     def evaluate_response_for_request(response, request_signature)

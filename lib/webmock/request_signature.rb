@@ -26,7 +26,11 @@ module WebMock
     # Build a signature for history while preserving the original client
     # objects for stub matchers and callbacks. Keep nested form structure.
     def with_body_values(&block)
-      self.class.new(method, uri, body: map_body_values(body, &block), headers: headers)
+      with_body(map_body_values(body, &block))
+    end
+
+    def with_body(value)
+      self.class.new(method, uri, body: value, headers: headers)
     end
 
     # A copy that shares no mutable state with the original.

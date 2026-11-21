@@ -119,10 +119,12 @@ unless RUBY_PLATFORM =~ /java/
         it "records the whole file when the request body has a path" do
           contents = "abc\xFF".b
           File.binwrite(@file_path, contents)
-          stub_request(:post, "www.example.com").with(body: contents)
           File.open(@file_path, "rb") do |file|
+            stub = stub_request(:post, "www.example.com").with(body: contents) { |req| req.body.equal?(file) }
+            stub.to_return { |req| {body: req.body.path} }
             file.read(1)
-            @sess.post("/", file)
+            expect(@sess.post("/", file).body).to eq(@file_path)
+            assert_requested(stub)
             expect(file.pos).to eq(1)
           end
           expect(executed_requests.last.body).to eq(contents)
@@ -228,6 +230,16 @@ unless RUBY_PLATFORM =~ /java/
             stats = @sess.post_stream("/", "abc") { |stream| body = stream.read }
             expect(body).to eq("def")
             expect(stats.uploaded_bytes).to eq(3)
+          end
+
+          it "counts uploaded bytes when a stub matches the original stream" do
+            data = StringIO.new("payload")
+            data.read(1)
+            stub = stub_request(:post, "www.example.com").with(body: "ayload") { |req| req.body.equal?(data) }
+            stats = @sess.post_stream("/", data) { |stream| stream.drain! }
+            expect(stats.uploaded_bytes).to eq(6)
+            expect(data.pos).to eq(1)
+            assert_requested(stub)
           end
 
           it "should raise Patron::TimeoutError for a stubbed timeout" do

@@ -43,11 +43,11 @@ if defined?(::Patron::Session)
               return super unless block
 
               req = build_request(action, url, headers, **options)
-              request_signature, webmock_response = PatronAdapter.register_request(req)
+              request_signature, webmock_response, recorded_body = PatronAdapter.register_request(req)
 
               if webmock_response
                 PatronAdapter.stream_stubbed_response(webmock_response, request_signature,
-                  default_response_charset, &block)
+                  default_response_charset, recorded_body.to_s.bytesize, &block)
               else
                 # Callbacks run once the head has arrived, so they also run
                 # when the block leaves before the end of the body
@@ -253,15 +253,19 @@ if defined?(::Patron::Session)
         # Records the request and returns its signature with the stubbed
         # response, which is nil when a real request is allowed
         def self.register_request(req)
-          request_signature = build_request_signature(req)
-          WebMock::RequestRegistry.instance.put(request_signature)
+          recorded = build_request_signature(req)
+          request_signature = recorded
+          if recorded.body && !req.file_name && req.upload_data && !req.upload_data.equal?(recorded.body)
+            request_signature = recorded.with_body(req.upload_data)
+          end
 
-          webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+          webmock_response = WebMock::StubRegistry.instance.response_for_request(
+            recorded, record: recorded, live: request_signature)
           if webmock_response.nil? && !WebMock.net_connect_allowed?(request_signature.uri)
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
 
-          [request_signature, webmock_response]
+          [request_signature, webmock_response, recorded.body]
         end
 
         def self.invoke_callbacks(request_signature, webmock_response)
@@ -279,7 +283,7 @@ if defined?(::Patron::Session)
 
         # Callbacks run before the block, so they also run when it leaves
         # before the end of the body
-        def self.stream_stubbed_response(webmock_response, request_signature, default_response_charset)
+        def self.stream_stubbed_response(webmock_response, request_signature, default_response_charset, uploaded_bytes)
           head = build_patron_response(webmock_response, default_response_charset, with_body: false)
           invoke_callbacks(request_signature, webmock_response)
           # Kept out of the stream, so the stream has only the methods of
@@ -298,7 +302,7 @@ if defined?(::Patron::Session)
             redirect_count: head.redirect_count,
             header_data: build_header_data(webmock_response),
             downloaded_bytes: body.pos,
-            uploaded_bytes: request_signature.body.to_s.bytesize,
+            uploaded_bytes: uploaded_bytes,
             timings: {},
             complete: body.eof?,
             default_charset: default_response_charset

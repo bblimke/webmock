@@ -30,12 +30,15 @@ unless RUBY_PLATFORM =~ /java/
       url = "http://example.com/upload"
       path = File.expand_path("../../fixtures/test.txt", __dir__)
       contents = File.binread(path)
-      stub_request(:put, url).with(body: contents)
       File.open(path, "r:UTF-8:UTF-16LE") do |file|
+        stub = stub_request(:put, url).with(body: contents) { |req| req.body.equal?(file) }
+        stub.to_return { |req| {body: req.body.path} }
         curl = Curl::Easy.new(url)
         curl.put_data = file
         curl.perform
+        expect(curl.body_str).to eq(path)
         expect(file.pos).to eq(0)
+        assert_requested(stub)
       end
       expect(executed_requests.last.body).to eq(contents)
     end

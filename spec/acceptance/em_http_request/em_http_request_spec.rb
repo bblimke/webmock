@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'acceptance/webmock_shared'
 require 'ostruct'
+require 'tempfile'
 
 unless RUBY_PLATFORM =~ /java/
   require 'acceptance/em_http_request/em_http_request_spec_helper'
@@ -294,6 +295,26 @@ unless RUBY_PLATFORM =~ /java/
           expect(stub).to have_been_requested.once.with(body: expected)
           expect(file.read(10)).to eq(expected)
           expect(executed_requests.last.body).to eq(expected)
+        end
+      end
+
+      it "leaves a buffered file wrapper's transformation to the upload reader" do
+        reader_class = Class.new(SimpleDelegator) do
+          def read(*args)
+            data = super
+            data.tr!("A-Za-z", "N-ZA-Mn-za-m") if data
+            data
+          end
+        end
+        url = "http://www.example.com/"
+        stub_request(:post, url).to_return { |req| {body: req.body.read} }
+        Tempfile.create("upload") do |file|
+          file.write("header\nhello")
+          file.rewind
+          file.gets
+          reader = reader_class.new(file)
+          expect(http_request(:post, url, body: reader).body).to eq("uryyb")
+          expect(executed_requests.last.body).to eq(reader.to_s)
         end
       end
 
