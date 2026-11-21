@@ -59,6 +59,13 @@ describe "Excon" do
     expect(executed_requests.map(&:body)).to eq([nil, "", nil])
   end
 
+  it 'preserves the encoding of each request body' do
+    url = "http://example.com/upload"
+    stub_request(:post, url)
+    ["abc".encode("UTF-8"), "abc".b].each { |body| Excon.post(url, body: body) }
+    expect(executed_requests.map { |request| request.body.encoding }).to eq([Encoding::UTF_8, Encoding::BINARY])
+  end
+
   it 'handles file uploads correctly' do
     stub_request(:put, "http://example.com/upload").with(body: file_contents)
 
