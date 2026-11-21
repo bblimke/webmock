@@ -650,6 +650,26 @@ RestClient.get('bbc.com', '/')         # ===> Allowed
 RestClient.get('www.bbc.com', '/')     # ===> Failure
 ```
 
+### Real requests can be allowed or disabled only within a block
+
+Given a block, `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` apply their settings only while the block runs and return the block's value. When the block ends, even with an exception, WebMock restores the settings from before the call.
+
+```ruby
+WebMock.disable_net_connect!
+
+WebMock.allow_net_connect! do
+  Net::HTTP.get('www.something.com', '/')    # ===> /.+Something.+/
+end
+
+WebMock.disable_net_connect!(allow: 'www.example.org') do
+  RestClient.get('www.example.org', '/')    # ===> Allowed
+end
+
+Net::HTTP.get('www.something.com', '/')    # ===> Failure
+```
+
+Settings changed inside the block, for example by another call to `WebMock.disable_net_connect!`, are undone as well. The settings are global, so other threads see them while the block runs.
+
 ## Connecting on Net::HTTP.start
 
 HTTP protocol has 3 steps: connect, request and response (or 4 with close). Most Ruby HTTP client libraries

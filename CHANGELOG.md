@@ -1,5 +1,17 @@
 # Changelog
 
+# Unreleased
+
+* Allow or disable real requests only within a block (#1110)
+
+    `WebMock.allow_net_connect!` and `WebMock.disable_net_connect!` now take a block, for example `WebMock.disable_net_connect!(allow: "api.example.com") { ... }`. The settings apply only while the block runs. When it ends, even with an exception, the settings from before the call come back.
+
+    Previously, a block given to either method was ignored: it never ran, and the new settings stayed for the rest of the run.
+
+    The settings are global, so other threads see them while the block runs.
+
+    Thanks to [Yegor Bugayenko](https://github.com/yegor256)
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

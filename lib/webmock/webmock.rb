@@ -43,17 +43,40 @@ module WebMock
     end
   end
 
-  def self.allow_net_connect!(options = {})
-    Config.instance.allow_net_connect = true
-    Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
+  def self.allow_net_connect!(options = {}, &block)
+    with_restored_net_connect_config(block) do
+      Config.instance.allow_net_connect = true
+      Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
+    end
   end
 
-  def self.disable_net_connect!(options = {})
-    Config.instance.allow_net_connect = false
-    Config.instance.allow_localhost = options[:allow_localhost]
-    Config.instance.allow = options[:allow]
-    Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
+  def self.disable_net_connect!(options = {}, &block)
+    with_restored_net_connect_config(block) do
+      Config.instance.allow_net_connect = false
+      Config.instance.allow_localhost = options[:allow_localhost]
+      Config.instance.allow = options[:allow]
+      Config.instance.net_http_connect_on_start = options[:net_http_connect_on_start]
+    end
   end
+
+  NET_CONNECT_SETTINGS = %i[allow_net_connect allow_localhost allow net_http_connect_on_start].freeze
+  private_constant :NET_CONNECT_SETTINGS
+
+  # Without a block, applies the settings. With a block, applies them only
+  # while the block runs and then restores the settings from before the call,
+  # ignoring any changes made inside the block.
+  def self.with_restored_net_connect_config(block)
+    return yield unless block
+
+    saved = NET_CONNECT_SETTINGS.map { |name| [name, Config.instance.public_send(name)] }
+    begin
+      yield
+      block.call
+    ensure
+      saved.each { |name, value| Config.instance.public_send(:"#{name}=", value) }
+    end
+  end
+  private_class_method :with_restored_net_connect_config
 
   class << self
     alias :enable_net_connect!   :allow_net_connect!

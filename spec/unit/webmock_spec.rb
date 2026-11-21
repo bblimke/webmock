@@ -148,6 +148,85 @@ describe "WebMock" do
     end
   end
 
+  describe "net connect settings with a block" do
+    let(:config) { WebMock::Config.instance }
+
+    def settings
+      [config.allow_net_connect, config.allow_localhost, config.allow, config.net_http_connect_on_start]
+    end
+
+    after { WebMock.disable_net_connect! }
+
+    it "allows real requests only while the block given to allow_net_connect! runs" do
+      WebMock.disable_net_connect!(allow_localhost: true, allow: "example.org", net_http_connect_on_start: true)
+      before_block = settings
+
+      inside = WebMock.allow_net_connect!(net_http_connect_on_start: "example.com") do
+        [WebMock.net_connect_allowed?, config.net_http_connect_on_start]
+      end
+
+      expect(inside).to eq([true, "example.com"])
+      expect(settings).to eq(before_block)
+    end
+
+    it "disables real requests only while the block given to disable_net_connect! runs" do
+      WebMock.disable_net_connect!
+      WebMock.allow_net_connect!
+      before_block = settings
+
+      inside = WebMock.disable_net_connect!(allow: "example.org") do
+        [WebMock.net_connect_allowed?("http://example.org/"), WebMock.net_connect_allowed?("http://example.com/")]
+      end
+
+      expect(inside).to eq([true, false])
+      expect(settings).to eq(before_block)
+      expect(WebMock.net_connect_allowed?("http://example.com/")).to be(true)
+    end
+
+    it "restores the settings when the block raises" do
+      WebMock.disable_net_connect!(allow: "example.org")
+      before_block = settings
+
+      expect {
+        WebMock.allow_net_connect! { raise ArgumentError, "boom" }
+      }.to raise_error(ArgumentError, "boom")
+
+      expect(settings).to eq(before_block)
+    end
+
+    it "discards changes made inside the block" do
+      WebMock.disable_net_connect!(allow: "example.org")
+      before_block = settings
+
+      WebMock.disable_net_connect!(allow_localhost: true) do
+        WebMock.allow_net_connect!
+      end
+
+      expect(settings).to eq(before_block)
+    end
+
+    it "restores each level of nested blocks, including through the aliases" do
+      WebMock.disable_net_connect!
+
+      WebMock.enable_net_connect! do
+        WebMock.disallow_net_connect!(allow: "example.org") do
+          expect(WebMock.net_connect_allowed?("http://example.com/")).to be_falsey
+          expect(WebMock.net_connect_allowed?("http://example.org/")).to be(true)
+        end
+        expect(WebMock.net_connect_allowed?("http://example.com/")).to be(true)
+      end
+
+      expect(WebMock.net_connect_allowed?("http://example.com/")).to be_falsey
+    end
+
+    it "keeps the settings when no block is given" do
+      WebMock.disable_net_connect!
+      WebMock.allow_net_connect!
+
+      expect(WebMock.net_connect_allowed?).to be(true)
+    end
+  end
+
   describe ".net_http_connect_on_start?" do
     let(:uri) { Addressable::URI.parse("http://example.org:5432") }
 
