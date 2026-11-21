@@ -16,6 +16,8 @@ shared_context "complex cross-concern behaviors" do |*adapter_info|
 
     expect(played_back_response.headers.keys).to include('Set-Cookie')
     expect(played_back_response).to eq(real_response)
+  ensure
+    WebMock.reset_callbacks
   end
 
   let(:no_content_url) { "#{HTTP_STATUS_SERVICE}/204" }

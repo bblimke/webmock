@@ -194,6 +194,37 @@ describe "Net:HTTP" do
     expect(Net::HTTP.start("www.example.com") { |http| http.request(req)}.body).to eq("abc")
   end
 
+  describe "a real response read in the request block" do
+    include LocalHTTPServer
+
+    let(:chunks) { ["first,", "second,", "third"] }
+    let(:chunked_response) do
+      "HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n" +
+        chunks.map { |chunk| "#{chunk.bytesize.to_s(16)}\r\n#{chunk}\r\n" }.join + "0\r\n\r\n"
+    end
+
+    def get(port, headers = {}, &block)
+      Net::HTTP.start("127.0.0.1", port) { |http| http.request(Net::HTTP::Get.new("/", headers), &block) }
+    end
+
+    after { WebMock.reset_callbacks }
+
+    it "is read whole before the block, so callbacks get all of it" do
+      recorded = []
+      seen = []
+      WebMock.after_request { |_request, response| recorded << response.body }
+      capture_requests(4, response: chunked_response) do |port|
+        get(port) { |response| response.read_body { |chunk| seen << chunk } }
+        get(port) { |response| response.body }
+        get(port) { |response| response.read_body(+"before:") }
+        get(port) { |_response| break }
+      end
+
+      expect(seen).to eq([chunks.join])
+      expect(recorded).to eq([chunks.join] * 4)
+    end
+  end
+
   describe "a body stream whose read needs a length" do
     include LocalHTTPServer
 
