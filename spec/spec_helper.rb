@@ -19,6 +19,7 @@ require 'webmock/rspec'
 
 require 'support/network_connection'
 require 'support/webmock_server'
+require 'support/local_http_server'
 require 'support/my_rack_app'
 require 'support/failures'
 

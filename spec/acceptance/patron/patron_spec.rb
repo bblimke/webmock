@@ -339,31 +339,18 @@ unless RUBY_PLATFORM =~ /java/
       end
 
       describe "real requests with credentials" do
+        include LocalHTTPServer
+
         # Serves one request and returns the head that the session sent
         def request_head_sent_by
-          server = TCPServer.new("127.0.0.1", 0)
-          thread = Thread.new do
-            client = server.accept
-            lines = []
-            while (line = client.gets) && line != "\r\n"
-              lines << line
-            end
-            client.write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok")
-            client.close
-            lines.join
-          end
-          thread.report_on_exception = false
-
-          WebMock.allow_net_connect!
-          sess = Patron::Session.new
-          sess.base_url = "http://127.0.0.1:#{server.addr[1]}"
-          sess.username = "user"
-          sess.password = "pass"
-          sess.auth_type = :digest
-          yield sess
-          thread.value
-        ensure
-          server.close if server
+          capture_request_heads do |port|
+            sess = Patron::Session.new
+            sess.base_url = "http://127.0.0.1:#{port}"
+            sess.username = "user"
+            sess.password = "pass"
+            sess.auth_type = :digest
+            yield sess
+          end.first
         end
 
         it "should not add a Basic Authorization header to the request" do
