@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.38.0
 
 * Allow or disable real requests only within a block (#1110)
 
@@ -12,6 +12,22 @@
 
     Thanks to [Yegor Bugayenko](https://github.com/yegor256) for the suggestion
 
+* Record the form Content-Type of Typhoeus requests with a hash body (#463)
+
+    Previously, `Typhoeus.post(url, body: {page: 2})` sent `Content-Type: application/x-www-form-urlencoded`, but WebMock recorded the request without it. A stub with `with(body: {page: 2})` didn't match, and neither did a stub that required that header.
+
+    WebMock now records the header whenever Typhoeus sends it for a hash body: for a POST, even with an empty hash, and for any other method except PUT and HEAD, unless the form is empty.
+
+    A request that sets its own Content-Type keeps it. Multipart forms, such as a hash with a file or a request with `multipart: true`, still have no Content-Type recorded, except an empty POST, which Typhoeus sends URL encoded even then. Requests with `nobody: true` have none either.
+
+    Callbacks, `WebMock.executed_requests` and VCR see the header too, and the stub suggested for an unmatched request includes it and shows a form body as a hash. Update assertions that compare all the headers of such a request. If VCR, hooked into WebMock, matches requests on their headers, record the affected cassettes again.
+
+* Keep a `with` block when `with` is called again with options only
+
+    Previously, `stub_request(:post, url).with { |request| request.body == "yes" }.with(headers: {"X-A" => "1"})` dropped the block, so the stub also matched a request with that header and the body `"no"`. A later `with` call already kept the options it didn't give, such as `body:`, and now keeps the block too. The same applies to `a_request`.
+
+    A stub or request expectation that matched only because the block was dropped no longer matches. Calling `with` again with a block, or with an option given before, still replaces it.
+
 * Match numbers and boolean values in query patterns (#371)
 
     Previously, `with(query: hash_including(page: 2))` never matched `?page=2`, because query values in a request are strings and WebMock compared them with the Integer `2`. A plain hash had the same problem when the stub's URI was a regexp, a template or a lambda, as in `stub_request(:get, /example/).with(query: {page: 2})`. With a string URI, an array of numbers such as `{tag: [2, 10]}` didn't match `?tag[]=2&tag[]=10`.
@@ -20,11 +36,31 @@
 
     This also makes `hash_excluding` work with such values. Previously, `with(query: hash_excluding(page: 2))` matched `?page=2`. A test that passed only because of this will now fail.
 
+* Fix nested `hash_including` and `hash_excluding` with symbol keys in RSpec (#900)
+
+    Previously, in RSpec, `with(body: {user: hash_including(role: "admin")})` never matched the JSON body `{"user":{"role":"admin"}}`. WebMock converted the keys of the outer hash to strings, but not those of a matcher inside it, and the parsed body has string keys. For the same reason, a nested `hash_excluding` with symbol keys never excluded anything, so `with(body: {user: hash_excluding(role: "admin")})` matched that body too.
+
+    The same applied to query patterns: `with(query: hash_including(filter: hash_excluding(role: "admin")))` matched `?filter[role]=admin`.
+
+    Nested matchers now get string keys too, as do hashes inside RSpec's `array_including` and `array_excluding`. A test that passed only because a nested `hash_excluding` excluded nothing will now fail.
+
 * Fix `hash_including` and `hash_excluding` nested in a query hash
 
     Previously, `stub_request(:get, "www.example.com").with(query: {filter: hash_including("role" => "admin")})` never matched `?filter[role]=admin&filter[active]=true`, because WebMock wrote the matcher into the stub's URL as text. With a regexp, a template or a lambda URI, such a stub never matched in RSpec, where `hash_including` and `hash_excluding` are RSpec's own matchers.
 
     Such stubs now match with every kind of URI.
+
+* Ignore letter case in allowed host names (#819)
+
+    Previously, `WebMock.disable_net_connect!(allow: "Anachronic.local")` blocked requests to that host, because WebMock compared the allowed name with the request's host, which it writes in lowercase. The same applied to a host with a port, such as `"Anachronic.local:8080"`, and to host names given as `net_http_connect_on_start`.
+
+    Such requests are now allowed and reach the real server. Host names are not case sensitive, and allowed URLs have ignored the letter case of the host since 3.30.0.
+
+* Fix URI templates not matching encoded characters in query values (#468)
+
+    Previously, `stub_request(:get, Addressable::Template.new("https://example.com/test{?q}"))` didn't match `https://example.com/test?q=env%3Aproduction`, although the template itself matches that URL. The same happened with `?q=env:production`, and with other punctuation such as `/`, `@` or `=`, encoded or not.
+
+    Both now match. As with string URIs, a stub can't tell such an encoded character from the character itself.
 
 * Fix stubs with a hash body pattern raising on binary request bodies (#333)
 
@@ -38,26 +74,6 @@
 
     WebMock now raises its usual error, and the suggested stub shows such a body as a string.
 
-* Fix nested `hash_including` and `hash_excluding` with symbol keys in RSpec (#900)
-
-    Previously, in RSpec, `with(body: {user: hash_including(role: "admin")})` never matched the JSON body `{"user":{"role":"admin"}}`. WebMock converted the keys of the outer hash to strings, but not those of a matcher inside it, and the parsed body has string keys. For the same reason, a nested `hash_excluding` with symbol keys never excluded anything, so `with(body: {user: hash_excluding(role: "admin")})` matched that body too.
-
-    The same applied to query patterns: `with(query: hash_including(filter: hash_excluding(role: "admin")))` matched `?filter[role]=admin`.
-
-    Nested matchers now get string keys too, as do hashes inside RSpec's `array_including` and `array_excluding`. A test that passed only because a nested `hash_excluding` excluded nothing will now fail.
-
-* Fix URI templates not matching encoded characters in query values (#468)
-
-    Previously, `stub_request(:get, Addressable::Template.new("https://example.com/test{?q}"))` didn't match `https://example.com/test?q=env%3Aproduction`, although the template itself matches that URL. The same happened with `?q=env:production`, and with other punctuation such as `/`, `@` or `=`, encoded or not.
-
-    Both now match. As with string URIs, a stub can't tell such an encoded character from the character itself.
-
-* Ignore letter case in allowed host names (#819)
-
-    Previously, `WebMock.disable_net_connect!(allow: "Anachronic.local")` blocked requests to that host, because WebMock compared the allowed name with the request's host, which it writes in lowercase. The same applied to a host with a port, such as `"Anachronic.local:8080"`, and to host names given as `net_http_connect_on_start`.
-
-    Such requests are now allowed and reach the real server. Host names are not case sensitive, and allowed URLs have ignored the letter case of the host since 3.30.0.
-
 * Fix Net::HTTP `OPTIONS *` requests raising `Addressable::URI::InvalidURIError` (#982)
 
     Previously, `http.request(Net::HTTP::Options.new("*"))` raised `Invalid port number`, even with real connections allowed, because WebMock could not build a URI from the `*` request target.
@@ -69,22 +85,6 @@
     Previously, after `WebMock::Config.instance.query_values_notation = :flat_array`, a URL that WebMock had already seen kept the query it got with the earlier notation, so `?a=1&a=2` still became `?a=2`. Whether a stub matched depended on which tests ran first.
 
     WebMock now reads each request's URL with the current notation. A stub keeps the query as WebMock read it when the stub was declared, so set the notation before declaring stubs.
-
-* Keep a `with` block when `with` is called again with options only
-
-    Previously, `stub_request(:post, url).with { |request| request.body == "yes" }.with(headers: {"X-A" => "1"})` dropped the block, so the stub also matched a request with that header and the body `"no"`. A later `with` call already kept the options it didn't give, such as `body:`, and now keeps the block too. The same applies to `a_request`.
-
-    A stub or request expectation that matched only because the block was dropped no longer matches. Calling `with` again with a block, or with an option given before, still replaces it.
-
-* Record the form Content-Type of Typhoeus requests with a hash body (#463)
-
-    Previously, `Typhoeus.post(url, body: {page: 2})` sent `Content-Type: application/x-www-form-urlencoded`, but WebMock recorded the request without it. A stub with `with(body: {page: 2})` didn't match, and neither did a stub that required that header.
-
-    WebMock now records the header whenever Typhoeus sends it for a hash body: for a POST, even with an empty hash, and for any other method except PUT and HEAD, unless the form is empty.
-
-    A request that sets its own Content-Type keeps it. Multipart forms, such as a hash with a file or a request with `multipart: true`, still have no Content-Type recorded, except an empty POST, which Typhoeus sends URL encoded even then. Requests with `nobody: true` have none either.
-
-    Callbacks, `WebMock.executed_requests` and VCR see the header too, and the stub suggested for an unmatched request includes it and shows a form body as a hash. Update assertions that compare all the headers of such a request. If VCR, hooked into WebMock, matches requests on their headers, record the affected cassettes again.
 
 * Match `with(query: "...")` pairs in any order with `:flat_array`
 
