@@ -270,6 +270,21 @@ describe WebMock::Util::URI do
       expect(WebMock::Util::QueryMapper.query_to_values(uri.query)).to eq({"load"=>{"include"=>[{"staff"=>"email"},"business_name"]}})
     end
 
+    it "should normalize a URI seen before again after the query notation changes" do
+      uri_string = "http://www.example.com:80/path?target=host1&target=host2"
+      previous_notation = WebMock::Config.instance.query_values_notation
+      begin
+        WebMock::Config.instance.query_values_notation = :subscript
+        expect(WebMock::Util::URI.normalize_uri(uri_string).query).to eq("target=host2")
+        WebMock::Config.instance.query_values_notation = :flat_array
+        expect(WebMock::Util::URI.normalize_uri(uri_string).query).to eq("target=host1&target=host2")
+        WebMock::Config.instance.query_values_notation = :subscript
+        expect(WebMock::Util::URI.normalize_uri(uri_string).query).to eq("target=host2")
+      ensure
+        WebMock::Config.instance.query_values_notation = previous_notation
+      end
+    end
+
     context "when query notation is set to :flat_array" do
       before :all do
         @previous_notation = WebMock::Config.instance.query_values_notation

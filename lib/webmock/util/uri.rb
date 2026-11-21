@@ -13,16 +13,20 @@ module WebMock
         hash[key] = Addressable::URI.heuristic_parse(key)
       end
 
-      NORMALIZED_URIS = Hash.new do |hash, uri|
-        normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
-        if normalized_uri.query_values
-          sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query, notation: Config.instance.query_values_notation) || {})
-          normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values, notation: WebMock::Config.instance.query_values_notation)
+      # Keyed by query notation, then by URI, so changing
+      # Config.instance.query_values_notation applies to URIs seen before.
+      NORMALIZED_URIS = Hash.new do |by_notation, notation|
+        by_notation[notation] = Hash.new do |hash, uri|
+          normalized_uri = WebMock::Util::URI.heuristic_parse(uri)
+          if normalized_uri.query_values
+            sorted_query_values = sort_query_values(WebMock::Util::QueryMapper.query_to_values(normalized_uri.query, notation: notation) || {})
+            normalized_uri.query = WebMock::Util::QueryMapper.values_to_query(sorted_query_values, notation: notation)
+          end
+          normalized_uri = normalized_uri.normalize #normalize! is slower
+          normalized_uri.query = normalized_uri.query.gsub("+", "%2B") if normalized_uri.query
+          normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
+          hash[uri] = normalized_uri
         end
-        normalized_uri = normalized_uri.normalize #normalize! is slower
-        normalized_uri.query = normalized_uri.query.gsub("+", "%2B") if normalized_uri.query
-        normalized_uri.port = normalized_uri.inferred_port unless normalized_uri.port
-        hash[uri] = normalized_uri
       end
 
       def self.heuristic_parse(uri)
@@ -32,7 +36,7 @@ module WebMock
       def self.normalize_uri(uri)
         return uri if uri.is_a?(Regexp)
         uri = 'http://' + uri unless uri.match('^https?://') if uri.is_a?(String)
-        NORMALIZED_URIS[uri].dup
+        NORMALIZED_URIS[Config.instance.query_values_notation][uri].dup
       end
 
       def self.variations_of_uri_as_strings(uri_object, only_with_scheme: false)

@@ -64,6 +64,12 @@
 
     WebMock now records such a request with the path `/*`, so stub it as `stub_request(:options, "www.example.com/*")`. Real requests still send `OPTIONS *`. Stubs and `assert_requested` can't tell such a request from an `OPTIONS` request for the path `/*`.
 
+* Apply a changed `query_values_notation` to URLs that WebMock has already seen
+
+    Previously, after `WebMock::Config.instance.query_values_notation = :flat_array`, a URL that WebMock had already seen kept the query it got with the earlier notation, so `?a=1&a=2` still became `?a=2`. Whether a stub matched depended on which tests ran first.
+
+    WebMock now reads each request's URL with the current notation. A stub keeps the query as WebMock read it when the stub was declared, so set the notation before declaring stubs.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)
