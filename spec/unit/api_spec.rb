@@ -164,6 +164,11 @@ describe WebMock::API do
       WebMock::RequestRegistry.instance.put(request_signature)
     end
 
+    it 'returns the new request counter' do
+      counter = WebMock.reset_executed_requests!
+      expect(counter).to equal(WebMock::RequestRegistry.instance.requested_signatures)
+    end
+
     it 'resets request registry counter' do
       expect{
         subject

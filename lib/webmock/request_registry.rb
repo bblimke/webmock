@@ -20,8 +20,8 @@ module WebMock
     # always agree.
     def reset!
       atomically do
-        self.requested_signatures = Util::HashCounter.new
         @executed_requests = []
+        self.requested_signatures = Util::HashCounter.new
       end
     end
 
