@@ -14,7 +14,17 @@ module WebMock
     def body_diff
       return {} unless request_signature_diffable? && request_stub_diffable?
 
-      Hashdiff.diff(request_signature_body_hash, request_stub_body_hash)
+      Hashdiff.diff(request_signature_body_hash, request_stub_body_hash) do |_path, actual, expected|
+        # A regexp that matches the request's value is not a difference.
+        # Anything else, including matchers and lambdas, which building a
+        # message must not run, is left to Hashdiff by returning nil.
+        begin
+          true if expected.is_a?(Regexp) && actual.is_a?(String) && expected.match?(actual)
+        rescue EncodingError
+          # A regexp and a value in incompatible encodings don't match.
+          nil
+        end
+      end
     end
 
     attr_reader :request_signature, :request_stub

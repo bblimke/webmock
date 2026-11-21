@@ -56,6 +56,12 @@
 
     The list now shows `stub_request(:get, Addressable::Template.new("http://localhost:9200/{index}/_search"))`, a regexp as a regexp, and a query that isn't part of the URL as `with(query: ...)`. The suggested stub for the unmatched request is unchanged.
 
+* Leave out of the body diff the values that a regexp in a stub's body pattern matches (#840)
+
+    Previously, when a request didn't match a stub such as `with(body: {"email" => /@/}, headers: {"X-Token" => "1"})` because of its headers, the body diff in the message still listed `["~", "email", "milo@carter.net", /@/]`, so the regexp looked like the cause.
+
+    The diff now leaves out the values that such a regexp matches.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)
