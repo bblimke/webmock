@@ -63,6 +63,15 @@ if defined?(Typhoeus)
             headers['Authorization'] = WebMock::Util::Headers.basic_auth_header(req.options[:userpwd])
           end
 
+          # libcurl sends the cookie option as a Cookie header, unless the
+          # request already has one. With libcurl's cookie engine on, it adds
+          # the cookies it keeps to that header, which can't be known here.
+          cookie = req.options[:cookie]
+          cookie_engine = %i[cookiefile cookiejar cookielist].any? { |option| req.options[option] }
+          if cookie && !cookie_engine && (headers || {}).keys.none? { |name| name.to_s.casecmp?('Cookie') }
+            headers = (headers || {}).merge('Cookie' => cookie)
+          end
+
           body = req.options[:body]
           form = body.is_a?(Hash)
           body = WebMock::Util::QueryMapper.values_to_query(body) if form

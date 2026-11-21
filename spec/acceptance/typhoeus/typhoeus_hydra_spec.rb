@@ -254,6 +254,44 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe "the cookie option" do
+        include LocalHTTPServer
+
+        it "is matched as the Cookie header" do
+          stub_request(:get, "www.example.com").with(headers: {"Cookie" => "key=value"}).to_return(body: "Cookies Accepted!")
+          expect(Typhoeus.get("http://www.example.com", cookie: "key=value").body).to eq("Cookies Accepted!")
+        end
+
+        it "records the Cookie header that libcurl sends" do
+          requests = [
+            {cookie: "key=value"},
+            {cookie: "key=value", headers: {"Cookie" => "other=1"}},
+            {cookie: "key=value", headers: {"cookie" => "other=1"}},
+            {cookie: ""},
+            {}
+          ]
+          heads = capture_request_heads(requests.size) do |port|
+            requests.each do |options|
+              expect(Typhoeus::Request.new("http://127.0.0.1:#{port}/", **options).run.code).to eq(200)
+            end
+          end
+          received = heads.map { |head| head[/^cookie:[ \t]*([^\r]*)/i, 1] }
+
+          expect(received.first(3)).to eq(["key=value", "other=1", "other=1"])
+          expect(executed_requests.map { |request| (request.headers || {})["Cookie"] }).to eq(received)
+        end
+
+        it "records no Cookie header when libcurl's cookie engine can add to it" do
+          heads = capture_request_heads do |port|
+            Typhoeus::Request.new("http://127.0.0.1:#{port}/", cookie: "manual=1",
+              cookielist: "Set-Cookie: jar=2; domain=127.0.0.1").run
+          end
+
+          expect(heads.first[/^cookie:[ \t]*([^\r]*)/i, 1]).to eq("jar=2; manual=1")
+          expect(executed_requests.last.headers.to_h).not_to have_key("Cookie")
+        end
+      end
+
       describe "timeouts" do
         it "should support native typhoeus timeouts" do
           stub_request(:any, "example.com").to_timeout

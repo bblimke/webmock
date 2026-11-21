@@ -20,6 +20,12 @@
 
     The client now hands out its real connection pool when WebMock's settings allow real connections to the host, and raises `WebMock::NetConnectNotAllowedError` otherwise. WebMock can't stub or record what a library sends over such a connection, and neither can VCR, so with VCR hooked into WebMock, allow the host with `WebMock.disable_net_connect!(allow: ...)`.
 
+* Match the Cookie header that Typhoeus sends for the `cookie` option (#813)
+
+    Previously, `Typhoeus.get(url, cookie: "key=value")` sent `Cookie: key=value`, but WebMock recorded the request without it, so a stub with `with(headers: {"Cookie" => "key=value"})` didn't match.
+
+    WebMock now records the header, unless the request sets its own Cookie header, which is then the one sent, or uses libcurl's cookie engine with `cookiefile`, `cookiejar` or `cookielist`, which adds its own cookies to it. If VCR, hooked into WebMock, matches requests on their headers, record cassettes that contain such requests again. VCR now records the cookie too, so filter it, for example with `filter_sensitive_data`, if it is a secret.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)
