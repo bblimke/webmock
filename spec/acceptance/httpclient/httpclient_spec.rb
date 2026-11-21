@@ -75,6 +75,45 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
       expect(executed_requests.map { |request| request.uri.path }).to eq(["/outer", "/inner"])
     end
 
+    it "records and counts the request ID sent on a real async request" do
+      WebMock.allow_net_connect!
+      server = WEBrick::HTTPServer.new(BindAddress: "127.0.0.1", Port: 0,
+        Logger: WEBrick::Log.new(File::NULL), AccessLog: [])
+      server.mount_proc("/") { |req, res| res.body = req["X-Request-Id"] }
+      thread = Thread.new { server.start }
+      url = "http://127.0.0.1:#{server.config[:Port]}/"
+      client = HTTPClient.new
+      filter = double("request ID filter", filter_response: nil)
+      next_id = 0
+      allow(filter).to receive(:filter_request) do |req|
+        req.header.set("X-Request-Id", (next_id += 1).to_s)
+      end
+      client.request_filter << filter
+
+      connection = client.get_async(url)
+      connection.join
+      sent_id = connection.pop.content.read
+      expect(sent_id).to eq("1")
+      expect(executed_requests.map { |req| req.headers["X-Request-Id"] }).to eq([sent_id])
+      expect(a_request(:get, url).with(headers: {"X-Request-Id" => sent_id})).to have_been_made.once
+    ensure
+      server.shutdown if server
+      thread.join if thread
+    end
+
+    it "delivers an async loopback response to both the callback and the caller" do
+      WebMock.allow_net_connect!
+      client = HTTPClient.new
+      client.test_loopback_response << "loopback"
+      callback_bodies = []
+      WebMock.after_request { |_, response| callback_bodies << response.body }
+
+      connection = client.get_async("http://localhost/")
+      connection.join
+      expect(callback_bodies).to eq(["loopback"])
+      expect(connection.pop.content.read).to eq("loopback")
+    end
+
     it "evaluates a stubbed response only once per async request even if the async thread starts early" do
       # Reproduces two races that made the async thread evaluate the stub registry again and consume
       # an extra response from the stub sequence: starting work before the caller finished wiring up

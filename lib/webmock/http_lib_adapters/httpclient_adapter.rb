@@ -45,32 +45,34 @@ if defined?(::HTTPClient)
   end
 
   module WebMockHTTPClients
-    WEBMOCK_HTTPCLIENT_RESPONSES = :webmock_httpclient_responses
-    WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES = :webmock_httpclient_request_signatures
+    # HTTPClient publishes the response through push. Some versions return
+    # a different value from do_get_stream, including nil for loopback replies.
+    class AsyncConnection < ::HTTPClient::Connection
+      attr_reader :response
 
-    REQUEST_RESPONSE_LOCK = Mutex.new
+      def push(response)
+        @response = response
+        super
+      end
+    end
+
+    class ResponseFilter < Struct.new(:filter)
+      def filter_request(_req)
+      end
+
+      def filter_response(req, response)
+        filter.filter_response(req, response)
+      end
+    end
+    private_constant :AsyncConnection, :ResponseFilter
 
     def do_get_block(req, proxy, conn, &block)
-      do_get(req, proxy, conn, false, &block)
-    end
-
-    def do_get_stream(req, proxy, conn, &block)
-      do_get(req, proxy, conn, true, &block)
-    end
-
-    def do_get(req, proxy, conn, stream = false, &block)
-      clear_thread_variables unless conn.async_thread
-
-      request_signature = build_request_signature(req, :reuse_existing)
-
-      # Async requests are already recorded in their calling thread.
-      WebMock::RequestRegistry.instance.put(request_signature) unless stream
-
-      webmock_response = webmock_responses.delete(request_signature) do
-        WebMock::StubRegistry.instance.response_for_request(request_signature)
-      end
+      @request_filter.each { |filter| filter.filter_request(req) }
+      request_signature = build_request_signature(req)
+      WebMock::RequestRegistry.instance.put(request_signature)
+      webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
       if webmock_response
-        response = build_httpclient_response(webmock_response, stream, req.header, &block)
+        response = build_httpclient_response(webmock_response, false, req.header, &block)
         @request_filter.each do |filter|
           filter.filter_response(req, response)
         end
@@ -79,9 +81,7 @@ if defined?(::HTTPClient)
           {lib: :httpclient}, request_signature, webmock_response)
         res
       elsif WebMock.net_connect_allowed?(request_signature.uri)
-        res = if stream
-          do_get_stream_without_webmock(req, proxy, conn, &block)
-        elsif block
+        if block
           body = ''
           do_get_block_without_webmock(req, proxy, conn) do |http_res, chunk|
             if chunk && chunk.bytesize > 0
@@ -107,22 +107,39 @@ if defined?(::HTTPClient)
     end
 
     def do_request_async(method, uri, query, body, extheader)
-      clear_thread_variables
       req = create_request(method, uri, query, body, extheader)
+      proxy = no_proxy?(uri) ? nil : @proxy
+      filters = apply_request_filters(req, proxy)
       request_signature = build_request_signature(req)
       WebMock::RequestRegistry.instance.put(request_signature)
 
       webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-      if webmock_response
-        async_conn_for_stubbed_request(req, request_signature, webmock_response)
-      elsif WebMock.net_connect_allowed?(request_signature.uri)
-        conn = super
-        conn.async_thread[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = [request_signature]
-        conn.async_thread[WEBMOCK_HTTPCLIENT_RESPONSES] = {request_signature => nil}
-        conn
-      else
+      unless webmock_response || WebMock.net_connect_allowed?(request_signature.uri)
         raise WebMock::NetConnectNotAllowedError.new(request_signature)
       end
+
+      # Keep the prepared request, including any headers its filters assigned.
+      # HTTPClient's do_request_async would create a second request in the worker.
+      conn = AsyncConnection.new
+      conn.async_thread = Thread.new do
+        begin
+          if webmock_response
+            response = build_httpclient_response(webmock_response, true, req.header)
+            filters.each { |filter| filter.filter_response(req, response) }
+            conn.push(response)
+            WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient}, request_signature, webmock_response)
+          else
+            clone(freeze: false).send_prepared_request(req, proxy, conn, filters)
+            if WebMock::CallbackRegistry.any_callbacks?
+              WebMock::CallbackRegistry.invoke_callbacks(
+                {lib: :httpclient, real_request: true}, request_signature, build_webmock_response(conn.response))
+            end
+          end
+        rescue Exception => e
+          conn.push e
+        end
+      end
+      conn
     end
 
     def build_httpclient_response(webmock_response, stream = false, req_header = nil, &block)
@@ -167,11 +184,7 @@ if defined?(::HTTPClient)
       webmock_response
     end
 
-    def build_request_signature(req, reuse_existing = false)
-      @request_filter.each do |filter|
-        filter.filter_request(req)
-      end
-
+    def build_request_signature(req)
       uri = WebMock::Util::URI.heuristic_parse(req.header.request_uri.to_s)
       if req.header.request_query
         # HTTPClient sends the query argument after the query in the URI
@@ -187,35 +200,31 @@ if defined?(::HTTPClient)
       end
       headers = headers_from_session(uri).merge(headers)
 
-      signature = WebMock::RequestSignature.new(
+      WebMock::RequestSignature.new(
         req.header.request_method.downcase.to_sym,
         uri.to_s,
         body: req.http_body.dump,
         headers: headers
       )
-
-      # reuse a previous identical signature object if we stored one for later use
-      if reuse_existing && previous_signature = previous_signature_for(signature)
-        return previous_signature
-      end
-
-      signature
     end
 
-    def webmock_responses
-      Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] ||= {}
-    end
+    protected
 
-    def webmock_request_signatures
-      Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] ||= []
-    end
-
-    def previous_signature_for(signature)
-      return nil unless index = webmock_request_signatures.index(signature)
-      webmock_request_signatures.delete_at(index)
+    # Only the per-request copy changes its filter list. It shares the client's
+    # sessions and lets HTTPClient run the response filters at the normal time.
+    def send_prepared_request(req, proxy, conn, filters)
+      @request_filter = filters.map { |filter| ResponseFilter.new(filter) }
+      protect_keep_alive_disconnected { do_get_stream(req, proxy, conn) }
     end
 
     private
+
+    def apply_request_filters(req, proxy)
+      # Recent HTTPClient versions select the applicable proxy filters here.
+      return filter_request(req, proxy) if respond_to?(:filter_request, true)
+
+      @request_filter.each { |filter| filter.filter_request(req) }
+    end
 
     # some of the headers sent by HTTPClient are derived from
     # the client session
@@ -227,39 +236,10 @@ if defined?(::HTTPClient)
         hdrs
       end
     end
-
-    def clear_thread_variables
-      Thread.current[WEBMOCK_HTTPCLIENT_REQUEST_SIGNATURES] = nil
-      Thread.current[WEBMOCK_HTTPCLIENT_RESPONSES] = nil
-    end
-
-    # The async thread must not go through do_get, which would rebuild the request signature.
-    # Rebuilding calls headers_from_session again, and the session sets a Date header with
-    # 1 second resolution, so a signature built later can differ from the one the response was
-    # cached under, which makes the thread evaluate the stub registry again and consume
-    # an extra response from the stub sequence. The thread only delivers what the caller
-    # already evaluated, mirroring do_get's stubbed branch.
-    def async_conn_for_stubbed_request(req, request_signature, webmock_response)
-      conn = HTTPClient::Connection.new
-      conn.async_thread = Thread.new do
-        begin
-          response = build_httpclient_response(webmock_response, true, req.header)
-          @request_filter.each do |filter|
-            filter.filter_response(req, response)
-          end
-          conn.push(response)
-          WebMock::CallbackRegistry.invoke_callbacks({lib: :httpclient}, request_signature, webmock_response)
-        rescue Exception => e
-          conn.push e
-        end
-      end
-      conn
-    end
   end
 
   class WebMockHTTPClient < HTTPClient
     alias_method :do_get_block_without_webmock, :do_get_block
-    alias_method :do_get_stream_without_webmock, :do_get_stream
 
     include WebMockHTTPClients
   end
@@ -267,7 +247,6 @@ if defined?(::HTTPClient)
   if defined? ::JSONClient
     class WebMockJSONClient < JSONClient
       alias_method :do_get_block_without_webmock, :do_get_block
-      alias_method :do_get_stream_without_webmock, :do_get_stream
 
       include WebMockHTTPClients
     end
