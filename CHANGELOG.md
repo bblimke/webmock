@@ -76,6 +76,16 @@
 
     A stub or request expectation that matched only because the block was dropped no longer matches. Calling `with` again with a block, or with an option given before, still replaces it.
 
+* Record the form Content-Type of Typhoeus requests with a hash body (#463)
+
+    Previously, `Typhoeus.post(url, body: {page: 2})` sent `Content-Type: application/x-www-form-urlencoded`, but WebMock recorded the request without it. A stub with `with(body: {page: 2})` didn't match, and neither did a stub that required that header.
+
+    WebMock now records the header whenever Typhoeus sends it for a hash body: for a POST, even with an empty hash, and for any other method except PUT and HEAD, unless the form is empty.
+
+    A request that sets its own Content-Type keeps it. Multipart forms, such as a hash with a file or a request with `multipart: true`, still have no Content-Type recorded, except an empty POST, which Typhoeus sends URL encoded even then. Requests with `nobody: true` have none either.
+
+    Callbacks, `WebMock.executed_requests` and VCR see the header too, and the stub suggested for an unmatched request includes it and shows a form body as a hash. Update assertions that compare all the headers of such a request. If VCR, hooked into WebMock, matches requests on their headers, record the affected cassettes again.
+
 # 3.37.0
 
 * Add `executed_requests` to inspect the requests made (#1069)

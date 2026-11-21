@@ -189,6 +189,71 @@ unless RUBY_PLATFORM =~ /java/
         end
       end
 
+      describe "when the body is a Hash" do
+        include LocalHTTPServer
+
+        it "records the form Content-Type, so Integer values and header stubs match" do
+          stub_request(:post, "www.example.com").
+            with(body: {"a" => {"b" => 1}}, headers: {"Content-Type" => "application/x-www-form-urlencoded"})
+          expect(Typhoeus.post("http://www.example.com", body: {a: {b: 1}}).code).to eq(200)
+        end
+
+        # content_type counts as Content-Type, since WebMock reads header names
+        # that way, although libcurl then sends both headers.
+        it "keeps a Content-Type given in the request" do
+          stub_request(:post, "www.example.com")
+          Typhoeus.post("http://www.example.com", body: {a: 1}, headers: {"Content-Type" => "application/json"})
+          Typhoeus.post("http://www.example.com", body: {a: 1}, headers: {content_type: "text/plain"})
+          expect(executed_requests.map(&:content_type)).to eq(["application/json", "text/plain"])
+        end
+
+        it "records no Content-Type with the nobody option" do
+          stub_request(:post, "http://example.com")
+          Typhoeus.post("http://example.com", body: {a: 1}, nobody: true)
+          expect(executed_requests.last.content_type).to be_nil
+        end
+
+        # With Ethon before 0.19, Typhoeus can't build the URL of such a request.
+        if Gem::Version.new(Ethon::VERSION) >= Gem::Version.new("0.19")
+          it "records no Content-Type for a form Ethon can't read" do
+            stub_request(:post, "http://example.com")
+            file = Tempfile.new("upload")
+            file.unlink
+            Typhoeus.post("http://example.com", body: {a: file})
+            expect(executed_requests.last.content_type).to be_nil
+          ensure
+            file&.close!
+          end
+        end
+
+        it "records the Content-Type that libcurl sends" do
+          file = File.open(__FILE__)
+          requests = [
+            [:post, {a: 1}], [:patch, {a: 1}], [:delete, {a: 1}], [:get, {a: 1}],
+            [:put, {a: 1}], [:head, {a: 1}], [:post, {}], [:get, {}],
+            [:post, {a: 1}, {multipart: true}], [:post, {a: file}],
+            [:post, {a: [file]}], [:post, {}, {multipart: true}],
+            # Ethon 0.19 sends no body for a form without values, older
+            # versions send an empty one, so this is checked last.
+            [:patch, {a: {}}]
+          ]
+          heads = capture_request_heads(requests.size) do |port|
+            requests.each do |method, body, options|
+              response = Typhoeus::Request.new("http://127.0.0.1:#{port}/", method: method, body: body, **(options || {})).run
+              expect(response.code).to eq(200)
+            end
+          end
+          received = heads.map { |head| head[/^content-type:\s*([^;\r]+)/i, 1] }
+
+          form = "application/x-www-form-urlencoded"
+          multipart = "multipart/form-data"
+          expect(received[0...-1]).to eq([form, form, form, form, nil, nil, form, nil, multipart, multipart, multipart, form])
+          expect(executed_requests.map(&:content_type)).to eq(received.map { |type| type unless type == "multipart/form-data" })
+        ensure
+          file&.close
+        end
+      end
+
       describe "timeouts" do
         it "should support native typhoeus timeouts" do
           stub_request(:any, "example.com").to_timeout

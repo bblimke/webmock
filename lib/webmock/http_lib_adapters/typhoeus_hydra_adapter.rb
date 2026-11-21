@@ -64,10 +64,8 @@ if defined?(Typhoeus)
           end
 
           body = req.options[:body]
-
-          if body.is_a?(Hash)
-            body = WebMock::Util::QueryMapper.values_to_query(body)
-          end
+          form = body.is_a?(Hash)
+          body = WebMock::Util::QueryMapper.values_to_query(body) if form
 
           request_signature = WebMock::RequestSignature.new(
             req.options[:method] || :get,
@@ -76,9 +74,39 @@ if defined?(Typhoeus)
             headers: headers
           )
 
+          add_form_content_type(request_signature, req) if form
           req.instance_variable_set(:@__webmock_request_signature, request_signature)
 
           request_signature
+        end
+
+        # libcurl adds this header when Ethon sends a Hash body as a URL
+        # encoded form: for a POST, even with an empty form, and for other
+        # methods with a form that isn't empty, except PUT, which Ethon
+        # uploads, and HEAD, which sends no body. A multipart form, with a
+        # file or the multipart option, is sent with a boundary instead, which
+        # isn't recorded. Ethon's own form decides whether a form is empty or
+        # multipart, since that differs between Ethon versions. A Content-Type
+        # given as content_type counts as set, since WebMock reads header
+        # names that way, though libcurl then sends both headers. With the
+        # nobody option, or when Ethon can't read the form, such as for a
+        # file without a path, no header is recorded, as before.
+        def self.add_form_content_type(signature, req)
+          headers = signature.headers || {}
+          return if headers.key?('Content-Type') || req.options[:nobody] || !defined?(::Ethon::Easy::Form)
+
+          form = ::Ethon::Easy::Form.new(nil, req.options[:body], req.options[:multipart])
+          if form.empty?
+            return unless signature.method == :post
+          else
+            return if [:put, :head].include?(signature.method)
+            form.params_encoding = req.options.fetch(:params_encoding, :typhoeus)
+            return if form.multipart?
+          end
+
+          signature.headers = headers.merge('Content-Type' => 'application/x-www-form-urlencoded')
+        rescue StandardError
+          nil
         end
 
         def self.signature_for_history(signature)
