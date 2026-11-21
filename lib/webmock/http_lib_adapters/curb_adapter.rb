@@ -7,6 +7,8 @@ rescue LoadError
 end
 
 if defined?(Curl)
+  require 'stringio'
+
   unsupported_curb_versions = ['0.8.7']
 
   # Curl::Easy#perform raises "cannot define finalizer for TrueClass" on Ruby 2.6
@@ -98,7 +100,7 @@ if defined?(Curl)
         when :post, :patch
           self.post_body || @post_body
         when :put
-          @put_data
+          put_body_for_signature(@put_data)
         else
           nil
         end
@@ -131,6 +133,22 @@ if defined?(Curl)
           headers: headers
         )
         request_signature
+      end
+
+      private def put_body_for_signature(data)
+        return data unless data.respond_to?(:read)
+
+        # Leave pipes and other streaming sources for Curb to consume.
+        stream = data.is_a?(StringIO) ? data : IO.try_convert(data)
+        return data.to_s unless stream.is_a?(StringIO) || stream&.stat&.file?
+
+        position = stream.pos
+        # Read bytes as Curb does, even if the file has a text encoding.
+        buffer = StringIO.new(''.b)
+        IO.copy_stream(stream, buffer)
+        buffer.string
+      ensure
+        stream.pos = position if position
       end
 
       def headers_as_hash(headers)

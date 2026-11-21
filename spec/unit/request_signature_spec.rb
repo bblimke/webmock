@@ -66,6 +66,13 @@ describe WebMock::RequestSignature do
     end
   end
 
+  it "distinguishes different headers with the same printable representation" do
+    first = WebMock::RequestSignature.new(:get, "www.example.com", headers: {"A" => "x', 'B'=>'y"})
+    second = WebMock::RequestSignature.new(:get, "www.example.com", headers: {"A" => "x", "B" => "y"})
+    expect(first.to_s).to eq(second.to_s)
+    expect({first => 1, second => 2}.size).to eq(2)
+  end
+
   describe "#hash" do
     it "reporst same hash for two signatures with the same values" do
       signature1 = WebMock::RequestSignature.new(:get, "www.example.com",

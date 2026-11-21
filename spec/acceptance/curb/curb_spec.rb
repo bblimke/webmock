@@ -24,6 +24,43 @@ unless RUBY_PLATFORM =~ /java/
       WebMock.reset!
     end
 
+    it "records the bytes of a file upload without retaining or consuming its handle" do
+      url = "http://example.com/upload"
+      path = File.expand_path("../../fixtures/test.txt", __dir__)
+      contents = File.binread(path)
+      stub_request(:put, url).with(body: contents)
+      File.open(path, "r:UTF-8:UTF-16LE") do |file|
+        curl = Curl::Easy.new(url)
+        curl.put_data = file
+        curl.perform
+        expect(file.pos).to eq(0)
+      end
+      expect(executed_requests.last.body).to eq(contents)
+    end
+
+    it "records a StringIO upload from its current position" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      stream = StringIO.new(+"prefix-data")
+      stream.pos = 7
+      Curl::Easy.new(url).http_put(stream)
+      expect(stream.pos).to eq(7)
+      stream.string.replace("changed")
+      expect(executed_requests.last.body).to eq("data")
+    end
+
+    it "leaves a pipe available for Curb to read" do
+      url = "http://example.com/upload"
+      stub_request(:put, url)
+      IO.pipe do |reader, writer|
+        writer.write("data")
+        writer.close
+        Curl::Easy.new(url).http_put(reader)
+        expect(reader.read).to eq("data")
+        expect(executed_requests.last.body).to eq(reader.to_s)
+      end
+    end
+
     describe "callbacks" do
       before(:each) do
         @curl = Curl::Easy.new

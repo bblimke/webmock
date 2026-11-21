@@ -40,11 +40,13 @@ module WebMock
     end
 
     def hash
-      self.to_s.hash
+      [method, uri, body, headers].hash
     end
 
     def eql?(other)
-      self.to_s == other.to_s
+      other.is_a?(RequestSignature) &&
+        method == other.method && uri.eql?(other.uri) &&
+        body.eql?(other.body) && headers.eql?(other.headers)
     end
     alias == eql?
 

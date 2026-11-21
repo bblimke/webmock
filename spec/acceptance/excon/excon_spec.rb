@@ -52,6 +52,13 @@ describe "Excon" do
   let(:file) { File.new(__FILE__) }
   let(:file_contents) { File.read(__FILE__) }
 
+  it 'keeps absent and empty request bodies distinct in the history' do
+    url = "http://example.com/upload"
+    stub_request(:post, url)
+    [nil, "", nil].each { |body| Excon.post(url, body: body) }
+    expect(executed_requests.map(&:body)).to eq([nil, "", nil])
+  end
+
   it 'handles file uploads correctly' do
     stub_request(:put, "http://example.com/upload").with(body: file_contents)
 
