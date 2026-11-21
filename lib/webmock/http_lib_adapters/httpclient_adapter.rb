@@ -106,10 +106,12 @@ if defined?(::HTTPClient)
       if webmock_response
         response = build_httpclient_response(webmock_response, false, req.header, &block)
         filters.each { |filter| filter.filter_response(req, response) }
-        res = conn.push(response)
+        conn.push(response)
         WebMock::CallbackRegistry.invoke_callbacks(
           {lib: :httpclient}, request_signature, webmock_response)
-        res
+        # Return the response, as HTTPClient#do_get_block does. Libraries that
+        # wrap the method to trace requests read its result.
+        response
       elsif WebMock.net_connect_allowed?(request_signature.uri)
         clone(freeze: false).send_prepared_sync_request(req, proxy, conn, filters, request_signature, &block)
       else

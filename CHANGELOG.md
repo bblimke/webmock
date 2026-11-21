@@ -1,5 +1,13 @@
 # Changelog
 
+# Unreleased
+
+* Fix tracing libraries that wrap HTTPClient failing on stubbed requests (#1010)
+
+    Previously, for a stubbed request, WebMock's version of HTTPClient's private `do_get_block` method returned a `Thread::Queue` instead of the response that HTTPClient's own version returns. Libraries that wrap the method to trace requests, such as Datadog's, read that result as the response.
+
+    It now returns the response, as it already did for real requests.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

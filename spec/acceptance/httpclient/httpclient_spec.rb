@@ -39,6 +39,24 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
     expect(response_body).to eq("")
   end
 
+  it "returns the response from do_get_block for a stubbed request, as HTTPClient does" do
+    stub_request(:get, "www.example.com").to_return(body: "abc")
+    results = []
+    tracer = Module.new do
+      define_method(:do_get_block) do |*args, &block|
+        super(*args, &block).tap { |result| results << result }
+      end
+    end
+    client = HTTPClient.new
+    client.singleton_class.prepend(tracer)
+
+    response = client.get("http://www.example.com/")
+    streamed = client.get("http://www.example.com/") { |_chunk| }
+
+    expect(results).to match([equal(response), equal(streamed)])
+    expect(response.body).to eq("abc")
+  end
+
   it "should match requests if headers are the same  but in different order" do
     stub_request(:get, "www.example.com").with(headers: {"a" => ["b", "c"]} )
     expect(http_request(
