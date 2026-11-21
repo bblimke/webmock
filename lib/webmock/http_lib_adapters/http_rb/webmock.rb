@@ -37,14 +37,43 @@ module HTTP
 
       return unless webmock_response
 
-      raise_timeout_error if webmock_response.should_timeout
-      webmock_response.raise_error_if_any
+      features = @options.features.values
+      response = nil
+      exchange = ->(_request) { response = replay_response(features, webmock_response) }
+      # HTTP.rb 6 instruments a request in around_request, inside the
+      # HTTP::Client#perform a stub skips, so the instrumentation runs around
+      # a stubbed exchange too. Other features that run around the exchange,
+      # such as caching and digest_auth, don't run for a stub. The stub's
+      # response is returned whatever an instrumenter returns, and also when
+      # one doesn't yield, as before.
+      instrumentation(features).reverse.reduce(exchange) do |inner, feature|
+        ->(request) { feature.around_request(request) { |r| inner.call(r) } }
+      end.call(@request)
+      response || replay_response(features, webmock_response)
+    end
+
+    def instrumentation(features)
+      return [] unless defined?(::HTTP::Features::Instrumentation) && ::HTTP::Feature.method_defined?(:around_request)
+
+      features.select { |feature| feature.is_a?(::HTTP::Features::Instrumentation) }
+    end
+
+    def replay_response(features, webmock_response)
+      # HTTP::Client calls on_error for an error while sending, which for a
+      # stub is its timeout or error, but not for one raised while wrapping
+      # the response, as the raise_error feature does for a 500.
+      begin
+        raise_timeout_error if webmock_response.should_timeout
+        webmock_response.raise_error_if_any
+      rescue ::HTTP::Error => e
+        features.each { |feature| feature.on_error(@request, e) if feature.respond_to?(:on_error) }
+        raise
+      end
 
       invoke_callbacks(webmock_response, real_request: false)
       response = ::HTTP::Response.from_webmock @request, webmock_response, request_signature
 
       # HTTP.rb 6.0+ wraps responses in reverse feature order
-      features = @options.features.values
       features = features.reverse if HTTP::VERSION >= "6.0.0"
       features.each { |feature| response = feature.wrap_response(response) }
       response

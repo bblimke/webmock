@@ -32,6 +32,12 @@
 
     WebMock now leaves out requests it didn't see. On older versions, `hook_into :webmock` alone records and replays Typhoeus requests too.
 
+* Run the instrumentation of the `http` gem 6 for stubbed requests (#881)
+
+    Previously, with version 6 of the `http` gem (HTTP.rb), a stubbed request skipped the instrumentation feature, so `HTTP.use(instrumentation: {instrumenter: ...})` emitted no `request.http` events for it. In every version, a stubbed timeout or `HTTP::Error` emitted no `error.http` event.
+
+    Stubbed requests now emit the same instrumentation events as real ones. Other features that HTTP.rb 6 runs around a request, such as caching and digest auth, still don't run for stubbed requests.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)
