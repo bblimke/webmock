@@ -34,8 +34,9 @@ unless RUBY_PLATFORM =~ /java/
       it "records file parts inside an array by path and counts repeated uploads" do
         url = "http://example.com/"
         File.open(__FILE__, "rb") do |file|
-          stub_request(:post, url).with { |req| req.body.first["file"].equal?(file) }
+          stub = stub_request(:post, url).with { |req| req.body.first["file"].equal?(file) }
           2.times { Typhoeus.post(url, body: [{"file" => file}]) }
+          expect(stub).to have_been_requested.twice
         end
         stub_request(:post, url)
         Typhoeus.post(url, body: [{"file" => __FILE__}])

@@ -831,6 +831,7 @@ A few things to know:
 * For Curb PUT uploads and EventMachine stream uploads, history captures bytes from the reader’s current position, up to the specified `Content-Length`. This works with regular files, `StringIO`, and rewindable readers over them. Pipes and other one-pass streams are represented by their `to_s` so the client can still read them.
 * For Curb multipart PUTs, history exposes the field metadata (`name`, `content`, `content_type`, `local_file`, and `remote_file`). For a field supplied by a callback, `content` reflects the field attribute and can be `nil`.
 * Typhoeus array bodies keep their nested form structure in history. File parts appear as `Pathname` objects so you can distinguish a file upload from a string with the same path.
+* When a stub checks a native upload object, `assert_requested(stub)` uses the result of that check. Additional conditions in `have_been_requested.with(...)` apply to the recorded request.
 * Depending on the HTTP client, requests that WebMock blocked because real connections are disabled may be listed too.
 
 ## Clearing stubs and request history

@@ -20,6 +20,10 @@ module WebMock
 
     attr_reader :method_pattern, :uri_pattern, :body_pattern, :headers_pattern, :with_block
 
+    # History uses an opaque key so it needn't retain a matcher block or
+    # an upload captured by that block. Changing the pattern replaces the key.
+    attr_reader :match_token
+
     def initialize(method, uri, options = {})
       @method_pattern  = MethodPattern.new(method)
       @uri_pattern     = create_uri_pattern(uri)
@@ -27,21 +31,26 @@ module WebMock
       @headers_pattern = nil
       @with_block      = nil
       assign_options(options)
+      @match_token = Object.new if @body_pattern
     end
 
     def with(options = {}, &block)
       raise ArgumentError.new('#with method invoked with no arguments. Either options hash or block must be specified. Created a block with do..end? Try creating it with curly braces {} instead.') if options.empty? && !block_given?
       assign_options(options)
       @with_block = block
+      @match_token = (@body_pattern || @with_block) && Object.new
       self
     end
 
     def matches?(request_signature)
-      @method_pattern.matches?(request_signature.method) &&
-        @uri_pattern.matches?(request_signature.uri) &&
-        (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, request_signature.content_type)) &&
+      return false unless @method_pattern.matches?(request_signature.method) && @uri_pattern.matches?(request_signature.uri)
+
+      token = @match_token
+      matched = (@body_pattern.nil? || @body_pattern.matches?(request_signature.body, request_signature.content_type)) &&
         (@headers_pattern.nil? || @headers_pattern.matches?(request_signature.headers)) &&
         (@with_block.nil? || @with_block.call(request_signature))
+      yield(token, matched) if token && block_given?
+      matched
     end
 
     def to_s

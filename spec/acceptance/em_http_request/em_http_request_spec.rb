@@ -289,11 +289,61 @@ unless RUBY_PLATFORM =~ /java/
         File.open(__FILE__, "rb") do |file|
           file.read(5)
           expected = File.binread(__FILE__, 10, 5)
-          stub_request(:post, url).with { |req| req.body.equal?(file) }
+          stub = stub_request(:post, url).with { |req| req.body.equal?(file) }
           http_request(:post, url, body: file, headers: {"Content-Length" => "10"})
+          expect(stub).to have_been_requested.once.with(body: expected)
           expect(file.read(10)).to eq(expected)
           expect(executed_requests.last.body).to eq(expected)
         end
+      end
+
+      it "verifies live matches separately when different uploads have the same recorded bytes" do
+        url = "http://www.example.com/"
+        fallback = stub_request(:post, url)
+        stream_stub = stub_request(:post, url).with { |req| req.body.is_a?(StringIO) }
+        string_stub = stub_request(:post, url).with { |req| req.body == "data" }
+
+        http_request(:post, url, body: StringIO.new("data"))
+        http_request(:post, url, body: "data")
+        expect(string_stub).to have_been_requested.once
+        expect(stream_stub).to have_been_requested.once.with(body: "data")
+        expect(stream_stub).not_to have_been_requested.with(body: "other")
+        expect(fallback).to have_been_requested.twice
+        expect(a_request(:post, url).with(body: "data")).to have_been_made.twice
+
+        stream_stub.with { |req| req.body == "other" }
+        expect(stream_stub).not_to have_been_requested
+        WebMock.reset_executed_requests!
+        expect(string_stub).not_to have_been_requested
+      end
+
+      it "keeps matches from before a reset out of subsequent upload counts" do
+        url = "http://www.example.com/"
+        first = true
+        stub_request(:post, url)
+        stub = stub_request(:post, url).with do |_req|
+          if first
+            first = false
+            WebMock.reset_executed_requests!
+            true
+          else
+            false
+          end
+        end
+        2.times { http_request(:post, url, body: StringIO.new("same bytes")) }
+        expect(stub).not_to have_been_requested
+        expect(executed_requests.map(&:body)).to eq(["same bytes"])
+      end
+
+      it "records the outer request before its response reads the stream and makes another request" do
+        stub_request(:get, "example.com/inner")
+        stub_request(:post, "example.com/upload").to_return do |req|
+          Net::HTTP.get(URI("http://example.com/inner"))
+          {body: req.body.read}
+        end
+        response = http_request(:post, "http://example.com/upload", body: StringIO.new("payload"))
+        expect(response.body).to eq("payload")
+        expect(executed_requests.map { |req| [req.uri.path, req.body] }).to eq([["/upload", "payload"], ["/inner", nil]])
       end
 
       it "should work when a file is passed as body" do

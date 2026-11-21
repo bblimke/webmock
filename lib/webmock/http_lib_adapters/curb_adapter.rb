@@ -83,9 +83,9 @@ if defined?(Curl)
 
       def curb_or_webmock
         request_signature = build_request_signature
-        WebMock::RequestRegistry.instance.put(signature_for_history(request_signature))
+        recorded = signature_for_history(request_signature)
 
-        if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+        if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature, record: recorded)
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {lib: :curb}, request_signature, webmock_response)

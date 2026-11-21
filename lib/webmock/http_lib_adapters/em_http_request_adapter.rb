@@ -107,12 +107,6 @@ if defined?(EventMachine::HttpClient)
       end
 
       def send_request(head, body)
-        recorded = request_signature
-        if recorded.body.respond_to?(:read) && recorded.body.respond_to?(:eof?)
-          recorded = recorded.with_body_values { |stream| WebMock::Util::UploadBody.read(stream, head) }
-        end
-        WebMock::RequestRegistry.instance.put(recorded)
-
         if stubbed_webmock_response
           WebMock::CallbackRegistry.invoke_callbacks({lib: :em_http_request}, request_signature, stubbed_webmock_response)
           @uri ||= nil
@@ -148,7 +142,13 @@ if defined?(EventMachine::HttpClient)
 
       def stubbed_webmock_response
         unless defined?(@stubbed_webmock_response)
-          @stubbed_webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+          signature = request_signature
+          recorded = if signature.body.respond_to?(:read) && signature.body.respond_to?(:eof?)
+            signature.with_body_values { |stream| WebMock::Util::UploadBody.read(stream, signature.headers) }
+          else
+            signature
+          end
+          @stubbed_webmock_response = WebMock::StubRegistry.instance.response_for_request(signature, record: recorded)
         end
 
         @stubbed_webmock_response

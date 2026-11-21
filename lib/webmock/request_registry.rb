@@ -21,6 +21,7 @@ module WebMock
     def reset!
       atomically do
         @executed_requests = []
+        @live_matches = {}
         self.requested_signatures = Util::HashCounter.new
       end
     end
@@ -30,11 +31,25 @@ module WebMock
     # its body buffer cannot change it. A repeated request adds only a
     # reference to that copy, so a suite that never resets keeps one copy of
     # each distinct request.
-    def put(request_signature)
-      atomically do
-        @executed_requests << requested_signatures.put(request_signature)
+    def put(request_signature, track_live_matches: false)
+      stored = nil
+      live_matches = atomically do
+        stored = requested_signatures.put(request_signature)
+        @executed_requests << stored
+        @live_matches
       end
-      nil
+      return unless track_live_matches
+
+      # Matching happens outside the lock. Capture this generation so a
+      # concurrent reset cannot attach an old match to a later request.
+      lambda do |token, matched|
+        @lock.synchronize do
+          counts = live_matches[token] ||= {}
+          checked, accepted = counts.fetch(stored, [0, 0])
+          accepted += 1 if matched
+          counts[stored] = [checked + 1, accepted]
+        end
+      end
     end
 
     # Every request made since the last reset, in order, repeats included,
@@ -46,9 +61,25 @@ module WebMock
     end
 
     def times_executed(request_pattern)
-      self.requested_signatures.select do |request_signature|
-        request_pattern.matches?(request_signature)
-      end.inject(0) { |sum, (_, times_executed)| sum + times_executed }
+      pattern, conditions = request_pattern.respond_to?(:patterns) ? request_pattern.patterns : [request_pattern]
+      base = pattern.is_a?(RequestStub) ? pattern.request_pattern : pattern
+      token = base.match_token if base.is_a?(RequestPattern)
+      counts, observations = @lock.synchronize { [requested_signatures.snapshot, @live_matches[token]&.dup] }
+
+      counts.sum do |signature, total|
+        observed = observations && observations[signature]
+        if observed
+          # The same snapshot can represent both a stream and a string.
+          # Only recheck the requests for which the stub wasn't evaluated.
+          checked, accepted = observed
+          remaining = total - checked
+          accepted += remaining if remaining > 0 && pattern.matches?(signature)
+          next 0 if accepted > 0 && conditions && !conditions.matches?(signature)
+          accepted
+        else
+          request_pattern.matches?(signature) ? total : 0
+        end
+      end
     end
 
     def to_s

@@ -62,18 +62,19 @@ module WebMock
       request_stub_for(request_signature)
     end
 
-    def response_for_request(request_signature)
-      stub = request_stub_for(request_signature)
+    def response_for_request(request_signature, record: nil)
+      if record
+        remember = RequestRegistry.instance.put(record, track_live_matches: !record.equal?(request_signature))
+      end
+      stub = request_stub_for(request_signature, &remember)
       stub ? evaluate_response_for_request(stub.response, request_signature) : nil
     end
 
     private
 
-    def request_stub_for(request_signature)
+    def request_stub_for(request_signature, &remember)
       (global_stubs[:before_local_stubs] + request_stubs + global_stubs[:after_local_stubs])
-        .detect { |registered_request_stub|
-          registered_request_stub.request_pattern.matches?(request_signature)
-        }
+        .detect { |stub| stub.request_pattern.matches?(request_signature, &remember) }
     end
 
     def evaluate_response_for_request(response, request_signature)

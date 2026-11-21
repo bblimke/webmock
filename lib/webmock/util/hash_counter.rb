@@ -45,7 +45,11 @@ module WebMock
       def select(&block)
         return unless block_given?
 
-        @lock.synchronize { hash.dup }.select(&block)
+        snapshot.select(&block)
+      end
+
+      def snapshot
+        @lock.synchronize { hash.dup }
       end
 
       # Like select, it yields from a snapshot, outside the lock.

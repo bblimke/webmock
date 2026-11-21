@@ -149,8 +149,9 @@ unless RUBY_PLATFORM =~ /java/
       field = Curl::PostField.content("label", +"hello", "text/plain")
       curl = Curl::Easy.new(url)
       curl.multipart_form_post = true
-      stub_request(:put, url).with { |req| req.body.equal?(field) }
+      stub = stub_request(:put, url).with { |req| req.body.equal?(field) }
       2.times { curl.http_put(field) }
+      assert_requested(stub, times: 2)
       field.content.replace("changed")
       snapshot = executed_requests.first.body
       expect([snapshot.name, snapshot.content, snapshot.content_type]).to eq(["label", "hello", "text/plain"])

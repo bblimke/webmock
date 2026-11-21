@@ -206,9 +206,8 @@ if defined?(Typhoeus)
             request.block_connection = false;
 
             recorded = ::WebMock::HttpLibAdapters::TyphoeusAdapter.signature_for_history(request_signature)
-            ::WebMock::RequestRegistry.instance.put(recorded)
 
-            if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature)
+            if webmock_response = ::WebMock::StubRegistry.instance.response_for_request(request_signature, record: recorded)
               response = ::WebMock::HttpLibAdapters::TyphoeusAdapter.generate_typhoeus_response(webmock_response, url)
               if request.respond_to?(:on_headers)
                 request.execute_headers_callbacks(response)
