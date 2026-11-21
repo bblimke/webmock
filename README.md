@@ -1115,6 +1115,16 @@ WebMock.after_request(except: [:patron],
 end
 ```
 
+#### Removing callbacks
+
+Callbacks stay registered after `WebMock.reset!`, so a callback added in one test keeps running in later ones. To remove all callbacks, call:
+
+```ruby
+WebMock.reset_callbacks
+```
+
+This also removes callbacks registered by other libraries, such as VCR, so prefer registering your callbacks once, for example in your test helper.
+
 ## Bugs and Issues
 
 Please submit them here [http://github.com/bblimke/webmock/issues](http://github.com/bblimke/webmock/issues)
