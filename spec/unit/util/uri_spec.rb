@@ -272,7 +272,12 @@ describe WebMock::Util::URI do
 
     context "when query notation is set to :flat_array" do
       before :all do
+        @previous_notation = WebMock::Config.instance.query_values_notation
         WebMock::Config.instance.query_values_notation = :flat_array
+      end
+
+      after :all do
+        WebMock::Config.instance.query_values_notation = @previous_notation
       end
 
       it "should successfully handle repeated paramters" do
