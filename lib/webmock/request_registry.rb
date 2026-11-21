@@ -70,10 +70,12 @@ module WebMock
       # accept other methods, so they still get a copy of each signature.
       if request_pattern.instance_of?(RequestPattern) && request_pattern.method(:matches?).owner == RequestPattern
         method_pattern = request_pattern.method_pattern
+        uri_pattern = request_pattern.simple_uri_pattern
       end
 
       counts.sum do |stored, total|
         next 0 if method_pattern && !method_pattern.matches?(stored.method)
+        next(uri_pattern.matches?(stored.uri) ? total : 0) if uri_pattern
         observed = observations && observations[stored]
         # A user matcher may mutate its argument. The stored signature also
         # serves as a counter key and is shared by repeated history entries.
