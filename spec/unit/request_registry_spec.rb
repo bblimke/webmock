@@ -131,6 +131,24 @@ describe WebMock::RequestRegistry do
       expect(registry.requested_signatures.get(signature)).to eq(3)
     end
 
+    it "skips copying a recorded request when its method rules it out" do
+      registry.put(@request_signature)
+      stored = registry.requested_signatures.hash.keys.fetch(0)
+      expect(stored).not_to receive(:dup)
+      WebMock::API.assert_not_requested(:delete, "www.example.com")
+    end
+
+    it "lets an overridden matcher inspect a copy even when its declared method differs" do
+      registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: "original"))
+      pattern = WebMock::RequestPattern.new(:delete, "www.example.com")
+      pattern.define_singleton_method(:matches?) do |request|
+        request.body.replace("changed")
+        request.method == :post
+      end
+      expect(registry.times_executed(pattern)).to eq(1)
+      expect(registry.executed_requests.first.body).to eq("original")
+    end
+
     it "keeps the body a request had when it was made, even if the caller reuses its buffer" do
       buffer = +"first"
       registry.put(WebMock::RequestSignature.new(:post, "www.example.com", body: buffer))
