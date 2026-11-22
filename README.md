@@ -409,6 +409,12 @@ Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 Set appropriate Content-Type for HTTParty's `parsed_response`.
 
 ```ruby
+stub_request(:any, "www.example.com").to_return body: '{}', headers: {content_type: 'application/json'}
+```
+
+For JSON, `to_return_json` sets it for you:
+
+```ruby
 stub_request(:any, "www.example.com").to_return_json(body: {})
 ```
 
