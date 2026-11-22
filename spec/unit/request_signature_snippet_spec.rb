@@ -60,6 +60,20 @@ RSpec.describe WebMock::RequestSignatureSnippet do
   end
 
   describe "#request_stubs" do
+    context "when a stub's URL differs from the request URL only in a slash at the end" do
+      let(:uri) { "http://example.com/users/" }
+
+      before :each do
+        WebMock.stub_request(:get, "http://example.com/users")
+      end
+
+      it "points out the slash after that stub" do
+        expect(subject.request_stubs).to include(
+          %(stub_request(:get, "http://example.com/users")\n\n#{WebMock::TrailingSlashHint::STUB_HINTS[:added]}\n)
+        )
+      end
+    end
+
     before :each do
       WebMock.stub_request(:get, "https://www.example.com").with(body: {"a" => "b"})
     end

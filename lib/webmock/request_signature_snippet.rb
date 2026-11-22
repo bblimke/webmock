@@ -33,6 +33,7 @@ module WebMock
           add_body_diff(stub, text)
           add_json_body_hint(stub, text)
         end
+        add_trailing_slash_hint(stub, text)
       end
       text
     end
@@ -59,6 +60,11 @@ module WebMock
       return unless JsonBodyHint.applies?(stub.request_pattern, request_signature)
 
       text << "\n\n#{JsonBodyHint::STUB_HINT}\n"
+    end
+
+    def add_trailing_slash_hint(stub, text)
+      difference = TrailingSlashHint.difference(stub.request_pattern, request_signature)
+      text << "\n\n#{TrailingSlashHint::STUB_HINTS[difference]}\n" if difference
     end
 
     def signature_stub_body_diff(stub)

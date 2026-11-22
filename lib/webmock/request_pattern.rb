@@ -375,6 +375,12 @@ module WebMock
       "\"#{pattern_inspect}\""
     end
 
+    # Whether the URI matches apart from its query, for failure message
+    # hints, which must not run matchers given for the query.
+    def matches_without_query?(uri)
+      @pattern.is_a?(Addressable::URI) && uri.omit(:query) === @pattern.omit(:query)
+    end
+
     private
 
     def pattern_matches?(uri)

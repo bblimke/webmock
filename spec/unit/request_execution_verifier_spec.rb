@@ -169,6 +169,15 @@ describe WebMock::RequestExecutionVerifier do
       end
     end
 
+    it "points out a request made to the expected URL with a slash at the end" do
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:get, "http://www.example.com/users/"))
+      @verifier.request_pattern = WebMock::RequestPattern.new(:get, "www.example.com/users")
+      @verifier.expected_times_executed = 1
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).to include(WebMock::TrailingSlashHint::EXPECTATION_HINTS[:added])
+    end
+
     it "adds the hint to an at_least failure with too few requests" do
       @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: '{"a":1,"b":2}')
       @verifier.at_least_times_executed = 1

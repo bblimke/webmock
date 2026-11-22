@@ -88,6 +88,12 @@
 
     A test that expected the cookies of such a stub joined, or sorted, now gets them as a real server would send them. For a real response with several cookies, `after_request` callbacks, and so VCR, now get them in the order the server sent them instead of sorted, and for Excon each cookie instead of the joined header, so recordings and snapshots of them can change.
 
+* Point out when a request URL and a stub's URL differ in a slash at the end of the path (#864)
+
+    WebMock treats `http://example.com/users` and `http://example.com/users/` as different URLs, since servers can too. Previously, when a request missed a stub because of that slash, the message didn't say why.
+
+    The registered stubs listed for an unstubbed request, and the message of a failed `assert_requested` or `have_been_made`, now point out the slash. Matching is unchanged.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

@@ -56,7 +56,7 @@ module WebMock
     def failure_message_phrase(is_negated=false)
       negation = is_negated ? "was not" : "was"
       "The request #{Util::MessageString.utf8(request_pattern)} #{negation} expected to execute #{quantity_phrase(is_negated)}but it executed #{times(times_executed)}" +
-        (is_negated ? "" : json_body_hint) +
+        (is_negated ? "" : json_body_hint + trailing_slash_hint) +
         self.class.executed_requests_message
     end
 
@@ -69,6 +69,17 @@ module WebMock
         JsonBodyHint.applies?(request_pattern, request_signature)
       end
       requests.empty? ? "" : "\n\n#{JsonBodyHint::EXPECTATION_HINT}"
+    end
+
+    # Only when too few requests matched, as for json_body_hint.
+    def trailing_slash_hint
+      return "" unless too_few_requests_executed?
+
+      RequestRegistry.instance.requested_signatures.each do |request_signature, _|
+        difference = TrailingSlashHint.difference(request_pattern, request_signature)
+        return "\n\n#{TrailingSlashHint::EXPECTATION_HINTS[difference]}" if difference
+      end
+      ""
     end
 
     def too_few_requests_executed?
