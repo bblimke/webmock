@@ -409,7 +409,7 @@ Net::HTTP.get("www.example.com", '/')    # ===> "abc"
 Set appropriate Content-Type for HTTParty's `parsed_response`.
 
 ```ruby
-stub_request(:any, "www.example.com").to_return body: '{}', headers: {content_type: 'application/json'}
+stub_request(:any, "www.example.com").to_return_json(body: {})
 ```
 
 ### Response with body specified as IO object
@@ -432,6 +432,8 @@ stub_request(:any, "www.example.com").
 
 Net::HTTP.get('www.example.com', '/') # ===> "{\"foo\": \"bar\"}"
 ```
+
+`to_return_json` encodes the body and sets the `Content-Type` header to `application/json`, so there is no need to call `to_json` or set the header yourself. A `Content-Type` given in `headers` takes precedence.
 
 A `File` or `Pathname` body is returned as it is, so it should hold JSON that is already encoded:
 
