@@ -2,6 +2,10 @@
 
 # Unreleased
 
+* Support `Curl::Multi` requests in the curb adapter (#535)
+
+    Match stubs and enforce network permissions per handle. Allowed transfers retain curb's native multi loop, while stubbed transfers complete during `perform`. Record both kinds of requests and preserve curb and WebMock callbacks, including mixed batches and reused handles.
+
 * Fix tracing libraries that wrap HTTPClient failing on stubbed requests (#1010)
 
     Previously, for a stubbed request, WebMock's version of HTTPClient's private `do_get_block` method returned a `Thread::Queue` instead of the response that HTTPClient's own version returns. Libraries that wrap the method to trace requests, such as Datadog's, read that result as the response.

@@ -22,14 +22,20 @@ if defined?(Curl)
 
         OriginalCurlEasy = Curl::Easy unless const_defined?(:OriginalCurlEasy)
 
+        OriginalCurlMulti = Curl::Multi unless const_defined?(:OriginalCurlMulti)
+
         def self.enable!
           Curl.send(:remove_const, :Easy)
           Curl.send(:const_set, :Easy, Curl::WebMockCurlEasy)
+          Curl.send(:remove_const, :Multi)
+          Curl.send(:const_set, :Multi, Curl::WebMockCurlMulti)
         end
 
         def self.disable!
           Curl.send(:remove_const, :Easy)
           Curl.send(:const_set, :Easy, OriginalCurlEasy)
+          Curl.send(:remove_const, :Multi)
+          Curl.send(:const_set, :Multi, OriginalCurlMulti)
         end
 
         # Borrowed from Patron:
@@ -61,6 +67,72 @@ if defined?(Curl)
   end
 
   module Curl
+    class WebMockCurlMulti < Curl::Multi
+      # Intercept the native attachment boundary, retaining curb's public add,
+      # remove, request table and native event loop for allowed transfers.
+      def _add(easy)
+        return super if easy.webmock_performing_easy?
+
+        begin
+          signature, response = easy.webmock_request
+        rescue Exception # NetConnectNotAllowedError inherits directly from Exception.
+          # Older curb versions insert into requests before calling _add.
+          requests.delete(easy.object_id)
+          easy.webmock_restore_multi_url
+          raise
+        end
+        if response
+          easy.multi = self
+          webmock_pending[easy.object_id] = [easy, signature, response]
+        else
+          easy.webmock_record_multi_request(signature)
+          super
+        end
+      end
+
+      def _remove(easy)
+        if webmock_pending.delete(easy.object_id)
+          easy.multi = nil
+          return self
+        end
+        super
+      end
+
+      def perform(&block)
+        complete_webmock_requests
+        super do
+          begin
+            complete_webmock_requests
+            block.call if block
+          end until webmock_pending.empty?
+        end
+      end
+
+      private
+
+      def webmock_pending
+        @webmock_pending ||= {}
+      end
+
+      def complete_webmock_requests
+        until webmock_pending.empty?
+          easy, signature, response = webmock_pending.values.first
+          # Detach before callbacks so they can remove or requeue handles.
+          remove(easy)
+          if easy.webmock_follow_multi_redirect(signature, response)
+            add(easy)
+          else
+            begin
+              easy.multi = self
+              easy.webmock_complete_multi_request(signature, response)
+            ensure
+              easy.multi = nil if easy.multi == self && !requests.key?(easy.object_id)
+            end
+          end
+        end
+      end
+    end
+
     class WebMockCurlEasy < Curl::Easy
       # Curb's native PostField cannot be duplicated. Its public attributes
       # describe the field without running a content callback or opening a file.
@@ -81,7 +153,10 @@ if defined?(Curl)
       end
       private_constant :MultipartField
 
-      def curb_or_webmock
+      def webmock_request
+        @webmock_method ||= :get
+        clear_webmock_response
+        webmock_clear_multi_request
         request_signature = build_request_signature
         recorded = signature_for_history(request_signature)
         if request_signature.method == :put && @put_data.respond_to?(:read)
@@ -90,13 +165,22 @@ if defined?(Curl)
 
         webmock_response = WebMock::StubRegistry.instance.response_for_request(
           request_signature, record: recorded)
+        unless webmock_response || WebMock.net_connect_allowed?(request_signature.uri)
+          raise WebMock::NetConnectNotAllowedError.new(request_signature)
+        end
+        [request_signature, webmock_response]
+      end
+
+      def curb_or_webmock
+        request_signature, webmock_response = webmock_request
         if webmock_response
           build_curb_response(webmock_response)
           WebMock::CallbackRegistry.invoke_callbacks(
             {lib: :curb}, request_signature, webmock_response)
           invoke_curb_callbacks
           true
-        elsif WebMock.net_connect_allowed?(request_signature.uri)
+        else
+          @webmock_performing_easy = true
           res = yield
           if WebMock::CallbackRegistry.any_callbacks?
             webmock_response = build_webmock_response
@@ -105,9 +189,104 @@ if defined?(Curl)
                 webmock_response)
           end
           res
-        else
-          raise WebMock::NetConnectNotAllowedError.new(request_signature)
         end
+      ensure
+        @webmock_performing_easy = false
+      end
+
+      def webmock_performing_easy?
+        @webmock_performing_easy
+      end
+
+      def webmock_record_multi_request(signature)
+        @webmock_multi_request = signature
+        on_complete(&@on_complete)
+      end
+
+      def webmock_clear_multi_request
+        @webmock_multi_request = nil
+      end
+
+      %w[body header].each do |part|
+        define_method("on_#{part}") do |&block|
+          instance_variable_set("@on_#{part}", block)
+          if block
+            super() do |data|
+              if @webmock_multi_request
+                buffer = instance_variable_get("@webmock_#{part}") || +""
+                buffer << data
+                instance_variable_set("@webmock_#{part}", buffer)
+              end
+              block.call(data)
+            end
+          else
+            super(&block)
+          end
+        end
+      end
+
+      def on_complete(&block)
+        @on_complete = block
+        super do |easy|
+          signature = @webmock_multi_request
+          webmock_restore_multi_url
+          webmock_clear_multi_request
+          if signature && WebMock::CallbackRegistry.any_callbacks?
+            WebMock::CallbackRegistry.invoke_callbacks(
+              {lib: :curb, real_request: true}, signature, build_webmock_response)
+          end
+          block.call(easy) if block
+        end
+      end
+
+      def webmock_follow_multi_redirect(signature, response)
+        location = response.headers && response.headers['Location']
+        return false unless follow_location? && (300..399).include?(response.status[0]) && location
+        return false if response.should_timeout || response.exception
+
+        @webmock_multi_redirects ||= 0
+        limit = max_redirects || 50
+        if limit >= 0 && @webmock_multi_redirects >= limit
+          @webmock_last_result = 47 # CURLE_TOO_MANY_REDIRECTS
+          return false
+        end
+        WebMock::CallbackRegistry.invoke_callbacks({lib: :curb}, signature, response)
+        @webmock_multi_original_url ||= url
+        @webmock_multi_redirects += 1
+        self.url = WebMock::Util::URI.heuristic_parse(url).join(location).to_s
+        true
+      end
+
+      def webmock_restore_multi_url
+        return unless @webmock_multi_original_url
+        @last_effective_url = last_effective_url
+        self.url = @webmock_multi_original_url
+        @webmock_multi_original_url = @webmock_multi_redirects = nil
+      end
+
+      def webmock_complete_multi_request(signature, response)
+        if response.should_timeout
+          @body_str = ""
+          @header_str = ""
+          @response_code = 0
+          @webmock_last_result = 28 # CURLE_OPERATION_TIMEDOUT
+        else
+          build_curb_response(response, follow_redirects: false)
+          @webmock_last_result ||= 0
+        end
+        webmock_restore_multi_url
+        WebMock::CallbackRegistry.invoke_callbacks({lib: :curb}, signature, response)
+        invoke_curb_callbacks(multi: true)
+      end
+
+      def last_result
+        @webmock_last_result || super
+      end
+
+      def clear_webmock_response
+        @body_str = @header_str = @response_code = @content_type = nil
+        @last_effective_url = @transfer_encoding = @webmock_last_result = nil
+        @webmock_body = @webmock_header = nil
       end
 
       def signature_for_history(signature)
@@ -138,7 +317,7 @@ if defined?(Curl)
           nil
         end
 
-        if defined?( @on_debug )
+        if @on_debug
           @on_debug.call("Trying 127.0.0.1...\r\n", 0)
           @on_debug.call('Connected to ' + uri.hostname + "\r\n", 0)
           @debug_method = method.upcase
@@ -188,7 +367,7 @@ if defined?(Curl)
         end
       end
 
-      def build_curb_response(webmock_response)
+      def build_curb_response(webmock_response, follow_redirects: true)
         raise Curl::Err::TimeoutError if webmock_response.should_timeout
         webmock_response.raise_error_if_any
 
@@ -197,7 +376,7 @@ if defined?(Curl)
 
         @header_str = "HTTP/1.1 #{webmock_response.status[0]} #{webmock_response.status[1]}\r\n".dup
 
-        @on_debug.call(@header_str, 1) if defined?( @on_debug )
+        @on_debug.call(@header_str, 1) if @on_debug
 
         if webmock_response.headers
           # Each cookie gets a line of its own, as servers send them.
@@ -205,14 +384,14 @@ if defined?(Curl)
             values = k == "Set-Cookie" ? Array(v) : [v.is_a?(Array) ? v.join(", ") : v]
             values.map do |value|
               header = "#{k}: #{value}"
-              @on_debug.call(header + "\r\n", 1) if defined?( @on_debug )
+              @on_debug.call(header + "\r\n", 1) if @on_debug
               header
             end
           end.join("\r\n")
-          @on_debug.call("\r\n", 1) if defined?( @on_debug )
+          @on_debug.call("\r\n", 1) if @on_debug
 
           location = webmock_response.headers['Location']
-          if self.follow_location? && location
+          if follow_redirects && self.follow_location? && location
             @last_effective_url = location
             webmock_follow_location(location)
           end
@@ -235,10 +414,10 @@ if defined?(Curl)
         self.url = first_url
       end
 
-      def invoke_curb_callbacks
-        @on_progress.call(0.0,1.0,0.0,1.0) if defined?( @on_progress )
-        self.header_str.lines.each { |header_line| @on_header.call header_line } if defined?( @on_header )
-        if defined?( @on_body )
+      def invoke_curb_callbacks(multi: false)
+        @on_progress.call(0.0,1.0,0.0,1.0) if @on_progress
+        self.header_str.lines.each { |header_line| @on_header.call header_line } if @on_header
+        if @on_body
           if chunked_response?
             self.body_str.each do |chunk|
               @on_body.call(chunk)
@@ -247,15 +426,24 @@ if defined?(Curl)
             @on_body.call(self.body_str)
           end
         end
-        @on_complete.call(self) if defined?( @on_complete )
+        completed_code = response_code
+        completed_result = last_result if multi
+        @on_complete.call(self) if @on_complete
 
-        case response_code
+        if multi && completed_result != 0
+          @on_failure.call(self, Curl::Easy.error(completed_result)) if @on_failure
+          return
+        end
+
+        case completed_code
         when 200..299
-          @on_success.call(self) if defined?( @on_success )
+          @on_success.call(self) if @on_success
+        when 300..399
+          @on_redirect.call(self, Curl::Easy.error(0)) if multi && @on_redirect && max_redirects != 0
         when 400..499
-          @on_missing.call(self, self.response_code) if defined?( @on_missing )
+          @on_missing.call(self, multi ? Curl::Easy.error(0) : self.response_code) if @on_missing
         when 500..599
-          @on_failure.call(self, self.response_code) if defined?( @on_failure )
+          @on_failure.call(self, multi ? Curl::Easy.error(0) : self.response_code) if @on_failure
         end
       end
 
@@ -265,9 +453,9 @@ if defined?(Curl)
 
       def build_webmock_response
         status, headers =
-         WebMock::HttpLibAdapters::CurbAdapter.parse_header_string(self.header_str)
+         WebMock::HttpLibAdapters::CurbAdapter.parse_header_string((@webmock_header || self.header_str).to_s)
 
-        if defined?( @on_debug )
+        if @on_debug
           http_response = ["HTTP/1.0 #{@debug_method} #{@debug_path}"]
           headers.each do |name, value|
             http_response << "#{name}: #{value}"
@@ -279,7 +467,7 @@ if defined?(Curl)
 
         webmock_response = WebMock::Response.new
         webmock_response.status = [self.response_code, status]
-        webmock_response.body = self.body_str
+        webmock_response.body = @webmock_body || self.body_str
         webmock_response.headers = headers
         webmock_response
       end
@@ -395,7 +583,7 @@ if defined?(Curl)
         @content_type ||= super
       end
 
-      %w[ success failure missing header body complete progress debug ].each do |callback|
+      %w[ success failure missing redirect progress debug ].each do |callback|
         class_eval <<-METHOD, __FILE__, __LINE__
           def on_#{callback} &block
             @on_#{callback} = block
@@ -410,12 +598,10 @@ if defined?(Curl)
 
       def reset
         @put_data = nil
+        clear_webmock_response
+        webmock_clear_multi_request
         reset_webmock_method
-        instance_variable_set(:@body_str, nil)
-        instance_variable_set(:@content_type, nil)
-        instance_variable_set(:@header_str, nil)
-        instance_variable_set(:@last_effective_url, nil)
-        instance_variable_set(:@response_code, nil)
+        @webmock_multi_original_url = @webmock_multi_redirects = nil
         super
       end
     end
