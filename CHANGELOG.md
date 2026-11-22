@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.39.0
 
 * Fix tracing libraries that wrap HTTPClient failing on stubbed requests (#1010)
 
