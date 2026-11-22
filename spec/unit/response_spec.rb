@@ -50,6 +50,41 @@ describe WebMock::Response do
       @response = WebMock::Response.new(status: [500, "Internal Server Error"])
       expect(@response.status).to eq([500, "Internal Server Error"])
     end
+
+    it "converts a code given as a string of digits" do
+      expect(WebMock::Response.new(status: "201").status).to eq([201, ""])
+    end
+
+    it "converts a code returned by a lambda after evaluating it" do
+      response = WebMock::Response.new(status: ->(_request) { "202" })
+      expect(response.evaluate(WebMock::RequestSignature.new(:get, "www.example.com")).status).to eq([202, ""])
+    end
+
+    it "keeps a code and reason pair as given, without a warning" do
+      [["404", "Not Found"], [404], [404, nil], [404, :not_found]].each do |status|
+        expect { expect(WebMock::Response.new(status: status).status).to eq(status) }.not_to output.to_stderr
+      end
+    end
+
+    it "warns once about a status that isn't a number" do
+      expect { WebMock::Response.new(status: :webmock_spec_status) }.to output(
+        /WebMock deprecation warning: status :webmock_spec_status is not an HTTP status code.*Rack::Utils\.status_code\(:webmock_spec_status\).*WebMock 4\.0 will raise ArgumentError/
+      ).to_stderr
+      expect { WebMock::Response.new(status: :webmock_spec_status) }.not_to output.to_stderr
+    end
+
+    it "gives the default status for false, as for nil" do
+      expect { expect(WebMock::Response.new(status: false).status).to eq([200, ""]) }.not_to output.to_stderr
+    end
+
+    it "warns about a float status, without raising" do
+      expect { WebMock::Response.new(status: 299.5) }.to output(/status 299\.5 is not an HTTP status code/).to_stderr
+    end
+
+    it "keeps other statuses as given, without a warning, as some clients read them" do
+      status = [201, "Created"].each
+      expect { expect(WebMock::Response.new(status: status).status).to equal(status) }.not_to output.to_stderr
+    end
   end
 
   describe "raising error" do

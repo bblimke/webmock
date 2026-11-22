@@ -74,6 +74,12 @@
 
     Such a dump now loads. A dump made while WebMock is enabled names WebMock's subclass, so load it where WebMock is loaded.
 
+* Convert a status given as a string of digits, and deprecate statuses such as `:ok` (#802)
+
+    Previously, `to_return(status: "201")` gave the code `"2"` in Net::HTTP, because WebMock kept the string and adapters used its first character as the code. `to_return(status: :ok)` gave the code `"o"`, or `0` in some clients, without an error.
+
+    A string of digits is now converted to a number. A status such as `:ok`, `"ok"` or `200.0` now prints a deprecation warning, and WebMock 4.0 will raise `ArgumentError` for it. Use a number such as `200`, or `Rack::Utils.status_code(:ok)` in a Rack app. A code and reason pair such as `[200, "OK"]` works as before.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

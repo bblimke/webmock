@@ -52,7 +52,16 @@ module WebMock
     end
 
     def status=(status)
-      @status = status.is_a?(Integer) ? [status, ""] : status
+      @status = if status.is_a?(Integer)
+        [status, ""]
+      elsif status_code?(status)
+        # A string such as "201" would reach clients as the code "2"
+        [status.to_i, ""]
+      else
+        # nil and false give the default status, as before.
+        check_status(status) unless status.nil? || status == false || status.is_a?(Proc)
+        status
+      end
     end
 
     def exception
@@ -103,6 +112,32 @@ module WebMock
     end
 
     private
+
+    WARNED_STATUSES = {}
+    private_constant :WARNED_STATUSES
+
+    def status_code?(value)
+      value.is_a?(String) && value.match?(/\A\d+\z/)
+    end
+
+    # A Symbol, a String that isn't digits or a Float, given as the status or
+    # as the code of a pair, reaches clients as a broken status, so it is
+    # deprecated. Anything else is kept as given, as before, since some
+    # clients read other values, such as an Enumerator, as they should.
+    def check_status(status)
+      code = status.is_a?(Array) ? status.first : status
+      return unless code.is_a?(Symbol) || code.is_a?(String) || code.is_a?(Float)
+      return if status_code?(code)
+
+      key = status.inspect
+      return if WARNED_STATUSES[key]
+      WARNED_STATUSES[key] = true
+      rack_hint = code.is_a?(Symbol) ? ", or Rack::Utils.status_code(#{code.inspect}) in a Rack app" : ""
+      WebMock::Deprecation.warning(
+        "status #{key} is not an HTTP status code, so HTTP clients get a broken status from it. " \
+        "Use a number such as 200#{rack_hint}. WebMock 4.0 will raise ArgumentError for it."
+      )
+    end
 
     def stringify_body!
       if @body.is_a?(IO) || @body.is_a?(Pathname)
