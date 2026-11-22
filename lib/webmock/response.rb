@@ -33,7 +33,7 @@ module WebMock
     def headers=(headers)
       @headers = headers
       if @headers && !@headers.is_a?(Proc)
-        @headers = Util::Headers.normalize_headers(@headers)
+        @headers = Util::Headers.normalize_response_headers(@headers)
       end
     end
 
@@ -168,7 +168,11 @@ module WebMock
 
       options = {}
       options[:headers] = {}
-      response.each_header {|name, value| options[:headers][name] = value}
+      # Each Set-Cookie line is a cookie of its own, and a cookie such as one
+      # with Expires=Wed, 21 Oct 2026 can't be split back out of joined ones.
+      response.each_header do |name, value|
+        options[:headers][name] = name == "set-cookie" ? response.get_fields(name) : value
+      end
       options[:headers]['transfer-encoding'] = transfer_encoding if transfer_encoding
       options[:body] = response.read_body
       options[:status] = [response.code.to_i, response.message]

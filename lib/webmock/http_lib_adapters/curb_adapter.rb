@@ -200,10 +200,14 @@ if defined?(Curl)
         @on_debug.call(@header_str, 1) if defined?( @on_debug )
 
         if webmock_response.headers
-          @header_str << webmock_response.headers.map do |k,v|
-            header = "#{k}: #{v.is_a?(Array) ? v.join(", ") : v}"
-            @on_debug.call(header + "\r\n", 1) if defined?( @on_debug )
-            header
+          # Each cookie gets a line of its own, as servers send them.
+          @header_str << webmock_response.headers.flat_map do |k,v|
+            values = k == "Set-Cookie" ? Array(v) : [v.is_a?(Array) ? v.join(", ") : v]
+            values.map do |value|
+              header = "#{k}: #{value}"
+              @on_debug.call(header + "\r\n", 1) if defined?( @on_debug )
+              header
+            end
           end.join("\r\n")
           @on_debug.call("\r\n", 1) if defined?( @on_debug )
 

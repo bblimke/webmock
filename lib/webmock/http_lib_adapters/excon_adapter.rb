@@ -129,18 +129,39 @@ if defined?(Excon)
         def self.real_response(mock)
           raise Excon::Errors::Timeout if mock.should_timeout
           mock.raise_error_if_any
+          headers = mock.headers || {}
+          # Copies, so changes to a response's cookies can't reach the stub.
+          cookies = Array(headers["Set-Cookie"]).map(&:dup)
+          # Excon joins repeated headers, and lists each cookie in :cookies.
+          headers = headers.merge("Set-Cookie" => join_cookies(cookies)) if cookies.size > 1
           {
             body: mock.body,
             status: mock.status[0].to_i,
             reason_phrase: mock.status[1],
-            headers: mock.headers || {}
+            headers: headers,
+            cookies: cookies
           }
+        end
+
+        # Joined as Excon joins them, or as bytes when they are in
+        # incompatible encodings, as a server sends them.
+        def self.join_cookies(cookies)
+          cookies.join(", ")
+        rescue Encoding::CompatibilityError
+          cookies.map(&:b).join(", ".b)
         end
 
         def self.mock_response(real)
           mock = WebMock::Response.new
           mock.status  = [real.status, real.reason_phrase]
           mock.headers = real.headers
+          # Excon joins the cookies of a response in its header, so callbacks,
+          # such as VCR's, get each one from the list Excon keeps.
+          # Copies, so a callback that changes one doesn't change the response.
+          cookies = real.data[:cookies]
+          if cookies && cookies.size > 1
+            mock.headers = real.headers.to_h.reject { |name, _| name.casecmp?("Set-Cookie") }.merge("Set-Cookie" => cookies.map(&:dup))
+          end
           mock.body    = real.body.dup
           mock
         end

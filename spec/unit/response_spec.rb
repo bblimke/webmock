@@ -36,6 +36,22 @@ describe WebMock::Response do
     expect(@response.headers).to eq({'B' => 'b'})
   end
 
+  it "normalizes header names and sorts repeated values" do
+    @response = WebMock::Response.new(headers: {'content-type' => :json, 'accept' => ['b', 'a']})
+    expect(@response.headers).to eq('Content-Type' => 'json', 'Accept' => ['a', 'b'])
+  end
+
+  it "passes normalize_headers the headers alone, as a test suite that replaces it expects" do
+    allow(WebMock::Util::Headers).to receive(:normalize_headers, &->(headers) { headers })
+    response = WebMock::Response.new(headers: {'x-custom' => '1', 'set-cookie' => ['b=2', 'a=1']})
+    expect(response.headers).to eq('x-custom' => '1', 'set-cookie' => ['b=2', 'a=1'])
+  end
+
+  it "keeps Set-Cookie values in the given order" do
+    response = WebMock::Response.new(headers: {'set-cookie' => ['sid=old; Max-Age=0', 'sid=new']})
+    expect(response.headers).to eq('Set-Cookie' => ['sid=old; Max-Age=0', 'sid=new'])
+  end
+
   describe "status" do
     it "should have 200 code and empty message by default" do
       expect(@response.status).to eq([200, ""])
@@ -189,6 +205,19 @@ describe WebMock::Response do
   end
 
   describe "from raw response" do
+    it "keeps each Set-Cookie line, in order" do
+      first = "z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT; Path=/"
+      second = "a=2; HttpOnly"
+      response = WebMock::Response.new(
+        "HTTP/1.1 200 OK\r\nSet-Cookie: #{first}\r\nSet-Cookie: #{second}\r\nContent-Length: 0\r\n\r\n")
+      expect(response.headers["Set-Cookie"]).to eq([first, second])
+    end
+
+    it "keeps a single Set-Cookie line as a string" do
+      response = WebMock::Response.new("HTTP/1.1 200 OK\r\nSet-Cookie: a=1\r\nContent-Length: 0\r\n\r\n")
+      expect(response.headers["Set-Cookie"]).to eq("a=1")
+    end
+
     describe "when input is a StringIO" do
       before(:each) do
         @io = StringIO.new(File.read(CURL_EXAMPLE_OUTPUT_PATH))

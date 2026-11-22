@@ -150,7 +150,7 @@ describe "Net:HTTP" do
   it "should handle multiple values for the same response header" do
     stub_http_request(:get, "www.example.com").to_return(headers: { 'Set-Cookie' => ['foo=bar', 'bar=bazz'] })
     response = Net::HTTP.get_response(URI.parse("http://www.example.com/"))
-    expect(response.get_fields('Set-Cookie')).to eq(['bar=bazz', 'foo=bar'])
+    expect(response.get_fields('Set-Cookie')).to eq(['foo=bar', 'bar=bazz'])
   end
 
   it "should yield block on response" do

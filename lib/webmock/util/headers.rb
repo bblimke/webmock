@@ -23,6 +23,23 @@ module WebMock
         end
       end
 
+      # The headers of a response. normalize_headers sorts repeated values, so
+      # the order they are given in doesn't matter for matching, but of two
+      # cookies with the same name a client keeps the last one, so Set-Cookie
+      # values are put back in the order given. normalize_headers is called
+      # with the headers alone, as before, since some test suites replace it
+      # with a method that takes one argument.
+      def self.normalize_response_headers(headers)
+        normalized = normalize_headers(headers)
+        return normalized unless normalized.is_a?(Hash) && normalized["Set-Cookie"].is_a?(Array)
+
+        cookies = nil
+        headers.each do |name, value|
+          cookies = value if value.is_a?(Array) && value.size > 1 && normalize_name(name) == "Set-Cookie"
+        end
+        cookies ? normalized.merge("Set-Cookie" => cookies.map(&:to_s)) : normalized
+      end
+
       def self.sorted_headers_string(headers)
         headers = WebMock::Util::Headers.normalize_headers(headers)
         str = '{'.dup

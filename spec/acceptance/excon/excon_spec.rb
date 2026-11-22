@@ -6,6 +6,59 @@ describe "Excon" do
   include ExconSpecHelper
   include_context "with WebMock", :no_url_auth
 
+  it 'joins Set-Cookie values into one header and lists each in :cookies, as Excon does' do
+    cookies = ["z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT", "a=2"]
+    stub_request(:get, "www.example.com").to_return(headers: {"Set-Cookie" => cookies})
+    response = Excon.get("http://www.example.com")
+    expect(response.headers["Set-Cookie"]).to eq(cookies.join(", "))
+    expect(response[:cookies]).to eq(cookies)
+  end
+
+  it "keeps the cookies of a stub when a response's cookies are changed" do
+    cookies = ["z=1", "a=2"]
+    stub_request(:get, "www.example.com").to_return(headers: {"Set-Cookie" => cookies})
+    Excon.get("http://www.example.com")[:cookies].shift
+    response = Excon.get("http://www.example.com")
+    expect([response.headers["Set-Cookie"], response[:cookies]]).to eq(["z=1, a=2", cookies])
+  end
+
+  it "joins cookies in incompatible encodings as bytes" do
+    cookies = ["a=caf\u00E9", "b=\xFF".b]
+    stub_request(:get, "www.example.com").to_return(headers: {"Set-Cookie" => cookies})
+    response = Excon.get("http://www.example.com")
+    expect(response.headers["Set-Cookie"]).to eq("a=caf\xC3\xA9, b=\xFF".b)
+    expect(response[:cookies]).to eq(cookies)
+  end
+
+  describe 'a real response with several cookies' do
+    include LocalHTTPServer
+
+    after { WebMock.reset_callbacks }
+
+    it 'gives callbacks each cookie, as Excon lists them' do
+      recorded = nil
+      WebMock.after_request { |_request, response| recorded = response.headers["Set-Cookie"] }
+      raw = "HTTP/1.1 200 OK\r\nSet-Cookie: z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT\r\nSet-Cookie: a=2\r\n" \
+        "Content-Length: 0\r\nConnection: close\r\n\r\n"
+      capture_requests(response: raw) { |port| Excon.get("http://127.0.0.1:#{port}/") }
+      expect(recorded).to eq(["z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT", "a=2"])
+    end
+
+    it "doesn't let a callback change the cookies the application gets" do
+      WebMock.after_request { |_request, response| response.headers["Set-Cookie"].each { |cookie| cookie.replace("redacted") } }
+      raw = "HTTP/1.1 200 OK\r\nSet-Cookie: z=1\r\nSet-Cookie: a=2\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
+      response = nil
+      capture_requests(response: raw) { |port| response = Excon.get("http://127.0.0.1:#{port}/") }
+      expect(response[:cookies]).to eq(["z=1", "a=2"])
+    end
+  end
+
+  it 'lists a single Set-Cookie value in :cookies' do
+    stub_request(:get, "www.example.com").to_return(headers: {"Set-Cookie" => "a=1"})
+    response = Excon.get("http://www.example.com")
+    expect([response.headers["Set-Cookie"], response[:cookies]]).to eq(["a=1", ["a=1"]])
+  end
+
   it 'should allow Excon requests to use query hash paramters' do
     stub_request(:get, "http://example.com/resource/?a=1&b=2").to_return(body: "abc")
     expect(Excon.new('http://example.com').get(path: "resource/", query: {a: 1, b: 2}).body).to eq("abc")

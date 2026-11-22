@@ -80,6 +80,14 @@
 
     A string of digits is now converted to a number. A status such as `:ok`, `"ok"` or `200.0` now prints a deprecation warning, and WebMock 4.0 will raise `ArgumentError` for it. Use a number such as `200`, or `Rack::Utils.status_code(:ok)` in a Rack app. A code and reason pair such as `[200, "OK"]` works as before.
 
+* Keep each cookie of a stubbed response with several `Set-Cookie` headers, in order (#470)
+
+    Previously, a raw response such as `to_return(File.read("response.txt"))` with two `Set-Cookie` lines gave clients one comma joined `Set-Cookie` value, which can't be split back, since a cookie such as `a=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT` contains a comma. A stub such as `to_return(headers: {"Set-Cookie" => ["sid=old; Max-Age=0", "sid=new"]})` gave the cookies sorted, so a client applied `sid=old; Max-Age=0` last and deleted the cookie, and Curb got them on one header line.
+
+    Each client now gets the cookies as it would from a server sending these lines: separately, in the given order, on lines of their own in Curb, and joined in `headers["Set-Cookie"]` and listed in `response[:cookies]` in Excon. Other repeated response headers are unchanged.
+
+    A test that expected the cookies of such a stub joined, or sorted, now gets them as a real server would send them. For a real response with several cookies, `after_request` callbacks, and so VCR, now get them in the order the server sent them instead of sorted, and for Excon each cookie instead of the joined header, so recordings and snapshots of them can change.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

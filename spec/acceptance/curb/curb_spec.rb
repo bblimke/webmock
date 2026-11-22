@@ -26,6 +26,20 @@ unless RUBY_PLATFORM =~ /java/
       WebMock.reset!
     end
 
+    it "gives each Set-Cookie value a header line of its own, as servers send them" do
+      stub_request(:get, "www.example.com").
+        to_return(headers: {"Set-Cookie" => ["z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT", "a=2"], "X-Multi" => ["b", "a"]})
+      lines = []
+      curl = Curl::Easy.new("http://www.example.com")
+      curl.on_header { |line| lines << line; line.bytesize }
+      curl.perform
+
+      expected = ["Set-Cookie: z=1; Expires=Wed, 21 Oct 2026 07:28:00 GMT", "Set-Cookie: a=2"]
+      expect(curl.header_str.lines.grep(/\ASet-Cookie/).map(&:strip)).to eq(expected)
+      expect(lines.grep(/\ASet-Cookie/).map(&:strip)).to eq(expected)
+      expect(curl.header_str.lines.grep(/\AX-Multi/).map(&:strip)).to eq(["X-Multi: a, b"])
+    end
+
     it "records the bytes of a file upload without retaining or consuming its handle" do
       url = "http://example.com/upload"
       path = File.expand_path("../../fixtures/test.txt", __dir__)
