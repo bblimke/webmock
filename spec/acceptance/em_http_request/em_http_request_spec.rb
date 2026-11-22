@@ -11,6 +11,18 @@ unless RUBY_PLATFORM =~ /java/
 
     include_context "with WebMock", :no_status_message
 
+    it "loads a YAML or Marshal dump of a client" do
+      require 'yaml'
+      client = EventMachine::HttpClient.new(nil, nil)
+      # Psych 4 loads only plain data with YAML.load
+      load_yaml = YAML.respond_to?(:unsafe_load) ? :unsafe_load : :load
+      jar_class = WebMock::HttpLibAdapters::EmHttpRequestAdapter::OriginalHttpClient::CookieJar
+
+      [YAML.public_send(load_yaml, client.to_yaml), Marshal.load(Marshal.dump(client))].each do |loaded|
+        expect(loaded.instance_variable_get(:@cookiejar)).to be_a(jar_class)
+      end
+    end
+
     #functionality only supported for em-http-request 1.x
     if defined?(EventMachine::HttpConnection)
       context 'when a real request is made and redirects are followed', net_connect: true do

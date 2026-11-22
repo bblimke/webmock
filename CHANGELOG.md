@@ -68,6 +68,12 @@
 
     The suggestion now leaves `User-Agent` out, so it matches whatever the client sends. The message still shows the request with all its headers.
 
+* Fix loading a YAML or Marshal dump of an em-http-request client while WebMock is enabled (#729)
+
+    Previously, `YAML.unsafe_load(client.to_yaml)` or `Marshal.load(Marshal.dump(client))` raised `ArgumentError: undefined class/module EventMachine::HttpClient::CookieJar`, because WebMock replaces `EventMachine::HttpClient` with a subclass.
+
+    Such a dump now loads. A dump made while WebMock is enabled names WebMock's subclass, so load it where WebMock is loaded.
+
 # 3.38.0
 
 * Allow or disable real requests only within a block (#1110)

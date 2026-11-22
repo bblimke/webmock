@@ -84,6 +84,10 @@ if defined?(EventMachine::HttpClient)
 
     class WebMockHttpClient < EventMachine::HttpClient
       include HttpEncoding
+      # A YAML or Marshal dump names the cookie jar EventMachine::HttpClient::CookieJar,
+      # which is this class while WebMock is enabled, and loading a dump looks
+      # the constant up without the superclass.
+      CookieJar = superclass.const_get(:CookieJar, false) if superclass.const_defined?(:CookieJar, false)
 
       def uri
         @req.uri
