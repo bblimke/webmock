@@ -11,7 +11,8 @@ describe "errors" do
 
         expect(message).to start_with(
           "Real HTTP connections are disabled. Unregistered request: POST http://www.example.org/ with body '\\xFF\\xFE'")
-        expect(message).to include('body: "café"')
+        # The snippet writes the body with #inspect, which escapes it in a locale that isn't UTF-8.
+        expect(message).to include("body: #{"café".inspect}")
       end
 
       it "is built when the request body and a header have incompatible encodings" do
@@ -20,7 +21,7 @@ describe "errors" do
         message = WebMock::NetConnectNotAllowedError.new(signature).message
 
         expect(message).to include("with body 'café' with headers {'X-Blob'=>'\\xFF'}")
-        expect(message).to include('body: "café"')
+        expect(message).to include("body: #{"café".inspect}")
       end
 
       it "should have message with request signature and snippet" do
