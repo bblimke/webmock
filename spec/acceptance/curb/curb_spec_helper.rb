@@ -91,23 +91,44 @@ module CurbSpecHelper
     end
   end
 
+  def setup_perform_request(uri, method, body, options)
+    curl = setup_request(uri, nil, options)
+
+    case method
+    when :post
+      curl.post_body = body
+    when :put
+      curl.put_data = body
+    when :head
+      curl.head = true
+    when :delete
+      curl.delete = true
+    end
+
+    curl
+  end
+
   module Perform
     def curb_http_request(uri, method, body, options)
-      curl = setup_request(uri, nil, options)
-
-      case method
-      when :post
-        curl.post_body = body
-      when :put
-        curl.put_data = body
-      when :head
-        curl.head = true
-      when :delete
-        curl.delete = true
-      end
-
+      curl = setup_perform_request(uri, method, body, options)
       curl.perform
       curl
+    end
+  end
+
+  module Multi
+    def curb_http_request(uri, method, body, options)
+      curl = setup_perform_request(uri, method, body, options)
+      multi = Curl::Multi.new
+      multi.add(curl)
+      multi.perform
+      if curl.last_result != 0
+        error_class, message = Curl::Easy.error(curl.last_result)
+        raise error_class, message
+      end
+      curl
+    ensure
+      multi.close if multi
     end
   end
 
