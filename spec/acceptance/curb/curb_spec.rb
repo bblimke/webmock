@@ -249,7 +249,7 @@ unless RUBY_PLATFORM =~ /java/
       describe 'on_debug' do
         it "should call on_debug" do
           stub_request(:any, "example.com").
-            to_return(status: 200, headers: { 'Server' => 'nginx' }, body: { hello: :world }.to_json)
+            to_return_json(headers: { 'Server' => 'nginx' }, body: { hello: :world })
 
           test = []
 
@@ -509,7 +509,6 @@ unless RUBY_PLATFORM =~ /java/
 
           stub_request(:any, 'example.com').
             to_return(body: "abc",
-                      status: 200,
                       headers: { 'Content-Type' => content_type })
 
           @curl.http_get
@@ -521,8 +520,7 @@ unless RUBY_PLATFORM =~ /java/
         it "returns nil for content_type" do
 
           stub_request(:any, 'example.com').
-            to_return(body: "abc",
-                      status: 200 )
+            to_return(body: "abc")
 
           @curl.http_get
           expect(@curl.content_type).to be_nil
@@ -539,7 +537,6 @@ unless RUBY_PLATFORM =~ /java/
       it "is true when Transfer-Encoding is 'chunked' and body responds to each" do
         stub_request(:any, 'example.com').
           to_return(body: ["abc", "def"],
-                    status: 200,
                     headers: { 'Transfer-Encoding' => 'chunked' })
 
         @curl.http_get
@@ -548,8 +545,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it "is false when Transfer-Encoding is not 'chunked'" do
         stub_request(:any, 'example.com').
-          to_return(body: ["abc", "def"],
-                    status: 200)
+          to_return(body: ["abc", "def"])
 
         @curl.http_get
         expect(@curl).not_to be_chunked_response
@@ -557,8 +553,7 @@ unless RUBY_PLATFORM =~ /java/
 
       it "is false when Transfer-Encoding is 'chunked' but body does not respond to each" do
         stub_request(:any, 'example.com').
-          to_return(body: "abc",
-                    status: 200)
+          to_return(body: "abc")
 
         @curl.http_get
         expect(@curl).not_to be_chunked_response

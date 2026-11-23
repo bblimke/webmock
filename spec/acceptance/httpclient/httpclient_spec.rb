@@ -204,7 +204,7 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
   end
 
   it "should work with get_content" do
-    stub_request(:get, 'www.example.com').to_return(status: 200, body: 'test', headers: {})
+    stub_request(:get, 'www.example.com').to_return(body: 'test')
     str = ''.dup
     HTTPClient.get_content('www.example.com') do |content|
       str << content
@@ -213,11 +213,7 @@ describe "HTTPClient", if: !(RUBY_PLATFORM =~ /java/) do
   end
 
   it "should work via JSONClient subclass" do
-    stub_request(:get, 'www.example.com').to_return(
-      status: 200,
-      body: '{"test": "foo"}',
-      headers: {'Content-Type' => 'application/json'}
-    )
+    stub_request(:get, 'www.example.com').to_return_json(body: { test: "foo" })
     content = JSONClient.get('www.example.com').content
     expect(content).to eq("test" => "foo")
   end
