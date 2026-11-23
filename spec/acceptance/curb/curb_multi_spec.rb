@@ -347,6 +347,25 @@ unless RUBY_PLATFORM =~ /java/
       expect(WebMock).to have_requested(:get, 'http://example.com/loop').times(3)
     end
 
+    it "lets handles of curb's own Curl::Easy class make their requests, as before" do
+      original_class = WebMock::HttpLibAdapters::CurbAdapter::OriginalCurlEasy
+      # As if defined before WebMock was loaded.
+      subclass = Class.new(original_class)
+      codes = nil
+      capture_request_heads(4) do |port|
+        url = "http://127.0.0.1:#{port}/"
+        # A handle made while WebMock was disabled, one of the subclass and
+        # a copy, which curb makes of its own class.
+        handles = [original_class.new(url), subclass.new(url), Curl::Easy.new(url).dup]
+        handles.each(&:perform)
+        added = subclass.new(url)
+        @multi.add(added)
+        @multi.perform
+        codes = [*handles, added].map(&:response_code)
+      end
+      expect(codes).to eq([200, 200, 200, 200])
+    end
+
     it 'restores the original multi class when the curb adapter is disabled' do
       WebMock.disable!(except: [:net_http])
       expect(Curl::Multi).to eq(WebMock::HttpLibAdapters::CurbAdapter::OriginalCurlMulti)

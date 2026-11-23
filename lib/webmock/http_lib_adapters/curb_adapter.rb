@@ -71,7 +71,11 @@ if defined?(Curl)
       # Intercept the native attachment boundary, retaining curb's public add,
       # remove, request table and native event loop for allowed transfers.
       def _add(easy)
-        return super if easy.webmock_performing_easy?
+        # A handle of curb's own Curl::Easy class, such as a subclass defined
+        # before WebMock was loaded, one made while WebMock was disabled or a
+        # copy made with Curl::Easy#dup, makes its request without WebMock, as
+        # it always has. Easy#perform runs such handles through a multi too.
+        return super if !easy.is_a?(WebMockCurlEasy) || easy.webmock_performing_easy?
 
         begin
           signature, response = easy.webmock_request
