@@ -359,6 +359,29 @@ unless RUBY_PLATFORM =~ /java/
       expect(yielded).to all(equal(@multi))
     end
 
+    it 'finishes perform when a stubbed handle is reset or closed before it' do
+      stub_request(:get, 'http://example.com/')
+      %i[reset close].each do |action|
+        begin
+          multi = Curl::Multi.new
+          easy = Curl::Easy.new('http://example.com/')
+          other = Curl::Easy.new('http://example.com/')
+          completed = 0
+          other.on_complete { completed += 1 }
+          multi.add(easy)
+          multi.add(other)
+          easy.public_send(action)
+          # Run perform in a thread, so the spec fails instead of hanging.
+          thread = Thread.new { multi.perform }
+          expect(thread.join(5)).to be_truthy, "perform didn't finish after #{action}"
+          expect(completed).to eq(1)
+        ensure
+          thread&.kill
+          multi&.close
+        end
+      end
+    end
+
     it "lets handles of curb's own Curl::Easy class make their requests, as before" do
       original_class = WebMock::HttpLibAdapters::CurbAdapter::OriginalCurlEasy
       # As if defined before WebMock was loaded.

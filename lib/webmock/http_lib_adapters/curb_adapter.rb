@@ -121,8 +121,14 @@ if defined?(Curl)
       def complete_webmock_requests
         until webmock_pending.empty?
           easy, signature, response = webmock_pending.values.first
+          # Curb 1.5 takes a handle out of the multi on reset or close without
+          # calling _remove, so it no longer belongs to this multi.
+          attached = requests.key?(easy.object_id)
           # Detach before callbacks so they can remove or requeue handles.
           remove(easy)
+          webmock_pending.delete(easy.object_id)
+          next unless attached
+
           if easy.webmock_follow_multi_redirect(signature, response)
             add(easy)
           else
