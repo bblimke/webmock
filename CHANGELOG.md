@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.40.0
 
 * Add support for `Curl::Multi` (#535)
 
