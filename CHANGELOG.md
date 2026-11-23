@@ -1,10 +1,18 @@
 # Changelog
 
+# Unreleased
+
+* Add support for `Curl::Multi` (#535)
+
+    Previously, WebMock didn't see requests sent with `Curl::Multi`. A handle added with `multi.add` and sent with `multi.perform` went to the real server, even when a stub matched it or real connections were disabled, and WebMock didn't record it.
+
+    Now a handle that matches a stub gets the stubbed response during `multi.perform`, and one that is neither stubbed nor allowed raises `WebMock::NetConnectNotAllowedError` from `multi.add`. Allowed requests still run together in curb's own multi loop. WebMock records both, and `WebMock.after_request` callbacks get both.
+
+    If your tests send `Curl::Multi` requests to real servers, stub them or allow their hosts, for example with `WebMock.disable_net_connect!(allow: "api.example.com")`. VCR, hooked into WebMock, now records and replays these requests too, and raises `VCR::Errors::UnhandledHTTPRequestError` for one that a cassette doesn't have, so record such cassettes again.
+
+    Thanks to [Todd Fisher](https://github.com/taf2)
+
 # 3.39.0
-
-* Support `Curl::Multi` requests in the curb adapter (#535)
-
-    Match stubs and enforce network permissions per handle. Allowed transfers retain curb's native multi loop, while stubbed transfers complete during `perform`. Record both kinds of requests and preserve curb and WebMock callbacks, including mixed batches and reused handles.
 
 * Fix tracing libraries that wrap HTTPClient failing on stubbed requests (#1010)
 
