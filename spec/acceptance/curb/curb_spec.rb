@@ -737,6 +737,11 @@ unless RUBY_PLATFORM =~ /java/
       include CurbSpecHelper::Perform
     end
 
+    describe "using Curl::Multi for requests" do
+      it_should_behave_like "Curb"
+      include CurbSpecHelper::Multi
+    end
+
     describe "using .http_* methods for requests" do
       it_should_behave_like "Curb"
       include CurbSpecHelper::ClassNamedHttp

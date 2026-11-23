@@ -23,7 +23,7 @@ Supported HTTP libraries
 ------------------------
 
 * [Async::HTTP::Client](https://github.com/socketry/async-http)
-* [Curb](https://github.com/taf2/curb) (`Curl::Easy` only). `Curl::Multi` sends real requests even when a matching stub exists and `WebMock.disable_net_connect!` is in effect.
+* [Curb](https://github.com/taf2/curb) (`Curl::Easy` and `Curl::Multi`)
 * [EM-HTTP-Request](https://github.com/igrigorik/em-http-request)
 * [Excon](https://github.com/excon/excon)
 * [HTTPClient](https://github.com/nahi/httpclient)
@@ -569,6 +569,20 @@ stub_request(:any, 'www.example.net').to_timeout
 
 RestClient.post('www.example.net', 'abc')    # ===> RestClient::RequestTimeout
 ```
+
+### Curb multi requests
+
+`Curl::Multi` matches each handle against stubs when it is added. An unstubbed
+handle raises `WebMock::NetConnectNotAllowedError` from `multi.add` unless its
+URL is allowed by WebMock's network settings. Stubbed handles complete when
+`multi.perform` runs; allowed handles still run together on curb's native multi
+loop. Both kinds of requests are recorded and invoke callbacks, including
+`WebMock.after_request`. Callbacks registered with `real_requests_only: true`
+receive only real transfers.
+
+This also applies to `Curl::Multi.get`, `post`, `put` and `http`, and the `Curl.get`
+and `Curl.post` convenience methods. Create the multi and easy handles after
+WebMock is enabled, as with `Curl::Easy` requests.
 
 ### Multiple responses for repeated requests
 
