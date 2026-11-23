@@ -772,6 +772,22 @@ unless RUBY_PLATFORM =~ /java/
           response_code: 0,
         )
       end
+
+      it "should drop the callbacks, as curb does" do
+        events = []
+        %w[success failure missing redirect complete progress debug body header].each do |name|
+          @curl.public_send("on_#{name}") { |*| events << name }
+        end
+        @curl.http_get
+        expect(events).to include("complete", "success", "body")
+
+        events.clear
+        @curl.reset
+        @curl.url = "http://example.com"
+        @curl.http_get
+        expect(events).to be_empty
+        expect(@curl.body_str).to eq("abc")
+      end
     end
   end
 

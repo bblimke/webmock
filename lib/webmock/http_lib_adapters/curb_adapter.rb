@@ -606,6 +606,10 @@ if defined?(Curl)
         webmock_clear_multi_request
         reset_webmock_method
         @webmock_multi_original_url = @webmock_multi_redirects = nil
+        # Curb's reset drops every callback, so a stubbed request, or a real one
+        # WebMock records, doesn't run the ones set before it either.
+        @on_success = @on_failure = @on_missing = @on_redirect = @on_complete = nil
+        @on_body = @on_header = @on_progress = @on_debug = nil
         super
       end
     end

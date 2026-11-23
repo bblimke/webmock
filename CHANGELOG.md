@@ -12,6 +12,10 @@
 
     Thanks to [Todd Fisher](https://github.com/taf2)
 
+* Drop curb callbacks on `Curl::Easy#reset` for stubbed requests, as curb does
+
+    Previously, a callback such as `on_complete`, set before `reset`, still ran for a stubbed request made after it. Curb drops every callback on `reset`, so a real request didn't run it. If your tests rely on such a callback, set it again after `reset`.
+
 # 3.39.0
 
 * Fix tracing libraries that wrap HTTPClient failing on stubbed requests (#1010)

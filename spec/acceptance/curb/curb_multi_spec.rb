@@ -366,6 +366,24 @@ unless RUBY_PLATFORM =~ /java/
       expect(codes).to eq([200, 200, 200, 200])
     end
 
+    it 'does not run callbacks set before reset when a reset handle makes a real request' do
+      completed = []
+      url = nil
+      capture_requests(2) do |port|
+        url = "http://127.0.0.1:#{port}/"
+        easy = Curl::Easy.new(url)
+        easy.on_complete { completed << :before_reset }
+        @multi.add(easy)
+        @multi.perform
+        easy.reset
+        easy.url = url
+        @multi.add(easy)
+        @multi.perform
+      end
+      expect(completed).to eq([:before_reset])
+      expect(WebMock).to have_requested(:get, url).twice
+    end
+
     it 'restores the original multi class when the curb adapter is disabled' do
       WebMock.disable!(except: [:net_http])
       expect(Curl::Multi).to eq(WebMock::HttpLibAdapters::CurbAdapter::OriginalCurlMulti)
