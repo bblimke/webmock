@@ -347,6 +347,18 @@ unless RUBY_PLATFORM =~ /java/
       expect(WebMock).to have_requested(:get, 'http://example.com/loop').times(3)
     end
 
+    it 'passes the multi to the perform block, as curb does' do
+      stub_request(:get, 'http://example.com/')
+      yielded = []
+      capture_requests do |port|
+        @multi.add(Curl::Easy.new("http://127.0.0.1:#{port}/"))
+        @multi.add(Curl::Easy.new('http://example.com/'))
+        @multi.perform { |multi| yielded << multi }
+      end
+      expect(yielded).not_to be_empty
+      expect(yielded).to all(equal(@multi))
+    end
+
     it "lets handles of curb's own Curl::Easy class make their requests, as before" do
       original_class = WebMock::HttpLibAdapters::CurbAdapter::OriginalCurlEasy
       # As if defined before WebMock was loaded.

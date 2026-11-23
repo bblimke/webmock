@@ -104,10 +104,10 @@ if defined?(Curl)
 
       def perform(&block)
         complete_webmock_requests
-        super do
+        super do |multi|
           begin
             complete_webmock_requests
-            block.call if block
+            block.call(multi) if block
           end until webmock_pending.empty?
         end
       end
