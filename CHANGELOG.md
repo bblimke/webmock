@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.41.0
 
 WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its old parser, which converted JSON to YAML and failed on or misread some valid JSON. Every body pattern that matched on 3.40.0 still matches. If one matches only as the old parser reads the body, WebMock prints a deprecation warning, because 4.0 drops the old parser and the pattern won't match there.
 
