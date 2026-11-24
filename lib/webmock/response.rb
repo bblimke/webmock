@@ -135,7 +135,7 @@ module WebMock
       rack_hint = code.is_a?(Symbol) ? ", or Rack::Utils.status_code(#{code.inspect}) in a Rack app" : ""
       WebMock::Deprecation.warning(
         "status #{key} is not an HTTP status code, so HTTP clients get a broken status from it. " \
-        "Use a number such as 200#{rack_hint}. WebMock 4.0 will raise ArgumentError for it."
+        "Use a number such as 200#{rack_hint}. A future major version of WebMock will raise ArgumentError for it."
       )
     end
 

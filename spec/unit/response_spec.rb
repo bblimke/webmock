@@ -84,7 +84,7 @@ describe WebMock::Response do
 
     it "warns once about a status that isn't a number" do
       expect { WebMock::Response.new(status: :webmock_spec_status) }.to output(
-        /WebMock deprecation warning: status :webmock_spec_status is not an HTTP status code.*Rack::Utils\.status_code\(:webmock_spec_status\).*WebMock 4\.0 will raise ArgumentError/
+        /WebMock deprecation warning: status :webmock_spec_status is not an HTTP status code.*Rack::Utils\.status_code\(:webmock_spec_status\).*A future major version of WebMock will raise ArgumentError/
       ).to_stderr
       expect { WebMock::Response.new(status: :webmock_spec_status) }.not_to output.to_stderr
     end

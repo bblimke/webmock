@@ -28,6 +28,10 @@ WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its 
 
     Previously, with Psych 4 or later (the default since Ruby 3.1), a JSON body such as `{"a": 2020-01-01}`, which isn't valid JSON, raised `Psych::DisallowedClass` when a stub had a hash body pattern, instead of WebMock's error for an unregistered request. It now doesn't match the pattern.
 
+* Name a future major version in the deprecation warning for statuses such as `:ok`
+
+    The deprecation warning for a status such as `:ok`, added in 3.38.0, said that WebMock 4.0 would raise `ArgumentError` for it. 4.0 changes how JSON request bodies are read and doesn't change statuses yet, so the warning now names a future major version.
+
 # 3.40.0
 
 * Add support for `Curl::Multi` (#535)
