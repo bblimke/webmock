@@ -49,11 +49,20 @@ describe WebMock::RequestStub do
     end
 
     it "should raise if given no responses" do
-      expect { @request_stub.to_return }.to raise_error(ArgumentError, "#to_return needs at least one response")
+      expect { @request_stub.to_return }.to raise_error(ArgumentError, "#to_return requires at least one response")
     end
 
     it "should raise if given an empty list" do
-      expect { @request_stub.to_return([]) }.to raise_error(ArgumentError, "#to_return needs at least one response")
+      expect { @request_stub.to_return([]) }.to raise_error(ArgumentError, "#to_return requires at least one response")
+    end
+
+    it "should raise if given a nil response" do
+      expect { @request_stub.to_return(nil) }.to raise_error(ArgumentError, "nil is not a valid response for #to_return")
+      expect { @request_stub.to_return({body: "abc"}, nil) }.to raise_error(ArgumentError, "nil is not a valid response for #to_return")
+    end
+
+    it "should raise from the and_return alias if given no responses" do
+      expect { @request_stub.and_return }.to raise_error(ArgumentError, "#to_return requires at least one response")
     end
 
   end
@@ -67,7 +76,19 @@ describe WebMock::RequestStub do
     end
 
     it "should raise if given no responses" do
-      expect { @request_stub.to_return_json }.to raise_error(ArgumentError, "#to_return_json needs at least one response")
+      expect { @request_stub.to_return_json }.to raise_error(ArgumentError, "#to_return_json requires at least one response")
+    end
+
+    it "should raise if given an empty list" do
+      expect { @request_stub.to_return_json([]) }.to raise_error(ArgumentError, "#to_return_json requires at least one response")
+    end
+
+    it "should raise if given a nil response" do
+      expect { @request_stub.to_return_json(nil) }.to raise_error(ArgumentError, "nil is not a valid response for #to_return_json")
+    end
+
+    it "should raise from the and_return_json alias if given no responses" do
+      expect { @request_stub.and_return_json }.to raise_error(ArgumentError, "#to_return_json requires at least one response")
     end
 
     it "should assign responses normally" do
@@ -188,7 +209,19 @@ describe WebMock::RequestStub do
   describe "to_raise" do
 
     it "should raise if given no exceptions" do
-      expect { @request_stub.to_raise }.to raise_error(ArgumentError, "#to_raise needs at least one exception")
+      expect { @request_stub.to_raise }.to raise_error(ArgumentError, "#to_raise requires at least one exception")
+    end
+
+    it "should raise if given an empty list" do
+      expect { @request_stub.to_raise([]) }.to raise_error(ArgumentError, "#to_raise requires at least one exception")
+    end
+
+    it "should raise if given a nil exception" do
+      expect { @request_stub.to_raise(nil) }.to raise_error(ArgumentError, "nil is not a valid exception for #to_raise")
+    end
+
+    it "should raise from the and_raise alias if given no exceptions" do
+      expect { @request_stub.and_raise }.to raise_error(ArgumentError, "#to_raise requires at least one exception")
     end
 
     it "should assign response with exception to be thrown" do
