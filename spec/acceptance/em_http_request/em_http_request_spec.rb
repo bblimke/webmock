@@ -240,7 +240,7 @@ unless RUBY_PLATFORM =~ /java/
           end
 
           it "should work" do
-            stub_request(:post, /.*.testserver.com*/).to_return(status: 200, body: 'ok')
+            stub_request(:post, /.*.testserver.com*/).to_return(body: 'ok')
             expect {
               EM.run do
                 fiber = Fiber.new do
@@ -426,7 +426,7 @@ unless RUBY_PLATFORM =~ /java/
     end
 
     it "should work with multiple requests to the same connection when the first request times out" do
-      stub_request(:get, "www.example.com/foo").to_timeout.then.to_return(status: 200, body: "wombat")
+      stub_request(:get, "www.example.com/foo").to_timeout.then.to_return(body: "wombat")
       err  = nil
       body = nil
 
@@ -494,11 +494,7 @@ unless RUBY_PLATFORM =~ /java/
 
         before(:each) do
           stub_request(:get, "http://example.org/").
-          to_return(
-            status: 200,
-            body: "",
-            headers: { 'Set-Cookie' => cookie_string }
-          )
+          to_return(headers: { 'Set-Cookie' => cookie_string })
         end
 
         describe 'success' do
