@@ -102,6 +102,36 @@ describe WebMock::RequestExecutionVerifier do
     end
   end
 
+  describe "failure message for a request body that isn't valid JSON" do
+    before(:each) do
+      WebMock::RequestRegistry.instance.requested_signatures.put(
+        WebMock::RequestSignature.new(:post, "www.example.com",
+          body: "{a: 1}", headers: {"Content-Type" => "application/json"})
+      )
+    end
+
+    it "explains why an expected hash body can't match it" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: {a: 1})
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).to match(
+        /but it executed 0 times\n\nHint: a request was made with a body that isn't valid JSON \(.+\), so it can't match the expected body\. .+\n\nThe following requests were made:/
+      )
+    end
+
+    it "does not explain it for an expected body that matches any body, such as hash_including({})" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.com", body: hash_including({}))
+      @verifier.expected_times_executed = 2
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).not_to include("Hint:")
+    end
+
+    it "does not explain it when the expected request has another URI" do
+      @verifier.request_pattern = WebMock::RequestPattern.new(:post, "www.example.org", body: {a: 1})
+      expect(@verifier.matches?).to be false
+      expect(@verifier.failure_message).not_to include("Hint:")
+    end
+  end
+
   describe "failure message for a JSON body declared as a string" do
     before(:each) do
       allow(WebMock::RequestRegistry.instance).to receive(:to_s).and_call_original

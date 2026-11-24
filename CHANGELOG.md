@@ -16,6 +16,10 @@ This major version requires Ruby 3.0 or later, reads JSON request bodies only wi
 
     A lambda or matcher in a body pattern now gets the value `JSON.parse` returns, such as the Float `1.0e+20` for `1e+20`, so one written for the old reading may not match, or may raise an error, such as `NoMethodError` for `start_with?` on a Float. Such an error fails the request even when a stub declared before it would match, and 3.41.0 warns about the lambda only when it matches the old reading.
 
+* Explain in failure messages when a JSON request body isn't valid JSON
+
+    A body that isn't valid JSON, such as `{a: 1}`, no longer matches a body declared as a hash, an array, `hash_including` or `hash_excluding` (see above). So that such a failure isn't left unexplained, the list of stubs in the failure message now ends with a hint that quotes the parser's error, and `assert_requested` and `have_requested` failures add a similar hint.
+
 * Stream real Net::HTTP responses to the request block as they arrive, when no callbacks are registered (#742)
 
     Previously, with real requests allowed, WebMock read the whole response before calling the block given to `http.request(request) { |response| ... }`. So `response.read_body { |chunk| ... }` got the body as one chunk after all of it had arrived, and `response.decode_content = true` in the block left a gzip body compressed.

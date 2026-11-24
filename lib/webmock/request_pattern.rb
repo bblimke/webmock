@@ -423,6 +423,13 @@ module WebMock
       @pattern = pattern.is_a?(Hash) ? normalize_hash(pattern) : webmock_hash_matcher(pattern)
     end
 
+    # True for a hash, an array, hash_including or hash_excluding, which
+    # match the body as parsed for its content type, such as JSON, unless
+    # they match any body, as {} does.
+    def parses_body?
+      @pattern.is_a?(Hash) || @pattern.is_a?(Array) || @pattern.is_a?(WebMock::Matchers::HashArgumentMatcher)
+    end
+
     def matches?(body, content_type = "", serialized_body = nil)
       # Checked on the raw value, so body patterns used with mixed case
       # multipart content types keep working as in earlier versions.

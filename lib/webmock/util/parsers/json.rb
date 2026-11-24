@@ -11,12 +11,15 @@ module WebMock
         # gem version to parse in a thread's stack.
         MAX_NESTING = 1000
 
+        # Starts the message of every ParseError raised here.
+        ERROR_PREFIX = "Invalid JSON string: "
+
         def self.parse(json)
           # JSON texts may start with a byte order mark, which parsers may ignore.
           json = to_utf8(json).delete_prefix("\uFEFF")
           ::JSON.parse(json, allow_duplicate_key: true, max_nesting: MAX_NESTING)
         rescue ::JSON::JSONError, EncodingError => e
-          raise ParseError, "Invalid JSON string: #{e.message}"
+          raise ParseError, "#{ERROR_PREFIX}#{e.message}"
         end
 
         # The json gem reads bytes that aren't valid in their encoding, so
@@ -27,7 +30,7 @@ module WebMock
           if json.encoding == Encoding::BINARY || json.encoding == Encoding::US_ASCII
             json = json.dup.force_encoding(Encoding::UTF_8)
           end
-          raise ParseError, "Invalid JSON string: it isn't valid #{json.encoding}" unless json.valid_encoding?
+          raise ParseError, "#{ERROR_PREFIX}it isn't valid #{json.encoding}" unless json.valid_encoding?
 
           json.encoding == Encoding::UTF_8 ? json : json.encode(Encoding::UTF_8)
         end

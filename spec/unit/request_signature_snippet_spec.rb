@@ -145,6 +145,31 @@ RSpec.describe WebMock::RequestSignatureSnippet do
       end
     end
 
+    context "when stubs declare a hash body and the request body isn't valid JSON" do
+      let(:method) { :post }
+      let(:request_signature_body) { "{a: 1}" }
+
+      before :each do
+        WebMock.stub_request(:post, "http://example.com").with(body: {a: 1})
+        WebMock.stub_request(:post, "http://example.com").with(body: {a: 2})
+      end
+
+      it "explains why once, after the stubs" do
+        result = subject.request_stubs
+        expect(result).to match(
+          /\n\nHint: the request body isn't valid JSON \(.+\), so a stub above with a body declared as a hash, an array, hash_including or hash_excluding can't match it\. .+such as \{a: 1\}\.\n\z/
+        )
+        expect(result.scan("Hint:").size).to eq(1)
+      end
+
+      it "does not explain it when showing the body diff is turned off" do
+        WebMock.hide_body_diff!
+        expect(subject.request_stubs).not_to include("Hint:")
+      ensure
+        WebMock.show_body_diff!
+      end
+    end
+
     context "with no request stubs" do
       it "returns nil" do
         WebMock.reset!

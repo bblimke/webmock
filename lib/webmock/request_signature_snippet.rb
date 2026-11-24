@@ -24,10 +24,11 @@ module WebMock
     end
 
     def request_stubs
-      return if WebMock::StubRegistry.instance.request_stubs.empty?
+      stubs = WebMock::StubRegistry.instance.request_stubs
+      return if stubs.empty?
 
       text = "registered request stubs:\n".dup
-      WebMock::StubRegistry.instance.request_stubs.each do |stub|
+      stubs.each do |stub|
         text << "\n#{WebMock::Util::MessageString.utf8(WebMock::StubRequestSnippet.new(stub).to_s(false))}"
         if WebMock.show_body_diff?
           add_body_diff(stub, text)
@@ -35,6 +36,7 @@ module WebMock
         end
         add_trailing_slash_hint(stub, text)
       end
+      add_invalid_json_hint(stubs, text) if WebMock.show_body_diff?
       text
     end
 
@@ -60,6 +62,12 @@ module WebMock
       return unless JsonBodyHint.applies?(stub.request_pattern, request_signature)
 
       text << "\n\n#{JsonBodyHint::STUB_HINT}\n"
+    end
+
+    # Once after the stubs, since it is about the request rather than a stub.
+    def add_invalid_json_hint(stubs, text)
+      hint = JsonBodyHint.invalid_json_hint(stubs, request_signature, :stub)
+      text << "\n\n#{hint}\n" if hint
     end
 
     def add_trailing_slash_hint(stub, text)

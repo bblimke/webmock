@@ -61,14 +61,16 @@ module WebMock
     end
 
     # Only when too few requests matched: with too many, declaring the body
-    # as a hash would match even more of them.
+    # as a hash would match even more of them, and a request whose body isn't
+    # valid JSON isn't why there are too many.
     def json_body_hint
       return "" unless WebMock.show_body_diff? && too_few_requests_executed?
 
-      requests = RequestRegistry.instance.requested_signatures.select do |request_signature, _|
-        JsonBodyHint.applies?(request_pattern, request_signature)
+      RequestRegistry.instance.requested_signatures.each do |request_signature, _|
+        hint = JsonBodyHint.expectation_hint(request_pattern, request_signature)
+        return "\n\n#{hint}" if hint
       end
-      requests.empty? ? "" : "\n\n#{JsonBodyHint::EXPECTATION_HINT}"
+      ""
     end
 
     # Only when too few requests matched, as for json_body_hint.
