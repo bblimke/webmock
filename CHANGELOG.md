@@ -1,48 +1,55 @@
 # Changelog
 
-# Unreleased
+# 4.0.0
 
-This major version requires Ruby 3.0 or later, reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for invalid stub declarations, such as a bare `to_return`. The JSON, Net::HTTP and stub declaration changes can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
+4.0 requires Ruby 3.0 or later. Its other changes fix behaviour that was wrong in 3.x, so a spec fails only if it passed because of one of them. A typical test suite needs no changes: a stub such as `stub_request(:get, url).to_return(body: "ok")` works as before, a request that sends `{id: 1}.to_json` still matches `with(body: {id: 1})`, and VCR records and replays as before.
 
-* Require Ruby 3.0 or later
+## Breaking change
 
-    Ruby 2.6 and 2.7 reached end of life in 2022 and 2023. On them, Bundler keeps installing WebMock 3.x. WebMock 4.0 also needs crack 0.4.6 or later, the first version to declare both rexml and bigdecimal, which stopped being default gems in Ruby 3.0 and 3.4. With an older crack, `require "webmock"` could fail with a `LoadError`. On JRuby, WebMock 4.0 needs JRuby 9.4 or later.
+* **Ruby 3.0 or later, and crack 0.4.6 or later.** On Ruby 2.6 and 2.7, Bundler keeps installing WebMock 3.x. On JRuby, 4.0 needs JRuby 9.4 or later. If your Gemfile pins crack below 0.4.6, loosen the pin.
 
-* Stop matching JSON request bodies as WebMock's old JSON parser read them (#432)
+## Fixes that can fail a spec
 
-    3.41.0 parses JSON request bodies with `JSON.parse`, and still matches a hash body pattern against what WebMock's old parser reads, with a deprecation warning. 4.0 drops the old parser.
+* **Stubs that didn't do what they said now fail where they are declared.** A bare `to_return` crashed on the first matching request, `to_raise(:timeout)` returned a 200 instead of raising, and `to_return(status: 404) { ... }` dropped the status. These now raise `ArgumentError`.
 
-    A body that isn't valid JSON, such as `{a: 1}`, `{'a': 1}` or `{"a": 1,}`, no longer matches a hash body pattern. Neither does a pattern written for a value the old parser read differently, such as `{amount: "1e+20"}` for the body `{"amount":1e+20}`. Send valid JSON, for example from `to_json`, and write the pattern for what `JSON.parse` returns.
+* **Request bodies that aren't valid JSON no longer match a hash pattern.** A request that sent `{a: 1}` as JSON matched `with(body: {a: 1})`, although a real server would reject it. JSON from `to_json` isn't affected. Before upgrading, run your specs on 3.42.0 and fix any JSON body warnings it prints.
 
-    A lambda or matcher in a body pattern now gets the value `JSON.parse` returns, such as the Float `1.0e+20` for `1e+20`, so one written for the old reading may not match, or may raise an error, such as `NoMethodError` for `start_with?` on a Float. Such an error fails the request even when a stub declared before it would match, and 3.41.0 warns about the lambda only when it matches the old reading.
+* **Real Net::HTTP requests behave as without WebMock.** This only matters if your specs make real requests through Net::HTTP that aren't stubbed or recorded with VCR. The block given to `request` now gets the response while Net::HTTP reads it, instead of after WebMock has read all of it.
 
-* Explain in failure messages when a JSON request body isn't valid JSON
+Statuses such as `:ok` still print the deprecation warning added in 3.39.0, rather than raising. Use a number, such as `200`.
 
-    A body that isn't valid JSON, such as `{a: 1}`, no longer matches a body declared as a hash, an array, `hash_including` or `hash_excluding` (see above). So that such a failure isn't left unexplained, the list of stubs in the failure message now ends with a hint that quotes the parser's error, and `assert_requested` and `have_requested` failures add a similar hint.
+## If a spec fails
 
-* Stream real Net::HTTP responses to the request block as they arrive, when no callbacks are registered (#742)
+### Stub declarations
 
-    Previously, with real requests allowed, WebMock read the whole response before calling the block given to `http.request(request) { |response| ... }`. So `response.read_body { |chunk| ... }` got the body as one chunk after all of it had arrived, and `response.decode_content = true` in the block left a gzip body compressed.
+* For an empty 200 response, leave off a bare `to_return`, or give it a response, such as `to_return(status: 200)`. `to_return` and `to_return_json` with no arguments, an empty list or empty `**options` raise `ArgumentError`, and so does a `nil` response, which raised `NoMethodError` before.
+* Give `to_raise` an exception class, an exception or a message, such as `to_raise(StandardError)`. Use `to_timeout` for a timeout.
+* Give `to_return` either responses or a block, such as `to_return { |request| {status: 404, body: "x"} }`.
 
-    When no `after_request` callbacks are registered, or only ones that skip Net::HTTP with `except: [:net_http]`, the block now gets the response while Net::HTTP reads it, as without WebMock. Helpers that pass a block of their own to `request`, such as `http.get` and `Net::HTTP.post`, read the response this way too.
+The same checks apply to `and_return`, `and_return_json` and `and_raise`.
 
-    So code that relies on the body having been read before the block now behaves as without WebMock. A request sent on the same connection inside the block, or after breaking out of it before the body is read, can fail, for example with `IOError`, `EOFError` or `Net::HTTPBadResponse`. Calling `read_body` with a block on the response after a request made with a block has returned raises `IOError`, since Net::HTTP has read the body by then. When the connection fails while the block reads the body, Net::HTTP raises, as it does without WebMock. The net-http versions in Ruby 3.3 and earlier instead send a GET or another idempotent request again and call the block again, also when the block raises an error such as `IOError`.
+Thanks to [Daniel Pepper](https://github.com/dpep)
 
-    To fix such code, send the next request after the block given to `request` returns, or on another connection, and read the body before breaking out of the block. Call `read_body` with a block only inside the request block.
+### JSON request bodies (#432)
 
-    With callbacks, as when VCR is hooked into WebMock, the body is still read before the block, so the callbacks get all of it, as before.
+3.41.0 started reading JSON request bodies with `JSON.parse`, and fell back to WebMock's old JSON parser with a deprecation warning. 4.0 drops the old parser, so a body declared as a hash, an array, `hash_including` or `hash_excluding` no longer matches:
 
-* Raise `ArgumentError` from `to_return`, `to_return_json` and `to_raise` given nothing to return or raise
+* a request body that isn't valid JSON, such as `{a: 1}` or `{'a': 1}`. Send `{a: 1}.to_json` instead.
+* a value the old parser read differently. The body `{"amount":1e+20}` matches `{amount: 1e20}`, not `{amount: "1e+20"}`.
 
-    Previously, `to_return` and `to_return_json` with no arguments, an empty list, empty `**options` or a nil response, and `to_raise` with no exceptions or a value that isn't an exception, such as `nil`, `false` or `:timeout`, declared no usable response. A request matching such a stub raised a `NoMethodError` for `evaluate` on nil, a nil response raised a `NoMethodError` when the stub was declared, and `to_raise(nil)` or `to_raise(:timeout)` quietly returned an empty 200 response.
+A lambda or matcher in a body pattern now gets only the value `JSON.parse` returns, such as the Float `1.0e+20`. One that calls a String method on it, such as `start_with?`, raises `NoMethodError`, which fails the request even when another stub would match. 3.42.0 warns about such a lambda only when the old reading matched.
 
-    They now raise `ArgumentError` when the stub is declared, even if no request ever matches it. Drop a bare `to_return`, since a stub without one already returns an empty 200 response, or give it a response such as `to_return(status: 200)`. Give `to_raise` an exception class, an exception or a message, such as `to_raise(StandardError)`.
+When the only reason a stub doesn't match is that the request body isn't valid JSON, the failure message now says so and quotes the parser's error, unless body diffs are hidden with `WebMock.hide_body_diff!`.
 
-    Thanks to [Daniel Pepper](https://github.com/dpep)
+### Real Net::HTTP requests (#742)
 
-* Raise `ArgumentError` from `to_return` given both responses and a block
+Previously, with real requests allowed, WebMock read the whole response before calling the block given to `request`. So `response.read_body { |chunk| ... }` got the body in one piece, and `response.decode_content = true` in the block left a gzip body compressed. Now the block gets the response while Net::HTTP reads it, as without WebMock, unless an `after_request` callback for Net::HTTP, such as VCR's, needs the whole body first. A callback registered with `except: [:net_http]` doesn't.
 
-    Previously, `to_return(status: 404) { |request| {body: "x"} }` used only the block, so the stub returned 200 and the status was quietly dropped. It now raises `ArgumentError` when the stub is declared. Put the whole response in the block, such as `to_return { |request| {status: 404, body: "x"} }`.
+Code that relied on WebMock reading the body first can now fail, as it does without WebMock:
+
+* Another request on the same connection, sent inside the block or after breaking out of it before the body is read, can fail. Send it after the block returns, or on another connection.
+* `read_body` with a block, called after a request made with a block has returned, raises `IOError`. Call it inside the block.
+* When the connection drops while the body is read, the net-http versions in Ruby 3.4 and later raise instead of retrying. That includes `http.get` without a block of your own, since it passes one to `request`. The net-http versions in Ruby 3.3 and earlier retry a GET and run the block again, even when the block raised `IOError`.
 
 # 3.42.0
 
@@ -88,7 +95,7 @@ WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its 
 
 * Name a future major version in the deprecation warning for statuses such as `:ok`
 
-    The deprecation warning for a status such as `:ok`, added in 3.38.0, said that WebMock 4.0 would raise `ArgumentError` for it. 4.0 changes how JSON request bodies are read and doesn't change statuses yet, so the warning now names a future major version.
+    The deprecation warning for a status such as `:ok`, added in 3.39.0, said that WebMock 4.0 would raise `ArgumentError` for it. 4.0 changes how JSON request bodies are read and doesn't change statuses yet, so the warning now names a future major version.
 
 # 3.40.0
 
