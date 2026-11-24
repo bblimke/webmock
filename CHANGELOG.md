@@ -2,7 +2,11 @@
 
 # Unreleased
 
-This major version reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for stubs declared with nothing to return or raise. All three can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
+This major version requires Ruby 3.0 or later, reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for stubs declared with nothing to return or raise. The JSON, Net::HTTP and stub declaration changes can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
+
+* Require Ruby 3.0 or later
+
+    Ruby 2.6 and 2.7 reached end of life in 2022 and 2023. On them, Bundler keeps installing WebMock 3.x. WebMock 4.0 also needs crack 0.4.6 or later, the first version to declare both rexml and bigdecimal, which stopped being default gems in Ruby 3.0 and 3.4. With an older crack, `require "webmock"` could fail with a `LoadError`. On JRuby, WebMock 4.0 needs JRuby 9.4 or later.
 
 * Stop matching JSON request bodies as WebMock's old JSON parser read them (#432)
 

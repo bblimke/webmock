@@ -38,15 +38,13 @@ Supported HTTP libraries
 
 Supported Ruby Interpreters
 ---------------------------
-* MRI 2.6
-* MRI 2.7
 * MRI 3.0
 * MRI 3.1
 * MRI 3.2
 * MRI 3.3
 * MRI 3.4
 * MRI 4.0
-* JRuby
+* JRuby 9.4 or later
 
 ## Installation
 
