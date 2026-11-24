@@ -20,7 +20,10 @@ module WebMock
       if block
         @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(block)])
       else
-        @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| ResponseFactory.response_for(r)})
+        response_hashes = [*response_hashes].flatten
+        require_args!(response_hashes, :to_return, 'response')
+
+        @responses_sequences << ResponsesSequence.new(response_hashes.map {|r| ResponseFactory.response_for(r)})
       end
       self
     end
@@ -29,7 +32,10 @@ module WebMock
     def to_return_json(*response_hashes)
       raise ArgumentError, '#to_return_json does not support passing a block' if block_given?
 
-      json_response_hashes = [*response_hashes].flatten.map do |resp_h|
+      response_hashes = [*response_hashes].flatten
+      require_args!(response_hashes, :to_return_json, 'response')
+
+      json_response_hashes = response_hashes.map do |resp_h|
         headers, body = resp_h.values_at(:headers, :body)
 
         json_body = if body.respond_to?(:call)
@@ -60,7 +66,10 @@ module WebMock
     end
 
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
+      exceptions = [*exceptions].flatten
+      require_args!(exceptions, :to_raise, 'exception')
+
+      @responses_sequences << ResponsesSequence.new(exceptions.map {|e|
         ResponseFactory.response_for(exception: e)
       })
       self
@@ -133,6 +142,11 @@ module WebMock
     end
 
     private
+
+    def require_args!(values, method, noun)
+      raise ArgumentError, "##{method} requires at least one #{noun}" if values.empty?
+      raise ArgumentError, "nil is not a valid #{noun} for ##{method}" if values.include?(nil)
+    end
 
     def json_response_body(body)
       case body
