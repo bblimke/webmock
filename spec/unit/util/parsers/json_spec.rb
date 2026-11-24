@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe WebMock::Util::Parsers::JSON do
   describe ".parse" do
-    it "should parse json without parsing dates" do
+    it "keeps a date string as a String" do
       expect(described_class.parse("{\"a\":\"2011-01-01\"}")).to eq(
         {"a" => "2011-01-01"}
       )
@@ -67,57 +67,6 @@ describe WebMock::Util::Parsers::JSON do
           described_class.parse(json)
         }.to raise_error(WebMock::Util::Parsers::ParseError), "expected #{json.inspect} to raise ParseError"
       end
-    end
-  end
-
-  describe ".parse_legacy" do
-    it "should parse json without parsing dates" do
-      expect(described_class.parse_legacy("\"a\":\"2011-01-01\"")).to eq(
-        {"a" => "2011-01-01"}
-      )
-    end
-
-    it "can parse json with multibyte characters" do
-      expect(described_class.parse_legacy(
-        "{\"name\":\"山田太郎\"\,\"job\":\"会社員\"}"
-      )).to eq({"name" => "山田太郎", "job" => "会社員"})
-    end
-
-    it "reads some bodies that aren't valid JSON" do
-      ["{a: 1}", "{'a': 1}", "{\"a\": 1,}"].each do |json|
-        expect(described_class.parse_legacy(json)).to eq({"a" => 1})
-      end
-    end
-
-    it "rescues ArgumentError's from YAML.load" do
-      allow(YAML).to receive(:load).and_raise(ArgumentError)
-      expect {
-        described_class.parse_legacy("Bad JSON")
-      }.to raise_error WebMock::Util::Parsers::ParseError
-    end
-
-    it "rescues Psych::SyntaxError's from YAML.load" do
-      allow(YAML).to receive(:load).and_raise(Psych::SyntaxError)
-      expect {
-        described_class.parse_legacy("Bad JSON")
-      }.to raise_error WebMock::Util::Parsers::ParseError
-    end
-
-    it "rescues Psych::DisallowedClass from YAML.load" do
-      # Psych 4 and later take the action and the class name, Psych 3 only the class name.
-      arguments = Psych::DisallowedClass.instance_method(:initialize).arity == 1 ? ["Date"] : ["load", "Date"]
-      allow(YAML).to receive(:load).and_raise(Psych::DisallowedClass.new(*arguments))
-      expect {
-        described_class.parse_legacy("{\"a\": 2020-01-01}")
-      }.to raise_error WebMock::Util::Parsers::ParseError
-    end
-  end
-
-  describe ".convert_json_to_yaml" do
-    it "parses multibyte characters" do
-      expect(described_class.convert_json_to_yaml(
-        "{\"name\":\"山田太郎\"\,\"job\":\"会社員\"}"
-      )).to eq "{\"name\": \"山田太郎\", \"job\": \"会社員\"}"
     end
   end
 end

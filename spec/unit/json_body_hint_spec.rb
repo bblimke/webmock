@@ -94,7 +94,7 @@ describe WebMock::JsonBodyHint do
     expect(applies?(pattern('{"a":1.0}'))).to be false
   end
 
-  it "does not raise for a request body that YAML would read as aliases" do
+  it "does not raise for a request body that isn't valid JSON, such as YAML aliases" do
     request_signature.body = '[&a 1, *a]'
     expect(applies?(pattern('[1,1]'))).to be false
   end

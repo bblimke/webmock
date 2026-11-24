@@ -2,6 +2,14 @@
 
 # Unreleased
 
+* Stop matching JSON request bodies as WebMock's old JSON parser read them (#432)
+
+    3.41.0 parses JSON request bodies with `JSON.parse`, and still matches a hash body pattern against what WebMock's old parser reads, with a deprecation warning. 4.0 drops the old parser.
+
+    A body that isn't valid JSON, such as `{a: 1}`, `{'a': 1}` or `{"a": 1,}`, no longer matches a hash body pattern. Neither does a pattern written for a value the old parser read differently, such as `{amount: "1e+20"}` for the body `{"amount":1e+20}`. Send valid JSON, for example from `to_json`, and write the pattern for what `JSON.parse` returns.
+
+    A lambda or matcher in a body pattern now gets the value `JSON.parse` returns, such as the Float `1.0e+20` for `1e+20`, so one written for the old reading may not match, or may raise an error, such as `NoMethodError` for `start_with?` on a Float. Such an error fails the request even when a stub declared before it would match, and 3.41.0 warns about the lambda only when it matches the old reading.
+
 * Raise `ArgumentError` from `to_return`, `to_return_json` and `to_raise` given nothing to return or raise
 
     Previously, `to_return` and `to_return_json` with no arguments, an empty list, empty `**options` or a nil response, and `to_raise` with no exceptions or nil, declared no usable response. A request matching such a stub raised a `NoMethodError` for `evaluate` on nil, a nil response raised a `NoMethodError` when the stub was declared, and `to_raise(nil)` quietly returned an empty 200 response.
