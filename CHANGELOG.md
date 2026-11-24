@@ -30,9 +30,9 @@ This major version requires Ruby 3.0 or later, reads JSON request bodies only wi
 
 * Raise `ArgumentError` from `to_return`, `to_return_json` and `to_raise` given nothing to return or raise
 
-    Previously, `to_return` and `to_return_json` with no arguments, an empty list, empty `**options` or a nil response, and `to_raise` with no exceptions or nil, declared no usable response. A request matching such a stub raised a `NoMethodError` for `evaluate` on nil, a nil response raised a `NoMethodError` when the stub was declared, and `to_raise(nil)` quietly returned an empty 200 response.
+    Previously, `to_return` and `to_return_json` with no arguments, an empty list, empty `**options` or a nil response, and `to_raise` with no exceptions or a value that isn't an exception, such as `nil`, `false` or `:timeout`, declared no usable response. A request matching such a stub raised a `NoMethodError` for `evaluate` on nil, a nil response raised a `NoMethodError` when the stub was declared, and `to_raise(nil)` or `to_raise(:timeout)` quietly returned an empty 200 response.
 
-    They now raise `ArgumentError` when the stub is declared, even if no request ever matches it. Drop a bare `to_return`, since a stub without one already returns an empty 200 response, or give it a response such as `to_return(status: 200)`. Give `to_raise` the exception to raise, such as `to_raise(StandardError)`.
+    They now raise `ArgumentError` when the stub is declared, even if no request ever matches it. Drop a bare `to_return`, since a stub without one already returns an empty 200 response, or give it a response such as `to_return(status: 200)`. Give `to_raise` an exception class, an exception or a message, such as `to_raise(StandardError)`.
 
     Thanks to [Daniel Pepper](https://github.com/dpep)
 

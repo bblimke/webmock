@@ -68,6 +68,11 @@ module WebMock
     def to_raise(*exceptions)
       exceptions = [*exceptions].flatten
       require_args!(exceptions, :to_raise, 'exception')
+      exceptions.each do |exception|
+        next if exception.is_a?(String) || exception.is_a?(Exception) || (exception.is_a?(Class) && exception <= Exception)
+
+        raise ArgumentError, "#{exception.inspect} is not a valid exception for #to_raise"
+      end
 
       @responses_sequences << ResponsesSequence.new(exceptions.map {|e|
         ResponseFactory.response_for(exception: e)
@@ -145,7 +150,7 @@ module WebMock
 
     def require_args!(values, method, noun)
       raise ArgumentError, "##{method} requires at least one #{noun}" if values.empty?
-      raise ArgumentError, "nil is not a valid #{noun} for ##{method}" if values.include?(nil)
+      raise ArgumentError, "nil is not a valid #{noun} for ##{method}" if values.any?(&:nil?)
     end
 
     def json_response_body(body)

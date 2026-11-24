@@ -61,6 +61,15 @@ describe WebMock::RequestStub do
       expect { @request_stub.to_return({body: "abc"}, nil) }.to raise_error(ArgumentError, "nil is not a valid response for #to_return")
     end
 
+    it "should accept a response that compares equal to nil" do
+      response = ->(_request) { {body: "abc"} }
+      def response.==(other)
+        other.nil? || super
+      end
+      @request_stub.to_return(response)
+      expect(@request_stub.response.evaluate(WebMock::RequestSignature.new(:get, "www.example.com")).body).to eq("abc")
+    end
+
     it "should raise from the and_return alias if given no responses" do
       expect { @request_stub.and_return }.to raise_error(ArgumentError, "#to_return requires at least one response")
     end
@@ -222,6 +231,19 @@ describe WebMock::RequestStub do
 
     it "should raise from the and_raise alias if given no exceptions" do
       expect { @request_stub.and_raise }.to raise_error(ArgumentError, "#to_raise requires at least one exception")
+    end
+
+    it "should raise if given something that isn't an exception" do
+      [false, :timeout, 42, Object, -> { StandardError }].each do |value|
+        expect { @request_stub.to_raise(value) }.to raise_error(ArgumentError, "#{value.inspect} is not a valid exception for #to_raise")
+      end
+    end
+
+    it "should accept exception classes, exceptions and messages" do
+      @request_stub.to_raise(ArgumentError, IOError.new("an exception"), "a message")
+      expect { @request_stub.response.raise_error_if_any }.to raise_error(ArgumentError, "Exception from WebMock")
+      expect { @request_stub.response.raise_error_if_any }.to raise_error(IOError, "an exception")
+      expect { @request_stub.response.raise_error_if_any }.to raise_error(StandardError, "a message")
     end
 
     it "should assign response with exception to be thrown" do
