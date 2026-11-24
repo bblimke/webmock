@@ -1165,6 +1165,115 @@ describe WebMock::RequestPattern do
             let(:content_type) { 'Application/JSON' }
             it_behaves_like "a json body"
           end
+
+          def json_request(body)
+            WebMock::RequestSignature.new(:post, "www.example.com", headers: {content_type: 'application/json'}, body: body)
+          end
+
+          it "matches a body with an escaped backslash in a string (#432)" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {data: "{\"url\":\"/p?w=1\\u0026h=2\"}"})
+            expect(pattern).to match(json_request('{"data":"{\"url\":\"/p?w=1\\\\u0026h=2\"}"}'))
+          end
+
+          it "matches a number with an exponent as the number it is, without a warning" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {amount: 1e20})
+            expect { expect(pattern).to match(json_request('{"amount":1e+20}')) }.not_to output.to_stderr
+          end
+
+          it "does not raise for a body with an unquoted date" do
+            expect(WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: "2020-01-01"})).
+              not_to match(json_request('{"a": 2020-01-01}'))
+          end
+
+          it "matches a body with duplicate keys by the last value, without a warning" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {duplicate: 2})
+            expect { expect(pattern).to match(json_request('{"duplicate":1,"duplicate":2}')) }.not_to output.to_stderr
+          end
+
+          it "matches a body that isn't valid JSON, once with a deprecation warning, as it did before" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {invalid_json_warning: 1})
+            expect { expect(pattern).to match(json_request("{invalid_json_warning: 1}")) }.to output(
+              /WebMock deprecation warning: the body pattern \{"invalid_json_warning" ?=> ?1\} matched the request body "\{invalid_json_warning: 1\}" only as WebMock's old JSON parser reads it\. WebMock 4\.0 drops that parser, so it won't match\. Send valid JSON, for example from to_json, and write the pattern for what JSON\.parse returns\.$/
+            ).to_stderr
+            expect { expect(pattern).to match(json_request("{'invalid_json_warning': 1}")) }.not_to output.to_stderr
+          end
+
+          it "matches a value as the old JSON parser read it, with a deprecation warning, as it did before" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {legacy_exponent: "1e+20"})
+            expect { expect(pattern).to match(json_request('{"legacy_exponent":1e+20}')) }.
+              to output(/the body pattern \{"legacy_exponent" ?=> ?"1e\+20"\} matched the request body .* won't match\. Write the pattern for what JSON\.parse returns: \{"legacy_exponent" ?=> ?1\.0e\+20\}\.$/).to_stderr
+          end
+
+          it "matches a lambda written for what the old JSON parser read, with a deprecation warning, as it did before" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {lambda_warning: ->(value) { value.start_with?("1e") }})
+            expect { expect(pattern).to match(json_request('{"lambda_warning":1e+20}')) }.
+              to output(/WebMock deprecation warning: the body pattern/).to_stderr
+          end
+
+          it "matches when the pattern raises an exception that isn't a StandardError for the json gem's reading, as before" do
+            failure = Class.new(Exception)
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com',
+              body: {exception_warning: ->(value) { raise failure unless value == "1e+20"; true }})
+            expect { expect(pattern).to match(json_request('{"exception_warning":1e+20}')) }.
+              to output(/WebMock deprecation warning: the body pattern/).to_stderr
+          end
+
+          it "does not match when the pattern raises for the json gem's reading and doesn't match the old one, as before" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: ->(value) { value.start_with?("9") }})
+            expect(pattern).not_to match(json_request('{"a":1e+20}'))
+          end
+
+          it "raises an error the pattern raises for the old reading, as before" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: ->(value) { value > 5 }})
+            expect { pattern.matches?(json_request('{"a":1e-20}')) }.to raise_error(ArgumentError)
+          end
+
+          it "raises an error from the pattern when the old JSON parser reads the body the same" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: ->(_value) { raise ArgumentError, "from the pattern" }})
+            expect { pattern.matches?(json_request('{"a":1}')) }.to raise_error(ArgumentError, "from the pattern")
+          end
+
+          it "calls a matcher in the pattern once when the old JSON parser reads the body the same" do
+            calls = 0
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {a: ->(_value) { calls += 1; false }})
+            expect(pattern).not_to match(json_request('{"a":1}'))
+            expect(calls).to eq(1)
+          end
+
+          it "warns once for equal patterns with a lambda built for each of them" do
+            build = -> { WebMock::RequestPattern.new(:post, 'www.example.com', body: {equal_lambdas: ->(value) { value == "1e+5" }}) }
+            expect { expect(build.call).to match(json_request('{"equal_lambdas":1e+5}')) }.to output(/deprecation warning/).to_stderr
+            expect { expect(build.call).to match(json_request('{"equal_lambdas":1e+5}')) }.not_to output.to_stderr
+          end
+
+          it "warns for patterns that differ only in a value that looks like an address" do
+            first = WebMock::RequestPattern.new(:post, 'www.example.com', body: {hex_warning: "0x1"})
+            second = WebMock::RequestPattern.new(:post, 'www.example.com', body: {hex_warning: "0x2"})
+            expect { expect(first).to match(json_request("{hex_warning: '0x1'}")) }.to output(/deprecation warning/).to_stderr
+            expect { expect(second).to match(json_request("{hex_warning: '0x2'}")) }.to output(/deprecation warning/).to_stderr
+          end
+
+          it "warns for hash_including and array patterns too" do
+            including = WebMock::RequestPattern.new(:post, 'www.example.com', body: hash_including(including_warning: 1))
+            expect { expect(including).to match(json_request("{including_warning: 1, b: 2}")) }.
+              to output(/the body pattern hash_including\(\{"including_warning" ?=> ?1\}\) matched/).to_stderr
+            array = WebMock::RequestPattern.new(:post, 'www.example.com', body: ["array_warning", 1])
+            expect { expect(array).to match(json_request("['array_warning', 1,]")) }.
+              to output(/the body pattern \["array_warning", 1\] matched/).to_stderr
+          end
+
+          it "does not warn when neither parser's result matches" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: {no_match_warning: 1})
+            expect { expect(pattern).not_to match(json_request("{no_match_warning: 2}")) }.not_to output.to_stderr
+            expect { expect(pattern).not_to match(json_request('{"no_match_warning":2}')) }.not_to output.to_stderr
+          end
+
+          it "shortens a long body in the warning" do
+            pattern = WebMock::RequestPattern.new(:post, 'www.example.com', body: hash_including(long_body_warning: 1))
+            body = "{long_body_warning: 1, padding: '#{"x" * 200}'}"
+            expect { expect(pattern).to match(json_request(body)) }.
+              to output(/matched the request body "#{Regexp.escape(body[0, 100])}\.\.\." only as/).to_stderr
+          end
         end
 
         describe "for request with xml body and content type is set to xml" do

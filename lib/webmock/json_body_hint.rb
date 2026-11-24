@@ -54,11 +54,14 @@ module WebMock
       return false unless expected.is_a?(String) && actual.is_a?(String) && expected != actual
       return false unless request_signature.json_headers?
 
-      expected_json = parse_json(expected)
+      # The advice is to declare the body as JSON.parse(json_string), so
+      # the stub's string must parse with JSON.parse itself. The request
+      # body is read as WebMock reads it for matching.
+      expected_json = parse_json { ::JSON.parse(expected) }
       return false unless expected_json.is_a?(Hash) || expected_json.is_a?(Array)
 
       # eql? compares nested values strictly, so 1 and 1.0 are different.
-      expected_json.eql?(parse_json(actual))
+      expected_json.eql?(parse_json { WebMock::Util::Parsers::JSON.parse(actual) })
     end
 
     def self.matches_except_body?(request_pattern, request_signature)
@@ -67,9 +70,9 @@ module WebMock
         (request_pattern.headers_pattern.nil? || request_pattern.headers_pattern.matches?(request_signature.headers))
     end
 
-    def self.parse_json(string)
-      ::JSON.parse(string)
-    rescue ::JSON::JSONError, EncodingError
+    def self.parse_json
+      yield
+    rescue ::JSON::JSONError, EncodingError, WebMock::Util::Parsers::ParseError
       nil
     end
     private_class_method :parts_of, :body_differs_only_in_formatting?, :matches_except_body?, :parse_json

@@ -25,6 +25,18 @@ RSpec.describe WebMock::RequestBodyDiff do
   end
 
   describe "#body_diff" do
+    context "request signature body that WebMock reads as JSON for matching" do
+      it "diffs a body with duplicate keys, without a warning" do
+        request_signature.body = '{"key":"first","key":"different value"}'
+        expect { expect(subject.body_diff).to eq([["~", "key", "different value", "value"]]) }.not_to output.to_stderr
+      end
+
+      it "diffs a body that starts with a byte order mark" do
+        request_signature.body = "\uFEFF" + request_signature_body
+        expect(subject.body_diff).to eq([["~", "key", "different value", "value"]])
+      end
+    end
+
     context "request signature is unparseable json" do
       let(:request_signature_body) { "youcan'tparsethis!" }
 

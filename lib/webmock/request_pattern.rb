@@ -437,11 +437,11 @@ module WebMock
 
       if (@pattern).is_a?(Hash)
         return true if @pattern.empty?
-        matching_body_hashes?(body_as_hash(body, content_type), @pattern, content_type)
+        matching_parsed_body?(body, content_type) { |parsed| matching_body_hashes?(parsed, @pattern, content_type) }
       elsif (@pattern).is_a?(Array)
-        matching_body_array?(body_as_hash(body, content_type), @pattern, content_type)
+        matching_parsed_body?(body, content_type) { |parsed| matching_body_array?(parsed, @pattern, content_type) }
       elsif (@pattern).is_a?(WebMock::Matchers::HashArgumentMatcher)
-        @pattern == body_as_hash(body, content_type)
+        matching_parsed_body?(body, content_type) { |parsed| @pattern == parsed }
       else
         empty_string?(@pattern) && empty_string?(body) ||
           @pattern == body ||
@@ -454,6 +454,68 @@ module WebMock
     end
 
     private
+
+    WARNED_LEGACY_JSON = {}
+    private_constant :WARNED_LEGACY_JSON
+
+    # WebMock 3.40.0 and earlier read JSON bodies with a YAML based parser,
+    # which reads some bodies that aren't valid JSON and some values
+    # differently from the json gem. When the pattern doesn't match the json
+    # gem's reading and the old parser reads the body differently, the old
+    # reading decides, as in 3.40.0, with a warning once for each pattern
+    # when it matches.
+    def matching_parsed_body?(body, content_type)
+      parsed = body_as_hash(body, content_type)
+      begin
+        return true if yield(parsed)
+      rescue SignalException, SystemExit
+        raise
+      rescue Exception => error
+        # A value in the pattern, such as a lambda or an RSpec expectation,
+        # may expect what the old parser reads, so the old reading decides.
+      end
+
+      json = body && WebMock::Util::ContentType.body_format(content_type) == :json
+      legacy = legacy_json(body) if json
+      if !json || legacy.eql?(parsed)
+        raise error if error
+        return false
+      end
+
+      # As in 3.40.0, including an error the pattern raises for it.
+      matched = yield(legacy)
+      warn_legacy_json(body, parsed) if matched
+      matched
+    end
+
+    def legacy_json(body)
+      WebMock::Util::Parsers::JSON.parse_legacy(body)
+    rescue WebMock::Util::Parsers::ParseError
+      nil
+    end
+
+    def warn_legacy_json(body, parsed)
+      pattern = to_s
+      # Without object addresses, so equal patterns, such as ones with a
+      # lambda built in each example, warn once.
+      key = pattern.gsub(/#<([\w:]+?):0x\h+/, '#<\\1').hash
+      return if WARNED_LEGACY_JSON[key]
+      WARNED_LEGACY_JSON[key] = true
+      advice =
+        if parsed.nil?
+          "Send valid JSON, for example from to_json, and write the pattern for what JSON.parse returns."
+        else
+          "Write the pattern for what JSON.parse returns: #{shorten(parsed.inspect)}."
+        end
+      WebMock::Deprecation.warning(
+        "the body pattern #{shorten(pattern)} matched the request body #{shorten(body).inspect} " \
+        "only as WebMock's old JSON parser reads it. WebMock 4.0 drops that parser, so it won't match. #{advice}"
+      )
+    end
+
+    def shorten(text)
+      text.length > 100 ? "#{text[0, 100]}..." : text
+    end
 
     def body_as_hash(body, content_type)
       return if body.nil?

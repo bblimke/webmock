@@ -37,6 +37,15 @@ describe WebMock::JsonBodyHint do
     end
   end
 
+  it "applies when the request body starts with a byte order mark" do
+    request_signature.body = "\uFEFF" + request_body
+    expect(applies?(pattern('{"a":1,"b":2}'))).to be true
+  end
+
+  it "does not apply when the declared body doesn't parse with JSON.parse, which the advice uses" do
+    expect(applies?(pattern("\uFEFF{\"a\":1,\"b\":2}"))).to be false
+  end
+
   it "does not apply when the JSON is different" do
     expect(applies?(pattern('{"a":1,"b":3}'))).to be false
   end

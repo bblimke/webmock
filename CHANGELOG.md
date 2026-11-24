@@ -1,5 +1,33 @@
 # Changelog
 
+# Unreleased
+
+WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its old parser, which converted JSON to YAML and failed on or misread some valid JSON. Every body pattern that matched on 3.40.0 still matches. If one matches only as the old parser reads the body, WebMock prints a deprecation warning, because 4.0 drops the old parser and the pattern won't match there.
+
+* Match JSON request bodies with an escaped backslash in a string (#432)
+
+    Previously, a hash body pattern didn't match a JSON body with an escaped backslash inside a string, such as JSON inside JSON, because the old parser failed on it. For example, `with(body: {data: '{"url":"/p?a=1\u0026b=2"}'})` didn't match the body `{"data":"{\"url\":\"/p?a=1\\u0026b=2\"}"}`. It now matches.
+
+    Strings that the old parser changed now match too, for example `"a\u000ab"`, which it read as `"a b"`.
+
+* Match numbers with an exponent in JSON request bodies
+
+    Previously, a number such as `1e2` or `1e+20` in a JSON body was read as a String, so `with(body: {amount: 1e20})` didn't match the body `{"amount":1e+20}`, which `to_json` generates for that hash with recent json versions, such as the one in Ruby 4.0. It now matches.
+
+* Deprecate body patterns that match a JSON request body only as the old parser reads it
+
+    The old parser read some bodies that aren't valid JSON, and some values differently from `JSON.parse`. For example, `with(body: {a: 1})` matches the body `{a: 1}`, and `with(body: {amount: "1e+20"})` matches the body `{"amount":1e+20}`, because the old parser read that number as a String. Such a pattern still matches, and WebMock prints a warning once for each pattern:
+
+    ```
+    WebMock deprecation warning: the body pattern {"a" => 1} matched the request body "{a: 1}" only as WebMock's old JSON parser reads it. WebMock 4.0 drops that parser, so it won't match. Send valid JSON, for example from to_json, and write the pattern for what JSON.parse returns.
+    ```
+
+    To fix it, send valid JSON, for example `{a: 1}.to_json`, and write the pattern for what `JSON.parse` returns, such as `{amount: 1e20}`.
+
+* Don't raise Psych errors for JSON request bodies such as one with an unquoted date
+
+    Previously, with Psych 4 or later (the default since Ruby 3.1), a JSON body such as `{"a": 2020-01-01}`, which isn't valid JSON, raised `Psych::DisallowedClass` when a stub had a hash body pattern, instead of WebMock's error for an unregistered request. It now doesn't match the pattern.
+
 # 3.40.0
 
 * Add support for `Curl::Multi` (#535)
