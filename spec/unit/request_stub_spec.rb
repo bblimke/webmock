@@ -175,6 +175,10 @@ describe WebMock::RequestStub do
 
   describe "to_raise" do
 
+    it "should raise if given no exceptions" do
+      expect { @request_stub.to_raise }.to raise_error(ArgumentError, "#to_raise needs at least one exception")
+    end
+
     it "should assign response with exception to be thrown" do
       @request_stub.to_raise(ArgumentError)
       expect {

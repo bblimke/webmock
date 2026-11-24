@@ -60,7 +60,10 @@ module WebMock
     end
 
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
+      exceptions = [*exceptions].flatten
+      raise ArgumentError, '#to_raise needs at least one exception' if exceptions.empty?
+
+      @responses_sequences << ResponsesSequence.new(exceptions.map {|e|
         ResponseFactory.response_for(exception: e)
       })
       self

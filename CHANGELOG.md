@@ -1,5 +1,11 @@
 # Changelog
 
+# Unreleased
+
+* Raise `ArgumentError` from `to_raise` given no exceptions
+
+    Previously, `to_raise` with no arguments declared no response at all, and a request matching the stub raised `NoMethodError: undefined method 'evaluate' for nil`. It now raises `ArgumentError` when the stub is declared.
+
 # 3.40.0
 
 * Add support for `Curl::Multi` (#535)
