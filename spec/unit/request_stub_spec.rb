@@ -48,6 +48,14 @@ describe WebMock::RequestStub do
       expect([@request_stub.response.body, @request_stub.response.body]).to eq(["abc", "def"])
     end
 
+    it "should raise if given no responses" do
+      expect { @request_stub.to_return }.to raise_error(ArgumentError, "#to_return needs at least one response")
+    end
+
+    it "should raise if given an empty list" do
+      expect { @request_stub.to_return([]) }.to raise_error(ArgumentError, "#to_return needs at least one response")
+    end
+
   end
 
   describe "to_return_json" do
@@ -56,6 +64,10 @@ describe WebMock::RequestStub do
       expect {
         @request_stub.to_return_json(body: "abc", status: 500) { puts "don't call me" }
       }.to raise_error(ArgumentError, '#to_return_json does not support passing a block')
+    end
+
+    it "should raise if given no responses" do
+      expect { @request_stub.to_return_json }.to raise_error(ArgumentError, "#to_return_json needs at least one response")
     end
 
     it "should assign responses normally" do
@@ -174,6 +186,10 @@ describe WebMock::RequestStub do
   end
 
   describe "to_raise" do
+
+    it "should raise if given no exceptions" do
+      expect { @request_stub.to_raise }.to raise_error(ArgumentError, "#to_raise needs at least one exception")
+    end
 
     it "should assign response with exception to be thrown" do
       @request_stub.to_raise(ArgumentError)

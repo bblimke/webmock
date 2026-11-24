@@ -20,7 +20,10 @@ module WebMock
       if block
         @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(block)])
       else
-        @responses_sequences << ResponsesSequence.new([*response_hashes].flatten.map {|r| ResponseFactory.response_for(r)})
+        response_hashes = [*response_hashes].flatten
+        raise ArgumentError, '#to_return needs at least one response' if response_hashes.empty?
+
+        @responses_sequences << ResponsesSequence.new(response_hashes.map {|r| ResponseFactory.response_for(r)})
       end
       self
     end
@@ -29,7 +32,10 @@ module WebMock
     def to_return_json(*response_hashes)
       raise ArgumentError, '#to_return_json does not support passing a block' if block_given?
 
-      json_response_hashes = [*response_hashes].flatten.map do |resp_h|
+      response_hashes = [*response_hashes].flatten
+      raise ArgumentError, '#to_return_json needs at least one response' if response_hashes.empty?
+
+      json_response_hashes = response_hashes.map do |resp_h|
         headers, body = resp_h.values_at(:headers, :body)
 
         json_body = if body.respond_to?(:call)
@@ -60,7 +66,10 @@ module WebMock
     end
 
     def to_raise(*exceptions)
-      @responses_sequences << ResponsesSequence.new([*exceptions].flatten.map {|e|
+      exceptions = [*exceptions].flatten
+      raise ArgumentError, '#to_raise needs at least one exception' if exceptions.empty?
+
+      @responses_sequences << ResponsesSequence.new(exceptions.map {|e|
         ResponseFactory.response_for(exception: e)
       })
       self

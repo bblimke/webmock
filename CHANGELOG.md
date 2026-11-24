@@ -1,5 +1,11 @@
 # Changelog
 
+# Unreleased
+
+* Raise `ArgumentError` from `to_return`, `to_return_json` and `to_raise` given nothing to return or raise
+
+    Previously, `to_return` or `to_return_json` with no arguments or an empty list, and `to_raise` with no exceptions, declared no response at all, and a request matching the stub raised `NoMethodError: undefined method 'evaluate' for nil`. They now raise `ArgumentError` when the stub is declared.
+
 # 3.41.0
 
 WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its old parser, which converted JSON to YAML and failed on or misread some valid JSON. Every body pattern that matched on 3.40.0 still matches. If one matches only as the old parser reads the body, WebMock prints a deprecation warning, because 4.0 drops the old parser and the pattern won't match there.
