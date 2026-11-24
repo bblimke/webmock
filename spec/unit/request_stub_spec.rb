@@ -48,6 +48,17 @@ describe WebMock::RequestStub do
       expect([@request_stub.response.body, @request_stub.response.body]).to eq(["abc", "def"])
     end
 
+    it "should assign a response built by a block" do
+      @request_stub.to_return { |_request| {body: "abc", status: 404} }
+      response = @request_stub.response.evaluate(nil)
+      expect([response.body, response.status]).to eq(["abc", [404, ""]])
+    end
+
+    it "should raise if given both responses and a block" do
+      expect { @request_stub.to_return(status: 404) { {body: "abc"} } }.
+        to raise_error(ArgumentError, "#to_return does not accept both responses and a block")
+    end
+
     it "should raise if given no responses" do
       expect { @request_stub.to_return }.to raise_error(ArgumentError, "#to_return requires at least one response")
     end

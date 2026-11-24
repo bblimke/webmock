@@ -2,7 +2,7 @@
 
 # Unreleased
 
-This major version requires Ruby 3.0 or later, reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for stubs declared with nothing to return or raise. The JSON, Net::HTTP and stub declaration changes can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
+This major version requires Ruby 3.0 or later, reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for invalid stub declarations, such as a bare `to_return`. The JSON, Net::HTTP and stub declaration changes can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
 
 * Require Ruby 3.0 or later
 
@@ -35,6 +35,10 @@ This major version requires Ruby 3.0 or later, reads JSON request bodies only wi
     They now raise `ArgumentError` when the stub is declared, even if no request ever matches it. Drop a bare `to_return`, since a stub without one already returns an empty 200 response, or give it a response such as `to_return(status: 200)`. Give `to_raise` an exception class, an exception or a message, such as `to_raise(StandardError)`.
 
     Thanks to [Daniel Pepper](https://github.com/dpep)
+
+* Raise `ArgumentError` from `to_return` given both responses and a block
+
+    Previously, `to_return(status: 404) { |request| {body: "x"} }` used only the block, so the stub returned 200 and the status was quietly dropped. It now raises `ArgumentError` when the stub is declared. Put the whole response in the block, such as `to_return { |request| {status: 404, body: "x"} }`.
 
 # 3.42.0
 

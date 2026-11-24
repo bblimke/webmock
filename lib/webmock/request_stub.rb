@@ -18,6 +18,8 @@ module WebMock
 
     def to_return(*response_hashes, &block)
       if block
+        raise ArgumentError, '#to_return does not accept both responses and a block' unless response_hashes.empty?
+
         @responses_sequences << ResponsesSequence.new([ResponseFactory.response_for(block)])
       else
         response_hashes = [*response_hashes].flatten
