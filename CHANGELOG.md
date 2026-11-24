@@ -2,6 +2,8 @@
 
 # Unreleased
 
+This major version reads JSON request bodies only with `JSON.parse`, streams real Net::HTTP responses to the request block, and raises `ArgumentError` for stubs declared with nothing to return or raise. All three can make specs that pass on 3.x fail. Upgrade to 3.41.0 first: it warns about JSON body patterns that 4.0 won't match.
+
 * Stop matching JSON request bodies as WebMock's old JSON parser read them (#432)
 
     3.41.0 parses JSON request bodies with `JSON.parse`, and still matches a hash body pattern against what WebMock's old parser reads, with a deprecation warning. 4.0 drops the old parser.
@@ -9,6 +11,18 @@
     A body that isn't valid JSON, such as `{a: 1}`, `{'a': 1}` or `{"a": 1,}`, no longer matches a hash body pattern. Neither does a pattern written for a value the old parser read differently, such as `{amount: "1e+20"}` for the body `{"amount":1e+20}`. Send valid JSON, for example from `to_json`, and write the pattern for what `JSON.parse` returns.
 
     A lambda or matcher in a body pattern now gets the value `JSON.parse` returns, such as the Float `1.0e+20` for `1e+20`, so one written for the old reading may not match, or may raise an error, such as `NoMethodError` for `start_with?` on a Float. Such an error fails the request even when a stub declared before it would match, and 3.41.0 warns about the lambda only when it matches the old reading.
+
+* Stream real Net::HTTP responses to the request block as they arrive, when no callbacks are registered (#742)
+
+    Previously, with real requests allowed, WebMock read the whole response before calling the block given to `http.request(request) { |response| ... }`. So `response.read_body { |chunk| ... }` got the body as one chunk after all of it had arrived, and `response.decode_content = true` in the block left a gzip body compressed.
+
+    When no `after_request` callbacks are registered, or only ones that skip Net::HTTP with `except: [:net_http]`, the block now gets the response while Net::HTTP reads it, as without WebMock. Helpers that pass a block of their own to `request`, such as `http.get` and `Net::HTTP.post`, read the response this way too.
+
+    So code that relies on the body having been read before the block now behaves as without WebMock. A request sent on the same connection inside the block, or after breaking out of it before the body is read, can fail, for example with `IOError`, `EOFError` or `Net::HTTPBadResponse`. Calling `read_body` with a block on the response after a request made with a block has returned raises `IOError`, since Net::HTTP has read the body by then. When the connection fails while the block reads the body, Net::HTTP raises, as it does without WebMock. The net-http versions in Ruby 3.3 and earlier instead send a GET or another idempotent request again and call the block again, also when the block raises an error such as `IOError`.
+
+    To fix such code, send the next request after the block given to `request` returns, or on another connection, and read the body before breaking out of the block. Call `read_body` with a block only inside the request block.
+
+    With callbacks, as when VCR is hooked into WebMock, the body is still read before the block, so the callbacks get all of it, as before.
 
 * Raise `ArgumentError` from `to_return`, `to_return_json` and `to_raise` given nothing to return or raise
 

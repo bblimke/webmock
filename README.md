@@ -1160,6 +1160,10 @@ WebMock.after_request(except: [:patron],
 end
 ```
 
+#### Callbacks and Net::HTTP streaming
+
+A callback that runs for real Net::HTTP requests makes WebMock read the whole response body before it calls the block given to `request`, so the callback gets all of it. Without such a callback, the block gets the response while Net::HTTP reads it, as without WebMock, so it can read the body in chunks. WebMock decides this when the request is sent, so a callback registered while a request with a block is in flight doesn't get that response. Callbacks stay registered across tests, so one added in an earlier test turns streaming off in later tests too. To keep a callback away from Net::HTTP, register it with `except: [:net_http]`.
+
 #### Removing callbacks
 
 Callbacks stay registered after `WebMock.reset!`, so a callback added in one test keeps running in later ones. To remove all callbacks, call:

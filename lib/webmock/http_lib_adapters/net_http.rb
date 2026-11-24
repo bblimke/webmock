@@ -111,11 +111,21 @@ module WebMock
             build_net_http_response(webmock_response, request.uri, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
             check_right_http_connection
+            callback_options = {lib: :net_http, real_request: true}
+            # Without callbacks for this request, nothing needs the body
+            # before the block, so the block gets the response while
+            # Net::HTTP reads it, as without WebMock, and can stream the
+            # body or set decode_content. With callbacks, such as VCR's,
+            # the body is read first, so they get all of it.
+            stream = block && !WebMock::CallbackRegistry.any_callbacks_for?(callback_options)
             after_request = lambda do |response|
-              if WebMock::CallbackRegistry.any_callbacks?
+              # Checked again, so that callbacks registered while the
+              # request was made get the response too, as before. A request
+              # that streams to its block doesn't come here, so callbacks
+              # registered after it was sent don't get its response.
+              if WebMock::CallbackRegistry.any_callbacks_for?(callback_options)
                 webmock_response = build_webmock_response(response)
-                WebMock::CallbackRegistry.invoke_callbacks(
-                  {lib: :net_http, real_request: true}, request_signature, webmock_response)
+                WebMock::CallbackRegistry.invoke_callbacks(callback_options, request_signature, webmock_response)
               end
               response.extend Net::WebMockHTTPResponse
               # Net::HTTP has read the body and applied its encoding already
@@ -123,16 +133,17 @@ module WebMock
               block.call response if block
               response
             end
-            super_with_after_request = lambda {
-              response = super(request, nil, &nil)
-              after_request.call(response)
+            real_request = lambda {
+              next super(request, nil, &block) if stream
+
+              after_request.call(super(request, nil, &nil))
             }
             if started?
               ensure_actual_connection
-              super_with_after_request.call
+              real_request.call
             else
               start_with_connect {
-                super_with_after_request.call
+                real_request.call
               }
             end
           else

@@ -207,9 +207,69 @@ describe "Net:HTTP" do
       Net::HTTP.start("127.0.0.1", port) { |http| http.request(Net::HTTP::Get.new("/", headers), &block) }
     end
 
+    # Callbacks turn streaming off, so none are left from other specs.
+    before { WebMock.reset_callbacks }
     after { WebMock.reset_callbacks }
 
-    it "is read whole before the block, so callbacks get all of it" do
+    it "is streamed in the chunks Net::HTTP reads" do
+      seen = []
+      capture_requests(response: chunked_response) do |port|
+        get(port) { |response| response.read_body { |chunk| seen << chunk } }
+      end
+      expect(seen).to eq(chunks)
+    end
+
+    it "is decoded when the block sets decode_content" do
+      require "zlib"
+      compressed = Zlib.gzip("compressed body")
+      raw = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nContent-Length: #{compressed.bytesize}\r\n" \
+        "Connection: close\r\n\r\n".b + compressed
+      body = nil
+      capture_requests(response: raw) do |port|
+        get(port, "Accept-Encoding" => "gzip") do |response|
+          response.decode_content = true
+          body = response.body
+        end
+      end
+      expect(body).to eq("compressed body")
+    end
+
+    it "reaches the block before the rest of the body has arrived" do
+      first_chunk_seen = Queue.new
+      respond = lambda do |client|
+        client.write("HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n6\r\nfirst,\r\n")
+        # Without streaming, the client would wait for the rest of the body.
+        Timeout.timeout(5) { first_chunk_seen.pop }
+        client.write("5\r\nthird\r\n0\r\n\r\n")
+      end
+      seen = []
+      capture_requests(response: respond) do |port|
+        # Without retries, a request that doesn't stream fails as soon as the
+        # server gives up, rather than after the read timeout.
+        Net::HTTP.start("127.0.0.1", port, max_retries: 0) do |http|
+          http.request(Net::HTTP::Get.new("/")) do |response|
+            response.read_body do |chunk|
+              seen << chunk
+              first_chunk_seen << true if seen.size == 1
+            end
+          end
+        end
+      end
+      expect(seen.join).to eq("first,third")
+    end
+
+    it "is streamed when the only callbacks skip Net::HTTP" do
+      seen = []
+      called = false
+      WebMock.after_request(except: [:net_http]) { |_request, _response| called = true }
+      capture_requests(response: chunked_response) do |port|
+        get(port) { |response| response.read_body { |chunk| seen << chunk } }
+      end
+      expect(seen).to eq(chunks)
+      expect(called).to be false
+    end
+
+    it "is read whole before the block when callbacks are registered, as before" do
       recorded = []
       seen = []
       WebMock.after_request { |_request, response| recorded << response.body }
@@ -222,6 +282,16 @@ describe "Net:HTTP" do
 
       expect(seen).to eq([chunks.join])
       expect(recorded).to eq([chunks.join] * 4)
+    end
+
+    it "is given to callbacks registered while the request is made, as before" do
+      recorded = []
+      respond = lambda do |client|
+        WebMock.after_request { |_request, webmock_response| recorded << webmock_response.body }
+        client.write(chunked_response)
+      end
+      capture_requests(response: respond) { |port| get(port) }
+      expect(recorded).to eq([chunks.join])
     end
   end
 

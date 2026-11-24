@@ -13,7 +13,8 @@ module LocalHTTPServer
 
   # Like capture_request_heads, but returns each request as its head and
   # its body, read by Content-Length or from chunks, and can answer with the
-  # given raw response instead.
+  # given raw response instead, or with a lambda that is given the client
+  # socket and writes the response itself.
   def capture_requests(count = 1, response: EMPTY_RESPONSE)
     server = TCPServer.new("127.0.0.1", 0)
     thread = Thread.new do
@@ -33,7 +34,7 @@ module LocalHTTPServer
             end
             client.gets
           end
-          client.write(response)
+          response.respond_to?(:call) ? response.call(client) : client.write(response)
           [head, body]
         ensure
           client.close
