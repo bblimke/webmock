@@ -121,7 +121,7 @@ module HTTP
     # HTTP.rb 6's caching feature the body is a String, which shows nothing.
     # A subclass may do anything with what it reads, so it shows nothing too.
     def reads_from_inflater?(body)
-      return false unless exactly?(::HTTP::Response::Body, body)
+      return false unless defined?(::HTTP::Response::Inflater) && exactly?(::HTTP::Response::Body, body)
 
       stream = body.instance_variable_get(:@stream)
       if defined?(::HTTP::Features::Logging::BodyLogger) && exactly?(::HTTP::Features::Logging::BodyLogger, stream)

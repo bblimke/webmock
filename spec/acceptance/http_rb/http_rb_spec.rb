@@ -465,6 +465,17 @@ describe "HTTP.rb" do
       expect(recorded.headers).to include("Content-Encoding" => "br", "Content-Length" => "12")
     end
 
+    # A later HTTP.rb may inflate with a class of another name. HTTP.rb 4 and
+    # 5 need this one for every body they build.
+    it "keeps the headers of a real response when HTTP.rb has no inflater class of this name",
+      if: HTTP::VERSION >= "6.0.0" do
+      hide_const("HTTP::Response::Inflater")
+      _, recorded = real_and_recorded_response(client, :get, compressed_response("not inflated", encoding: "br"))
+
+      expect(recorded.body).to eq("not inflated")
+      expect(recorded.headers).to include("Content-Encoding" => "br", "Content-Length" => "12")
+    end
+
     it "keeps the headers of a compressed body that a feature of this kind left alone" do
       leaves_alone = Class.new(HTTP::Features::AutoInflate) do
         def wrap_response(response)
