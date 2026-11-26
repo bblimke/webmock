@@ -1,4 +1,6 @@
 require "spec_helper"
+require "logger"
+require "zlib"
 require "acceptance/webmock_shared"
 require "acceptance/http_rb/http_rb_spec_helper"
 
@@ -214,6 +216,271 @@ describe "HTTP.rb" do
 
       expect(response.code).to eq(401)
       expect(a_request(:get, "www.example.com")).to have_been_made.once
+    end
+  end
+
+  # HTTP.rb 3 has the feature, but a stubbed request with any feature fails there.
+  describe "auto_inflate feature",
+    if: defined?(HTTP::Features::AutoInflate) && HTTP::Feature.method_defined?(:wrap_response) do
+    include LocalHTTPServer
+
+    # A character of several bytes tells the size of the body from its length.
+    let(:inflated) { (%({"snow":"\u96ea"}) * 20).b }
+    let(:gzipped) { Zlib.gzip(inflated) }
+    let(:client) { HTTP.use(:auto_inflate) }
+
+    def compressed_response(body = gzipped, encoding: "gzip", length: body.bytesize, fields: "")
+      head = "HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n#{fields}" \
+        "Content-Encoding: #{encoding}\r\nContent-Length: #{length}\r\nConnection: close\r\n\r\n"
+      head.b + body
+    end
+
+    def stub_with(recorded, verb = :get)
+      stub_request(verb, "www.example.com").
+        to_return(status: recorded.status, headers: recorded.headers, body: recorded.body)
+    end
+
+    # Makes a real request and returns HTTP.rb's response and the one an
+    # after_request callback got for it.
+    def real_and_recorded_response(client, verb = :get, response = compressed_response)
+      recorded = nil
+      WebMock.after_request(real_requests_only: true) { |_, webmock_response| recorded = webmock_response }
+      real = nil
+      capture_requests(response: response) { |port| real = client.request(verb, "http://127.0.0.1:#{port}/") }
+      [real, recorded]
+    end
+
+    after { WebMock.reset_callbacks }
+
+    {"gzip" => :gzip, "x-gzip" => :gzip, "deflate" => :deflate}.each do |encoding, compress|
+      it "gives callbacks the inflated body of a real #{encoding} response with headers that describe it" do
+        response = compressed_response(Zlib.public_send(compress, inflated), encoding: encoding)
+        _, recorded = real_and_recorded_response(client, :get, response)
+
+        expect(recorded.body.b).to eq(inflated)
+        expect(recorded.headers).to eq(
+          "Content-Type" => "application/json; charset=utf-8",
+          "Content-Length" => inflated.bytesize.to_s,
+          "Connection" => "close"
+        )
+      end
+    end
+
+    # HTTP.rb 6 reads the inflated body through its logging feature's stream.
+    it "gives callbacks headers that describe the body when another feature wraps the inflated one",
+      if: HTTP::VERSION >= "6.0.0" do
+      logging = HTTP.use(logging: {logger: Logger.new(File::NULL)}).use(:auto_inflate)
+      _, recorded = real_and_recorded_response(logging)
+
+      expect(recorded.body.b).to eq(inflated)
+      expect(recorded.headers).to include("Content-Length" => inflated.bytesize.to_s)
+      expect(recorded.headers).not_to include("Content-Encoding")
+    end
+
+    it "returns the real body for a stub made of what callbacks got for a real response" do
+      _, recorded = real_and_recorded_response(client)
+      stub_with(recorded)
+
+      expect(client.get("http://www.example.com/").to_s.b).to eq(inflated)
+    end
+
+    it "gives callbacks headers that describe a body that is still compressed once inflated" do
+      real, recorded = real_and_recorded_response(client, :get, compressed_response(Zlib.gzip(gzipped)))
+      stub_with(recorded)
+
+      expect(real.to_s.b).to eq(gzipped)
+      expect(recorded.body.b).to eq(gzipped)
+      expect(recorded.headers).to include("Content-Length" => gzipped.bytesize.to_s)
+      expect(recorded.headers).not_to include("Content-Encoding")
+      expect(client.get("http://www.example.com/").to_s.b).to eq(gzipped)
+    end
+
+    it "gives callbacks no Content-Length for a real response that has none" do
+      chunked = "HTTP/1.1 200 OK\r\nContent-Encoding: gzip\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n".b +
+        "#{gzipped.bytesize.to_s(16)}\r\n".b + gzipped + "\r\n0\r\n\r\n".b
+      _, recorded = real_and_recorded_response(client, :get, chunked)
+
+      expect(recorded.body.b).to eq(inflated)
+      expect(recorded.headers).to eq("Transfer-Encoding" => "chunked", "Connection" => "close")
+    end
+
+    it "leaves the real response as HTTP.rb returns it, with the headers of the compressed body" do
+      real, _ = real_and_recorded_response(client)
+
+      expect(real.body.readpartial.b).to eq(inflated)
+      expect(real.headers.to_h).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+    end
+
+    it "asks nothing of the feature for a body it can see was inflated" do
+      feature = HTTP::Features::AutoInflate.new
+      expect(feature).to receive(:wrap_response).once.and_call_original
+      _, recorded = real_and_recorded_response(HTTP.use(auto_inflate: feature))
+
+      expect(recorded.headers).not_to include("Content-Encoding")
+    end
+
+    # HTTP.rb 6 applies the features to a response from the last to the first.
+    it "keeps the headers when another feature's stream reads the inflated body and compresses it again",
+      if: HTTP::VERSION >= "6.0.0" do
+      repacking = Class.new do
+        def initialize(body)
+          @stream = body
+        end
+
+        def readpartial(size = 16_384, *args)
+          @deflated ||= StringIO.new(Zlib.deflate(@stream.to_s))
+          @deflated.readpartial(size, *args)
+        end
+      end
+      repack = Class.new(HTTP::Feature) do
+        define_method(:wrap_response) do |response|
+          HTTP::Response.new(status: response.code, version: response.version, headers: response.headers,
+            request: response.request, body: HTTP::Response::Body.new(repacking.new(response.body)))
+        end
+      end
+      repacked = HTTP.use(repack: repack.new).use(:auto_inflate)
+      deflated = Zlib.deflate(inflated)
+      real, recorded = real_and_recorded_response(repacked, :get, compressed_response(deflated, encoding: "deflate"))
+      stub_with(recorded)
+
+      expect(real.to_s.b).to eq(deflated)
+      expect(recorded.headers).to include("Content-Encoding" => "deflate")
+      expect(repacked.get("http://www.example.com/").to_s.b).to eq(deflated)
+    end
+
+    # A body of a feature's own kind may do anything with what it reads, and
+    # say anything of itself.
+    it "keeps the headers when a subclass of HTTP.rb's body reads the inflated body and compresses it again",
+      if: HTTP::VERSION >= "6.0.0" do
+      deflating = Class.new(HTTP::Response::Body) do
+        def to_s
+          Zlib.deflate(super)
+        end
+
+        def instance_of?(_class)
+          true
+        end
+      end
+      repack = Class.new(HTTP::Feature) do
+        define_method(:wrap_response) do |response|
+          HTTP::Response.new(status: response.code, version: response.version, headers: response.headers,
+            request: response.request, body: deflating.new(response.body.instance_variable_get(:@stream)))
+        end
+      end
+      repacked = HTTP.use(repack: repack.new).use(:auto_inflate)
+      deflated = Zlib.deflate(inflated)
+      _, recorded = real_and_recorded_response(repacked, :get, compressed_response(deflated, encoding: "deflate"))
+      stub_with(recorded)
+
+      expect(recorded.body.b).to eq(deflated)
+      expect(recorded.headers).to include("Content-Encoding" => "deflate", "Content-Length" => deflated.bytesize.to_s)
+      expect(repacked.get("http://www.example.com/").to_s.b).to eq(deflated)
+    end
+
+    # A subclass may do anything with the headers and the body.
+    it "keeps the headers as they were when the feature is a subclass of HTTP.rb's" do
+      real, recorded = real_and_recorded_response(HTTP.use(subclass: Class.new(HTTP::Features::AutoInflate).new))
+
+      expect(real.to_s.b).to eq(inflated)
+      expect(recorded.body.b).to eq(inflated)
+      expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+    end
+
+    it "asks a real response for its body once" do
+      calls = 0
+      counting = Class.new(HTTP::Feature) do
+        define_method(:wrap_response) do |response|
+          response.define_singleton_method(:body) do
+            calls += 1
+            super()
+          end
+          response
+        end
+      end
+      # HTTP.rb 6 applies the features to a response from the last to the first.
+      features = [:auto_inflate, {counting: counting.new}]
+      features.reverse! if HTTP::VERSION >= "6.0.0"
+      _, recorded = real_and_recorded_response(features.inject(HTTP) { |client, feature| client.use(feature) })
+
+      expect(recorded.headers).not_to include("Content-Encoding")
+      expect(calls).to eq(1)
+    end
+
+    # HTTP.rb 4 raises Zlib::BufError when it inflates an empty body.
+    context "for a real response with an empty body", if: HTTP::VERSION >= "5.0.0" do
+      it "keeps the headers when the body inflates to nothing" do
+        nothing = Zlib.gzip("")
+        _, recorded = real_and_recorded_response(client, :get, compressed_response(nothing))
+        stub_with(recorded)
+
+        expect(recorded.body).to eq("")
+        expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => nothing.bytesize.to_s)
+        expect(client.get("http://www.example.com/").to_s).to eq("")
+      end
+
+      it "keeps the headers of a response to HEAD" do
+        response = compressed_response("", length: gzipped.bytesize)
+        _, recorded = real_and_recorded_response(client, :head, response)
+        stub_with(recorded, :head)
+
+        expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+        expect(client.head("http://www.example.com/").to_s).to eq("")
+      end
+
+      {204 => "No Content", 304 => "Not Modified"}.each do |code, reason|
+        it "keeps the headers of a #{code} response" do
+          response = "HTTP/1.1 #{code} #{reason}\r\nContent-Encoding: gzip\r\nConnection: close\r\n\r\n"
+          _, recorded = real_and_recorded_response(client, :get, response)
+          stub_with(recorded)
+
+          expect(recorded.headers).to include("Content-Encoding" => "gzip")
+          expect(client.get("http://www.example.com/").to_s).to eq("")
+        end
+      end
+    end
+
+    # HTTP.rb 6's caching feature returns the body as a String, which doesn't
+    # show that auto_inflate, which has to come after it, inflated it.
+    it "keeps the headers as they were for a real response that the caching feature returns",
+      if: defined?(HTTP::Features::Caching) do
+      response = compressed_response(fields: "Cache-Control: max-age=60\r\n")
+      real, recorded = real_and_recorded_response(HTTP.use(:caching, :auto_inflate), :get, response)
+
+      expect(real.to_s.b).to eq(inflated)
+      expect(recorded.body.b).to eq(inflated)
+      expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+    end
+
+    it "keeps the headers of a compressed body of a real response without the feature" do
+      _, recorded = real_and_recorded_response(HTTP)
+
+      expect(recorded.body.b).to eq(gzipped)
+      expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+    end
+
+    it "keeps the headers of a real response in an encoding the feature doesn't inflate" do
+      _, recorded = real_and_recorded_response(client, :get, compressed_response("not inflated", encoding: "br"))
+
+      expect(recorded.body).to eq("not inflated")
+      expect(recorded.headers).to include("Content-Encoding" => "br", "Content-Length" => "12")
+    end
+
+    it "keeps the headers of a compressed body that a feature of this kind left alone" do
+      leaves_alone = Class.new(HTTP::Features::AutoInflate) do
+        def wrap_response(response)
+          response
+        end
+      end
+      _, recorded = real_and_recorded_response(HTTP.use(leaves_alone: leaves_alone.new))
+
+      expect(recorded.body.b).to eq(gzipped)
+      expect(recorded.headers).to include("Content-Encoding" => "gzip", "Content-Length" => gzipped.bytesize.to_s)
+    end
+
+    it "inflates the compressed body of a stub" do
+      stub_request(:get, "www.example.com").to_return(body: gzipped, headers: {"Content-Encoding" => "gzip"})
+
+      expect(client.get("http://www.example.com/").to_s.b).to eq(inflated)
     end
   end
 

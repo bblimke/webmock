@@ -7,6 +7,9 @@ module HTTP
 
       webmock_response.status  = [status.to_i, reason]
 
+      # The caller gets the body before it is read, to see what it reads from.
+      body = self.body
+      yield body if block_given?
       webmock_response.body    = body.to_s
       # This call is used to reset the body of the response to enable it to be streamed if necessary.
       # The `body.to_s` call above reads the body, which allows WebMock to trigger any registered callbacks.

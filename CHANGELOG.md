@@ -1,5 +1,19 @@
 # Changelog
 
+# Unreleased
+
+* Fix VCR failing to replay responses recorded with the `auto_inflate` feature of the `http` gem (#1154)
+
+    Previously, for a real request made with `HTTP.use(:auto_inflate)`, `after_request` callbacks got the inflated body together with the `Content-Encoding: gzip` header of the compressed one. VCR, hooked into WebMock, recorded both, and replaying the cassette raised `Zlib::DataError: incorrect header check`, because the feature tried to inflate the body again. With VCR's `decode_compressed_response` option, recording raised `Zlib::GzipFile::Error` instead.
+
+    Callbacks now get the inflated body without the `Content-Encoding` header, as they do for a body that Net::HTTP inflates. A `Content-Length` header, when the response has one, gives the size of the inflated body. The response the client returns is unchanged, and so are the headers of a response with an empty body, such as one to a HEAD request.
+
+    A cassette recorded this way replays the response with those headers, while the real response keeps the headers of the compressed body.
+
+    This doesn't cover a client that inflates with a subclass of the feature, or responses returned by the `caching` feature of `http` 6. Callbacks get those as before.
+
+    Cassettes recorded with older versions that have the `Content-Encoding` header on an inflated body still fail. Record them again, or remove that header from their responses. Their `Content-Length` is still that of the compressed body.
+
 # 3.41.0
 
 WebMock now parses JSON request bodies with Ruby's `JSON.parse`, instead of its old parser, which converted JSON to YAML and failed on or misread some valid JSON. Every body pattern that matched on 3.40.0 still matches. If one matches only as the old parser reads the body, WebMock prints a deprecation warning, because 4.0 drops the old parser and the pattern won't match there.
