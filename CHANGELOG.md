@@ -1,6 +1,6 @@
 # Changelog
 
-# Unreleased
+# 3.42.0
 
 * Fix VCR failing to replay responses recorded with the `auto_inflate` feature of the `http` gem (#1154)
 
